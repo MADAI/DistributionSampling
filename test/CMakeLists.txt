@@ -21,9 +21,13 @@ add_executable( RegularStepGradientDescentOptimizerTest RegularStepGradientDesce
 target_link_libraries( RegularStepGradientDescentOptimizerTest ${LIBRARIES} )
 add_test( RegularStepGradientDescentOptimizerTest RegularStepGradientDescentOptimizerTest )
 
-add_executable( external_model_plus_mhmcmc_test external_model_plus_mhmcmc_test.cxx )
-target_link_libraries( external_model_plus_mhmcmc_test ${LIBRARIES} )
-add_test( external_model_plus_mhmcmc_test external_model_plus_mhmcmc_test )
+
+configure_file( ${TEST_BASE_DIR}/ExternalModelMCMCTest/ExternalModelMCMCTestConfiguration.txt.in
+  ${CMAKE_CURRENT_BINARY_DIR}/ExternalModelMCMCTestConfiguration.txt @ONLY )
+add_executable( ExternalModelMCMCTest ExternalModelMCMCTest.cxx )
+target_link_libraries( ExternalModelMCMCTest ${LIBRARIES} )
+add_test( ExternalModelMCMCTest
+  ExternalModelMCMCTest ${CMAKE_CURRENT_BINARY_DIR}/ExternalModelMCMCTestConfiguration.txt )
 
 add_executable( Gaussian2DMCMCTest Gaussian2DMCMCTest.cxx )
 target_link_libraries( Gaussian2DMCMCTest ${LIBRARIES} )

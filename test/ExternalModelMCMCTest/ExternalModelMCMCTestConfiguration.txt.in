@@ -31,4 +31,4 @@ param_name1
 mean
 var
 1
-ExampleProcess.py
+@DistributionSampling_SOURCE_DIR@/test/ExternalModelMCMCTest/ExampleProcess.py
