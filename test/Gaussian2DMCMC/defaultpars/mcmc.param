@@ -1,0 +1,17 @@
+string MODEL TEST
+string OPTIMIZER MCMC
+string OBSERVABLES standardlong
+int MAX_ITERATIONS 100000
+bool USE_EMULATOR false
+bool PROCESS_PIPE false
+bool LOGLIKE true
+bool LOGPRIOR true
+bool LOGPROPOSAL true
+int WRITEOUT 500
+int VIZ_COUNT 2
+bool LIKELIHOOD_PARAMETER_MAP true
+bool PROPOSAL_PARAMETER_MAP true
+bool PRIOR_PARAMETER_MAP false
+string GNUPLOT_TRACESTYLE lines
+bool APPEND_TRACE true
+bool VISUALIZE_TRACE false

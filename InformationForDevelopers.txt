@@ -1,0 +1,105 @@
+Information for Developers
+Cory Quammen <cquammen@cs.unc.edu>
+Last update: October 23, 2012
+
+--------------------------
+How to add to this library
+--------------------------
+
+Git enables different "workflows", or ways for developers to
+contribute to the main repository for a software project. We are using
+the "branchy workflow". The main idea is that each new contribution is
+added first in a "topic" branch that derives from the master
+branch. The master branch should always be kept in good shape such
+that everything compiles and runs as expected. That way, when you
+start a new branch based on the master branch, you can be confident
+that you are starting from a good place and that the first place to
+look for bugs is in your topic branch.
+
+To create new topic branch, use the following commands:
+
+git branch NewTopicBranch
+
+This will create a new branch called "NewTopicBranch" (you should give
+your topic a more sensible name). It will have all the same commits as
+the master branch. To add new commits to the NewTopicBranch, you must
+first check it out:
+
+git checkout NewTopicBranch
+
+Subsequent invocations of "git commit" will commit to that topic
+branch and won't touch the master branch.
+
+To can do the same as the above two commands with a single command:
+
+git checkout -b NewTopicBranch.
+
+After you are satisfied with your work, you should push the topic
+branch to the main git repository so that others may review it.
+
+git push origin NewTopicBranch
+
+If the work is satisfactory, then the topic branch will be merged
+into the master branch.
+
+After your topic branch is merged with the master branch, you should
+update your master branch using
+
+git checkout master
+git pull origin master
+
+Then you can delete your topic branch from your local repository
+using:
+
+git branch -d NewTopicBranch
+
+If you did some work in a branch and then decide that it shouldn't be
+included in master, you can delete your branch with
+
+git branch -D NewTopicBranch
+
+----------
+Code style
+----------
+
+Consistent coding style within a source code project is important for
+readability and a clean look to the code.
+
+Code should adhere to this handful of formatting rules:
+
+- Header source code files should have the extension .h
+
+- C++ source code files should have the extention .cxx
+
+- C Source code files should have the extention .c
+
+- Use spaces, not tabs
+
+- Nested code blocks should be indented by 2 spaces
+
+- Function and method names should follow upper CAML case convention,
+  e.g., ComputeValue(), GetNextIteration(). Avoid using underscores to
+  separate words (they slow down typing).
+
+- Favor complete English words instead of abbreviations when naming
+  variables and functions.
+
+    Bad:    pn
+    Better: paramName
+    Best:   parameterName
+
+- Class member variables should have the "m_" prefix, e.g. m_Value, m_Distance.
+
+- Include the header files that defined the types you used, but include
+  no more headers than that.
+
+- For C++, classes and functions for MADAI software should exist
+  within the "madai" namespace
+
+- Avoid "using namespace std;" like you would avoid the
+  plague. Slightly better alternative: "using std::string;" Preferred:
+  used std::string throughout your code. The problem with refering to
+  "string" in source code is that we may someday include a library
+  that defines it's own string type. This will confuse the compiler
+  and cause all kinds of headaches. To be safe, always use
+  "std::string".

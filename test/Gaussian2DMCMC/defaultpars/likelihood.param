@@ -1,0 +1,5 @@
+bool PROCESS_PIPE false
+bool USE_EMULATOR true
+bool TIMING false
+bool VERBOSE false
+string EMULATORFILEPATH /Users/jeffwyka/MADAI/stat/msu-hydro-analysis/

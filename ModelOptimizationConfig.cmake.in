@@ -1,0 +1,3 @@
+set( ModelOptimization_INCLUDE_DIRS @ModelOptimization_INCLUDE_DIRS@ )
+set( ModelOptimization_LIBRARY_DIRS @ModelOptimization_LIBRARY_DIRS@ )
+set( ModelOptimization_LIBRARIES @ModelOptimization_LIBRARIES@ )

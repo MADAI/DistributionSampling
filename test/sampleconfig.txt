@@ -1,0 +1,34 @@
+# Sample config for external_model_plus_mhmcmc_test
+#
+# Comment lines must begin with '#' character.
+#
+# This uses a fake emulator (emulator_emulator).  I've tested it with
+# the real emulator too.
+#
+# File format:
+#   2             <- number of parameters
+#   param_name0   <- first parameter name, no spaces, full line
+#   0.0 1.0       <- first parameter range
+#   param_name1   <- second parameter name, no spaces, full line
+#   0.0 1.0       <- second parameter range
+#   2             <- number of outputs
+#   mean          <- first output name, no spaces, full line
+#   var           <- second output name, so spaces, full line
+#   1             <- number of command line arguments (including command)
+#   ./emulator_emulator.py  <- name of command should be complete path 
+#                 <- if there were other command line arguments, they go here
+#  
+# The first argument is a command.  It can be an absolute path or a
+# realtive path (if it contans a '/' character) or an executable in
+# the $PATH.  See execvp() for more information.
+#
+2
+param_name0
+0.0 1.0
+param_name1
+0.0 1.0
+2
+mean
+var
+1
+./emulator_emulator.py

@@ -1,0 +1,4 @@
+vector MIXING_STD_DEV .01 .01 .01 .01 .01 .01
+bool SYMMETRIC_PROPOSAL true
+bool RESCALED_PROPOSAL false
+
