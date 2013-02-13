@@ -26,7 +26,7 @@ add_test( Gaussian2DModelTest Gaussian2DModelTest )
 
 add_executable( MCMCRunTest MCMCRunTest.cxx )
 target_link_libraries( MCMCRunTest ${LIBRARIES} )
-add_test( MCMCRunTest MCMCRunTest ${TEST_BASE_DIR}/TestModel ${TEST_BASE_DIR}/test_trace.dat )
+add_test( MCMCRunTest MCMCRunTest ${TEST_BASE_DIR}/TestModel ${TEST_BASE_DIR}/TestModel/MCMCRunTestTrace.dat )
 
 add_executable( ModelTest ModelTest.cxx )
 target_link_libraries( ModelTest ${LIBRARIES} )
