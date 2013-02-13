@@ -1,8 +1,8 @@
-# Sample config for external_model_plus_mhmcmc_test
+# Sample config for ExternalModelMCMCTest
 #
 # Comment lines must begin with '#' character.
 #
-# This uses a fake emulator (emulator_emulator).  I've tested it with
+# This uses a fake emulator (ExampleProcess.py).  I've tested it with
 # the real emulator too.
 #
 # File format:
@@ -31,4 +31,4 @@ param_name1
 mean
 var
 1
-./emulator_emulator.py
+ExampleProcess.py
