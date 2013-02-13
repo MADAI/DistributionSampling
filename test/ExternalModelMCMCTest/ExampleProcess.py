@@ -2,7 +2,7 @@
 
 #=========================================================================
 #
-#  Copyright (c) 2010-2012 The University of North Carolina at Chapel Hill
+#  Copyright The University of North Carolina at Chapel Hill
 #  All rights reserved.
 # 
 #   Licensed under the MADAI Software License. You may obtain a copy of
@@ -24,6 +24,7 @@
 
 import sys
 from math import *
+
 def tok(readable):
 	while True:
 		line = readable.readline()
@@ -31,9 +32,11 @@ def tok(readable):
 			break
 		for token in line.split():
 			yield token
+
 def f(x,y):
 	scale = 0.2 * exp(-16 * ((x - 0.5)**2 + (y - 0.5)**2))
 	return scale * (3.0 + sin(25 * x) + sin(25 * y))
+
 o = sys.stdout
 it = tok(sys.stdin)
 o.write('2\nparam_0\nparam_1\n2\nmean_0\nvariance_0\n')
