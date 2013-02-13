@@ -53,11 +53,12 @@ bool dis_comments(std::FILE * fp, char comment_character){
 
 int main(int argc, char ** argv){
   srand(0);
-  if(argc != 2) {
-    "Useage:\n\t mcmc info_dir_path\n\n"
-    "where info_dir_path is the path to the "
-    "directory containing all of the configuration "
-    "files needed to run the mcmc.\n\n";
+  if (argc != 3) {
+    std::cout << "Usage: " << argv[0] << " info_dir_path comparison_trace\n\n"
+      "where info_dir_path is the path to the "
+      "directory containing all of the configuration "
+      "files needed for the MCMCRun class and comparison_trace holds the "
+      "expected output from the MCMCRun.\n\n";
     return EXIT_FAILURE;
   }
   std::string info_dir(argv[1]);
@@ -67,6 +68,8 @@ int main(int argc, char ** argv){
     std::cerr << "Something is wrong with the model\n\n";
     return EXIT_FAILURE;
   }
+
+  std::string comparison_trace( argv[2] );
   
   madai::MCMCRun run(&t_model, info_dir);
   
@@ -94,13 +97,13 @@ int main(int argc, char ** argv){
   // At this point the trace for the new run has been created.
   // Now want to compare it to a previous run.
   
-  FILE* fp1 = fopen("test_trace.dat", "r");
+  FILE* fp1 = fopen( comparison_trace.c_str(), "r");
   std::string trace_file_name;
   trace_file_name = trace.m_TraceDirectory.c_str();
   trace_file_name += "/trace.dat";
   FILE* fp2 = fopen(trace_file_name.c_str(), "r");
   if(fp1 == NULL){
-    std::cerr << "Error opening test_trace.dat" << std::endl;
+    std::cerr << "Error opening " << comparison_trace << std::endl;
     return EXIT_FAILURE;
   }
   if(fp2 == NULL){

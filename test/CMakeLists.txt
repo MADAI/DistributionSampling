@@ -33,9 +33,9 @@ add_executable( Gaussian2DMCMCTest Gaussian2DMCMCTest.cxx )
 target_link_libraries( Gaussian2DMCMCTest ${LIBRARIES} )
 add_test( Gaussian2DMCMCTest Gaussian2DMCMCTest ${TEST_BASE_DIR}/Gaussian2DMCMC )
 
-add_executable( MCMC_core_test MCMC_core_test.cxx )
-target_link_libraries( MCMC_core_test ${LIBRARIES} )
-add_test( MCMC_core_test MCMC_core_test )
+add_executable( MCMCRunTest MCMCRunTest.cxx )
+target_link_libraries( MCMCRunTest ${LIBRARIES} )
+add_test( MCMCRunTest MCMCRunTest ${TEST_BASE_DIR}/TestModel ${TEST_BASE_DIR}/test_trace.dat )
 
 add_executable( DiceMCMC DiceMCMC.cxx )
 target_link_libraries( DiceMCMC ${LIBRARIES} )
