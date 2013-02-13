@@ -30,10 +30,8 @@ Gaussian2DModel
   m_StandardDeviationX( 4.0 ),
   m_StandardDeviationY( 12.3 )
 {
-  // Temporarily changed this so that the mcmc would work with this model
-  // Using +-DBL_MAX for the range introduces errors in taking steps in the mcmc.
-  this->AddParameter( "X", m_MeanX-10.0*m_StandardDeviationX, m_MeanX+10.0*m_StandardDeviationX );
-  this->AddParameter( "Y", m_MeanY-10.0*m_StandardDeviationY, m_MeanY+10.0*m_StandardDeviationY );
+  this->AddParameter( "X" );
+  this->AddParameter( "Y" );
 
   this->AddScalarOutputName( "Value" );
 }
