@@ -64,10 +64,6 @@ int main(int argc, char ** argv){
   }
   trace.MakeTrace();
   
-  if(run.m_CreateTrace){
-    run.m_Visualizer->FinalTrace(&trace);
-  }
-  
   std::cerr << "Done Successfully." << std::endl;
 
   return EXIT_SUCCESS;

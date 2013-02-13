@@ -65,10 +65,6 @@ int main(int argc, char ** argv){
   }
 	trace.MakeTrace();
     
-	if(run.m_CreateTrace){
-		run.m_Visualizer->FinalTrace(&trace);
-	}
-    
 	double ratio = (double)run.m_AcceptCount/((double)trace.m_MaxIterations-(double)run.m_BurnIn);
   std::cout << "Accepts: " << run.m_AcceptCount << std::endl;
   std::cout << "Iterations-Burn in: " << trace.m_MaxIterations-run.m_BurnIn << std::endl;

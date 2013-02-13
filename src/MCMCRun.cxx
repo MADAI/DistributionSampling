@@ -94,7 +94,6 @@ MCMCRun
     m_BestLikelihood=m_LikelihoodCurrent;
     m_BestParameterSet = m_InitialTheta;
     if ( m_CreateTrace ) {
-      m_Visualizer = new Visualization( this );
       m_VizCount = parameter::getI( m_LocalParameterMap, "VIZ_COUNT", floor(ThetaOutsList->m_MaxIterations/200) );
     }
   }
@@ -205,9 +204,6 @@ MCMCRun
 
   if ( ( m_IterationNumber > m_BurnIn ) && ( ( m_IterationNumber + 1 ) % ( ThetaOutsList->m_Writeout ) == 0 ) ) {
     std::cout << "Writing out." << std::endl;
-    if ( m_CreateTrace && ( m_IterationNumber != 1 ) ) {
-      m_Visualizer->UpdateTraceFig( ThetaOutsList );
-    }
     ThetaOutsList->WriteOut( m_Model->GetParameters() );
   }
 }

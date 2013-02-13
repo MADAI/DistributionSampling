@@ -32,7 +32,6 @@
 #include "MultiModel.h"
 #include "Optimizer.h"
 #include "Trace.h"
-#include "Visualization.h"
 
 
 namespace madai {
@@ -40,7 +39,6 @@ namespace madai {
 class Model;
 class Trace;
 class TraceElement;
-class Visualization;
 
 
 /* \class MCMCRun
@@ -75,7 +73,6 @@ public:
   bool                m_CreateTrace;
   bool                m_Debug;
 
-  Visualization*      m_Visualizer;
   CRandom*            m_RandomNumber;
 
   std::vector<double> m_CurrentParameters;
