@@ -32,7 +32,7 @@
 int main(int argc, char ** argv) {
 	if (argc < 2) {
 		std::cerr <<
-			"Useage:\n\texternal_model_plus_mhmcmc_test CONFIG_FILE\n\n"
+			"Usage: " << argv[0] << " CONFIG_FILE\n\n"
 			"where CONFIG_FILE is a suitable configuration for the\n"
 			"madai::ExternalModel class.\n\n";
 		return EXIT_FAILURE;
@@ -60,9 +60,9 @@ int main(int argc, char ** argv) {
 
 	madai::Trace trace;
 	unsigned int numberIter = 500;
-	for (unsigned int count = 0; count < numberIter; count ++){
+	for (unsigned int count = 0; count < numberIter; count ++) {
 		simple_mcmc.NextIteration(&trace);
-    }
+  }
 
 	trace.writeHead(std::cout, external_model.GetParameters(), external_model.GetScalarOutputNames());
 	trace.write(std::cout);
