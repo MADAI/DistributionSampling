@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright (c) 2010-2012 The University of North Carolina at Chapel Hill
+ *  Copyright The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
@@ -90,7 +90,7 @@ int main( int argc, char ** argv ) {
   // At this point the run has completed. Now I want to bin the points in the trace.
   std::string trace_file_name;
   trace_file_name = trace.m_TraceDirectory.c_str();
-  trace_file_name +="/trace.dat";
+  trace_file_name += "/trace.dat";
   FILE* fp = fopen( trace_file_name.c_str(), "r" );
   if( fp == NULL ){
     std::cerr << "Error opening trace.dat [1]" << std::endl;
@@ -151,8 +151,8 @@ int main( int argc, char ** argv ) {
   }
   for( unsigned int i = 0; i < nbins; i++ ) {
     for( unsigned int j = 0; j < nbins; j++ ) {
-      rho[0][i]+=densities[i][j];
-      rho[1][j]+=densities[i][j];
+      rho[0][i] += densities[i][j];
+      rho[1][j] += densities[i][j];
     }
   }
   

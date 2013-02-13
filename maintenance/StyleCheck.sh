@@ -5,7 +5,7 @@
 
 script_path="`dirname \"$0\"`"
 
-files=`ls -1 src/*.h src/*.cxx`
+files=`ls -1 src/*.h src/*.cxx test/*.cxx`
 
 for file in $files; do KWStyle -v $file -xml ${script_path}/KWStyle.xml | sed '/^$/d'; done
 

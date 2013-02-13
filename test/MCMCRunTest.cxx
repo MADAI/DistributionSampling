@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright (c) 2010-2012 The University of North Carolina at Chapel Hill
+ *  Copyright The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
@@ -166,8 +166,8 @@ int main(int argc, char ** argv){
       std::cerr << "Check MCMCRun.cxx's EvaluateProposal and TakeStep" << std::endl;
       return EXIT_FAILURE;
     }
-    k+=2;
-    if(set1[k]!=set2[k]){
+    k += 2;
+    if(set1[k] != set2[k]){
       std::cerr << "Different values for alpha on iteration " << iter_num1 << "\n\n";
       std::cerr << "MCMC Core Test Failure: MCMC Error." << std::endl;
       std::cerr << "Areas that might be responsible:" << std::endl;

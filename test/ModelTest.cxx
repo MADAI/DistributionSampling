@@ -21,7 +21,7 @@
 
 #include "Model.h"
 
-/** Test class for Model.
+/** \class Test class for Model.
  *
  * Model is an abstract class, so we implement the pure virtual
  * methods in a derived class. */
@@ -242,4 +242,3 @@ int main( int argc, char *argv[])
 
   return EXIT_SUCCESS;
 }
-

@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright (c) 2010-2012 The University of North Carolina at Chapel Hill
+ *  Copyright The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
