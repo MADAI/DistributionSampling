@@ -21,9 +21,9 @@
 
 #include "Model.h"
 
-#include "process_pipe.h"
-/* madai::process_pipe struct, madai::create_process_pipe fn.
- Note that process_pipe is full of POSIX-specific inter-process
+#include "ProcessPipe.h"
+/* madai::ProcessPipe struct, madai::CreateProcessPipe fn.
+ Note that ProcessPipe is full of POSIX-specific inter-process
  communication code.  We can and should fix that at some point.  Until we
  fix that, this class will only compile for a POSIX (Unix, Linux,
  BSD, MacOS X) target.  */
@@ -72,7 +72,7 @@ private:
 
   std::vector< std::string > m_CommandArguments;
 
-  process_pipe m_Process;
+  ProcessPipe m_Process;
 
   std::string m_ConfigurationFileName;
 

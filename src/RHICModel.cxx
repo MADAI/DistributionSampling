@@ -154,7 +154,7 @@ RHICModel
 ::LoadProcess()
 {
   std::string EmuSnapFile_Name = m_DirectoryName + "/Emulator.statefile";
-  std::cerr << "Loading emulator from " << EmuSnapFile_Name << " as a running process_pipe" << std::endl;
+  std::cerr << "Loading emulator from " << EmuSnapFile_Name << " as a running ProcessPipe" << std::endl;
   std::ofstream shell_script;
   std::string ssname = "begin_int_emu.sh";
   shell_script.open( ssname.c_str() );
@@ -178,8 +178,8 @@ RHICModel
    */
 
   /** function returns EXIT_FAILURE on error, EXIT_SUCCESS otherwise */
-  if ( EXIT_FAILURE == create_process_pipe(&( this->m_Process), argv ) ){
-    std::cerr << "create_process_pipe returned failure.\n";
+  if ( EXIT_FAILURE == CreateProcessPipe(&( this->m_Process), argv ) ){
+    std::cerr << "create_ProcessPipe returned failure.\n";
     exit( 1 );
   }
   for ( unsigned int i = 0; i < command_line_length; i++ ) {
@@ -188,7 +188,7 @@ RHICModel
   delete[] argv;
 
   if ( this->m_Process.answer == NULL || this->m_Process.question == NULL ) {
-    std::cerr << "create_process_pipe returned NULL fileptrs.\n";
+    std::cerr << "create_ProcessPipe returned NULL fileptrs.\n";
     this->m_StateFlag = ERROR;
     return OTHER_ERROR;
   }

@@ -12,6 +12,7 @@ set( SRC_FILES
   MultiModel.cxx
   Optimizer.cxx
   PriorDistribution.cxx
+  ProcessPipe.c
   Quad.cxx
   RHICModel.cxx
   RHIC_LikelihoodDistribution.cxx
@@ -27,7 +28,6 @@ set( SRC_FILES
   Trace.cxx
   TraceElement.cxx
   Visualization.cxx
-  process_pipe.c
 )
 
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${DistributionSampling_BINARY_DIR}/lib )

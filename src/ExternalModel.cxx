@@ -210,8 +210,8 @@ ExternalModel::LoadConfigurationFile( std::istream & configFile )
   */
 
   /** function returns EXIT_FAILURE on error, EXIT_SUCCESS otherwise */
-  if ( EXIT_FAILURE == create_process_pipe(&(this->m_Process), argv) ) {
-    std::cerr << "create_process_pipe returned failure.\n";
+  if ( EXIT_FAILURE == CreateProcessPipe(&(this->m_Process), argv) ) {
+    std::cerr << "CreateProcessPipe returned failure.\n";
     this->m_StateFlag = ERROR;
     return OTHER_ERROR;
   }
@@ -221,7 +221,7 @@ ExternalModel::LoadConfigurationFile( std::istream & configFile )
   delete[] argv;
 
   if ( this->m_Process.answer == NULL || this->m_Process.question == NULL ) {
-    std::cerr << "create_process_pipe returned NULL fileptrs.\n";
+    std::cerr << "CreateProcessPipe returned NULL fileptrs.\n";
     this->m_StateFlag = ERROR;
     return OTHER_ERROR;
   }

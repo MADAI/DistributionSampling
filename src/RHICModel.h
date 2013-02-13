@@ -22,7 +22,7 @@
 #include "MultiModel.h"
 
 #include "EmuPlusPlus/EmuPlusPlus.h"
-#include "process_pipe.h"
+#include "ProcessPipe.h"
 
 
 namespace madai {
@@ -51,8 +51,8 @@ public:
   virtual ErrorType LoadProcess();
 
 private:
-  process_pipe m_Process;
-  emulator*    m_Emulator;
+  ProcessPipe m_Process;
+  emulator*   m_Emulator;
 
 }; // end class RHICModel
 

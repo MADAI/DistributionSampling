@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __process_pipe_h__
-#define __process_pipe_h__
+#ifndef __ProcessPipe_h__
+#define __ProcessPipe_h__
 
 #ifndef __unix__
 #define __unix__
@@ -27,20 +27,20 @@
 #include <cstdio>
 namespace madai {
   extern "C" {
-    typedef struct process_pipe {
+    typedef struct ProcessPipe {
       std::FILE * question;
       std::FILE * answer;
       long int pid; /* in case other signals need to be sent. */
-    } process_pipe;
+    } ProcessPipe;
 
 #else /* NOT __cplusplus */
 
 #include <stdio.h>
-typedef struct process_pipe {
+typedef struct ProcessPipe {
   FILE * question;
   FILE * answer;
   long int pid; /* in case other signals need to be sent. */
-} process_pipe;
+} ProcessPipe;
 
 #endif /* __cplusplus */
 
@@ -48,11 +48,11 @@ typedef struct process_pipe {
 /** returns EXIT_FAILURE on error, EXIT_SUCCESS otherwise.  Note that
  argv[0] doesn't seem to respect your PATH evironment variable, so you
  may need to pass an absolute path. argv should be NULL terminated. */
-    int create_process_pipe(process_pipe * pp, char * const * argv);
+ int CreateProcessPipe(ProcessPipe * pp, char * const * argv);
 
 #ifdef __cplusplus
   }
 }
 #endif /* __cplusplus */
 
-#endif  /* __process_pipe_h__ */
+#endif  /* __ProcessPipe_h__ */
