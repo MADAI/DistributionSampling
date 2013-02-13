@@ -327,7 +327,7 @@ MCMCRun
   } else if ( m_FlatStep ) {
     double range[2];
     for(int i = 0; i < proposed.size(); i++){
-      if(m_ActiveParameters.find(m_Model->GetParameters()[i].m_Name)!=m_ActiveParameters.end() ) {
+      if(m_ActiveParameters.find(m_Model->GetParameters()[i].m_Name) != m_ActiveParameters.end() ) {
         m_Model->GetRange(i, range);
         proposed[i] = double(rand() % int((range[1] - range[0])*10000))/10000.0+range[0];
       }

@@ -60,7 +60,7 @@ public:
                                      double & Prior) const;
 
 protected:
-  unsigned int m_NumberOfParameters, m_NumberOfOutputs;
+  unsigned int m_NumberOfParameters,   m_NumberOfOutputs;
   std::vector< std::vector< double > > m_Weights;
   std::vector< double >                m_TotalWeights;
 
