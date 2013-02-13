@@ -1,5 +1,5 @@
 set( LIBRARIES 
-  ModelOptimization
+  DistributionSampling
   ${CORELIBS} 
 )
 

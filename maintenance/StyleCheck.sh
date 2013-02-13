@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# To use, run this from the top level of the ModelOptimization
+# To use, run this from the top level of the DistributionSampling
 # library source directory.
 
 files=`ls -1 src/*.h src/*.cxx`

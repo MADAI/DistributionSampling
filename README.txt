@@ -1,4 +1,4 @@
-Project: ModelOptimization
+Project: DistributionSampling
 README.txt author: Cory Quammen <cquammen@cs.unc.edu>
 Last updated: 2011/06/23
 
@@ -15,31 +15,31 @@ Last updated: 2011/06/23
     file is located. For example, if the directory containing this
     README.txt file is located in
 
-    /home/user/cquammen/madai/stat/ModelOptimization
+    /home/user/cquammen/madai/stat/DistributionSampling
     
      a good build directory might be
     
-    /home/user/cquammen/madai/build/stat/ModelOptimization-build
+    /home/user/cquammen/madai/build/stat/DistributionSampling-build
 
 2). Navigate to the build directory created in step 1.
 
 3). Type
 
-     cmake .../stat/ModelOptimization
+     cmake .../stat/DistributionSampling
 
-     where .../stat/ModelOptimization is an absolute or relative path
-     to the ModelOptimization source directory.
+     where .../stat/DistributionSampling is an absolute or relative path
+     to the DistributionSampling source directory.
 
      Using the example directories above, this command is
 
-     cmake /home/user/cquammen/madai/stat/ModelOptimization
+     cmake /home/user/cquammen/madai/stat/DistributionSampling
 
 4). Type
 
     make
 
     The various source files will compile, producing a library
-    libModelOptimization.a in a directory called "lib" in the root
+    libDistributionSampling.a in a directory called "lib" in the root
     level of the build directory.
 
 5. (optional) Type

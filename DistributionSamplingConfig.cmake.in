@@ -1,3 +1,3 @@
-set( ModelOptimization_INCLUDE_DIRS @ModelOptimization_INCLUDE_DIRS@ )
-set( ModelOptimization_LIBRARY_DIRS @ModelOptimization_LIBRARY_DIRS@ )
-set( ModelOptimization_LIBRARIES @ModelOptimization_LIBRARIES@ )
+set( DistributionSampling_INCLUDE_DIRS @DistributionSampling_INCLUDE_DIRS@ )
+set( DistributionSampling_LIBRARY_DIRS @DistributionSampling_LIBRARY_DIRS@ )
+set( DistributionSampling_LIBRARIES @DistributionSampling_LIBRARIES@ )
