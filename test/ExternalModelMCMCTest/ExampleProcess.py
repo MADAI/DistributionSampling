@@ -44,7 +44,10 @@ o.write('2\nparam_0\nparam_1\n2\nmean_0\nvariance_0\n')
 o.flush()
 while True:
 	try:
-		x = float(it.next())
+		nextValue = it.next()
+		if nextValue == "STOP":
+			break
+		x = float(nextValue)
 		y = float(it.next())
 		o.write('%r\n%r\n' % (f(x,y), 0.0))
 		o.flush()

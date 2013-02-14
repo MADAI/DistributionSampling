@@ -57,6 +57,11 @@ public:
   virtual ErrorType StartProcess( const std::string & processPath,
                                   const std::vector< std::string > & arguments );
 
+  /**
+   * Stop the external process.
+   */
+  virtual ErrorType StopProcess();
+
   /** 
    * Get the scalar outputs from the model evaluated at x.  If an
    * error happens, the scalar output array will be left incomplete.

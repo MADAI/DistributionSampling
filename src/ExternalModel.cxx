@@ -217,15 +217,37 @@ ExternalModel
 }
 
 
+ExternalModel::ErrorType
+ExternalModel
+::StopProcess()
+{
+  if ( !this->IsReady() ) {
+    return OTHER_ERROR;
+  }
+
+  // Send the STOP message
+  std::fprintf( m_Process.question, "STOP\n" );
+  std::fflush( m_Process.question );
+
+  // Don't expect an answer
+
+  return NO_ERROR;
+}
+
+
 /**
  * Get the scalar outputs from the model evaluated at x.  If an
  * error happens, the scalar output array will be left incomplete.
  */
 ExternalModel::ErrorType
-ExternalModel::GetScalarOutputs(
-  const std::vector< double > & parameters,
-  std::vector< double > & scalars ) const
+ExternalModel
+::GetScalarOutputs( const std::vector< double > & parameters,
+                    std::vector< double > & scalars ) const
 {
+  if ( !this->IsReady() ) {
+    return OTHER_ERROR;
+  }
+
   for ( std::vector< double >::const_iterator par_it = parameters.begin();
        par_it < parameters.end(); par_it++ ) {
     //FIXME to do: check against parameter range.
@@ -248,7 +270,8 @@ ExternalModel::GetScalarOutputs(
 // Not implemented yet.
 // Get the likelihood and prior at the point theta
 ExternalModel::ErrorType
-ExternalModel::GetLikeAndPrior( const std::vector< double > & parameters,
+ExternalModel
+::GetLikeAndPrior( const std::vector< double > & parameters,
                                 double & Like, double & Prior ) const
 {
   return OTHER_ERROR;

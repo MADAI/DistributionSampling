@@ -40,29 +40,29 @@ int main(int argc, char ** argv) {
   }
 
   std::string executable( argv[1] );
-  madai::ExternalModel external_model;
+  madai::ExternalModel externalModel;
 
   // This executable does not require any arguments
   std::vector< std::string > arguments;
 
-  external_model.StartProcess( executable, arguments );
-  if ( !external_model.IsReady() ) {
+  externalModel.StartProcess( executable, arguments );
+  if ( !externalModel.IsReady() ) {
     std::cerr << "Something is wrong with the external model\n";
 
     return EXIT_FAILURE;
   }
 
-  madai::SimpleMetropolisHastings simple_mcmc( &external_model );
+  madai::SimpleMetropolisHastings simple_mcmc( &externalModel );
 
   std::vector< madai::Parameter > const * parameters
-    = &(external_model.GetParameters());
+    = &(externalModel.GetParameters());
 
   for (unsigned int i = 0; i < parameters->size(); i++) {
     simple_mcmc.ActivateParameter((*parameters)[i].m_Name);
   }
 
   simple_mcmc.SetOutputScalarToOptimize
-    ( external_model.GetScalarOutputNames().at(0) );
+    ( externalModel.GetScalarOutputNames().at(0) );
 
   madai::Trace trace;
   unsigned int numberIter = 500;
@@ -70,9 +70,12 @@ int main(int argc, char ** argv) {
     simple_mcmc.NextIteration(&trace);
   }
 
+  // Stop the external process
+  externalModel.StopProcess();
+
   trace.writeHead( std::cout,
-                   external_model.GetParameters(),
-                   external_model.GetScalarOutputNames() );
+                   externalModel.GetParameters(),
+                   externalModel.GetScalarOutputNames() );
   trace.write( std::cout );
 
   return EXIT_SUCCESS;
