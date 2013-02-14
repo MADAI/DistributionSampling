@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __Optimizer_h__
-#define __Optimizer_h__
+#ifndef __Sampler_h__
+#define __Sampler_h__
 
 #include <set>
 
@@ -28,10 +28,10 @@ namespace madai {
 
 class Model;
 
-/** \class Optimizer
+/** \class Sampler
  *
  * Base class for algorithms that sample from a distribution. */
-class Optimizer {
+class Sampler {
 public:
   typedef enum {
     NO_ERROR = 0,
@@ -39,8 +39,8 @@ public:
     INVALID_OUTPUT_SCALAR_INDEX_ERROR
   } ErrorType;
 
-  Optimizer( const Model *model );
-  virtual ~Optimizer();
+  Sampler( const Model *model );
+  virtual ~Sampler();
   const Model * GetModel() const;
   std::set< std::string > GetActiveParameters();
 
@@ -107,7 +107,7 @@ protected:
   std::string             m_OutputScalarToOptimize;
   unsigned int            m_OutputScalarToOptimizeIndex;
 
-  Optimizer() {}; // intentionally hidden
+  Sampler() {}; // intentionally hidden
 
   /** Subclasses that need to reset internal state when a parameter
   value has been changed outside the operation of the optimization
@@ -119,8 +119,8 @@ protected:
 
   bool IsLikeAndPrior() const;
 
-}; // end Optimizer
+}; // end Sampler
 
 } // end namespace madai
 
-#endif // __Optimizer_h__x
+#endif // __Sampler_h__x

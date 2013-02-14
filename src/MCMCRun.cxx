@@ -25,7 +25,7 @@ namespace madai {
 MCMCRun
 ::MCMCRun( const Model *in_model,
            const std::string info_dir ) :
-  Optimizer( in_model )
+  Sampler( in_model )
 {
   // First check to see if the model supplies a method for
   // calculating the Likelihood and Prior.

@@ -30,7 +30,7 @@
 
 #include "Model.h"
 #include "MultiModel.h"
-#include "Optimizer.h"
+#include "Sampler.h"
 #include "Trace.h"
 
 
@@ -46,7 +46,7 @@ class TraceElement;
  * MCMCRun loads in parameters for running a monte carlo analysis and provides a method for
  * taking steps in parameter space, defined by said parameters.
  */
-class MCMCRun : public Optimizer {
+class MCMCRun : public Sampler {
 public:
   MCMCRun(const Model *in_model, const std::string info_dir);
   ~MCMCRun();
