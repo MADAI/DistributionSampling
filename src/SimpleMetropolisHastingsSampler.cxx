@@ -16,7 +16,7 @@
  *
  *=========================================================================*/
 
-#include "SimpleMetropolisHastings.h"
+#include "SimpleMetropolisHastingsSampler.h"
 
 #include <cstdlib>
 
@@ -24,9 +24,9 @@
 namespace madai {
 
 
-SimpleMetropolisHastings
-::SimpleMetropolisHastings( const Model * model ) :
-  Optimizer( model ),
+SimpleMetropolisHastingsSampler
+::SimpleMetropolisHastingsSampler( const Model * model ) :
+  Sampler( model ),
   m_StepSize(1.0e-2),
   m_ActiveParameters( model->GetNumberOfParameters(), true ),
   m_NumberOfParameters( model->GetNumberOfParameters() ),
@@ -35,13 +35,13 @@ SimpleMetropolisHastings
 }
 
 
-SimpleMetropolisHastings
-::~SimpleMetropolisHastings()
+SimpleMetropolisHastingsSampler
+::~SimpleMetropolisHastingsSampler()
 {
 }
 
 
-void SimpleMetropolisHastings
+void SimpleMetropolisHastingsSampler
 ::SetStepSize( double stepSize )
 {
   this->m_StepSize = stepSize;
@@ -56,8 +56,8 @@ static double uniform_rand()
 }
 
 
-void SimpleMetropolisHastings
-::NextIteration( Trace *trace )
+void SimpleMetropolisHastingsSampler
+::NextSample( Trace *trace )
 {
   // xc is x_candidate
   std::vector< double > xc( this->m_NumberOfParameters, 0.0 );

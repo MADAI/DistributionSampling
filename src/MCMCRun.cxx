@@ -25,7 +25,7 @@ namespace madai {
 MCMCRun
 ::MCMCRun( const Model *in_model,
            const std::string info_dir ) :
-  Optimizer( in_model )
+  Sampler( in_model )
 {
   // First check to see if the model supplies a method for
   // calculating the Likelihood and Prior.
@@ -79,7 +79,7 @@ MCMCRun
 
 void
 MCMCRun
-::NextIteration( Trace *ThetaOutsList )
+::NextSample( Trace *ThetaOutsList )
 {
   double alpha, LOGBF;
   if ( m_LogLike ) {

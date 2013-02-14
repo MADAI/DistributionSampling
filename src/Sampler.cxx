@@ -16,15 +16,15 @@
  *
  *=========================================================================*/
 
-#include "Optimizer.h"
+#include "Sampler.h"
 #include "Parameter.h"
 
 
 namespace madai {
 
 
-Optimizer
-::Optimizer( const Model *model ) :
+Sampler
+::Sampler( const Model *model ) :
   m_Model( model ),
   m_OutputScalarToOptimizeIndex( 0 )
 {
@@ -43,14 +43,14 @@ Optimizer
 }
 
 
-Optimizer
-::~Optimizer()
+Sampler
+::~Sampler()
 {
 }
 
 
 const Model *
-Optimizer
+Sampler
 ::GetModel() const
 {
   return m_Model;
@@ -58,7 +58,7 @@ Optimizer
 
 
 std::set< std::string >
-Optimizer
+Sampler
 ::GetActiveParameters()
 {
   return m_ActiveParameters;
@@ -66,7 +66,7 @@ Optimizer
 
 
 void
-Optimizer
+Sampler
 ::ActivateParameter( const std::string & parameterName )
 {
   // TODO - check that parameter name is valid
@@ -76,7 +76,7 @@ Optimizer
 
 
 void
-Optimizer
+Sampler
 ::DeactivateParameter( const std::string & parameterName )
 {
   m_ActiveParameters.erase( parameterName );
@@ -84,15 +84,15 @@ Optimizer
 
 
 unsigned int
-Optimizer
+Sampler
 ::GetNumberOfActiveParameters() const
 {
   return static_cast< unsigned int >( m_ActiveParameters.size() );
 }
 
 
-Optimizer::ErrorType
-Optimizer
+Sampler::ErrorType
+Sampler
 ::SetParameterValue( const std::string & parameterName, double value )
 {
   unsigned int parameterIndex = this->GetParameterIndex( parameterName );
@@ -111,8 +111,8 @@ Optimizer
 }
 
 
-Optimizer::ErrorType
-Optimizer
+Sampler::ErrorType
+Sampler
 ::SetOutputScalarToOptimize( const std::string & scalarName )
 {
   unsigned int idx = this->GetOutputScalarIndex( scalarName );
@@ -124,8 +124,8 @@ Optimizer
 }
 
 
-Optimizer::ErrorType
-Optimizer
+Sampler::ErrorType
+Sampler
 ::SetOutputScalarToOptimizeIndex( unsigned int idx )
 {
   if (idx >= m_Model->GetNumberOfScalarOutputs())
@@ -137,7 +137,7 @@ Optimizer
 
 
 std::string
-Optimizer
+Sampler
 ::GetOutputScalarToOptimize()
 {
   return this->m_OutputScalarToOptimize;
@@ -145,7 +145,7 @@ Optimizer
 
 
 unsigned int
-Optimizer
+Sampler
 ::GetOutputScalarToOptimizeIndex() const
 {
   return this->m_OutputScalarToOptimizeIndex;
@@ -153,7 +153,7 @@ Optimizer
 
 
 const std::vector< double > &
-Optimizer
+Sampler
 ::GetCurrentParameters() const
 {
   return m_CurrentParameters;
@@ -161,7 +161,7 @@ Optimizer
 
 
 unsigned int
-Optimizer
+Sampler
 ::GetOutputScalarIndex( const std::string & scalarName ) const
 {
   std::vector< std::string > const & outputs = this->m_Model->GetScalarOutputNames();
@@ -176,7 +176,7 @@ Optimizer
 
 
 unsigned int
-Optimizer
+Sampler
 ::GetParameterIndex( const std::string & parameterName ) const
 {
   const std::vector< Parameter > & parameters = this->m_Model->GetParameters();
@@ -192,7 +192,7 @@ Optimizer
 
 // To check if the model supplis a method for calculating the Likelihood and Prior
 bool
-Optimizer
+Sampler
 ::IsLikeAndPrior() const
 {
   std::cerr << "Using point at center of each parameter range" << std::endl;

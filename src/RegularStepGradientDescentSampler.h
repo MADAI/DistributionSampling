@@ -16,25 +16,25 @@
  *
  *=========================================================================*/
 
-#ifndef __RegularStepGradientDescentOptimizer_h__
-#define __RegularStepGradientDescentOptimizer_h__
+#ifndef __RegularStepGradientDescentSampler_h__
+#define __RegularStepGradientDescentSampler_h__
 
 
-#include "Optimizer.h"
+#include "Sampler.h"
 
 
 namespace madai {
 
-/** \class RegularStepGradientDescentOptimizer
+/** \class RegularStepGradientDescentSampler
  *
  * Straightforward implementation of a gradient descent optimizer.
  */
-class RegularStepGradientDescentOptimizer : public Optimizer {
+class RegularStepGradientDescentSampler : public Sampler {
 public:
-  RegularStepGradientDescentOptimizer( const Model *model );
-  ~RegularStepGradientDescentOptimizer();
+  RegularStepGradientDescentSampler( const Model *model );
+  ~RegularStepGradientDescentSampler();
 
-  void NextIteration(Trace *trace);
+  void NextSample(Trace *trace);
 
   /** Set the step size. */
   void SetStepSize( double stepSize );
@@ -52,9 +52,9 @@ protected:
 
   bool m_Minimize;
 
-  RegularStepGradientDescentOptimizer() {}; // intentionally hidden
-}; // end class RegularStepGradientDescentOptimizer
+  RegularStepGradientDescentSampler() {}; // intentionally hidden
+}; // end class RegularStepGradientDescentSampler
 
 } // end namespace madai
 
-#endif // __RegularStepGradientDescentOptimizer_h__
+#endif // __RegularStepGradientDescentSampler_h__

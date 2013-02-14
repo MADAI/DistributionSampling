@@ -58,7 +58,7 @@ int main(int argc, char ** argv){
     
 	run.m_AcceptCount = 0;
 	for(run.m_IterationNumber = 1; run.m_IterationNumber < trace.m_MaxIterations; run.m_IterationNumber++){
-		run.NextIteration(&trace);
+		run.NextSample(&trace);
   }
   if(trace.m_CurrentIteration!=0){
     trace.WriteOut(m_model.GetParameters());

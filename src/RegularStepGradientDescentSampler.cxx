@@ -16,30 +16,30 @@
  *
  *=========================================================================*/
 
-#include "RegularStepGradientDescentOptimizer.h"
+#include "RegularStepGradientDescentSampler.h"
 
 
 namespace madai {
 
 
-RegularStepGradientDescentOptimizer
-::RegularStepGradientDescentOptimizer( const Model *model ) :
-  Optimizer( model ),
+RegularStepGradientDescentSampler
+::RegularStepGradientDescentSampler( const Model *model ) :
+  Sampler( model ),
   m_StepSize( 1.0e-3 ),
   m_Minimize( true )
 {
 }
 
 
-RegularStepGradientDescentOptimizer
-::~RegularStepGradientDescentOptimizer()
+RegularStepGradientDescentSampler
+::~RegularStepGradientDescentSampler()
 {
 }
 
 
 void
-RegularStepGradientDescentOptimizer
-::NextIteration( Trace *trace )
+RegularStepGradientDescentSampler
+::NextSample( Trace *trace )
 {
   std::vector< bool > activeParameters( m_CurrentParameters.size() );
 
@@ -77,7 +77,7 @@ RegularStepGradientDescentOptimizer
 
 
 void
-RegularStepGradientDescentOptimizer
+RegularStepGradientDescentSampler
 ::SetStepSize( double stepSize )
 {
   m_StepSize = stepSize;
@@ -85,7 +85,7 @@ RegularStepGradientDescentOptimizer
 
 
 void
-RegularStepGradientDescentOptimizer
+RegularStepGradientDescentSampler
 ::MinimizeOn()
 {
   m_Minimize = true;
@@ -93,7 +93,7 @@ RegularStepGradientDescentOptimizer
 
 
 void
-RegularStepGradientDescentOptimizer
+RegularStepGradientDescentSampler
 ::MinimizeOff()
 {
   m_Minimize = false;

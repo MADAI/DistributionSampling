@@ -1,6 +1,6 @@
 Information for Developers
 Cory Quammen <cquammen@cs.unc.edu>
-Last update: October 23, 2012
+Last update: February 14, 2013
 
 --------------------------
 How to add to this library
@@ -78,7 +78,7 @@ Code should adhere to this handful of formatting rules:
 - Nested code blocks should be indented by 2 spaces
 
 - Function and method names should follow upper CAML case convention,
-  e.g., ComputeValue(), GetNextIteration(). Avoid using underscores to
+  e.g., ComputeValue(), NextSample(). Avoid using underscores to
   separate words (they slow down typing).
 
 - Favor complete English words instead of abbreviations when naming

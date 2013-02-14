@@ -20,7 +20,7 @@
 #include <iostream>
 
 #include "Gaussian2DModel.h"
-#include "RegularStepGradientDescentOptimizer.h"
+#include "RegularStepGradientDescentSampler.h"
 #include "Trace.h"
 
 
@@ -30,27 +30,27 @@ int main(int argc, char *argv[])
     new madai::Gaussian2DModel();
   model->LoadConfigurationFile( "file.txt" ); // TODO - does nothing
 
-  madai::RegularStepGradientDescentOptimizer *optimizer =
-    new madai::RegularStepGradientDescentOptimizer( model );
-  optimizer->MinimizeOff(); // We want to maximize this function
+  madai::RegularStepGradientDescentSampler *sampler =
+    new madai::RegularStepGradientDescentSampler( model );
+  sampler->MinimizeOff(); // We want to maximize this function
 
   madai::Trace *trace = new madai::Trace();
 
   // Set the step size.
   double stepSize = 20.0;
-  optimizer->SetStepSize( stepSize );
+  sampler->SetStepSize( stepSize );
 
   // Pick which output scalar to optimize.
-  optimizer->SetOutputScalarToOptimize( "Value " );
+  sampler->SetOutputScalarToOptimize( "Value " );
 
   // Set initial parameter values.
-  optimizer->SetParameterValue( "X", 21.0 );
-  optimizer->SetParameterValue( "Y", -13.5 );
+  sampler->SetParameterValue( "X", 21.0 );
+  sampler->SetParameterValue( "Y", -13.5 );
 
   std::vector< double > currentParameters;
   for (unsigned int i = 0; i < 50; i++) {
-    currentParameters = optimizer->GetCurrentParameters();
-    optimizer->NextIteration( trace );
+    currentParameters = sampler->GetCurrentParameters();
+    sampler->NextSample( trace );
   }
 
   double modelMeanX;
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 
   if ( fabs( modelMeanX - currentParameters[0] ) > 1.0e-3 ||
        fabs( modelMeanY - currentParameters[1] ) > 1.0e-3 ) {
-    std::cerr << "RegularStepGradientDescentOptimizer failed to converge "
+    std::cerr << "RegularStepGradientDescentSampler failed to converge "
               << "on the expected solution." << std::endl;
     std::cerr << "Expected currentParameters to be (" << modelMeanX << ", "
               << modelMeanY << "), got (" << currentParameters[0] << ", "

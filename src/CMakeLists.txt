@@ -10,7 +10,7 @@ set( SRC_FILES
   MCMCRun.cxx
   Model.cxx
   MultiModel.cxx
-  Optimizer.cxx
+  Sampler.cxx
   PriorDistribution.cxx
   ProcessPipe.c
   Quad.cxx
@@ -20,8 +20,8 @@ set( SRC_FILES
   RHIC_PCA_Model.cxx
   RHIC_PCA_PriorDistribution.cxx
   RHIC_PriorDistribution.cxx
-  RegularStepGradientDescentOptimizer.cxx
-  SimpleMetropolisHastings.cxx
+  RegularStepGradientDescentSampler.cxx
+  SimpleMetropolisHastingsSampler.cxx
   TestLikelihoodDistribution.cxx
   TestModel.cxx
   TestPriorDistribution.cxx

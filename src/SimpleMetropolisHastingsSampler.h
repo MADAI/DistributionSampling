@@ -16,21 +16,21 @@
  *
  *=========================================================================*/
 
-#ifndef __SimpleMetropolisHastings_h__
-#define __SimpleMetropolisHastings_h__
+#ifndef __SimpleMetropolisHastingsSampler_h__
+#define __SimpleMetropolisHastingsSampler_h__
 
 
-#include "Optimizer.h"
+#include "Sampler.h"
 
 
 namespace madai {
 
-class SimpleMetropolisHastings : public Optimizer {
+class SimpleMetropolisHastingsSampler : public Sampler {
 public:
-  SimpleMetropolisHastings( const Model *model );
-  ~SimpleMetropolisHastings();
+  SimpleMetropolisHastingsSampler( const Model *model );
+  ~SimpleMetropolisHastingsSampler();
 
-  void NextIteration(Trace *trace);
+  void NextSample(Trace *trace);
 
   /** Set the step size. */
   void SetStepSize( double stepSize );
@@ -38,7 +38,7 @@ public:
 protected:
   double m_StepSize;
 
-  SimpleMetropolisHastings() {}; // intentionally hidden
+  SimpleMetropolisHastingsSampler() {}; // intentionally hidden
 
   std::vector< bool > m_ActiveParameters;
 
@@ -46,8 +46,8 @@ protected:
   
   unsigned int m_NumberOfOutputs;
 
-}; // end class SimpleMetropolisHastings
+}; // end class SimpleMetropolisHastingsSampler
 
 } // end namespace madai
 
-#endif // __SimpleMetropolisHastings_h__
+#endif // __SimpleMetropolisHastingsSampler_h__

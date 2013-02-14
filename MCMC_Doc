@@ -10,7 +10,7 @@ Classes Brought Over:
    -- Configuration of how the trace is handled was moved to the
       Trace class.
    -- Removed the Run function.
-   -- Created a NextIteration function.
+   -- Created a NextSample function.
    -- Removed the Trace object so that it is external.
 3. Distribution
 4. LikelihoodDistribution (RHIC, RHIC_PCA, Cosmo, Test)
