@@ -26,7 +26,7 @@ add_subdirectory( src )
 add_subdirectory( main )
 
 set( DistributionSampling_INCLUDE_DIRS
-  ${DistributionSampling_SOURCE_DIR}/include
+  ${DistributionSampling_SOURCE_DIR}/src
   ${coral_INCLUDE_DIRS}
   ${MADAIEmulator_INCLUDE_DIRS}
 )
