@@ -258,7 +258,7 @@ ExternalModel
   for ( std::vector<double>::iterator ret_it = scalars.begin();
         ret_it < scalars.end(); ret_it++ ) {
     if (1 != fscanf(m_Process.answer, "%lf%*c", &(*ret_it))) {
-      std::cerr << "interprocess communication error [cJ83A]\n";
+      std::cerr << "interprocess communication error\n";
       return OTHER_ERROR;
     }
   }
