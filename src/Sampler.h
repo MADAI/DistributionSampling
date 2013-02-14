@@ -26,7 +26,9 @@
 
 namespace madai {
 
+
 class Model;
+
 
 /** \class Sampler
  *
@@ -64,7 +66,7 @@ public:
   /** Compute the next set of parameters and the output scalar values,
    * and save them in the trace file. */
 
-  virtual void NextIteration(Trace *trace) = 0;
+  virtual void NextSample(Trace *trace) = 0;
   //{  /* suggested structure for this function */
   //std::vector< double > scalarOutputs;
   //std::vector< double > gradient;

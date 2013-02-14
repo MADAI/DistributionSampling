@@ -51,7 +51,7 @@ public:
   MCMCRun(const Model *in_model, const std::string info_dir);
   ~MCMCRun();
 
-  void NextIteration( Trace *trace );
+  void NextSample( Trace *trace );
 
   std::vector<double> GetRandomTheta0(int seed);
   std::vector<double> GetTheta0FromFile();

@@ -87,7 +87,7 @@ int main(int argc, char ** argv){
     
   run.m_AcceptCount = 0;
   for(run.m_IterationNumber = 1; run.m_IterationNumber < trace.m_MaxIterations; run.m_IterationNumber++){
-    run.NextIteration(&trace);
+    run.NextSample(&trace);
   }
   if(trace.m_CurrentIteration!=0){
     trace.WriteOut(t_model.GetParameters());
@@ -173,7 +173,7 @@ int main(int argc, char ** argv){
       std::cerr << "Areas that might be responsible:" << std::endl;
       std::cerr << "1) MCMCRun::TakeStep" << std::endl;
       std::cerr << "2) MCMCRun::EvaluateProposal" << std::endl;
-      std::cerr << "3) MCMCRun::NextIteration" << std::endl;
+      std::cerr << "3) MCMCRun::NextSample" << std::endl;
       return EXIT_FAILURE;
     }
   }

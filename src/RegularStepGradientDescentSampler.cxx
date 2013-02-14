@@ -39,7 +39,7 @@ RegularStepGradientDescentSampler
 
 void
 RegularStepGradientDescentSampler
-::NextIteration( Trace *trace )
+::NextSample( Trace *trace )
 {
   std::vector< bool > activeParameters( m_CurrentParameters.size() );
 

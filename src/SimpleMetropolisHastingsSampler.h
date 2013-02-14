@@ -30,7 +30,7 @@ public:
   SimpleMetropolisHastingsSampler( const Model *model );
   ~SimpleMetropolisHastingsSampler();
 
-  void NextIteration(Trace *trace);
+  void NextSample(Trace *trace);
 
   /** Set the step size. */
   void SetStepSize( double stepSize );

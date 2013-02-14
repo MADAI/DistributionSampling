@@ -79,7 +79,7 @@ MCMCRun
 
 void
 MCMCRun
-::NextIteration( Trace *ThetaOutsList )
+::NextSample( Trace *ThetaOutsList )
 {
   double alpha, LOGBF;
   if ( m_LogLike ) {

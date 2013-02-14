@@ -57,7 +57,7 @@ static double uniform_rand()
 
 
 void SimpleMetropolisHastingsSampler
-::NextIteration( Trace *trace )
+::NextSample( Trace *trace )
 {
   // xc is x_candidate
   std::vector< double > xc( this->m_NumberOfParameters, 0.0 );

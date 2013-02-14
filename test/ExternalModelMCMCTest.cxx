@@ -22,12 +22,12 @@
 #include <vector>
 
 #include "ExternalModel.h"
-#include "SimpleMetropolisHastings.h"
+#include "SimpleMetropolisHastingsSampler.h"
 #include "Trace.h"
 
 /**
  * Test case for madai::ExternalModel and
- * madai::SimpleMetropolisHastings classes.
+ * madai::SimpleMetropolisHastingsSampler classes.
  */
 int main(int argc, char ** argv) {
   if (argc < 2) {
@@ -49,7 +49,7 @@ int main(int argc, char ** argv) {
     std::cerr << "Something is wrong with the external model\n";
     return EXIT_FAILURE;
   }
-  madai::SimpleMetropolisHastings simple_mcmc(&external_model);
+  madai::SimpleMetropolisHastingsSampler simple_mcmc(&external_model);
 
   std::vector< madai::Parameter > const * parameters
     = &(external_model.GetParameters());
@@ -61,7 +61,7 @@ int main(int argc, char ** argv) {
   madai::Trace trace;
   unsigned int numberIter = 500;
   for (unsigned int count = 0; count < numberIter; count ++) {
-    simple_mcmc.NextIteration(&trace);
+    simple_mcmc.NextSample(&trace);
   }
 
   trace.writeHead(std::cout, external_model.GetParameters(), external_model.GetScalarOutputNames());

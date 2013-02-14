@@ -34,7 +34,7 @@ public:
   RegularStepGradientDescentSampler( const Model *model );
   ~RegularStepGradientDescentSampler();
 
-  void NextIteration(Trace *trace);
+  void NextSample(Trace *trace);
 
   /** Set the step size. */
   void SetStepSize( double stepSize );

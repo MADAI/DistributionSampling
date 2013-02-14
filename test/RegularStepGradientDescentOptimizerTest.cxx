@@ -20,7 +20,7 @@
 #include <iostream>
 
 #include "Gaussian2DModel.h"
-#include "RegularStepGradientDescentOptimizer.h"
+#include "RegularStepGradientDescentSampler.h"
 #include "Trace.h"
 
 
@@ -30,8 +30,8 @@ int main(int argc, char *argv[])
     new madai::Gaussian2DModel();
   model->LoadConfigurationFile( "file.txt" ); // TODO - does nothing
 
-  madai::RegularStepGradientDescentOptimizer *optimizer =
-    new madai::RegularStepGradientDescentOptimizer( model );
+  madai::RegularStepGradientDescentSampler *optimizer =
+    new madai::RegularStepGradientDescentSampler( model );
   optimizer->MinimizeOff(); // We want to maximize this function
 
   madai::Trace *trace = new madai::Trace();
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
   std::vector< double > currentParameters;
   for (unsigned int i = 0; i < 50; i++) {
     currentParameters = optimizer->GetCurrentParameters();
-    optimizer->NextIteration( trace );
+    optimizer->NextSample( trace );
   }
 
   double modelMeanX;
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 
   if ( fabs( modelMeanX - currentParameters[0] ) > 1.0e-3 ||
        fabs( modelMeanY - currentParameters[1] ) > 1.0e-3 ) {
-    std::cerr << "RegularStepGradientDescentOptimizer failed to converge "
+    std::cerr << "RegularStepGradientDescentSampler failed to converge "
               << "on the expected solution." << std::endl;
     std::cerr << "Expected currentParameters to be (" << modelMeanX << ", "
               << modelMeanY << "), got (" << currentParameters[0] << ", "
