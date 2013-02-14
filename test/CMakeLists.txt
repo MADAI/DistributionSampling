@@ -9,12 +9,12 @@ add_executable( DiceMCMC DiceMCMC.cxx )
 target_link_libraries( DiceMCMC ${LIBRARIES} )
 add_test( DiceMCMC DiceMCMC ${TEST_BASE_DIR}/DiceMCMC )
 
-configure_file( ${TEST_BASE_DIR}/ExternalModelMCMCTest/ExternalModelMCMCTestConfiguration.txt.in
-  ${CMAKE_CURRENT_BINARY_DIR}/ExternalModelMCMCTestConfiguration.txt @ONLY )
+#configure_file( ${TEST_BASE_DIR}/ExternalModelMCMCTest/ExternalModelMCMCTestConfiguration.txt.in
+#  ${CMAKE_CURRENT_BINARY_DIR}/ExternalModelMCMCTestConfiguration.txt @ONLY )
 add_executable( ExternalModelMCMCTest ExternalModelMCMCTest.cxx )
 target_link_libraries( ExternalModelMCMCTest ${LIBRARIES} )
 add_test( ExternalModelMCMCTest
-  ExternalModelMCMCTest ${CMAKE_CURRENT_BINARY_DIR}/ExternalModelMCMCTestConfiguration.txt )
+  ExternalModelMCMCTest ${TEST_BASE_DIR}/ExternalModelMCMCTest/ExampleProcess.py )
 
 add_executable( Gaussian2DMCMCTest Gaussian2DMCMCTest.cxx )
 target_link_libraries( Gaussian2DMCMCTest ${LIBRARIES} )

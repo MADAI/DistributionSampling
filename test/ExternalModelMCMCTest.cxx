@@ -30,33 +30,37 @@
  * madai::SimpleMetropolisHastings classes.
  */
 int main(int argc, char ** argv) {
+
   if (argc < 2) {
     std::cerr <<
-      "Usage: " << argv[0] << " CONFIG_FILE\n\n"
-      "where CONFIG_FILE is a suitable configuration for the\n"
+      "Usage: " << argv[0] << " external_executable\n\n"
+      "where external_executable is suitable for the\n"
       "madai::ExternalModel class.\n\n";
     return EXIT_FAILURE;
   }
-  std::string filename(argv[1]);
+
+  std::string executable( argv[1] );
   madai::ExternalModel external_model;
-  if (filename == "-") {
-    //FIXME document this.
-    external_model.LoadConfigurationFile(std::cin);
-  } else {
-    external_model.LoadConfigurationFile(filename);
-  }
-  if (! external_model.IsReady()) {
+
+  //external_model.LoadConfigurationFile( filename );
+  external_model.StartProcess( executable );
+  if ( !external_model.IsReady() ) {
     std::cerr << "Something is wrong with the external model\n";
+
     return EXIT_FAILURE;
   }
-  madai::SimpleMetropolisHastings simple_mcmc(&external_model);
+
+  madai::SimpleMetropolisHastings simple_mcmc( &external_model );
 
   std::vector< madai::Parameter > const * parameters
     = &(external_model.GetParameters());
-  for (unsigned int i = 0; i < parameters->size(); i++)
+
+  for (unsigned int i = 0; i < parameters->size(); i++) {
     simple_mcmc.ActivateParameter((*parameters)[i].m_Name);
-  simple_mcmc.SetOutputScalarToOptimize(
-    external_model.GetScalarOutputNames().at(0) );
+  }
+
+  simple_mcmc.SetOutputScalarToOptimize
+    ( external_model.GetScalarOutputNames().at(0) );
 
   madai::Trace trace;
   unsigned int numberIter = 500;
@@ -64,8 +68,10 @@ int main(int argc, char ** argv) {
     simple_mcmc.NextIteration(&trace);
   }
 
-  trace.writeHead(std::cout, external_model.GetParameters(), external_model.GetScalarOutputNames());
-  trace.write(std::cout);
+  trace.writeHead( std::cout,
+                   external_model.GetParameters(),
+                   external_model.GetScalarOutputNames() );
+  trace.write( std::cout );
 
   return EXIT_SUCCESS;
 }

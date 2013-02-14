@@ -28,9 +28,10 @@
  fix that, this class will only compile for a POSIX (Unix, Linux,
  BSD, MacOS X) target.  */
 
-#include <vector> // std::vector
-#include <string> // std::string 
 #include <iostream>
+#include <string>
+#include <vector>
+
 
 namespace madai {
 
@@ -42,7 +43,6 @@ class ExternalModel : public Model {
 public:
   
   ExternalModel();
-  ExternalModel(const std::string & configFileName);
   virtual ~ExternalModel();
 
   /** 
@@ -50,7 +50,11 @@ public:
    * defined by this function.  We'll lock it down later.
    */
   virtual ErrorType LoadConfigurationFile( const std::string fileName );
-  virtual ErrorType LoadConfigurationFile( std::istream & configFile );
+
+  /**
+   * Start the external process and leave it open for queries.
+   */
+  virtual ErrorType StartProcess( const std::string & processPath );
 
   /** 
    * Get the scalar outputs from the model evaluated at x.  If an
@@ -66,16 +70,9 @@ public:
                                      double & Prior ) const;
 
 private:
-  unsigned int m_NumberOfParameters;
-
-  unsigned int m_NumberOfOutputs;
-
   std::vector< std::string > m_CommandArguments;
 
   ProcessPipe m_Process;
-
-  std::string m_ConfigurationFileName;
-
 }; // end Model
 
 } // end namespace madai
