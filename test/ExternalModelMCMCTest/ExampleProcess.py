@@ -39,6 +39,7 @@ def f(x,y):
 
 o = sys.stdout
 it = tok(sys.stdin)
+o.write('VERSION 1\n')
 o.write('2\nparam_0\nparam_1\n2\nmean_0\nvariance_0\n')
 o.flush()
 while True:

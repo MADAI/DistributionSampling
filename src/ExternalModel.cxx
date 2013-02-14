@@ -153,27 +153,35 @@ ExternalModel
   }
   delete[] argv;
 
+  // Have a pessimistic outlook
+  m_StateFlag = ERROR;
+
   // Now check for an error in the ProcessPipe creation
   if ( EXIT_FAILURE == createError ) {
     std::cerr << "CreateProcessPipe returned failure.\n";
-    m_StateFlag = ERROR;
     return OTHER_ERROR;
   }
 
   if ( m_Process.answer == NULL || m_Process.question == NULL ) {
     std::cerr << "CreateProcessPipe returned NULL fileptrs.\n";
-    m_StateFlag = ERROR;
     return OTHER_ERROR;
   }
 
   discard_comments( m_Process.answer, '#' );
   // allow comment lines to BEGIN the interactive process
 
+  // Get the version of the protocol we are speaking
+  char versionString[1024];
+  int versionNumber = 1;
+  if ( 2 != std::fscanf( m_Process.answer, "%s %d", versionString, &versionNumber) ) {
+    std::cerr << "fscanf failure reading version number from external process" << std::endl;
+    return OTHER_ERROR;
+  }
+
   // Get parameters
   unsigned int numberOfParameters = 0;
   if ( 1 != std::fscanf( m_Process.answer, "%u", &numberOfParameters ) ) {
     std::cerr << "fscanf failure reading from the external process [1]\n";
-    m_StateFlag = ERROR;
     return OTHER_ERROR;
   }
 
@@ -190,7 +198,6 @@ ExternalModel
   unsigned int numberOfOutputs;
   if ( 1 != std::fscanf( m_Process.answer, "%d", &numberOfOutputs ) ) {
     std::cerr << "fscanf failure reading from the external process [2]\n";
-    m_StateFlag = ERROR;
     return OTHER_ERROR;
   }
 
@@ -203,7 +210,7 @@ ExternalModel
     this->AddScalarOutputName( outputName );
   }
 
-  /* We are now ready to go! */
+  // We are now ready to go!
   m_StateFlag = READY;
 
   return NO_ERROR;
