@@ -30,27 +30,27 @@ int main(int argc, char *argv[])
     new madai::Gaussian2DModel();
   model->LoadConfigurationFile( "file.txt" ); // TODO - does nothing
 
-  madai::RegularStepGradientDescentSampler *optimizer =
+  madai::RegularStepGradientDescentSampler *sampler =
     new madai::RegularStepGradientDescentSampler( model );
-  optimizer->MinimizeOff(); // We want to maximize this function
+  sampler->MinimizeOff(); // We want to maximize this function
 
   madai::Trace *trace = new madai::Trace();
 
   // Set the step size.
   double stepSize = 20.0;
-  optimizer->SetStepSize( stepSize );
+  sampler->SetStepSize( stepSize );
 
   // Pick which output scalar to optimize.
-  optimizer->SetOutputScalarToOptimize( "Value " );
+  sampler->SetOutputScalarToOptimize( "Value " );
 
   // Set initial parameter values.
-  optimizer->SetParameterValue( "X", 21.0 );
-  optimizer->SetParameterValue( "Y", -13.5 );
+  sampler->SetParameterValue( "X", 21.0 );
+  sampler->SetParameterValue( "Y", -13.5 );
 
   std::vector< double > currentParameters;
   for (unsigned int i = 0; i < 50; i++) {
-    currentParameters = optimizer->GetCurrentParameters();
-    optimizer->NextSample( trace );
+    currentParameters = sampler->GetCurrentParameters();
+    sampler->NextSample( trace );
   }
 
   double modelMeanX;
