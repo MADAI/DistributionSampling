@@ -128,16 +128,33 @@ static bool discard_comments( std::istream & i, char comment_character ) {
 
 ExternalModel::ErrorType
 ExternalModel
-::StartProcess( const std::string & processPath )
+::StartProcess( const std::string & processPath,
+                const std::vector< std::string > & arguments )
 {
-  char ** argv = new char*[2];
+  // Create array of C strings from arguments array
+  char ** argv = new char*[arguments.size() + 1];
+
+  // First argument is expected to be the executable
   argv[0] = new char[processPath.size()+1];
   strcpy( argv[0], processPath.c_str() );
-  argv[0][processPath.size()] = '\0';
-  argv[1] = NULL;
+  std::cout << "argv[0]: " << argv[0] << std::endl;
+  for ( size_t i = 1; i <= arguments.size(); ++i ) {
+    argv[i] = new char[arguments[i].size()+1];
+    strcpy( argv[i], arguments[i].c_str() );
+  }
+  argv[arguments.size()+1] = NULL;
 
   // CreateProcessPipe returns EXIT_FAILURE on error, EXIT_SUCCESS otherwise
-  if ( EXIT_FAILURE == CreateProcessPipe(&(m_Process), argv) ) {
+  int createError = CreateProcessPipe( &(m_Process), argv );
+
+  // Free up the argv arrays
+  for ( size_t i = 0; i <= arguments.size(); ++i ) {
+    delete[] argv[i];
+  }
+  delete[] argv;
+
+  // Now check for an error in the ProcessPipe creation
+  if ( EXIT_FAILURE == createError ) {
     std::cerr << "CreateProcessPipe returned failure.\n";
     m_StateFlag = ERROR;
     return OTHER_ERROR;

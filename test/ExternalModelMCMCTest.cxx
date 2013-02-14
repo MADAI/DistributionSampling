@@ -42,8 +42,10 @@ int main(int argc, char ** argv) {
   std::string executable( argv[1] );
   madai::ExternalModel external_model;
 
-  //external_model.LoadConfigurationFile( filename );
-  external_model.StartProcess( executable );
+  // This executable does not require any arguments
+  std::vector< std::string > arguments;
+
+  external_model.StartProcess( executable, arguments );
   if ( !external_model.IsReady() ) {
     std::cerr << "Something is wrong with the external model\n";
 

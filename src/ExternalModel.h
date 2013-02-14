@@ -54,7 +54,8 @@ public:
   /**
    * Start the external process and leave it open for queries.
    */
-  virtual ErrorType StartProcess( const std::string & processPath );
+  virtual ErrorType StartProcess( const std::string & processPath,
+                                  const std::vector< std::string > & arguments );
 
   /** 
    * Get the scalar outputs from the model evaluated at x.  If an
