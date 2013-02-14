@@ -76,10 +76,9 @@ public:
                                      double & Prior ) const;
 
 private:
-  std::vector< std::string > m_CommandArguments;
-
   ProcessPipe m_Process;
-}; // end Model
+
+}; // end ExternalModel
 
 } // end namespace madai
 
