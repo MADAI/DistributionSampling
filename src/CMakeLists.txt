@@ -13,12 +13,8 @@ set( SRC_FILES
   Sampler.cxx
   PriorDistribution.cxx
   ProcessPipe.c
-  Quad.cxx
   RHICModel.cxx
   RHIC_LikelihoodDistribution.cxx
-  RHIC_PCA_LikelihoodDistribution.cxx
-  RHIC_PCA_Model.cxx
-  RHIC_PCA_PriorDistribution.cxx
   RHIC_PriorDistribution.cxx
   RegularStepGradientDescentSampler.cxx
   SimpleMetropolisHastingsSampler.cxx
@@ -27,7 +23,6 @@ set( SRC_FILES
   TestPriorDistribution.cxx
   Trace.cxx
   TraceElement.cxx
-  Visualization.cxx
 )
 
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${DistributionSampling_BINARY_DIR}/lib )

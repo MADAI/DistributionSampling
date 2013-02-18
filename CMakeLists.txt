@@ -23,7 +23,6 @@ link_directories(
 )
 
 add_subdirectory( src )
-add_subdirectory( main )
 
 set( DistributionSampling_INCLUDE_DIRS
   ${DistributionSampling_SOURCE_DIR}/src
