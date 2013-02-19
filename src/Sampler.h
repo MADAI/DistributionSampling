@@ -52,9 +52,13 @@ public:
   /** Get the number of active parameters. */
   unsigned int GetNumberOfActiveParameters() const;
 
+  /** Check whether a parameter is active. */
+  bool IsParameterActive( const std::string & parameterName );
+
   /** Resets a parameter value. */
   virtual ErrorType SetParameterValue( const std::string & parameterName,
                                        double value );
+  virtual double GetParameterValue( const std::string & parameterName );
 
   /** Sets the output scalar value to optimize. */
   ErrorType SetOutputScalarToOptimize( const std::string & scalarName );

@@ -91,6 +91,15 @@ Sampler
 }
 
 
+bool
+Sampler
+::IsParameterActive( const std::string & parameterName )
+{
+  return ( m_ActiveParameters.find( parameterName ) !=
+           m_ActiveParameters.end() );
+}
+
+
 Sampler::ErrorType
 Sampler
 ::SetParameterValue( const std::string & parameterName, double value )
@@ -108,6 +117,20 @@ Sampler
   // TODO - set dirty flag
 
   return NO_ERROR;
+}
+
+
+double
+Sampler
+::GetParameterValue( const std::string & parameterName )
+{
+  unsigned int parameterIndex = this->GetParameterIndex( parameterName );
+
+  if ( parameterIndex == static_cast< unsigned int >( -1 ) ) {
+    return 0.0;
+  }
+
+  return m_CurrentParameters[parameterIndex];
 }
 
 
