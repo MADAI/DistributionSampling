@@ -18,12 +18,22 @@
 
 #include "Model.h"
 
+extern "C"{
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_math.h>
+}
+#include <cassert>
+
 namespace madai {
 
 Model
 ::Model() :
   m_GradientEstimateStepSize( 1.0e-4 ),
-  m_StateFlag( UNINITIALIZED )
+  m_StateFlag( UNINITIALIZED ),
+  m_LogPriorLikelihoodFunction( NULL )
 {
 }
 
@@ -114,7 +124,7 @@ Model
   scalars.clear();
   gradient.clear();
 
-  ErrorType scalarOutputError;
+  Model::ErrorType scalarOutputError;
 
   double h = m_GradientEstimateStepSize;
   for ( unsigned int i = 0; i < this->GetNumberOfParameters(); ++i ) {
@@ -181,7 +191,7 @@ Model
 
 std::string
 Model
-::GetErrorTypeAsString( ErrorType error )
+::GetErrorTypeAsString( Model::ErrorType error )
 {
   std::string outputString( "NO_ERROR" );
 
@@ -205,6 +215,10 @@ Model
 
   case METHOD_NOT_IMPLEMENTED:
     outputString = std::string( "METHOD_NOT_IMPLEMENTED" );
+    break;
+
+  case WRONG_VECTOR_LENGTH:
+    outputString = std::string( "WRONG_VECTOR_LENGTH" );
     break;
 
   case OTHER_ERROR:
@@ -238,4 +252,152 @@ Model
 }
 
 
+Model::ErrorType
+Model
+::SetObservedScalarValues(const std::vector< double > & observedScalarValues)
+{
+  size_t size = observedScalarValues.size();
+  if ((size != this->GetNumberOfScalarOutputs()) && (size != 0))
+    return WRONG_VECTOR_LENGTH;
+  // copy the vector
+  this->m_ObservedScalarValues = observedScalarValues;
+  return NO_ERROR;
+}
+
+
+Model::ErrorType
+Model
+::SetObservedScalarCovariance(
+    const std::vector< double > & observedScalarCovariance)
+{
+  size_t size = observedScalarCovariance.size();
+  if (size == 0) { // represents zero matrix.
+    this->m_ObservedScalarCovariance.clear();
+    return NO_ERROR;
+  }
+  size_t t = this->GetNumberOfScalarOutputs();
+  if (size != (t * t))
+    return WRONG_VECTOR_LENGTH;
+  this->m_ObservedScalarCovariance = observedScalarCovariance;
+  return NO_ERROR;
+}
+
+
+Model::ErrorType
+Model
+::GetScalarOutputsAndCovariance(
+      const std::vector< double > & parameters,
+      std::vector< double > & scalars,
+      std::vector< double > & scalarCovariance)
+{
+  scalarCovariance.clear();
+  return this->GetScalarOutputs(parameters, scalars);
+}
+
+Model::ErrorType
+Model
+::GetScalarOutputsAndLogLikelihood(
+    const std::vector< double > & parameters,
+    std::vector< double > & scalars,
+    double & logLikelihood)
+{
+  logLikelihood = GSL_NAN; // if error occurs.
+  double logPriorLikelihood = 0.0; // default value.
+  if (this->m_LogPriorLikelihoodFunction != NULL) {
+    ScalarFunction::ErrorType e = this->m_LogPriorLikelihoodFunction->GetOutput(
+      parameters, logPriorLikelihood);
+    if (e != ScalarFunction::NO_ERROR)
+      return OTHER_ERROR;
+  }
+  size_t t = this->GetNumberOfScalarOutputs();
+  assert(t > 0);
+  std::vector< double > scalarCovariance;
+  Model::ErrorType result = this->GetScalarOutputsAndCovariance(
+    parameters, scalars, scalarCovariance);
+
+  if (result != NO_ERROR)
+    return result;
+  if (scalars.size() != t)
+    return OTHER_ERROR;
+
+  std::vector< double > scalarDifferences(t);
+  std::vector<double> covariance(t * t);
+
+  double distSq = 0.0;
+  if (this->m_ObservedScalarValues.size() == 0) {
+    for (size_t i = 0; i < t; ++i) {
+      scalarDifferences[i] = scalars[i];
+      distSq += std::pow(scalarDifferences[i],2);
+    }
+  } else {
+    for (size_t i = 0; i < t; ++i) {
+      scalarDifferences[i] = scalars[i] - this->m_ObservedScalarValues[i];
+      distSq += std::pow(scalarDifferences[i],2);
+    }
+  }
+
+  if ((scalarCovariance.size() == 0) &&
+      (this->m_ObservedScalarCovariance.size() == 0)) {
+    // Infinite precision makes no sense, so assume variance of 1.0
+    // for each variable.
+    logLikelihood = ((-0.5) * distSq) + logPriorLikelihood;
+    return NO_ERROR;
+  } else if (scalarCovariance.size() == 0) {
+    assert(this->m_ObservedScalarCovariance.size() == (t*t));
+    covariance = this->m_ObservedScalarCovariance;
+  } else if (this->m_ObservedScalarCovariance.size() == 0) {
+    assert(scalarCovariance.size() == (t*t));
+    covariance = scalarCovariance;
+  } else {
+    for (size_t i = 0; i < (t*t); ++i)
+      covariance[i]
+        = scalarCovariance[i] + this->m_ObservedScalarCovariance[i];
+  }
+  // We should replace this GSL code with some other linalg library.
+  gsl_matrix_view cov_view
+    = gsl_matrix_view_array(&(covariance[0]), t, t);
+  gsl_matrix * lu = &cov_view.matrix;
+
+  gsl_vector_view diff_view
+    = gsl_vector_view_array (&(scalarDifferences[0]), t);
+  gsl_vector * diff = &diff_view.vector;
+
+  gsl_vector * tmp = gsl_vector_alloc(t);
+  gsl_permutation * p = gsl_permutation_alloc(t);
+
+  // Need to calculate ((covariance)^(-1) . differences)
+  // tmp = (cov^(-1) . diff)
+  // cov . tmp = diff
+  // solve for tmp.
+  int signum;
+  gsl_linalg_LU_decomp (lu, p, &signum);
+  gsl_linalg_LU_solve (lu, p, diff, tmp);
+  // need to calulate ((diff)^T . tmp), the dot product of two vectors.
+  double innerProduct;
+  gsl_blas_ddot (diff, tmp, &innerProduct);
+
+  gsl_vector_free(tmp);
+  gsl_permutation_free(p);
+
+  logLikelihood = ((-0.5) * innerProduct) + logPriorLikelihood;
+  return NO_ERROR;
+}
+
+/**
+ * If this function is not set, assume a constant prior.
+ * To unset this, call with NULL.
+ */
+Model::ErrorType
+Model
+::SetLogPriorLikelihoodFunction(
+  ScalarFunction * function)
+{
+  this->m_LogPriorLikelihoodFunction = function;
+  return NO_ERROR;
+}
+
+
 } // end namespace madai
+
+
+

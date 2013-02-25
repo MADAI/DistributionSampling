@@ -28,23 +28,27 @@ namespace madai {
 class SimpleMetropolisHastingsSampler : public Sampler {
 public:
   SimpleMetropolisHastingsSampler( const Model *model );
-  ~SimpleMetropolisHastingsSampler();
+  virtual ~SimpleMetropolisHastingsSampler();
 
-  void NextSample(Trace *trace);
+  virtual void NextSample(Trace *trace);
 
   /** Set the step size. */
-  void SetStepSize( double stepSize );
+  virtual void SetStepSize( double stepSize );
 
 protected:
   double m_StepSize;
 
   SimpleMetropolisHastingsSampler() {}; // intentionally hidden
 
-  std::vector< bool > m_ActiveParameters;
-
   unsigned int m_NumberOfParameters;
-  
+
   unsigned int m_NumberOfOutputs;
+
+  std::vector< double > m_lastStep_x;
+
+  std::vector< double > m_lastStep_y;
+
+  double m_lastStep_logLikelihood;
 
 }; // end class SimpleMetropolisHastingsSampler
 

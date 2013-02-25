@@ -38,10 +38,21 @@ Trace
 void
 Trace
 ::add( const std::vector< double > & parameterValues,
-       const std::vector< double > & OutputValues )
+       const std::vector< double > & OutputValues,
+       double LogLikelihood)
 {
   this->m_TraceElements.push_back(
-    TraceElement( parameterValues,OutputValues ) );
+    TraceElement( parameterValues,OutputValues, LogLikelihood ) );
+}
+
+
+void
+Trace
+::add( const std::vector< double > & parameterValues,
+       const std::vector< double > & OutputValues)
+{
+  this->m_TraceElements.push_back(
+    TraceElement( parameterValues,OutputValues, 0.0 ) );
 }
 
 
@@ -149,6 +160,8 @@ Trace
     write_vector( out, (*this)[i].m_ParameterValues, ',' );
     out << ',';
     write_vector( out, (*this)[i].m_OutputValues, ',' );
+    out << ',';
+    out << (*this)[i].m_LogLikelihood;
     if ( (*this)[i].m_Comments.size() > 0 ) {
       out << ",\"";
       write_vector( out, (*this)[i].m_Comments, ';' );
@@ -188,8 +201,8 @@ Trace
     for ( itr++; itr < outputs.end(); itr++ ) {
       o << ',' << '"' << *itr << '"';
     }
-    o << '\n';
   }
+  o << ",\"LogLikelihood\"\n";
 }
 
 

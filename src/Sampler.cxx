@@ -18,6 +18,7 @@
 
 #include "Sampler.h"
 #include "Parameter.h"
+#include <cassert>
 
 
 namespace madai {
@@ -25,21 +26,32 @@ namespace madai {
 
 Sampler
 ::Sampler( const Model *model ) :
-  m_Model( model ),
-  m_OutputScalarToOptimizeIndex( 0 )
+  m_Model(model),
+  m_CurrentParameters(model->GetNumberOfParameters(),0.0),
+  m_OutputScalarToOptimizeIndex( 0 ),
+  m_ActiveParameterIndices(model->GetNumberOfParameters(), true),
+  m_OptimizeOnLikelihood(false)
 {
-  m_Model = model;
+  assert(model != NULL);
+  unsigned int np = this->m_Model->GetNumberOfParameters();
+  unsigned int nt = this->m_Model->GetNumberOfScalarOutputs();
+  assert(this->m_OutputScalarToOptimizeIndex < nt);
 
   // Initialize the vector for current parameters.
   m_CurrentParameters.resize( m_Model->GetNumberOfParameters() );
 
   // Activate all parameters by default.
-  const std::vector< Parameter > parameterDescriptions =
-    m_Model->GetParameters();
-  for ( unsigned int i = 0; i < parameterDescriptions.size(); ++i )
+  const std::vector< Parameter > & params = this->m_Model->GetParameters();
+  assert(np == params.size());
+
+  for (unsigned int i = 0; (i < np); ++i)
     {
-    this->ActivateParameter( parameterDescriptions[i].m_Name );
+    this->m_ActiveParameters.insert( params[i].m_Name );
     }
+
+  this->m_OutputScalarToOptimize
+    = this->m_Model->GetScalarOutputNames().at(
+      this->m_OutputScalarToOptimizeIndex);
 }
 
 
@@ -65,13 +77,41 @@ Sampler
 }
 
 
+unsigned int
+Sampler
+::GetNumberOfParameters() const {
+  if (this->GetModel() != NULL)
+    return this->GetModel()->GetNumberOfParameters();
+  else
+    return 0;
+}
+
+const std::vector< Parameter > &
+Sampler
+::GetParameters() const {
+  assert (this->GetModel() != NULL);
+  return this->GetModel()->GetParameters();
+}
+
+
+
 void
 Sampler
 ::ActivateParameter( const std::string & parameterName )
 {
-  // TODO - check that parameter name is valid
-
-  m_ActiveParameters.insert( parameterName );
+  bool found = false;
+  unsigned int np = this->GetNumberOfParameters();
+  const std::vector< Parameter > & params = this->GetParameters();
+  assert(np == params.size());
+  for (unsigned int i = 0; (i < np) && (! found); ++i) {
+    const std::string & name = params[i].m_Name;
+    if (parameterName == name) {
+      this->m_ActiveParameterIndices[i] = true;
+      m_ActiveParameters.insert( parameterName );
+      found = true;
+    }
+  }
+  assert(found); // should return an error, but this is a void function :(
 }
 
 
@@ -79,7 +119,44 @@ void
 Sampler
 ::DeactivateParameter( const std::string & parameterName )
 {
-  m_ActiveParameters.erase( parameterName );
+  bool found = false;
+  unsigned int np = this->GetNumberOfParameters();
+  const std::vector< Parameter > & params = this->GetParameters();
+  assert(np == params.size());
+  for (unsigned int i = 0; (i < np) && (! found); ++i) {
+    const std::string & name = params[i].m_Name;
+    if (parameterName == name) {
+      this->m_ActiveParameterIndices[i] = false;
+      m_ActiveParameters.erase( parameterName );
+      found = true;
+    }
+  }
+  assert(found); // should return an error, but this is a void function :(
+
+}
+
+/**
+ * easiest way to activate a parameter
+ */
+void Sampler
+::ActivateParameter( unsigned int ParameterIndex ) {
+  assert(ParameterIndex < this->GetNumberOfParameters());
+  assert(this->GetNumberOfParameters() == this->GetParameters().size());
+  assert(this->GetNumberOfParameters() == this->m_ActiveParameterIndices.size());
+  this->m_ActiveParameterIndices[ParameterIndex] = true;
+  this->m_ActiveParameters.insert(this->GetParameters()[ParameterIndex].m_Name);
+}
+
+/**
+ * easiest way to deactivate a parameter
+ */
+void Sampler
+::DeactivateParameter( unsigned int ParameterIndex ) {
+  assert(ParameterIndex < this->GetNumberOfParameters());
+  assert(this->GetNumberOfParameters() == this->GetParameters().size());
+  assert(this->GetNumberOfParameters() == this->m_ActiveParameterIndices.size());
+  this->m_ActiveParameterIndices[ParameterIndex] = false;
+  this->m_ActiveParameters.erase(this->GetParameters()[ParameterIndex].m_Name);
 }
 
 
@@ -216,4 +293,19 @@ Sampler
   }
 }
 
+
+
+bool
+Sampler
+::GetOptimizeOnLikelihood() const {
+  return this->m_OptimizeOnLikelihood;
+}
+
+void
+Sampler
+::SetOptimizeOnLikelihood(bool val) {
+  this->m_OptimizeOnLikelihood = val;
+}
+
 } // end namespace madai
+

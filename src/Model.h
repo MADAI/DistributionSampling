@@ -22,8 +22,11 @@
 #include "Parameter.h"
 #include "parametermap.h"
 #include "random.h"
+#include "ScalarFunction.h"
 
+extern "C"{
 #include <gsl/gsl_randist.h>
+}
 
 #include <cfloat>
 #include <vector>
@@ -39,6 +42,7 @@ public:
     INVALID_ACTIVE_PARAMETERS,
     FILE_NOT_FOUND_ERROR,
     METHOD_NOT_IMPLEMENTED,
+    WRONG_VECTOR_LENGTH,
     OTHER_ERROR
   } ErrorType;
 
@@ -90,6 +94,85 @@ public:
                                      double & LikeNew,
                                      double & PriorNew) const = 0;
 
+  /**
+   * Expect vector of length GetNumberOfScalarOutputs().  If you never
+   * set this, all model scalar outputs are assumed to already have
+   * the observed value subtracted off.  That is, we use the zero
+   * vector as ObservedScalarValues.  To unset this value, pass a
+   * zero-length vector, which is interpreted as the zero vector.
+   */
+  virtual ErrorType SetObservedScalarValues(
+      const std::vector< double > & observedScalarValues);
+  /**
+   * Expects a t-by-t symmetric covariance matrix, flattened into a
+   * vector of length (t*t), where t = GetNumberOfScalarOutputs().
+   * This matrix represents the variances in the field measurements of
+   * the observed scalars.  Consequently, the "distance" in output
+   * space is based on the inverse of the covariance (the precision
+   * matrix).
+   *
+   *  If you never set this, assumes zero.  To calculate
+   *  log-likelyhood, either the observed values or the model outputs
+   *  MUST have a covariance value.
+   */
+  virtual ErrorType SetObservedScalarCovariance(
+      const std::vector< double > & observedScalarCovariance);
+  /**
+   * 1) Calculate all of the scalar values at this point in parameter
+   * space.
+   * 2) calculate log-liklihood, using
+   *     model scalars outputs
+   *     model scalar output covariance
+   *     observed scalar values
+   *     observed scalar covariance
+   * If not overridden, this function calls
+   * GetScalarOutputsAndCovariance() and uses observedScalarValues and
+   * and observedScalarCovariance to calculate LogLikelihood.  The
+   * log-liklihood is returned along with the output scalars.  If both
+   * covariances are present, they are summed.
+   *
+   * (scalars, scalarCovariance) = GetScalarOutputsAndCovariance(parameters)
+   * logPriorLikelihood = LogPriorLikelihoodFunction(parameters)
+   * covariance = observedScalarCovariance + scalarCovariance
+   * differences = scalars - observedScalars
+   * LogLikelihood = -0.5 * (differences^T . (covariance)^(-1) . differences);
+   * @return logPriorLikelihood + LogLikelihood
+   *
+   * If both covariances are zero, the matrix will not be invertable
+   * and the log-likelihood will be negative-infinity.
+   *
+   * if LogPriorLikelihoodFunction is NULL, it is assumed to be zero.
+   */
+  virtual ErrorType GetScalarOutputsAndLogLikelihood(
+      const std::vector< double > & parameters,
+      std::vector< double > & scalars,
+      double & logLikelihood);
+
+  /**
+   * Some models don't know the output values precisely, instead they
+   * produce a distribution of possuble output values, with a mean and
+   * covariance.  In that case, this function should be overridden by
+   * subclasses to return those means and that covariance matrix
+   * (flattened).
+   *
+   * If not overridden, this will simply call GetScalarOutputs() and
+   * return an empty vector for scalarCovariance, representing a zero
+   * matrix.
+   */
+  virtual ErrorType GetScalarOutputsAndCovariance(
+      const std::vector< double > & parameters,
+      std::vector< double > & scalars,
+      std::vector< double > & scalarCovariance);
+
+  /**
+   * If this function is not set, assume a constant prior.
+   * To unset this, call with NULL.
+   *
+   */
+  virtual ErrorType SetLogPriorLikelihoodFunction(
+    ScalarFunction * function);
+  ///////////////////////////////////////////////////////////////////////
+
   /** Set/get the gradient estimate step size. */
   void SetGradientEstimateStepSize( double stepSize );
   double GetGradientEstimateStepSize() const;
@@ -134,6 +217,24 @@ protected:
 
   /** Add a scalar output name. */
   void AddScalarOutputName( const std::string & name );
+
+
+  /**
+   * A GetNumberOfScalarOutputs()-length vector.
+   * if empty, assume zero vector.
+   */
+  std::vector< double > m_ObservedScalarValues;
+  /**
+   * A (GetNumberOfScalarOutputs x GetNumberOfScalarOutputs) matrix,
+   * flattened so that we can use a gsl_matrix_view to look at it.
+   * If empty, assume zero matrix.
+   */
+  std::vector< double > m_ObservedScalarCovariance;
+  /**
+   * A function to get the LogPriorLikelihood at any point in
+   * parameter space.
+   */
+  ScalarFunction * m_LogPriorLikelihoodFunction;
 
 }; // end Model
 

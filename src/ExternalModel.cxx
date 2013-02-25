@@ -22,14 +22,21 @@
 #include <cstdlib> // EXIT_FAILURE
 #include <fstream>
 #include <string> // std::string
+#include <cstring> // std::strcmp
+
+#ifdef __unix__
+#include <signal.h> // kill, SIGINT
+#endif // How do we do signals on non-POSIX systems?
 
 #include "ExternalModel.h"
 
+#define str_equal(s1,s2) (std::strcmp ((s1), (s2)) == 0)
 
 namespace madai {
 
 ExternalModel
-::ExternalModel()
+::ExternalModel() :
+  m_CovarianceMode(NO_COVARIANCE)
 {
   // Mark the question and answer fields in the ProcessPipe as NULL so
   // that if they are not NULL at destruction we will know to close them.
@@ -50,19 +57,23 @@ ExternalModel
     // Hopefully the external process will clean itself up after its
     // stdin is closed for reading.
   }
+  #ifdef __unix__
+  // If it doesn't clean itself up, we send a ctrl-c.
+  kill((pid_t)(m_Process.pid), SIGINT);
+  #endif
 }
 
 
-/**
- * Loads a configuration from a file.  The format of the file is
- * defined by this function.  We'll lock it down later.
- */
-ExternalModel::ErrorType
-ExternalModel
-::LoadConfigurationFile( const std::string fileName )
-{
-  return NO_ERROR;
-}
+// /**
+//  * Loads a configuration from a file.  The format of the file is
+//  * defined by this function.  We'll lock it down later.
+//  */
+// ExternalModel::ErrorType
+// ExternalModel
+// ::LoadConfigurationFile( const std::string fileName )
+// {
+//   return NO_ERROR;
+// }
 
 
 static void discard_line( std::FILE * fp ) {
@@ -137,12 +148,12 @@ ExternalModel
   // First argument is expected to be the executable
   argv[0] = new char[processPath.size()+1];
   strcpy( argv[0], processPath.c_str() );
-  std::cout << "argv[0]: " << argv[0] << std::endl;
+  //std::cout << "argv[0]: " << argv[0] << std::endl;
   for ( size_t i = 1; i <= arguments.size(); ++i ) {
     argv[i] = new char[arguments[i].size()+1];
     strcpy( argv[i], arguments[i].c_str() );
   }
-  argv[arguments.size()+1] = NULL;
+  argv[arguments.size()+1] = NULL; // NULL-terminated array
 
   // CreateProcessPipe returns EXIT_FAILURE on error, EXIT_SUCCESS otherwise
   int createError = CreateProcessPipe( &(m_Process), argv );
@@ -171,10 +182,31 @@ ExternalModel
   // allow comment lines to BEGIN the interactive process
 
   // Get the version of the protocol we are speaking
-  char versionString[1024];
+  char buffer[4096];
   int versionNumber = 1;
-  if ( 2 != std::fscanf( m_Process.answer, "%s %d", versionString, &versionNumber) ) {
-    std::cerr << "fscanf failure reading version number from external process" << std::endl;
+  if ( 2 != std::fscanf( m_Process.answer, "%4095s %d",
+                         buffer, &versionNumber) ) {
+    std::cerr
+      << "fscanf failure reading version number from external process\n";
+    return OTHER_ERROR;
+  }
+
+  if (! str_equal(buffer, "VERSION")) {
+    std::cerr << "failure reading version number from external process\n";
+    return OTHER_ERROR;
+  }
+  if (versionNumber != 1) {
+    std::cerr << "Unknown interface version\n";
+    return OTHER_ERROR;
+  }
+
+  if ( 1 != std::fscanf( m_Process.answer, "%4095s", buffer) ) {
+    std::cerr << "fscanf failure @ PARAMETERS\n";
+    return OTHER_ERROR;
+  }
+
+  if (! str_equal(buffer, "PARAMETERS")) {
+    std::cerr << "syntax error @ PARAMETERS\n";
     return OTHER_ERROR;
   }
 
@@ -184,14 +216,34 @@ ExternalModel
     std::cerr << "fscanf failure reading from the external process [1]\n";
     return OTHER_ERROR;
   }
-
+  assert(numberOfParameters > 0);
   eat_whitespace( m_Process.answer );
   for ( unsigned int i = 0; i < numberOfParameters; i++ ) {
-    char buffer[256];
-    std::fscanf(m_Process.answer, "%s", buffer);
-
+    if ( 1 != std::fscanf(m_Process.answer, "%4095s", buffer)) {
+      std::cerr << "fscanf failure @ parameterName\n";
+      return OTHER_ERROR;
+    }
     std::string parameterName( buffer );
-    this->AddParameter( parameterName );
+    double parameterMin, parameterMax;
+    if ( 1 != std::fscanf(m_Process.answer, "%lf", &parameterMin)) {
+      std::cerr << "fscanf failure @ parametermin\n";
+      return OTHER_ERROR;
+    }
+    if ( 1 != std::fscanf(m_Process.answer, "%lf", &parameterMax)) {
+      std::cerr << "fscanf failure @ parametermin\n";
+      return OTHER_ERROR;
+    }
+    this->AddParameter( parameterName, parameterMin, parameterMax );
+  }
+
+  if ( 1 != std::fscanf( m_Process.answer, "%4095s", buffer) ) {
+    std::cerr << "fscanf failure @ OUTPUTS\n";
+    return OTHER_ERROR;
+  }
+
+  if (! str_equal(buffer, "OUTPUTS")) {
+    std::cerr << "syntax error @ OUTPUTS\n";
+    return OTHER_ERROR;
   }
 
   // Get output names
@@ -203,11 +255,81 @@ ExternalModel
 
   eat_whitespace( m_Process.answer );
   for ( unsigned int i = 0; i < numberOfOutputs; i++ ) {
-    char buffer[256];
-    std::fscanf(m_Process.answer, "%s", buffer);
-
+    if ( 1 != std::fscanf(m_Process.answer, "%4095s", buffer)) {
+      std::cerr << "fscanf failure @ outputName.\n";
+      return OTHER_ERROR;
+    }
     std::string outputName( buffer );
     this->AddScalarOutputName( outputName );
+  }
+  eat_whitespace( m_Process.answer );
+
+  if ( 1 != std::fscanf( m_Process.answer, "%4095s", buffer) ) {
+    std::cerr << "fscanf failure @ NEXT\n";
+    return OTHER_ERROR;
+  }
+
+  // covariance;
+
+  if (str_equal(buffer, "COVARIANCE")) {
+    if ( 1 != std::fscanf( m_Process.answer, "%4095s", buffer) ) {
+      std::cerr << "fscanf failure @ TRIANGULAR_MATRIX\n";
+      return OTHER_ERROR;
+    }
+    if (str_equal(buffer, "FULL_MATRIX")) {
+			this->m_CovarianceMode = FULL_MATRIX_COVARIANCE;
+			unsigned int covarianceSize;
+			if ( 1 != std::fscanf( m_Process.answer, "%d", &covarianceSize ) ) {
+				std::cerr << "fscanf failure @ covarianceSize.\n";
+				return OTHER_ERROR;
+			}
+			if (covarianceSize != (numberOfOutputs * numberOfOutputs)) {
+				std::cerr << "full covariance matrix wrong size\n";
+				return OTHER_ERROR;
+			}
+		} else if (str_equal(buffer, "TRIANGULAR_MATRIX")) {
+			this->m_CovarianceMode = TRIANGULAR_COVARIANCE;
+			unsigned int covarianceSize;
+			if ( 1 != std::fscanf( m_Process.answer, "%d", &covarianceSize ) ) {
+				std::cerr << "fscanf failure @ covarianceSize.\n";
+				return OTHER_ERROR;
+			}
+			if (covarianceSize != ((numberOfOutputs * (numberOfOutputs + 1)) / 2)) {
+				std::cerr << "triangular covariance matrix wrong size\n";
+				return OTHER_ERROR;
+			}
+		} else {
+      std::cerr << "unsupported covariance matrix format\n";
+      return OTHER_ERROR;
+    }
+    if ( 1 != std::fscanf( m_Process.answer, "%4095s", buffer) ) {
+      std::cerr << "fscanf failure @ COVNEXT\n";
+      return OTHER_ERROR;
+    }
+  } else if (str_equal(buffer, "VARIANCE")) {
+    int varianceSize;
+    if ( 1 != std::fscanf( m_Process.answer, "%d", &varianceSize ) ) {
+      std::cerr << "fscanf failure @ varianceSize.\n";
+      return OTHER_ERROR;
+    }
+    if (varianceSize != numberOfOutputs) {
+      std::cerr << "wrong  variance size.\n";
+      return OTHER_ERROR;
+    }
+
+    this->m_CovarianceMode = DIAGONAL_MATRIX_COVARIANCE;
+
+    if ( 1 != std::fscanf( m_Process.answer, "%4095s", buffer) ) {
+      std::cerr << "fscanf failure @ VARNEXT\n";
+      return OTHER_ERROR;
+    }
+  } else {
+    this->m_CovarianceMode = NO_COVARIANCE;
+  }
+
+  if (! str_equal(buffer, "END_OF_HEADER")) {
+    std::cerr << "syntax error @ END_OF_HEADER\n";
+    return OTHER_ERROR;
   }
 
   // We are now ready to go!
@@ -235,46 +357,109 @@ ExternalModel
 }
 
 
+inline static bool read_double(std::FILE * fptr, double * d) {
+  return (1 == fscanf(fptr, "%lf%*c", d));
+}
+
+/**
+ * Get the scalar outputs from the model evaluated at x.
+ */
+ExternalModel::ErrorType
+ExternalModel
+::GetScalarOutputs( const std::vector< double > & parameters,
+                    std::vector< double > & scalars ) const {
+  std::vector< double > scalarCovariance;
+  return this->GetScalarOutputsAndCovariance(parameters, scalars, scalarCovariance);
+}
+
 /**
  * Get the scalar outputs from the model evaluated at x.  If an
  * error happens, the scalar output array will be left incomplete.
  */
 ExternalModel::ErrorType
 ExternalModel
-::GetScalarOutputs( const std::vector< double > & parameters,
-                    std::vector< double > & scalars ) const
+::GetScalarOutputsAndCovariance(
+      const std::vector< double > & parameters,
+      std::vector< double > & scalars,
+      std::vector< double > & scalarCovariance) const
 {
   if ( !this->IsReady() ) {
     return OTHER_ERROR;
   }
+  if (parameters.size() != this->GetNumberOfParameters())
+    return WRONG_VECTOR_LENGTH;
+
+  ProcessPipe & proc = (const_cast< ExternalModel * >(this))->m_Process;
 
   for ( std::vector< double >::const_iterator par_it = parameters.begin();
        par_it < parameters.end(); par_it++ ) {
     //FIXME to do: check against parameter range.
-    std::fprintf( m_Process.question,"%.17lf\n", *par_it );
+    std::fprintf( proc.question,"%.17lf\n", *par_it );
   }
-  std::fflush( m_Process.question );
+  std::fflush( proc.question );
+
+  size_t t = this->GetNumberOfScalarOutputs();
+  scalars.resize(t);
 
   for ( std::vector<double>::iterator ret_it = scalars.begin();
         ret_it < scalars.end(); ret_it++ ) {
-    if (1 != fscanf(m_Process.answer, "%lf%*c", &(*ret_it))) {
+    if (! read_double(proc.answer, &(*ret_it))) {
       std::cerr << "interprocess communication error\n";
       return OTHER_ERROR;
     }
   }
+  switch (this->m_CovarianceMode) {
 
+  case NO_COVARIANCE:
+    scalarCovariance.clear();
+    break;
+
+  case TRIANGULAR_COVARIANCE:
+    scalarCovariance.resize(t * t);
+    for (int i = 0; i < t; ++i) {
+      for (int j = i; j < t; ++j) {
+        double d;
+        if (! read_double(proc.answer, &d)) {
+          std::cerr << "interprocess communication error\n";
+          return OTHER_ERROR;
+        }
+        if (i==j)
+          scalarCovariance[i*(1+t)] = d;
+        else
+          scalarCovariance[i+(t*j)] = scalarCovariance[j+(t*i)] = d;
+      }
+    }
+    break;
+
+  case FULL_MATRIX_COVARIANCE:
+    scalarCovariance.resize(t * t);
+    for (int i = 0; i < t; ++i) {
+      for (int j = 0; j < t; ++j) {
+        double * d = &(scalarCovariance[i+(t*j)]);
+        if (! read_double(proc.answer, d)) {
+          std::cerr << "interprocess communication error\n";
+          return OTHER_ERROR;
+        }
+      }
+    }
+    break;
+
+  case DIAGONAL_MATRIX_COVARIANCE: /* VARIANCE only */
+    scalarCovariance.assign(t * t,0.0);
+    for (int i = 0; i < t; ++i) {
+      if (! read_double(proc.answer, &(scalarCovariance[i*(1+t)]))) {
+        std::cerr << "interprocess communication error\n";
+        return OTHER_ERROR;
+      }
+    }
+    break;
+
+  } // end switch
   return NO_ERROR;
 }
 
 
-// Not implemented yet.
-// Get the likelihood and prior at the point theta
-ExternalModel::ErrorType
-ExternalModel
-::GetLikeAndPrior( const std::vector< double > & parameters,
-                                double & Like, double & Prior ) const
-{
-  return OTHER_ERROR;
-}
 
 } // end namespace madai
+
+

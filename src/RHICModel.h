@@ -21,7 +21,8 @@
 
 #include "MultiModel.h"
 
-#include "EmuPlusPlus/EmuPlusPlus.h"
+//#include "EmuPlusPlus/EmuPlusPlus.h"
+#include "EmuPlusPlus.h"
 #include "ProcessPipe.h"
 
 

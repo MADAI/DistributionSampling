@@ -20,7 +20,7 @@
 #define __ProcessPipe_h__
 
 #ifndef __unix__
-#define __unix__
+#define __unix__ // THIS SEEMS BAD!
 #endif
 
 #ifdef __cplusplus

@@ -34,7 +34,8 @@ int main(int argc, char *argv[])
     new madai::RegularStepGradientDescentSampler( model );
   sampler->MinimizeOff(); // We want to maximize this function
 
-  madai::Trace *trace = new madai::Trace();
+  //madai::Trace *trace = new madai::Trace();
+  madai::Trace trace;
 
   // Set the step size.
   double stepSize = 20.0;
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
   std::vector< double > currentParameters;
   for (unsigned int i = 0; i < 50; i++) {
     currentParameters = sampler->GetCurrentParameters();
-    sampler->NextSample( trace );
+    sampler->NextSample( &trace );
   }
 
   double modelMeanX;
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  delete trace;
+  //delete trace;
 
   return EXIT_SUCCESS;
 }

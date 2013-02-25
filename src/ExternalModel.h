@@ -41,15 +41,23 @@ namespace madai {
  * parameters and produce model outputs. */
 class ExternalModel : public Model {
 public:
-  
+  typedef enum {
+    NO_COVARIANCE,
+    TRIANGULAR_COVARIANCE,
+    FULL_MATRIX_COVARIANCE,
+    DIAGONAL_MATRIX_COVARIANCE, /* VARIANCE only */
+  } CovarianceMode;
+
   ExternalModel();
   virtual ~ExternalModel();
 
-  /** 
+  /**
    * Loads a configuration from a file.  The format of the file is
    * defined by this function.  We'll lock it down later.
    */
-  virtual ErrorType LoadConfigurationFile( const std::string fileName );
+  virtual ErrorType LoadConfigurationFile( const std::string fileName ) {
+    return METHOD_NOT_IMPLEMENTED;
+  }
 
   /**
    * Start the external process and leave it open for queries.
@@ -62,22 +70,33 @@ public:
    */
   virtual ErrorType StopProcess();
 
-  /** 
+  /**
    * Get the scalar outputs from the model evaluated at x.  If an
    * error happens, the scalar output array will be left incomplete.
+   */
+  virtual ErrorType GetScalarOutputsAndCovariance(
+      const std::vector< double > & parameters,
+      std::vector< double > & scalars,
+      std::vector< double > & scalarCovariance) const;
+
+  /**
+   * Get the scalar outputs from the model evaluated at x.
    */
   virtual ErrorType GetScalarOutputs( const std::vector< double > & parameters,
                                       std::vector< double > & scalars ) const;
 
-  // Not implemented yet.
-  // Proposed function for interaction with the MCMC
-  virtual ErrorType GetLikeAndPrior( const std::vector< double > & parameters,
-                                     double & Like,
-                                     double & Prior ) const;
+  /**
+   * METHOD_NOT_IMPLEMENTED
+   */
+  virtual Model::ErrorType GetLikeAndPrior(
+    const std::vector<double>&, double&, double&) const {
+    return METHOD_NOT_IMPLEMENTED;
+  }
+
 
 private:
   ProcessPipe m_Process;
-
+  CovarianceMode m_CovarianceMode;
 }; // end ExternalModel
 
 } // end namespace madai

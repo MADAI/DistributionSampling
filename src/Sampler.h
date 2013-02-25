@@ -23,6 +23,7 @@
 
 #include "Model.h"
 #include "Trace.h"
+#include "Parameter.h"
 
 namespace madai {
 
@@ -44,10 +45,33 @@ public:
   Sampler( const Model *model );
   virtual ~Sampler();
   const Model * GetModel() const;
+
+  /**
+   * deprecated
+   */
   std::set< std::string > GetActiveParameters();
 
+  /**
+   * deprecated
+   */
   void ActivateParameter( const std::string & parameterName );
+  /**
+   * deprecated
+   */
   void DeactivateParameter( const std::string & parameterName );
+
+  /**
+   * easiest way to activate a parameter
+   */
+  void ActivateParameter( unsigned int ParameterIndex );
+  /**
+   * easiest way to deactivate a parameter
+   */
+  void DeactivateParameter( unsigned int ParameterIndex );
+
+  virtual unsigned int GetNumberOfParameters() const;
+
+  virtual const std::vector< Parameter > & GetParameters() const;
 
   /** Get the number of active parameters. */
   unsigned int GetNumberOfActiveParameters() const;
@@ -101,7 +125,34 @@ public:
   /** Get the current parameter values. */
   const std::vector< double > & GetCurrentParameters() const;
 
+
+  /**
+   * If true, make a distribution proportional to exp(LogPosteriorLikelihood)
+   * If false, make a distribution proportional to m_OutputScalarToOptimize
+   *
+   * LogPosteriorLikelihood comes from the
+   * m_Model->GetScalarOutputsAndLogLikelihood() function;
+   */
+  virtual bool GetOptimizeOnLikelihood() const;
+  /**
+   * If true, make a distribution proportional to exp(LogPosteriorLikelihood)
+   * If false, make a distribution proportional to m_OutputScalarToOptimize
+   *
+   * LogPosteriorLikelihood comes from the
+   * m_Model->GetScalarOutputsAndLogLikelihood() function;
+   */
+  virtual void SetOptimizeOnLikelihood(bool val);
+
 protected:
+  Sampler() {}; // intentionally hidden
+  unsigned int GetOutputScalarIndex( const std::string & scalarName ) const;
+  unsigned int GetParameterIndex( const std::string & parameterName ) const;
+
+
+  /**
+   * WHAT IS THIS?
+   */
+  bool IsLikeAndPrior() const;
 
   const Model *           m_Model;
   std::set< std::string > m_ActiveParameters;
@@ -109,17 +160,23 @@ protected:
   std::string             m_OutputScalarToOptimize;
   unsigned int            m_OutputScalarToOptimizeIndex;
 
-  Sampler() {}; // intentionally hidden
+  /**
+   * If true, make a distribution proportional to exp(LogPosteriorLikelihood)
+   * If false, make a distribution proportional to m_OutputScalarToOptimize
+   *
+   * LogPosteriorLikelihood comes from the
+   * m_Model->GetScalarOutputsAndLogLikelihood() function;
+   */
+  bool                    m_OptimizeOnLikelihood;
+
 
   /** Subclasses that need to reset internal state when a parameter
   value has been changed outside the operation of the optimization
   algorithm should override this method. */
   virtual void ParameterSetExternally() {};
 
-  unsigned int GetOutputScalarIndex( const std::string & scalarName ) const;
-  unsigned int GetParameterIndex( const std::string & parameterName ) const;
+  std::vector< bool > m_ActiveParameterIndices;
 
-  bool IsLikeAndPrior() const;
 
 }; // end Sampler
 

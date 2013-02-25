@@ -237,8 +237,10 @@ RHICModel
     std::cerr << "Emulator is being loaded from: " << m_DirectoryName << + "/Emulator.statfile"
               << "using the EmuPlusPlus.h emulator handler" << std::endl;
     m_Emulator= new ::emulator( m_DirectoryName + "/Emulator.statefile" );
-    std::cerr << "Emulator loaded. Test (number of params): _" << m_Emulator->number_params << "_" << std::endl;
-    if ( m_Emulator->number_params != this->m_NumberOfParameters ) {
+
+    int NumberOfParameters = this->m_Emulator->getNumberOfParameters();
+    std::cerr << "Emulator loaded. Test (number of params): _" << NumberOfParameters << "_" << std::endl;
+    if ( NumberOfParameters != this->m_NumberOfParameters ) {
       std::cerr << "Emulator uses different number of parameters than read in. LoadDistributions Error" << std::endl;
       this->m_StateFlag = ERROR;
       return OTHER_ERROR;

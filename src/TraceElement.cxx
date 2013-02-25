@@ -24,9 +24,11 @@ namespace madai {
 
 TraceElement
 ::TraceElement( const std::vector< double > & parameter_values,
-                const std::vector< double > & output_values ) :
+                const std::vector< double > & output_values,
+                double LogLikelihood = 0.0) :
   m_ParameterValues( parameter_values ),
-  m_OutputValues( output_values )
+  m_OutputValues( output_values ),
+  m_LogLikelihood( LogLikelihood )
 {
 }
 
@@ -34,7 +36,8 @@ TraceElement
 TraceElement
 ::TraceElement( const std::vector< double > & parameter_values) :
   m_ParameterValues( parameter_values ),
-  m_Used( true )
+  m_Used( true ),
+  m_LogLikelihood( 0.0 )
 {
 }
 
@@ -46,15 +49,17 @@ TraceElement
   m_ParameterValues.clear();
   m_OutputValues.clear();
   m_Comments.clear();
+  m_LogLikelihood= 0.0;
   m_Used = false;
   m_InTrace = false;
 }
 
 
 TraceElement
-::TraceElement()
+::TraceElement() :
+  m_Used(false),
+  m_LogLikelihood(0.0)
 {
-  m_Used=false;
 }
 
 

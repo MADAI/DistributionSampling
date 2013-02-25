@@ -54,12 +54,12 @@ int main(int argc, char ** argv) {
 
   madai::SimpleMetropolisHastingsSampler simple_mcmc(&externalModel);
 
-  std::vector< madai::Parameter > const * parameters
-    = &(externalModel.GetParameters());
+  std::vector< madai::Parameter > const & parameters
+    = externalModel.GetParameters();
 
-  for (unsigned int i = 0; i < parameters->size(); i++) {
-    simple_mcmc.ActivateParameter((*parameters)[i].m_Name);
-  }
+  // for (unsigned int i = 0; i < parameters->size(); i++) {
+  //   simple_mcmc.ActivateParameter(parameters[i].m_Name);
+  // } // should be unnecesary
 
   simple_mcmc.SetOutputScalarToOptimize
     ( externalModel.GetScalarOutputNames().at(0) );
