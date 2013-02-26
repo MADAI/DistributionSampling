@@ -24,8 +24,15 @@
 
 namespace madai {
 
+/**
+ * Class ScalarFunction.
+ *
+ * Represents a single scalar evaluated at a point in parameter space.
+ *
+ * Meant to be used to represent prior-log-likelihood.
+ */
 class ScalarFunction {
- public:
+public:
   typedef enum {
     NO_ERROR = 0,
     INVALID_PARAMETER_INDEX,
@@ -33,23 +40,41 @@ class ScalarFunction {
     OTHER_ERROR
   } ErrorType;
 
-  ScalarFunction();
+	ScalarFunction() : m_ScalarOutputName("output") { }
   virtual ~ScalarFunction();
 
   /** Get the number of parameters. */
-  virtual unsigned int GetNumberOfParameters() const = 0;
+  virtual unsigned int GetNumberOfParameters() const
+	{
+		return this->m_Parameters.size();
+	}
+
   /** Get names of the parameters. */
-  virtual const std::vector< Parameter > & GetParameters() const = 0;
+  virtual const std::vector< Parameter > & GetParameters() const
+	{
+		return this->m_Parameters;
+	}
+
   /** Get the valid range for the parameter at parameterIndex. */
-  virtual ErrorType GetRange(
-    unsigned int parameterIndex, double range[2] ) const = 0;
+  virtual ErrorType GetRange(unsigned int parameterIndex, double range[2] ) {
+		if (parameterIndex >= this->m_Parameters.size())
+			return INVALID_PARAMETER_INDEX;
+		range[0] = this->m_Parameters[parameterIndex].m_MinimumPossibleValue;
+		range[0] = this->m_Parameters[parameterIndex].m_MaximumPossibleValue;
+		return NO_ERROR;
+	}
 
   /** Get the name of the scalar output. */
-  virtual const std::string & GetScalarOutputName() const = 0;
+  virtual const std::string & GetScalarOutputName() const {
+		return this->m_ScalarOutputName; // default name
+	};
 
   /** evaluate the function at this point. */
   virtual ErrorType GetOutput( const std::vector< double > & parameters,
-                               double  &  output) = 0;
+                               double & output) = 0; // must be overridden
+protected:
+  std::vector< Parameter > m_Parameters;
+	std::string m_ScalarOutputName;
 };
 } // end namespace madai
 #endif /* __ScalarFunction_h__ */
