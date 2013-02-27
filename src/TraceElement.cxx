@@ -59,7 +59,6 @@ TraceElement
   m_OutputValues.clear();
   m_Comments.clear();
   m_LogLikelihood= 0.0;
-  m_InTrace = false;
 }
 
 
@@ -67,16 +66,6 @@ TraceElement
 ::TraceElement() :
   m_LogLikelihood(0.0)
 {
-}
-
-
-void
-TraceElement
-::VizTrace()
-{
-  if ( !m_InTrace ) {
-    m_InTrace=true;
-  }
 }
 
 } // end namespace madai

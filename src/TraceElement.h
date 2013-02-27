@@ -43,13 +43,10 @@ public:
 
   TraceElement();
   void Reset();
-  void Print();
-  void VizTrace();
 
   std::vector< double > m_ParameterValues;
   std::vector< double > m_OutputValues;
   double                m_LogLikelihood;
-  bool                  m_InTrace;
 
   /** Comments may be used to store human-readable comments *or*
   record changes to state, such as changing an optimizer type,
