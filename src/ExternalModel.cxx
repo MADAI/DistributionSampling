@@ -62,18 +62,6 @@ ExternalModel
 }
 
 
-// /**
-//  * Loads a configuration from a file.  The format of the file is
-//  * defined by this function.  We'll lock it down later.
-//  */
-// ExternalModel::ErrorType
-// ExternalModel
-// ::LoadConfigurationFile( const std::string fileName )
-// {
-//   return NO_ERROR;
-// }
-
-
 static void discard_line( std::FILE * fp ) {
   static int buffersize = 1024;
   char buffer[buffersize];
@@ -146,7 +134,7 @@ ExternalModel
   // First argument is expected to be the executable
   argv[0] = new char[processPath.size()+1];
   strcpy( argv[0], processPath.c_str() );
-  //std::cout << "argv[0]: " << argv[0] << std::endl;
+
   for ( size_t i = 1; i <= arguments.size(); ++i ) {
     argv[i] = new char[arguments[i].size()+1];
     strcpy( argv[i], arguments[i].c_str() );
@@ -275,28 +263,28 @@ ExternalModel
       return OTHER_ERROR;
     }
     if (str_equal(buffer, "FULL_MATRIX")) {
-			this->m_CovarianceMode = FULL_MATRIX_COVARIANCE;
-			unsigned int covarianceSize;
-			if ( 1 != std::fscanf( m_Process.answer, "%d", &covarianceSize ) ) {
-				std::cerr << "fscanf failure @ covarianceSize.\n";
-				return OTHER_ERROR;
-			}
-			if (covarianceSize != (numberOfOutputs * numberOfOutputs)) {
-				std::cerr << "full covariance matrix wrong size\n";
-				return OTHER_ERROR;
-			}
-		} else if (str_equal(buffer, "TRIANGULAR_MATRIX")) {
-			this->m_CovarianceMode = TRIANGULAR_COVARIANCE;
-			unsigned int covarianceSize;
-			if ( 1 != std::fscanf( m_Process.answer, "%d", &covarianceSize ) ) {
-				std::cerr << "fscanf failure @ covarianceSize.\n";
-				return OTHER_ERROR;
-			}
-			if (covarianceSize != ((numberOfOutputs * (numberOfOutputs + 1)) / 2)) {
-				std::cerr << "triangular covariance matrix wrong size\n";
-				return OTHER_ERROR;
-			}
-		} else {
+      this->m_CovarianceMode = FULL_MATRIX_COVARIANCE;
+      unsigned int covarianceSize;
+      if ( 1 != std::fscanf( m_Process.answer, "%d", &covarianceSize ) ) {
+        std::cerr << "fscanf failure @ covarianceSize.\n";
+        return OTHER_ERROR;
+      }
+      if (covarianceSize != (numberOfOutputs * numberOfOutputs)) {
+        std::cerr << "full covariance matrix wrong size\n";
+        return OTHER_ERROR;
+      }
+    } else if (str_equal(buffer, "TRIANGULAR_MATRIX")) {
+      this->m_CovarianceMode = TRIANGULAR_COVARIANCE;
+      unsigned int covarianceSize;
+      if ( 1 != std::fscanf( m_Process.answer, "%d", &covarianceSize ) ) {
+        std::cerr << "fscanf failure @ covarianceSize.\n";
+        return OTHER_ERROR;
+      }
+      if (covarianceSize != ((numberOfOutputs * (numberOfOutputs + 1)) / 2)) {
+        std::cerr << "triangular covariance matrix wrong size\n";
+        return OTHER_ERROR;
+      }
+    } else {
       std::cerr << "unsupported covariance matrix format\n";
       return OTHER_ERROR;
     }
@@ -361,6 +349,8 @@ inline static bool read_double(std::FILE * fptr, double * d) {
 
 /**
  * Get the scalar outputs from the model evaluated at x.
+ *
+ * \todo Consider using this as default implementation in Model
  */
 ExternalModel::ErrorType
 ExternalModel
