@@ -43,14 +43,23 @@ namespace madai {
 class Trace {
 public:
   Trace();
-  Trace( const std::string info_dir, 
-         const std::string configuration );
   virtual ~Trace();
 
-  /** Add an entry from parameter and output values. */
+  /** Add an entry from parameter, output values, and log-likelihood. */
+  void Add( const std::vector< double > & parameterValues,
+            const std::vector< double > & outputValues,
+            double logLikelihood );
+
+  /** Add an entry from parameter and output values.
+   *
+   * Sets log-likelihood to 0.0. */
   void Add( const std::vector< double > & parameterValues,
             const std::vector< double > & outputValues );
 
+  /** Add an entry from parameter values alone.
+   *
+   * \todo It seems like you should always have to record an output
+   * from a model. */
   void Add( const std::vector< double > & parameterValues );
 
   /** Get the number of entries in the Trace. */
@@ -77,17 +86,8 @@ public:
   void WriteOut( const std::vector< Parameter > & params );
   void MakeTrace();
 
-  std::string  m_TraceDirectory;
-  int          m_Writeout;
-  int          m_MaxIterations;
-  int          m_WriteOutCounter;
-  int          m_CurrentIteration;
-  bool         m_AppendTrace;
-  parameterMap m_TraceParameterMap;
-
 protected:
   std::vector< TraceElement > m_TraceElements;
-  std::vector< std::string >  m_ParameterNames;
 
 }; // class Trace
 
