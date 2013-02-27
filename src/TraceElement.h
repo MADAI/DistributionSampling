@@ -35,9 +35,12 @@ public:
   TraceElement(const std::vector< double > & parameterValues,
                const std::vector< double > & OutputValues,
                double LogLikelihood);
+
   TraceElement(const std::vector< double > & parameterValues,
                const std::vector< double > & OutputValues );
+
   TraceElement(const std::vector< double > & parameterValues);
+
   TraceElement();
   void Reset();
   void Print();
@@ -47,7 +50,6 @@ public:
   std::vector< double > m_OutputValues;
   double                m_LogLikelihood;
   bool                  m_InTrace;
-  bool                  m_Used;
 
   /** Comments may be used to store human-readable comments *or*
   record changes to state, such as changing an optimizer type,
