@@ -97,12 +97,13 @@ public:
   /**
    * Expect vector of length GetNumberOfScalarOutputs().  If you never
    * set this, all model scalar outputs are assumed to already have
-   * the observed value subtracted off.  That is, we use the zero
+   * the observed value subtracted off.  By default, we use the zero
    * vector as ObservedScalarValues.  To unset this value, pass a
    * zero-length vector, which is interpreted as the zero vector.
    */
   virtual ErrorType SetObservedScalarValues(
-      const std::vector< double > & observedScalarValues);
+    const std::vector< double > & observedScalarValues);
+
   /**
    * Expects a t-by-t symmetric covariance matrix, flattened into a
    * vector of length (t*t), where t = GetNumberOfScalarOutputs().
@@ -112,23 +113,25 @@ public:
    * matrix).
    *
    *  If you never set this, assumes zero.  To calculate
-   *  log-likelyhood, either the observed values or the model outputs
-   *  MUST have a covariance value.
+   *  log-likelihood, either the observed value, the model outputs, or
+   *  both MUST have a covariance value.
    */
   virtual ErrorType SetObservedScalarCovariance(
-      const std::vector< double > & observedScalarCovariance);
+    const std::vector< double > & observedScalarCovariance);
+
   /**
    * 1) Calculate all of the scalar values at this point in parameter
    * space.
-   * 2) calculate log-liklihood, using
+   * 2) calculate log-likelihood, using
    *     model scalars outputs
    *     model scalar output covariance
    *     observed scalar values
    *     observed scalar covariance
+   *
    * If not overridden, this function calls
    * GetScalarOutputsAndCovariance() and uses observedScalarValues and
    * and observedScalarCovariance to calculate LogLikelihood.  The
-   * log-liklihood is returned along with the output scalars.  If both
+   * log-likelihood is returned along with the output scalars.  If both
    * covariances are present, they are summed.
    *
    * (scalars, scalarCovariance) = GetScalarOutputsAndCovariance(parameters)
@@ -141,37 +144,35 @@ public:
    * If both covariances are zero, the matrix will not be invertable
    * and the log-likelihood will be negative-infinity.
    *
-   * if LogPriorLikelihoodFunction is NULL, it is assumed to be zero.
+   * If LogPriorLikelihoodFunction is NULL, it is assumed to be zero.
    */
   virtual ErrorType GetScalarOutputsAndLogLikelihood(
-      const std::vector< double > & parameters,
-      std::vector< double > & scalars,
-      double & logLikelihood);
+    const std::vector< double > & parameters,
+    std::vector< double > & scalars,
+    double & logLikelihood);
 
   /**
    * Some models don't know the output values precisely, instead they
-   * produce a distribution of possuble output values, with a mean and
+   * produce a distribution of possible output values, with a mean and
    * covariance.  In that case, this function should be overridden by
    * subclasses to return those means and that covariance matrix
-   * (flattened).
+   * (flattened into a vector).
    *
    * If not overridden, this will simply call GetScalarOutputs() and
    * return an empty vector for scalarCovariance, representing a zero
    * matrix.
    */
   virtual ErrorType GetScalarOutputsAndCovariance(
-      const std::vector< double > & parameters,
-      std::vector< double > & scalars,
-      std::vector< double > & scalarCovariance);
+    const std::vector< double > & parameters,
+    std::vector< double > & scalars,
+    std::vector< double > & scalarCovariance);
 
   /**
    * If this function is not set, assume a constant prior.
-   * To unset this, call with NULL.
+   * To unset this, call with NULL as the argument.
    *
    */
-  virtual ErrorType SetLogPriorLikelihoodFunction(
-    ScalarFunction * function);
-  ///////////////////////////////////////////////////////////////////////
+  virtual ErrorType SetLogPriorLikelihoodFunction( ScalarFunction * function );
 
   /** Set/get the gradient estimate step size. */
   void SetGradientEstimateStepSize( double stepSize );
