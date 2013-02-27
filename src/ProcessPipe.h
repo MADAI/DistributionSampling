@@ -19,10 +19,6 @@
 #ifndef __ProcessPipe_h__
 #define __ProcessPipe_h__
 
-#ifndef __unix__
-#define __unix__ // THIS SEEMS BAD!
-#endif
-
 #ifdef __cplusplus
 #include <cstdio>
 namespace madai {
