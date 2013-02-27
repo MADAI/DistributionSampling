@@ -46,31 +46,25 @@ public:
   virtual ~Sampler();
   const Model * GetModel() const;
 
-  /**
-   * deprecated
-   */
   std::set< std::string > GetActiveParameters();
 
-  /**
-   * deprecated
-   */
+  /** Activate a parameter by name. */
   void ActivateParameter( const std::string & parameterName );
-  /**
-   * deprecated
-   */
+
+  /** Activate a parameter by index. */
+  void ActivateParameter( unsigned int parameterIndex );
+
+  /** Deactivate a parameter by name. */
   void DeactivateParameter( const std::string & parameterName );
 
-  /**
-   * easiest way to activate a parameter
-   */
-  void ActivateParameter( unsigned int ParameterIndex );
-  /**
-   * easiest way to deactivate a parameter
-   */
-  void DeactivateParameter( unsigned int ParameterIndex );
+  /** Deactivate a parameter by index. */
+  void DeactivateParameter( unsigned int parameterIndex );
 
+  /** Get the number of parameters. */
   virtual unsigned int GetNumberOfParameters() const;
 
+  /** Get the list of parameters. These are not the parameter values
+   * but instead a description of the parameter. */
   virtual const std::vector< Parameter > & GetParameters() const;
 
   /** Get the number of active parameters. */
@@ -80,51 +74,19 @@ public:
   virtual ErrorType SetParameterValue( const std::string & parameterName,
                                        double value );
 
-  /** Sets the output scalar value to optimize. */
+  /** Sets the output scalar value to optimize by name. */
   ErrorType SetOutputScalarToOptimize( const std::string & scalarName );
-  std::string GetOutputScalarToOptimize();
+  ErrorType SetOutputScalarToOptimize( unsigned int index );
 
-  ErrorType SetOutputScalarToOptimizeIndex(unsigned int idx);
+  std::string GetOutputScalarToOptimizeName();
   unsigned int GetOutputScalarToOptimizeIndex() const;
 
   /** Compute the next set of parameters and the output scalar values,
    * and save them in the trace file. */
-
   virtual void NextSample(Trace *trace) = 0;
-  //{  /* suggested structure for this function */
-  //std::vector< double > scalarOutputs;
-  //std::vector< double > gradient;
-  //int err;
-  //err = m_Model->GetScalarAndGradientOutputs(
-  // m_CurrentParameters,
-  // m_ActiveParameters,
-  // scalarOutputs,
-  // m_OutputScalarToOptimizeIndex,
-  // gradient);
-  //    if (err) {
-  //      // handle the error
-  //    }
-  //m_Trace->RecordData(m_CurrentParameters, scalarOutputs);
-  //
-  // // Based on:
-  // //    scalarOutputs[m_OutputScalarToOptimizeIndex]
-  // //    m_ActiveParameters
-  // //    m_Trace
-  // //    gradient
-  // //    m_CurrentParameters
-  // // Then we need to update
-  // //    m_CurrentParameters
-  //}
-
-  // scalars;
-  // m_Model->GetScalarOutputs( currentPosition, scalars, gradient );
-  // m_Trace->RecordData( scalars )
-
-  // update position
 
   /** Get the current parameter values. */
   const std::vector< double > & GetCurrentParameters() const;
-
 
   /**
    * If true, make a distribution proportional to exp(LogPosteriorLikelihood)
@@ -134,6 +96,7 @@ public:
    * m_Model->GetScalarOutputsAndLogLikelihood() function;
    */
   virtual bool GetOptimizeOnLikelihood() const;
+
   /**
    * If true, make a distribution proportional to exp(LogPosteriorLikelihood)
    * If false, make a distribution proportional to m_OutputScalarToOptimize

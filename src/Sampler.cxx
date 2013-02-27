@@ -77,24 +77,6 @@ Sampler
 }
 
 
-unsigned int
-Sampler
-::GetNumberOfParameters() const {
-  if (this->GetModel() != NULL)
-    return this->GetModel()->GetNumberOfParameters();
-  else
-    return 0;
-}
-
-const std::vector< Parameter > &
-Sampler
-::GetParameters() const {
-  assert (this->GetModel() != NULL);
-  return this->GetModel()->GetParameters();
-}
-
-
-
 void
 Sampler
 ::ActivateParameter( const std::string & parameterName )
@@ -112,6 +94,17 @@ Sampler
     }
   }
   assert(found); // should return an error, but this is a void function :(
+}
+
+
+void
+Sampler
+::ActivateParameter( unsigned int parameterIndex ) {
+  assert(parameterIndex < this->GetNumberOfParameters());
+  assert(this->GetNumberOfParameters() == this->GetParameters().size());
+  assert(this->GetNumberOfParameters() == this->m_ActiveParameterIndices.size());
+  this->m_ActiveParameterIndices[parameterIndex] = true;
+  this->m_ActiveParameters.insert(this->GetParameters()[parameterIndex].m_Name);
 }
 
 
@@ -135,28 +128,33 @@ Sampler
 
 }
 
-/**
- * easiest way to activate a parameter
- */
-void Sampler
-::ActivateParameter( unsigned int ParameterIndex ) {
-  assert(ParameterIndex < this->GetNumberOfParameters());
+
+void
+Sampler
+::DeactivateParameter( unsigned int parameterIndex ) {
+  assert(parameterIndex < this->GetNumberOfParameters());
   assert(this->GetNumberOfParameters() == this->GetParameters().size());
   assert(this->GetNumberOfParameters() == this->m_ActiveParameterIndices.size());
-  this->m_ActiveParameterIndices[ParameterIndex] = true;
-  this->m_ActiveParameters.insert(this->GetParameters()[ParameterIndex].m_Name);
+  this->m_ActiveParameterIndices[parameterIndex] = false;
+  this->m_ActiveParameters.erase(this->GetParameters()[parameterIndex].m_Name);
 }
 
-/**
- * easiest way to deactivate a parameter
- */
-void Sampler
-::DeactivateParameter( unsigned int ParameterIndex ) {
-  assert(ParameterIndex < this->GetNumberOfParameters());
-  assert(this->GetNumberOfParameters() == this->GetParameters().size());
-  assert(this->GetNumberOfParameters() == this->m_ActiveParameterIndices.size());
-  this->m_ActiveParameterIndices[ParameterIndex] = false;
-  this->m_ActiveParameters.erase(this->GetParameters()[ParameterIndex].m_Name);
+
+unsigned int
+Sampler
+::GetNumberOfParameters() const {
+  if (this->GetModel() != NULL)
+    return this->GetModel()->GetNumberOfParameters();
+  else
+    return 0;
+}
+
+
+const std::vector< Parameter > &
+Sampler
+::GetParameters() const {
+  assert (this->GetModel() != NULL);
+  return this->GetModel()->GetParameters();
 }
 
 
@@ -203,7 +201,7 @@ Sampler
 
 Sampler::ErrorType
 Sampler
-::SetOutputScalarToOptimizeIndex( unsigned int idx )
+::SetOutputScalarToOptimize( unsigned int idx )
 {
   if (idx >= m_Model->GetNumberOfScalarOutputs())
     return INVALID_PARAMETER_INDEX_ERROR;
@@ -215,7 +213,7 @@ Sampler
 
 std::string
 Sampler
-::GetOutputScalarToOptimize()
+::GetOutputScalarToOptimizeName()
 {
   return this->m_OutputScalarToOptimize;
 }
