@@ -29,7 +29,7 @@ Trace
 
 unsigned int
 Trace
-::Length() const
+::GetSize() const
 {
   return this->m_TraceElements.size();
 }
@@ -144,7 +144,7 @@ void write_vector( std::ostream& o, std::vector< T > const & v, char delim ) {
 void
 Trace
 ::Write( std::ostream & out ) const {
-  unsigned int N = this->Length();
+  unsigned int N = this->GetSize();
   for ( unsigned int i = 0; i < N; i++ ) {
     write_vector( out, (*this)[i].m_ParameterValues, ',' );
     out << ',';

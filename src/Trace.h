@@ -47,10 +47,15 @@ public:
          const std::string configuration );
   virtual ~Trace() {}
 
-  unsigned int Length() const;
+  /** Add an entry from parameter and output values. */
   void Add( const std::vector< double > & parameterValues,
-            const std::vector< double > & OutputValues );
+            const std::vector< double > & outputValues );
+
   void Add( const std::vector< double > & parameterValues );
+
+  /** Get the number of entries in the Trace. */
+  unsigned int GetSize() const;
+
   TraceElement & operator[]( unsigned int index );
   const TraceElement & operator[]( unsigned int index ) const;
 
