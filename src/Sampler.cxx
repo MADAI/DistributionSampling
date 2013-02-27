@@ -82,17 +82,13 @@ Sampler
 ::ActivateParameter( const std::string & parameterName )
 {
   bool found = false;
-  unsigned int np = this->GetNumberOfParameters();
-  const std::vector< Parameter > & params = this->GetParameters();
-  assert(np == params.size());
-  for (unsigned int i = 0; (i < np) && (! found); ++i) {
-    const std::string & name = params[i].m_Name;
-    if (parameterName == name) {
-      this->m_ActiveParameterIndices[i] = true;
-      m_ActiveParameters.insert( parameterName );
-      found = true;
-    }
+  unsigned int parameterIndex = this->GetParameterIndex( parameterName );
+  if ( parameterIndex != static_cast< unsigned int >(-1) ) {
+    m_ActiveParameterIndices[parameterIndex] = true;
+    m_ActiveParameters.insert( parameterName );
+    found = true;
   }
+
   assert(found); // should return an error, but this is a void function :(
 }
 
@@ -102,9 +98,9 @@ Sampler
 ::ActivateParameter( unsigned int parameterIndex ) {
   assert(parameterIndex < this->GetNumberOfParameters());
   assert(this->GetNumberOfParameters() == this->GetParameters().size());
-  assert(this->GetNumberOfParameters() == this->m_ActiveParameterIndices.size());
-  this->m_ActiveParameterIndices[parameterIndex] = true;
-  this->m_ActiveParameters.insert(this->GetParameters()[parameterIndex].m_Name);
+  assert(this->GetNumberOfParameters() == m_ActiveParameterIndices.size());
+  m_ActiveParameterIndices[parameterIndex] = true;
+  m_ActiveParameters.insert(this->GetParameters()[parameterIndex].m_Name);
 }
 
 
@@ -113,19 +109,14 @@ Sampler
 ::DeactivateParameter( const std::string & parameterName )
 {
   bool found = false;
-  unsigned int np = this->GetNumberOfParameters();
-  const std::vector< Parameter > & params = this->GetParameters();
-  assert(np == params.size());
-  for (unsigned int i = 0; (i < np) && (! found); ++i) {
-    const std::string & name = params[i].m_Name;
-    if (parameterName == name) {
-      this->m_ActiveParameterIndices[i] = false;
-      m_ActiveParameters.erase( parameterName );
-      found = true;
-    }
+  unsigned int parameterIndex = this->GetParameterIndex( parameterName );
+  if ( parameterIndex != static_cast< unsigned int >(-1) ) {
+    m_ActiveParameterIndices[ parameterIndex ] = false;
+    m_ActiveParameters.erase( parameterName );
+    found = true;
   }
-  assert(found); // should return an error, but this is a void function :(
 
+  assert(found); // should return an error, but this is a void function :(
 }
 
 
@@ -134,9 +125,9 @@ Sampler
 ::DeactivateParameter( unsigned int parameterIndex ) {
   assert(parameterIndex < this->GetNumberOfParameters());
   assert(this->GetNumberOfParameters() == this->GetParameters().size());
-  assert(this->GetNumberOfParameters() == this->m_ActiveParameterIndices.size());
-  this->m_ActiveParameterIndices[parameterIndex] = false;
-  this->m_ActiveParameters.erase(this->GetParameters()[parameterIndex].m_Name);
+  assert(this->GetNumberOfParameters() == m_ActiveParameterIndices.size());
+  m_ActiveParameterIndices[parameterIndex] = false;
+  m_ActiveParameters.erase(this->GetParameters()[parameterIndex].m_Name);
 }
 
 
