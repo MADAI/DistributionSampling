@@ -45,7 +45,6 @@ MarkovChainMonteCarloSampler
   m_Quiet         = parameter::getB( m_LocalParameterMap, "QUIET", false );
   m_AppendTrace   = parameter::getB( m_LocalParameterMap, "APPEND_TRACE", false );
   m_RescaledTrace = parameter::getB( m_LocalParameterMap, "RESCALED_TRACE", false );
-  m_CreateTrace   = parameter::getB( m_LocalParameterMap, "CREATE_TRACE", true );
   m_LogProposal   = parameter::getB( m_LocalParameterMap, "LOGPROPOSAL", true );
   m_LogPrior      = parameter::getB( m_LocalParameterMap, "LOGPRIOR", true );
   m_LogLike       = parameter::getB( m_LocalParameterMap, "LOGLIKE", true );
@@ -93,9 +92,6 @@ MarkovChainMonteCarloSampler
   if ( m_IterationNumber == 1) {
     m_BestLikelihood=m_LikelihoodCurrent;
     m_BestParameterSet = m_InitialTheta;
-    if ( m_CreateTrace ) {
-      m_VizCount = parameter::getI( m_LocalParameterMap, "VIZ_COUNT", floor(ThetaOutsList->m_MaxIterations/200) );
-    }
   }
 
   Temp_Theta = this->TakeStep( m_CurrentParameters, m_ScaleNew );
@@ -202,10 +198,7 @@ MarkovChainMonteCarloSampler
     m_ParameterValues[k] = ( m_CurrentParameters[k] - range[0] ) / ( range[1] - range[0] );
   }
 
-  if ( ( m_IterationNumber > m_BurnIn ) && ( ( m_IterationNumber + 1 ) % ( ThetaOutsList->m_Writeout ) == 0 ) ) {
-    std::cout << "Writing out." << std::endl;
-    ThetaOutsList->WriteOut( m_Model->GetParameters() );
-  }
+  ThetaOutsList->PrintDataToFile( m_Model->GetParameters() );
 }
 
 std::vector<double>

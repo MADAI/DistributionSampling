@@ -87,7 +87,6 @@ public:
   double              m_ScaleNew;
   double              m_ScaleCurrent;
   int                 m_AcceptCount;
-  int                 m_VizCount;
   int                 m_IterationNumber;
 
   // Taking a step and calculating the probability of the step

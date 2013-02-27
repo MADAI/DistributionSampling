@@ -83,8 +83,7 @@ public:
                   const std::vector< Parameter > & params,
                   const std::vector< std::string > & outputs) const;
   void PrintDataToFile( const std::vector< Parameter > & params );
-  void WriteOut( const std::vector< Parameter > & params );
-  void MakeTrace();
+  void LoadTrace();
 
 protected:
   std::vector< TraceElement > m_TraceElements;

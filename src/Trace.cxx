@@ -173,6 +173,7 @@ void
 Trace
 ::PrintDataToFile( const std::vector< Parameter > & params )
 {
+#if 0
   std::cout << "Printing data to file." << std::endl;
   std::ofstream outputfile;
   std::stringstream ss;
@@ -208,26 +209,15 @@ Trace
     std::cout << "Error: Couldn't open the output file" << std::endl;
     exit( 1 );
   }
+#endif
 }
 
 
 void
 Trace
-::WriteOut( const std::vector< Parameter > & parameters )
+::LoadTrace()
 {
-  this->PrintDataToFile( parameters );
-  for ( int i = 0; i < m_Writeout; i++ ) {
-    m_TraceElements[i].Reset();
-  }
-  m_WriteOutCounter++;
-  m_CurrentIteration = 0;
-}
-
-
-void
-Trace
-::MakeTrace()
-{
+#if 0
   std::stringstream ss;
   ss << "cat ";
 
@@ -241,6 +231,7 @@ Trace
   std::system( command.c_str() );
 
   ss.str( string() );
+#endif
 }
 
 } // end namespace madai
