@@ -76,7 +76,6 @@ public:
   void PrintDataToFile( const std::vector< Parameter > & params );
   void WriteOut( const std::vector< Parameter > & params );
   void MakeTrace();
-  std::vector< std::string > GetParNames();
 
   std::string  m_TraceDirectory;
   int          m_Writeout;

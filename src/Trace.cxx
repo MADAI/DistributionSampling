@@ -20,12 +20,6 @@
 
 namespace madai {
 
-std::vector< std::string >
-Trace
-::GetParNames(){
-  return this->m_ParameterNames;
-}
-
 
 unsigned int
 Trace
