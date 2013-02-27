@@ -42,10 +42,10 @@ namespace madai {
  * replay it. */
 class Trace {
 public:
-  Trace() {};
-  Trace( const std::string info_dir,
+  Trace();
+  Trace( const std::string info_dir, 
          const std::string configuration );
-  virtual ~Trace() {}
+  virtual ~Trace();
 
   /** Add an entry from parameter and output values. */
   void Add( const std::vector< double > & parameterValues,

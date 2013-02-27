@@ -21,54 +21,9 @@
 namespace madai {
 
 
-unsigned int
 Trace
-::GetSize() const
+::Trace()
 {
-  return this->m_TraceElements.size();
-}
-
-
-void
-Trace
-::Add( const std::vector< double > & parameterValues,
-       const std::vector< double > & OutputValues )
-{
-  this->m_TraceElements.push_back(
-    TraceElement( parameterValues,OutputValues, LogLikelihood ) );
-}
-
-
-void
-Trace
-::Add( const std::vector< double > & parameterValues )
-{
-  if ( m_CurrentIteration >= m_Writeout ) {
-    std::cerr << "Error: Trace class out of bounds (Greater than WRITEOUT).\n\n";
-    exit( 1 );
-  } else {
-    for ( int i = 0; i < parameterValues.size(); i++ ) {
-      m_TraceElements[m_CurrentIteration].m_ParameterValues.push_back( parameterValues[i] );
-    }
-  m_TraceElements[m_CurrentIteration].m_Used = true;
-  m_CurrentIteration++;
-  }
-}
-
-
-TraceElement &
-Trace
-::operator[]( unsigned int idx )
-{
-  return this->m_TraceElements[idx];
-}
-
-
-const TraceElement &
-Trace
-::operator[]( unsigned int idx ) const
-{
-  return this->m_TraceElements[idx];
 }
 
 
@@ -116,10 +71,69 @@ Trace
 
   m_WriteOutCounter = 0;
   m_CurrentIteration = 0;
+#if 0
   m_TraceElements.reserve( m_Writeout + 1 );
   for ( int i = 0; i < m_Writeout; i++ ) {
     m_TraceElements.push_back( TraceElement() );
   }
+#endif
+}
+
+
+Trace
+::~Trace()
+{
+}
+
+
+void
+Trace
+::Add( const std::vector< double > & parameterValues,
+       const std::vector< double > & OutputValues )
+{
+  this->m_TraceElements.push_back(
+    TraceElement( parameterValues,OutputValues ) );
+}
+
+
+void
+Trace
+::Add( const std::vector< double > & parameterValues )
+{
+  if ( m_CurrentIteration >= m_Writeout ) {
+    std::cerr << "Error: Trace class out of bounds (Greater than WRITEOUT).\n\n";
+    exit( 1 );
+  } else {
+    for ( int i = 0; i < parameterValues.size(); i++ ) {
+      m_TraceElements[m_CurrentIteration].m_ParameterValues.push_back( parameterValues[i] );
+    }
+  m_TraceElements[m_CurrentIteration].m_Used = true;
+  m_CurrentIteration++;
+  }
+}
+
+
+unsigned int
+Trace
+::GetSize() const
+{
+  return this->m_TraceElements.size();
+}
+
+
+TraceElement &
+Trace
+::operator[]( unsigned int idx )
+{
+  return this->m_TraceElements[idx];
+}
+
+
+const TraceElement &
+Trace
+::operator[]( unsigned int idx ) const
+{
+  return this->m_TraceElements[idx];
 }
 
 
