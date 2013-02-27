@@ -80,7 +80,8 @@ public:
       std::vector< double > & scalarCovariance) const;
 
   /**
-   * Get the scalar outputs from the model evaluated at x.
+   * Get the scalar outputs from the model evaluated at a position in
+   * the parameter space.
    */
   virtual ErrorType GetScalarOutputs( const std::vector< double > & parameters,
                                       std::vector< double > & scalars ) const;
@@ -96,7 +97,9 @@ public:
 
 private:
   ProcessPipe m_Process;
+
   CovarianceMode m_CovarianceMode;
+
 }; // end ExternalModel
 
 } // end namespace madai
