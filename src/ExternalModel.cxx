@@ -24,9 +24,9 @@
 #include <string> // std::string
 #include <cstring> // std::strcmp
 
-#ifdef __unix__
+/** \todo Add macro defined at configure time that states whether
+* signal.h is available to the compiler. */
 #include <signal.h> // kill, SIGINT
-#endif // How do we do signals on non-POSIX systems?
 
 #include "ExternalModel.h"
 
@@ -57,10 +57,8 @@ ExternalModel
     // Hopefully the external process will clean itself up after its
     // stdin is closed for reading.
   }
-  #ifdef __unix__
   // If it doesn't clean itself up, we send a ctrl-c.
   kill((pid_t)(m_Process.pid), SIGINT);
-  #endif
 }
 
 
