@@ -43,18 +43,21 @@ namespace madai {
 class Trace {
 public:
   Trace() {};
-  Trace( const std::string info_dir, 
+  Trace( const std::string info_dir,
          const std::string configuration );
   virtual ~Trace() {}
 
   unsigned int length() const;
+  void add( const std::vector< double > & parameterValues,
+            const std::vector< double > & OutputValues,
+            double LogLikelihood );
   void add( const std::vector< double > & parameterValues,
             const std::vector< double > & OutputValues );
   void add( const std::vector< double > & parameterValues );
   TraceElement & operator[]( unsigned int idx );
   const TraceElement & operator[]( unsigned int idx ) const;
 
-  void write( std::ostream & o ) const;  
+  void write( std::ostream & o ) const;
 
   /*
     Assert:
@@ -62,7 +65,7 @@ public:
         this->m_TraceElements[i].m_ParameterValues.size() == params.size()
         this->m_TraceElements[i].m_OutputValues.size() == outputs.size()
   */
-  void writeHead( std::ostream & o, 
+  void writeHead( std::ostream & o,
                   const std::vector< Parameter > & params ) const;
   void writeHead( std::ostream & o,
                   const std::vector< Parameter > & params,
@@ -71,7 +74,7 @@ public:
   void WriteOut( const std::vector< Parameter > & params );
   void MakeTrace();
   std::vector< std::string > GetParNames();
-    
+
   std::string  m_TraceDirectory;
   int          m_Writeout;
   int          m_MaxIterations;

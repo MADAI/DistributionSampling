@@ -18,7 +18,7 @@
 
 #include "ProcessPipe.h"
 
-#ifdef __unix__
+#if defined( __unix__ ) || defined( __APPLE__ )
 
 #include <unistd.h> /* fork, pipe, dup2, close, execvp */
 #include <stdio.h>  /* ANSI C standard calls (FILE*) */
@@ -114,7 +114,7 @@ int CreateProcessPipe( ProcessPipe * pp, char * const * argv ) {
 
 #else
 
-#error "Either _WIN32 or __unix_ should be defined.\
+#error "Either __APPLE__ or __unix__ should be defined.\
 	What kind of system is this?"
 
 #endif

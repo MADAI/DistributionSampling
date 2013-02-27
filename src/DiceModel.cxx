@@ -77,6 +77,7 @@ DiceModel
     std::string addon = ss.str();
     m_Denom *= m_Sides;
     this->AddParameter( par_name+addon, 0.5, ( double( m_Sides ) + 0.5 ) );
+    this->AddScalarOutputName( par_name+addon+"-Output" );
   }
   std::cerr << m_Denom << std::endl;
   
