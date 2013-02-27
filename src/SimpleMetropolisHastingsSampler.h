@@ -44,11 +44,11 @@ protected:
 
   unsigned int m_NumberOfOutputs;
 
-  std::vector< double > m_lastStep_x;
+  std::vector< double > m_LastStepParameters;
 
-  std::vector< double > m_lastStep_y;
+  std::vector< double > m_LastStepOutputs;
 
-  double m_lastStep_logLikelihood;
+  double m_LastStepLogLikelihood;
 
 }; // end class SimpleMetropolisHastingsSampler
 

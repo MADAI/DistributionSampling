@@ -31,23 +31,22 @@ SimpleMetropolisHastingsSampler
   m_StepSize( 1.0e-2 ),
   m_NumberOfParameters( model->GetNumberOfParameters() ),
   m_NumberOfOutputs( model->GetNumberOfScalarOutputs() ),
-  m_lastStep_x( model->GetNumberOfParameters() ),
-  m_lastStep_y( model->GetNumberOfScalarOutputs() ),
-  m_lastStep_logLikelihood (-1e30)
+  m_LastStepParameters( model->GetNumberOfParameters() ),
+  m_LastStepOutputs( model->GetNumberOfScalarOutputs() ),
+  m_LastStepLogLikelihood (-1e30)
 {
   assert(model != NULL);
-  for ( unsigned int i = 0; i < this->m_NumberOfParameters; i++ ) {
+  for ( unsigned int i = 0; i < m_NumberOfParameters; i++ ) {
     double range[2];
-    this->m_Model->GetRange( i, range );
-    this->m_lastStep_x[i] = 0.5 * (range[0] + range[1]);
+    m_Model->GetRange( i, range );
+    m_LastStepParameters[i] = 0.5 * (range[0] + range[1]);
     //FIXME should we have a random starting point?
   }
-  Model * m = const_cast< Model * >(this->m_Model);
-  // m->GetScalarOutputs( this->m_lastStep_x, this->m_lastStep_y );
+  Model * m = const_cast< Model * >(m_Model);
   m->GetScalarOutputsAndLogLikelihood(
-      this->m_lastStep_x,
-      this->m_lastStep_y,
-      this->m_lastStep_logLikelihood); // initial starting point.
+    m_LastStepParameters,
+    m_LastStepOutputs,
+    m_LastStepLogLikelihood); // initial starting point.
 }
 
 
@@ -60,7 +59,7 @@ SimpleMetropolisHastingsSampler
 void SimpleMetropolisHastingsSampler
 ::SetStepSize( double stepSize )
 {
-  this->m_StepSize = stepSize;
+  m_StepSize = stepSize;
 }
 
 
@@ -108,29 +107,29 @@ SimpleMetropolisHastingsSampler
 ::NextSample( Trace *trace )
 {
   // xc is x_candidate
-  Model * m = const_cast< Model * >(this->m_Model);
+  Model * m = const_cast< Model * >(m_Model);
 
-  std::vector< double > xc( this->m_NumberOfParameters, 0.0 );
-  std::vector< double > yc( this->m_NumberOfOutputs, 0.0 );
+  std::vector< double > xc( m_NumberOfParameters, 0.0 );
+  std::vector< double > yc( m_NumberOfOutputs, 0.0 );
 
   unsigned int output_index = this->GetOutputScalarToOptimizeIndex();
 
   for ( unsigned int giveup = 1048576; giveup != 0; --giveup ) {
-    random_inside_hypersphere(this->m_StepSize, &(xc[0]),
-                              this->m_NumberOfParameters);
-    for(unsigned int i = 0; i < this->m_NumberOfParameters; i++)
-      xc[i] += this->m_lastStep_x[i];
+    random_inside_hypersphere(m_StepSize, &(xc[0]),
+                              m_NumberOfParameters);
+    for(unsigned int i = 0; i < m_NumberOfParameters; i++)
+      xc[i] += m_LastStepParameters[i];
 
-    if (this->m_OptimizeOnLikelihood) {
+    if (m_OptimizeOnLikelihood) {
       double ll;
       m->GetScalarOutputsAndLogLikelihood(xc,yc,ll);
-      double delta_logLikelihood = ll - this->m_lastStep_logLikelihood;
+      double delta_logLikelihood = ll - m_LastStepLogLikelihood;
       if ((delta_logLikelihood > 0) ||
           (exp(delta_logLikelihood) > uniform_rand()))
         {
-          this->m_lastStep_logLikelihood = ll;
-          this->m_lastStep_x = xc;
-          this->m_lastStep_y = yc;
+          m_LastStepLogLikelihood = ll;
+          m_LastStepParameters = xc;
+          m_LastStepOutputs = yc;
           trace->add(xc, yc, ll);
           return;
           //FIXME do somthing
@@ -138,14 +137,14 @@ SimpleMetropolisHastingsSampler
     } else {
       double ll;
       m->GetScalarOutputsAndLogLikelihood(xc,yc,ll);
-      //this->m_Model->GetScalarOutputs(xc,yx);
-      double f_of_x = this->m_lastStep_y[output_index];
+      //m_Model->GetScalarOutputs(xc,yx);
+      double f_of_x = m_LastStepOutputs[output_index];
       double f_of_xc = yc[output_index];
       if ((f_of_xc > f_of_x) || (f_of_xc > (f_of_x * uniform_rand())))
         {
-          this->m_lastStep_logLikelihood = ll;
-          this->m_lastStep_x = xc;
-          this->m_lastStep_y = yc;
+          m_LastStepLogLikelihood = ll;
+          m_LastStepParameters = xc;
+          m_LastStepOutputs = yc;
           trace->add(xc, yc, ll);
           return;
           //FIXME do somthing ???
