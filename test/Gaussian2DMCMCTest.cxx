@@ -70,7 +70,7 @@ int main( int argc, char ** argv ) {
   
   madai::Trace trace( info_dir, "default" );
   if( run.m_BurnIn == 0 ) {
-    trace.add( run.m_InitialTheta );
+    trace.Add( run.m_InitialTheta );
   }
   
   for( int j = 0; j < g2d_model.GetNumberOfParameters(); j++ )

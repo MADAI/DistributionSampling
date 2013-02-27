@@ -150,7 +150,7 @@ SimpleMetropolisHastingsSampler
         m_LastStepLogLikelihood = ll;
         m_LastStepParameters = xc;
         m_LastStepOutputs = yc;
-        trace->add(xc, yc, ll);
+        trace->Add(xc, yc, ll);
         return;
       }
     } else {
@@ -164,7 +164,7 @@ SimpleMetropolisHastingsSampler
         m_LastStepLogLikelihood = ll;
         m_LastStepParameters = xc;
         m_LastStepOutputs = yc;
-        trace->add(xc, yc, ll);
+        trace->Add(xc, yc, ll);
         return;
       }
     }

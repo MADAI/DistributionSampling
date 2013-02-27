@@ -57,7 +57,7 @@ RegularStepGradientDescentSampler
     m_Model->GetScalarAndGradientOutputs( m_CurrentParameters, activeParameters,
                                           scalars, 0, gradient );
 
-  trace->add( m_CurrentParameters, scalars );
+  trace->Add( m_CurrentParameters, scalars );
 
   // Update the current parameters to the new position
   double direction = 1.0;

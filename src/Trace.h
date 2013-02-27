@@ -47,17 +47,14 @@ public:
          const std::string configuration );
   virtual ~Trace() {}
 
-  unsigned int length() const;
-  void add( const std::vector< double > & parameterValues,
-            const std::vector< double > & OutputValues,
-            double LogLikelihood );
-  void add( const std::vector< double > & parameterValues,
+  unsigned int Length() const;
+  void Add( const std::vector< double > & parameterValues,
             const std::vector< double > & OutputValues );
-  void add( const std::vector< double > & parameterValues );
-  TraceElement & operator[]( unsigned int idx );
-  const TraceElement & operator[]( unsigned int idx ) const;
+  void Add( const std::vector< double > & parameterValues );
+  TraceElement & operator[]( unsigned int index );
+  const TraceElement & operator[]( unsigned int index ) const;
 
-  void write( std::ostream & o ) const;
+  void Write( std::ostream & o ) const;  
 
   /*
     Assert:
@@ -65,9 +62,10 @@ public:
         this->m_TraceElements[i].m_ParameterValues.size() == params.size()
         this->m_TraceElements[i].m_OutputValues.size() == outputs.size()
   */
-  void writeHead( std::ostream & o,
+  void WriteHead( std::ostream & o, 
                   const std::vector< Parameter > & params ) const;
-  void writeHead( std::ostream & o,
+
+  void WriteHead( std::ostream & o,
                   const std::vector< Parameter > & params,
                   const std::vector< std::string > & outputs) const;
   void PrintDataToFile( const std::vector< Parameter > & params );

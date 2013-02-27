@@ -194,7 +194,7 @@ MarkovChainMonteCarloSampler
     TElement.push_back( m_ProposalNew );
     TElement.push_back( alpha );
   }
-  ThetaOutsList->add( TElement );
+  ThetaOutsList->Add( TElement );
 
   double range[2];
   for ( int k = 0; k < m_Model->GetNumberOfParameters(); k++ ) { //These ParamValus are used for the density plots

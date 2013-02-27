@@ -29,7 +29,7 @@ Trace
 
 unsigned int
 Trace
-::length() const
+::Length() const
 {
   return this->m_TraceElements.size();
 }
@@ -37,9 +37,8 @@ Trace
 
 void
 Trace
-::add( const std::vector< double > & parameterValues,
-       const std::vector< double > & OutputValues,
-       double LogLikelihood)
+::Add( const std::vector< double > & parameterValues,
+       const std::vector< double > & OutputValues )
 {
   this->m_TraceElements.push_back(
     TraceElement( parameterValues,OutputValues, LogLikelihood ) );
@@ -48,17 +47,7 @@ Trace
 
 void
 Trace
-::add( const std::vector< double > & parameterValues,
-       const std::vector< double > & OutputValues)
-{
-  this->m_TraceElements.push_back(
-    TraceElement( parameterValues,OutputValues, 0.0 ) );
-}
-
-
-void
-Trace
-::add( const std::vector< double > & parameterValues )
+::Add( const std::vector< double > & parameterValues )
 {
   if ( m_CurrentIteration >= m_Writeout ) {
     std::cerr << "Error: Trace class out of bounds (Greater than WRITEOUT).\n\n";
@@ -154,8 +143,8 @@ void write_vector( std::ostream& o, std::vector< T > const & v, char delim ) {
 
 void
 Trace
-::write( std::ostream & out ) const {
-  unsigned int N = this->length();
+::Write( std::ostream & out ) const {
+  unsigned int N = this->Length();
   for ( unsigned int i = 0; i < N; i++ ) {
     write_vector( out, (*this)[i].m_ParameterValues, ',' );
     out << ',';
@@ -181,7 +170,7 @@ Trace
   */
 void
 Trace
-::writeHead( std::ostream & o,
+::WriteHead( std::ostream & o,
              const std::vector< Parameter > & params,
              const std::vector< std::string > & outputs) const
 {
@@ -208,7 +197,7 @@ Trace
 
 void
 Trace
-::writeHead( std::ostream & o,
+::WriteHead( std::ostream & o,
              const std::vector< Parameter > & params ) const
 {
   if ( !params.empty() ) {
