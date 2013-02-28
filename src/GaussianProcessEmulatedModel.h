@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __GPEmulatedModel_h__
-#define __GPEmulatedModel_h__
+#ifndef __GaussianProcessEmulatedModel_h__
+#define __GaussianProcessEmulatedModel_h__
 
 #include "Model.h"
 #include "EmuPlusPlus.h"
@@ -28,21 +28,21 @@
 
 namespace madai {
 
-/** \class GPEmulatedModel
+/** \class GaussianProcessEmulatedModel
  *
  * Interface to EmuPlusPlus.h */
-class GPEmulatedModel : public Model {
+class GaussianProcessEmulatedModel : public Model {
   public:
 
   /**
    * constructor
    */
-  GPEmulatedModel();
+  GaussianProcessEmulatedModel();
 
   /**
    * destructor
    */
-  virtual ~GPEmulatedModel();
+  virtual ~GaussianProcessEmulatedModel();
 
   /**
    * Loads a model emulator from a file.
@@ -91,8 +91,8 @@ private:
   /** pointer to emulator object in libEmuPlusPlus */
   emulator * m_emulator;
 
-}; // end GPEmulatedModel
+}; // end GaussianProcessEmulatedModel
 
 } // end namespace madai
 
-#endif // __GPEmulatedModel_h__
+#endif // __GaussianProcessEmulatedModel_h__
