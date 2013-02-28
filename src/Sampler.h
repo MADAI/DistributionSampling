@@ -121,10 +121,20 @@ protected:
    */
   bool IsLikeAndPrior() const;
 
+  /** The Model from which this Sampler takes samples. */
   const Model *           m_Model;
+
+  /** Set of strings naming the active parameters. */
   std::set< std::string > m_ActiveParameters;
+
+  /** Stores the point in parameter space. This will change when
+   *  NextSample() is called. */
   std::vector< double >   m_CurrentParameters;
+
+  /** The name of the output scalar to optimize. */
   std::string             m_OutputScalarToOptimize;
+
+  /** The index of the output scalar to optimize. */
   unsigned int            m_OutputScalarToOptimizeIndex;
 
   /**
@@ -135,7 +145,6 @@ protected:
    * m_Model->GetScalarOutputsAndLogLikelihood() function;
    */
   bool                    m_OptimizeOnLikelihood;
-
 
   /** Subclasses that need to reset internal state when a parameter
   value has been changed outside the operation of the optimization
