@@ -52,14 +52,6 @@ public:
   virtual ~ExternalModel();
 
   /**
-   * Loads a configuration from a file.  The format of the file is
-   * defined by this function.  We'll lock it down later.
-   */
-  virtual ErrorType LoadConfigurationFile( const std::string fileName ) {
-    return METHOD_NOT_IMPLEMENTED;
-  }
-
-  /**
    * Start the external process and leave it open for queries.
    */
   virtual ErrorType StartProcess( const std::string & processPath,
