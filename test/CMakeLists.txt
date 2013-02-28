@@ -39,3 +39,7 @@ add_test( NumericalGradientEstimationTest NumericalGradientEstimationTest )
 add_executable( RegularStepGradientDescentOptimizerTest RegularStepGradientDescentOptimizerTest.cxx )
 target_link_libraries( RegularStepGradientDescentOptimizerTest ${LIBRARIES} )
 add_test( RegularStepGradientDescentOptimizerTest RegularStepGradientDescentOptimizerTest )
+
+add_executable( TraceTest TraceTest.cxx )
+target_link_libraries( TraceTest ${LIBRARIES} )
+add_test( TraceTest TraceTest )
