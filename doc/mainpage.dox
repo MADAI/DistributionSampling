@@ -2,4 +2,31 @@
 \mainpage MADAI Distribution Sampling Library
 
 \todo write a summary of what this library does.
+
+Impotant classes:
+
+madai::Parameter — a Parameter represents a single variable which can
+take on any floating-point value within some range.  It has a name, a
+minimum, and a maximum.  A "parameter space" is described by some
+vector of Parameters.
+
+madai::ScalarFunction — (an abstract class) Represents a single
+scalar evaluated at a point in parameter space.
+
+madai::Model — (an abstract class) A model is a function that is
+evaluated at a point in its parameter space.  It must return a vector
+of scalar outputs.  It can return a covariance matrix representing the
+uncertainty of those scalar outputs.  It can optionally return a
+log-likelihood value representing the likelihood of that set of
+output, given a set of field observations to compare against.
+
+madai::Trace — a set of points in some Model's parameter space.  At
+each point, the set of corresponding scalar outputs and the
+log-likelihood is also recorded.
+
+madai::Sampler — (an abstract class) A sampler takes in a Model and
+returns a Trace.  In normal useage, a sampler will return a set of
+points whose density in parameter space corresponds to
+exp(log-likelihood).
+
 */
