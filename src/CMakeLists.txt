@@ -1,4 +1,5 @@
 set( SRC_FILES
+  GaussianProcessEmulatedModel.cxx
   CosmoLikelihoodDistribution.cxx
   CosmoModel.cxx
   CosmoPriorDistribution.cxx
