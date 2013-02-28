@@ -8,7 +8,7 @@ set( SRC_FILES
   ExternalModel.cxx
   Gaussian2DModel.cxx
   LikelihoodDistribution.cxx
-  MCMCRun.cxx
+  MarkovChainMonteCarloSampler.cxx
   Model.cxx
   MultiModel.cxx
   Sampler.cxx

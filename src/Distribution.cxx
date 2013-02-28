@@ -18,7 +18,7 @@
 
 #include "MultiModel.h"
 
-#include "MCMCRun.h"
+#include "MarkovChainMonteCarloSampler.h"
 
 
 namespace madai {

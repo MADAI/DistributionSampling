@@ -22,7 +22,7 @@
 #include <string>
 #include "time.h"
 
-#include "MCMCRun.h"
+#include "MarkovChainMonteCarloSampler.h"
 #include "DiceModel.h"
 
 int main(int argc, char ** argv){
@@ -42,7 +42,7 @@ int main(int argc, char ** argv){
     return EXIT_FAILURE;
   }
   
-  madai::MCMCRun run(&d_model, info_dir);
+  madai::MarkovChainMonteCarloSampler run(&d_model, info_dir);
   std::vector< madai::Parameter > const * parameters = &(d_model.GetParameters());
   for(int i = 0; i < parameters->size(); i++)
     run.ActivateParameter( (*parameters)[i].m_Name );

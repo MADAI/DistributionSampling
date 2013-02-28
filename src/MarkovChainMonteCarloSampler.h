@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __MCMCRun_h__
-#define __MCMCRun_h__
+#ifndef __MarkovChainMonteCarloSampler_h__
+#define __MarkovChainMonteCarloSampler_h__
 
 #include <map>
 #include <string>
@@ -41,15 +41,16 @@ class Trace;
 class TraceElement;
 
 
-/* \class MCMCRun
+/* \class MarkovChainMonteCarloSampler
  *
- * MCMCRun loads in parameters for running a monte carlo analysis and provides a method for
- * taking steps in parameter space, defined by said parameters.
+ * MarkovChainMonteCarloSampler loads in parameters for running a
+ * monte carlo analysis and provides a method for taking steps in
+ * parameter space, defined by said parameters.
  */
-class MCMCRun : public Sampler {
+class MarkovChainMonteCarloSampler : public Sampler {
 public:
-  MCMCRun(const Model *in_model, const std::string info_dir);
-  ~MCMCRun();
+  MarkovChainMonteCarloSampler(const Model *in_model, const std::string info_dir);
+  ~MarkovChainMonteCarloSampler();
 
   void NextSample( Trace *trace );
 
@@ -114,4 +115,4 @@ public:
 
 } // end namespace madai
 
-#endif // __MCMCRun_h__
+#endif // __MarkovChainMonteCarloSampler_h__

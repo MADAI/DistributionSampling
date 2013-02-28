@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-#include "MCMCRun.h"
+#include "MarkovChainMonteCarloSampler.h"
 #include "Gaussian2DModel.h"
 
 /***
@@ -62,7 +62,7 @@ int main( int argc, char ** argv ) {
   }
   std::string info_dir( argv[1] );
   madai::Gaussian2DModel g2d_model;
-  madai::MCMCRun run( &g2d_model, info_dir );
+  madai::MarkovChainMonteCarloSampler run( &g2d_model, info_dir );
   
   std::vector< madai::Parameter > const * parameters = &( g2d_model.GetParameters() );
   for( int i = 0; i < parameters->size(); i++ )

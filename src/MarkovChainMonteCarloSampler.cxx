@@ -16,14 +16,14 @@
  *
  *=========================================================================*/
 
-#include "MCMCRun.h"
+#include "MarkovChainMonteCarloSampler.h"
 
 
 namespace madai {
 
 
-MCMCRun
-::MCMCRun( const Model *in_model,
+MarkovChainMonteCarloSampler
+::MarkovChainMonteCarloSampler( const Model *in_model,
            const std::string info_dir ) :
   Sampler( in_model )
 {
@@ -72,13 +72,13 @@ MCMCRun
   m_ScaleCurrent = (rand() / double(RAND_MAX));
 }
 
-MCMCRun
-::~MCMCRun()
+MarkovChainMonteCarloSampler
+::~MarkovChainMonteCarloSampler()
 {
 }
 
 void
-MCMCRun
+MarkovChainMonteCarloSampler
 ::NextSample( Trace *ThetaOutsList )
 {
   double alpha, LOGBF;
@@ -209,7 +209,7 @@ MCMCRun
 }
 
 std::vector<double>
-MCMCRun
+MarkovChainMonteCarloSampler
 ::GetRandomTheta0(int seed)
 { //This creates random theta 0s
   //srand(seed);
@@ -228,7 +228,7 @@ MCMCRun
 }
 
 std::vector<double>
-MCMCRun
+MarkovChainMonteCarloSampler
 ::GetTheta0FromFile()
 {
   parameterMap parmap;
@@ -269,7 +269,7 @@ MCMCRun
 
 // Load parameters for taking and evaluating steps
 void
-MCMCRun
+MarkovChainMonteCarloSampler
 ::LoadStepParameters()
 {
   m_SepMap = parameter::getB( m_LocalParameterMap, "PROPOSAL_PARAMETER_MAP", false );
@@ -304,7 +304,7 @@ MCMCRun
 
 // Take a step in parameter space
 std::vector< double >
-MCMCRun
+MarkovChainMonteCarloSampler
 ::TakeStep( std::vector< double >& current, double& scale )
 {
   std::vector< double > proposed = current;
@@ -348,7 +348,7 @@ MCMCRun
 
 // Calculate the probability of taking the step
 double
-MCMCRun
+MarkovChainMonteCarloSampler
 ::EvaluateProposal( std::vector< double > Theta1,
                     std::vector< double > Theta2,
                     double scale)

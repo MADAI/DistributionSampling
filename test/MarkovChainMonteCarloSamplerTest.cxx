@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "MCMCRun.h"
+#include "MarkovChainMonteCarloSampler.h"
 #include "TestModel.h"
 
 /***
@@ -57,8 +57,8 @@ int main(int argc, char ** argv){
     std::cout << "Usage: " << argv[0] << " info_dir_path comparison_trace\n\n"
       "where info_dir_path is the path to the "
       "directory containing all of the configuration "
-      "files needed for the MCMCRun class and comparison_trace holds the "
-      "expected output from the MCMCRun.\n\n";
+      "files needed for the MarkovChainMonteCarloSampler class and comparison_trace holds the "
+      "expected output from the MarkovChainMonteCarloSampler.\n\n";
     return EXIT_FAILURE;
   }
   std::string info_dir(argv[1]);
@@ -71,7 +71,7 @@ int main(int argc, char ** argv){
 
   std::string comparison_trace( argv[2] );
   
-  madai::MCMCRun run(&t_model, info_dir);
+  madai::MarkovChainMonteCarloSampler run(&t_model, info_dir);
   
   std::vector< madai::Parameter > const * parameters = &(t_model.GetParameters());
   for(int i = 0; i < parameters->size(); i++)
@@ -133,7 +133,7 @@ int main(int argc, char ** argv){
           std::cerr << "MCMC Core Test Failure: 0th iteration error. Initial theta needs to be the same" << std::endl;
           return EXIT_FAILURE;
         } else {
-          std::cerr << "MCMC Core Test Failure: Something must have gone wrong in taking a step in MCMCRun.cxx" << std::endl;
+          std::cerr << "MCMC Core Test Failure: Something must have gone wrong in taking a step in MarkovChainMonteCarloSampler.cxx" << std::endl;
           return EXIT_FAILURE;
         }
       }
@@ -162,8 +162,8 @@ int main(int argc, char ** argv){
     k++;
     if(set1[k]!=set2[k] || set1[k+1]!=set2[k+1]){
       std::cerr << "Different values for the Current Proposal on iteration " << iter_num1 << "\n\n";
-      std::cerr << "MCMC Core Test Failure: MCMCRun Step Taking Error." << std::endl;
-      std::cerr << "Check MCMCRun.cxx's EvaluateProposal and TakeStep" << std::endl;
+      std::cerr << "MCMC Core Test Failure: MarkovChainMonteCarloSampler Step Taking Error." << std::endl;
+      std::cerr << "Check MarkovChainMonteCarloSampler.cxx's EvaluateProposal and TakeStep" << std::endl;
       return EXIT_FAILURE;
     }
     k += 2;
@@ -171,9 +171,9 @@ int main(int argc, char ** argv){
       std::cerr << "Different values for alpha on iteration " << iter_num1 << "\n\n";
       std::cerr << "MCMC Core Test Failure: MCMC Error." << std::endl;
       std::cerr << "Areas that might be responsible:" << std::endl;
-      std::cerr << "1) MCMCRun::TakeStep" << std::endl;
-      std::cerr << "2) MCMCRun::EvaluateProposal" << std::endl;
-      std::cerr << "3) MCMCRun::NextSample" << std::endl;
+      std::cerr << "1) MarkovChainMonteCarloSampler::TakeStep" << std::endl;
+      std::cerr << "2) MarkovChainMonteCarloSampler::EvaluateProposal" << std::endl;
+      std::cerr << "3) MarkovChainMonteCarloSampler::NextSample" << std::endl;
       return EXIT_FAILURE;
     }
   }
