@@ -18,9 +18,9 @@
 
 #include "SimpleMetropolisHastingsSampler.h"
 
-#include <cstdlib>
 #include <cassert>
-#include <cmath>
+#include <cmath> // std::sin, cos, log, sqrt
+#include <algorithm> // std::count
 
 namespace madai {
 
@@ -113,12 +113,30 @@ SimpleMetropolisHastingsSampler
   std::vector< double > yc( m_NumberOfOutputs, 0.0 );
 
   unsigned int output_index = this->GetOutputScalarToOptimizeIndex();
+  unsigned int numberOfActiveParameters = this->GetNumberOfActiveParameters();
+  std::vector< double > randomStep( numberOfActiveParameters, 0.0 );
+
+  assert( std::count(this->m_ActiveParameterIndices.begin(),
+    this->m_ActiveParameterIndices.end(), true) == numberOfActiveParameters);
 
   for ( unsigned int giveup = 1048576; giveup != 0; --giveup ) {
-    random_inside_hypersphere(m_StepSize, &(xc[0]),
-                              m_NumberOfParameters);
-    for(unsigned int i = 0; i < m_NumberOfParameters; i++)
-      xc[i] += m_LastStepParameters[i];
+    random_inside_hypersphere(
+      m_StepSize, &(randomStep[0]), numberOfActiveParameters);
+    unsigned int k = 0;
+    for(unsigned int i = 0; i < m_NumberOfParameters; i++) {
+      if (this->m_ActiveParameterIndices[i]) {
+        xc[i] = m_LastStepParameters[i] + randomStep[k];
+        k++;
+      } else {
+        xc[i] = m_LastStepParameters[i];
+				// Not sure how to respect this->m_CurrentParameters[i] ???
+				// for (i < m_NumberOfParameters)
+				//   if (!this->m_ActiveParameterIndices[i] &&
+				//        (this->m_CurrentParameters[i] != m_LastStepParameters[i])) {
+				//     do something;
+				//   }
+      }
+    }
 
     if (m_OptimizeOnLikelihood) {
       double ll;
