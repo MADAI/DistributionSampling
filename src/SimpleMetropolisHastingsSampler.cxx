@@ -18,9 +18,9 @@
 
 #include "SimpleMetropolisHastingsSampler.h"
 
-#include <cstdlib>
 #include <cassert>
-#include <cmath>
+#include <cmath> // std::sin, cos, log, sqrt
+#include <algorithm> // std::count
 
 namespace madai {
 
@@ -91,8 +91,8 @@ static inline void random_multinormal(double *d, size_t n,
   if (sqmodulus != NULL)
     *sqmodulus = sum_of_squares;
 }
-static inline void random_inside_hypersphere(
-    double scale, double *d, size_t n)
+
+static inline void random_inside_hypersphere( double scale, double *d, size_t n )
 {
   double sqmodulus = 0.0;
   random_multinormal(d, n, &sqmodulus);
@@ -113,42 +113,60 @@ SimpleMetropolisHastingsSampler
   std::vector< double > yc( m_NumberOfOutputs, 0.0 );
 
   unsigned int output_index = this->GetOutputScalarToOptimizeIndex();
+  unsigned int numberOfActiveParameters = this->GetNumberOfActiveParameters();
+  std::vector< double > randomStep( numberOfActiveParameters, 0.0 );
+
+  assert( std::count( this->m_ActiveParameterIndices.begin(),
+                      this->m_ActiveParameterIndices.end(), true ) == numberOfActiveParameters);
 
   for ( unsigned int giveup = 1048576; giveup != 0; --giveup ) {
-    random_inside_hypersphere(m_StepSize, &(xc[0]),
-                              m_NumberOfParameters);
-    for(unsigned int i = 0; i < m_NumberOfParameters; i++)
-      xc[i] += m_LastStepParameters[i];
+    random_inside_hypersphere( m_StepSize,
+                               &(randomStep[0]),
+                               numberOfActiveParameters );
 
-    if (m_OptimizeOnLikelihood) {
+    unsigned int k = 0;
+    for ( unsigned int i = 0; i < m_NumberOfParameters; i++ ) {
+      if ( m_ActiveParameterIndices[i] ) {
+        xc[i] = m_LastStepParameters[i] + randomStep[k];
+        k++;
+      } else {
+        xc[i] = m_LastStepParameters[i];
+        // Not sure how to respect this->m_CurrentParameters[i] ???
+        // for (i < m_NumberOfParameters)
+        //   if (!this->m_ActiveParameterIndices[i] &&
+        //        (this->m_CurrentParameters[i] != m_LastStepParameters[i])) {
+        //     do something;
+        //   }
+      }
+    }
+
+    if ( m_OptimizeOnLikelihood ) {
       double ll;
       m->GetScalarOutputsAndLogLikelihood(xc,yc,ll);
       double delta_logLikelihood = ll - m_LastStepLogLikelihood;
+
       if ((delta_logLikelihood > 0) ||
-          (exp(delta_logLikelihood) > uniform_rand()))
-        {
-          m_LastStepLogLikelihood = ll;
-          m_LastStepParameters = xc;
-          m_LastStepOutputs = yc;
-          trace->add(xc, yc, ll);
-          return;
-          //FIXME do somthing
-        }
+          (exp(delta_logLikelihood) > uniform_rand())) {
+        m_LastStepLogLikelihood = ll;
+        m_LastStepParameters = xc;
+        m_LastStepOutputs = yc;
+        trace->add(xc, yc, ll);
+        return;
+      }
     } else {
       double ll;
       m->GetScalarOutputsAndLogLikelihood(xc,yc,ll);
-      //m_Model->GetScalarOutputs(xc,yx);
+
       double f_of_x = m_LastStepOutputs[output_index];
       double f_of_xc = yc[output_index];
-      if ((f_of_xc > f_of_x) || (f_of_xc > (f_of_x * uniform_rand())))
-        {
-          m_LastStepLogLikelihood = ll;
-          m_LastStepParameters = xc;
-          m_LastStepOutputs = yc;
-          trace->add(xc, yc, ll);
-          return;
-          //FIXME do somthing ???
-        }
+
+      if ((f_of_xc > f_of_x) || (f_of_xc > (f_of_x * uniform_rand()))) {
+        m_LastStepLogLikelihood = ll;
+        m_LastStepParameters = xc;
+        m_LastStepOutputs = yc;
+        trace->add(xc, yc, ll);
+        return;
+      }
     }
   }
 }
