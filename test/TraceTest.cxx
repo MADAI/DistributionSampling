@@ -124,7 +124,7 @@ int main( int argc, char* argv[] )
     outputNames.push_back( std::string( "Output" ) );
   }
 
-  trace.WriteCSVOutput( std::cout, parameterVector, outputNames );
+  trace.WriteCSVFile( "TraceTest.csv", parameterVector, outputNames );
 
   return EXIT_SUCCESS;
 }
