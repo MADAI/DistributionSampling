@@ -62,6 +62,9 @@ public:
   /** Get names of the parameters. */
   virtual const std::vector< Parameter > & GetParameters() const;
 
+  /** Get the names of the parameters. */
+  virtual std::vector< std::string > GetParameterNames() const;
+
   /** Get the number of scalar outputs. */
   virtual unsigned int GetNumberOfScalarOutputs() const;
 

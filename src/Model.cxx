@@ -76,6 +76,20 @@ Model
 }
 
 
+std::vector< std::string >
+Model
+::GetParameterNames() const
+{
+  std::vector< std::string > parameterNames;
+  parameterNames.reserve( m_Parameters.size() );
+  for ( std::vector< Parameter >::const_iterator iter = m_Parameters.begin();
+        iter != m_Parameters.end();
+        ++iter ) {
+    parameterNames.push_back( iter->m_Name );
+  }
+}
+
+
 unsigned int
 Model
 ::GetNumberOfScalarOutputs() const
