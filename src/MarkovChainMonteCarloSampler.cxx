@@ -198,7 +198,6 @@ MarkovChainMonteCarloSampler
     m_ParameterValues[k] = ( m_CurrentParameters[k] - range[0] ) / ( range[1] - range[0] );
   }
 
-  ThetaOutsList->PrintDataToFile( m_Model->GetParameters() );
 }
 
 std::vector<double>
