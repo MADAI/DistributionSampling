@@ -59,7 +59,7 @@ public:
   /**
      Given some set of field observations, the likelihood is the
      Likelihood that m_ParameterValues is the ground truth.
-     this->m_LogLikelihood is (C * ln(Likelihood)) for some unknown
+     this->m_LogLikelihood is (ln(C * Likelihood)) for some unknown
      constant C.
   */
   double                m_LogLikelihood;
