@@ -25,31 +25,60 @@
 
 namespace madai {
 
+/**
+ * \class SimpleMetropolisHastingsSampler
+ *
+ * This is a simple implemetation of the Metropolis Hastings
+ * algorithm.  It is "simple" in that each step is a point whose
+ * direction is uniformly chosen from the unit sphere (L2-norm) around
+ * the current point in parameter space.  The magnitude (L2-norm) of
+ * the step is randomly chosen from the uniform distribution on the
+ * range [0, StepSize].
+ */
 class SimpleMetropolisHastingsSampler : public Sampler {
 public:
+  /** constructor.  No way right now to change the model mid-trace.
+      Only parameter values can change  */
   SimpleMetropolisHastingsSampler( const Model *model );
+  /** destructor */
   virtual ~SimpleMetropolisHastingsSampler();
 
+  /** append the next point to the Trace  */
   virtual void NextSample(Trace *trace);
 
-  /** Set the step size. */
+  //@{
+  /**
+     Set/Get the StepSize, which is the maximum distance in Parameter
+     space to move, under euclidean L2 norm.
+  */
   virtual void SetStepSize( double stepSize );
+  virtual double GetStepSize() { return this->m_StepSize; }
+  //@}
 
 protected:
+  /**
+     Maximum distance in Parameter space to move, under euclidean L2
+     norm.
+  */
   double m_StepSize;
 
-  SimpleMetropolisHastingsSampler() {}; // intentionally hidden
-
+  /** cache this value from the Model */
   unsigned int m_NumberOfParameters;
 
+  /** cache this value from the Model */
   unsigned int m_NumberOfOutputs;
 
+  //@{
+  /** Keep track of the last step (or the initial position) so we
+      don't have to recalculate each time. */
   std::vector< double > m_LastStepParameters;
-
   std::vector< double > m_LastStepOutputs;
-
   double m_LastStepLogLikelihood;
-
+  //@}
+private:
+  /** This Sampler needs a Model to sample from, so this constructor
+      is hidden. */
+  SimpleMetropolisHastingsSampler() {};
 }; // end class SimpleMetropolisHastingsSampler
 
 } // end namespace madai

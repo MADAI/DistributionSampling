@@ -36,28 +36,39 @@ class Model;
  * Base class for algorithms that sample from a distribution. */
 class Sampler {
 public:
+  /** ErrorType */
   typedef enum {
     NO_ERROR = 0,
     INVALID_PARAMETER_INDEX_ERROR,
     INVALID_OUTPUT_SCALAR_INDEX_ERROR
   } ErrorType;
 
+  /** default constructor. */
   Sampler( const Model *model );
+  /** default constructor. */
   virtual ~Sampler();
+  /** return a pointer to the current Model */
   const Model * GetModel() const;
 
+  /** git a list of the names of the active parameters. */
   std::set< std::string > GetActiveParameters();
 
   /** Activate a parameter by name. */
   void ActivateParameter( const std::string & parameterName );
 
-  /** Activate a parameter by index. */
+  /**
+   * Activate a parameter by index.  Indexes correspond to indexes
+   * within this->GetParameters().
+   */
   void ActivateParameter( unsigned int parameterIndex );
 
   /** Deactivate a parameter by name. */
   void DeactivateParameter( const std::string & parameterName );
 
-  /** Deactivate a parameter by index. */
+  /**
+   * Deactivate a parameter by index. Indexes correspond to indexes
+   * within this->GetParameters().
+   */
   void DeactivateParameter( unsigned int parameterIndex );
 
   /** Get the number of parameters. */
@@ -76,14 +87,19 @@ public:
   /** Resets a parameter value. */
   virtual ErrorType SetParameterValue( const std::string & parameterName,
                                        double value );
+  /** Get the current value of a parameter. */
   virtual double GetParameterValue( const std::string & parameterName );
 
-  /** Sets the output scalar value to optimize by name. */
+  //@{
+  /**
+   * Sets/Gets the output scalar value. Either refer to a scalar by
+   * name or index within this->m_model->m_ScalarOutputNames.
+  */
   ErrorType SetOutputScalarToOptimize( const std::string & scalarName );
   ErrorType SetOutputScalarToOptimize( unsigned int index );
-
   std::string GetOutputScalarToOptimizeName();
   unsigned int GetOutputScalarToOptimizeIndex() const;
+  //@}
 
   /** Compute the next set of parameters and the output scalar values,
    * and save them in the trace file. */
@@ -111,13 +127,15 @@ public:
   virtual void SetOptimizeOnLikelihood(bool val);
 
 protected:
-  Sampler() {}; // intentionally hidden
+  /** intentionally hidden */
+  Sampler() {};
+  /** useful for a implementation */
   unsigned int GetOutputScalarIndex( const std::string & scalarName ) const;
+  /** useful for a implementation */
   unsigned int GetParameterIndex( const std::string & parameterName ) const;
 
-
   /**
-   * WHAT IS THIS?
+   * \todo WHAT IS THIS?
    */
   bool IsLikeAndPrior() const;
 
@@ -151,6 +169,10 @@ protected:
   algorithm should override this method. */
   virtual void ParameterSetExternally() {};
 
+  /**
+     Which Parameters are active?  Indexes correspond to indexes
+     within this->GetParameters().
+  */
   std::vector< bool > m_ActiveParameterIndices;
 
 

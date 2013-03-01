@@ -32,6 +32,11 @@ namespace madai {
  */
 class TraceElement {
 public:
+  //@{
+  /**
+     If LogLikelihood is not set, it defaults to 0.0.  If
+     output_values is not specified, it defaults to an empty vector.
+  */
   TraceElement(const std::vector< double > & parameterValues,
                const std::vector< double > & OutputValues,
                double LogLikelihood);
@@ -39,14 +44,28 @@ public:
                const std::vector< double > & OutputValues );
   TraceElement(const std::vector< double > & parameterValues);
   TraceElement();
+    //@}
+  /** Sets all values to zero, false, or empty. */
   void Reset();
+  /** \todo Unimplimented method. */
   void Print();
+  /** toggle this->m_InTrace to true */
   void VizTrace();
 
+  /** a set of Parameters values for some model. */
   std::vector< double > m_ParameterValues;
+  /** the model output that correspond to m_ParameterValues in some model. */
   std::vector< double > m_OutputValues;
+  /**
+     Given some set of field observations, the likelihood is the
+     Likelihood that m_ParameterValues is the ground truth.
+     this->m_LogLikelihood is (C * ln(Likelihood)) for some unknown
+     constant C.
+  */
   double                m_LogLikelihood;
+  /** \todo document. */
   bool                  m_InTrace;
+  /** \todo document. */
   bool                  m_Used;
 
   /** Comments may be used to store human-readable comments *or*
