@@ -1,5 +1,6 @@
 #include <cstdlib>
 
+#include "Parameter.h"
 #include "Trace.h"
 #include "VectorUtilities.h"
 
@@ -43,7 +44,6 @@ int main( int argc, char* argv[] )
 
   parameters[0] = -1.0;
   parameters[1] = 5.2;
-  parameters.push_back( 2.33 );
 
   outputs[0] = -4.89;
 
@@ -109,6 +109,22 @@ int main( int argc, char* argv[] )
 	      << element.m_LogLikelihood << std::endl;
     return EXIT_FAILURE;
   }
+
+
+  // Write trace file
+  std::vector< madai::Parameter > parameterVector;
+  parameterVector.reserve( parameters.size() );
+  for ( size_t i = 0; i < parameters.size(); ++i ) {
+    parameterVector.push_back( madai::Parameter( "Parameter" ) );
+  }
+
+  std::vector< std::string > outputNames;
+  outputNames.reserve( outputs.size() );
+  for ( size_t i = 0; i < outputs.size(); ++i ) {
+    outputNames.push_back( std::string( "Output" ) );
+  }
+
+  trace.WriteCSVOutput( std::cout, parameterVector, outputNames );
 
   return EXIT_SUCCESS;
 }
