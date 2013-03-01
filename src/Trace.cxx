@@ -102,22 +102,12 @@ void write_vector( std::ostream& o, std::vector< T > const & v, char delim ) {
 
 void
 Trace
-::Write( std::ostream & out ) const {
-  unsigned int N = this->GetSize();
-  for ( unsigned int i = 0; i < N; i++ ) {
-    write_vector( out, (*this)[i].m_ParameterValues, ',' );
-    out << ',';
-    write_vector( out, (*this)[i].m_OutputValues, ',' );
-    out << ',';
-    out << (*this)[i].m_LogLikelihood;
-    if ( (*this)[i].m_Comments.size() > 0 ) {
-      out << ",\"";
-      write_vector( out, (*this)[i].m_Comments, ';' );
-      out << '"';
-    }
-    out << '\n';
-  }
-  out.flush();
+::WriteCSVOutput( std::ostream & os,
+                  const std::vector< Parameter > & parameters,
+                  const std::vector< std::string > & outputNames ) const
+{
+  this->WriteHead( os, parameters, outputNames );
+  this->WriteData( os );
 }
 
 
@@ -156,16 +146,22 @@ Trace
 
 void
 Trace
-::WriteHead( std::ostream & o,
-             const std::vector< Parameter > & params ) const
-{
-  if ( !params.empty() ) {
-    std::vector< Parameter >::const_iterator itr = params.begin();
-    o << '"' << itr->m_Name << '"';
-    for (itr++; itr < params.end(); itr++) {
-      o << ',' << '"' << itr->m_Name << '"';
+::WriteData( std::ostream & out ) const {
+  unsigned int n = this->GetSize();
+  for ( unsigned int i = 0; i < n; i++ ) {
+    write_vector( out, (*this)[i].m_ParameterValues, ',' );
+    out << ',';
+    write_vector( out, (*this)[i].m_OutputValues, ',' );
+    out << ',';
+    out << (*this)[i].m_LogLikelihood;
+    if ( (*this)[i].m_Comments.size() > 0 ) {
+      out << ",\"";
+      write_vector( out, (*this)[i].m_Comments, ';' );
+      out << '"';
     }
+    out << '\n';
   }
+  out.flush();
 }
 
 

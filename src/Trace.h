@@ -68,20 +68,16 @@ public:
   TraceElement & operator[]( unsigned int index );
   const TraceElement & operator[]( unsigned int index ) const;
 
-  void Write( std::ostream & o ) const;  
-
-  /*
-    Assert:
-      FOR ALL i < this->m_TraceElements.size():
-        this->m_TraceElements[i].m_ParameterValues.size() == params.size()
-        this->m_TraceElements[i].m_OutputValues.size() == outputs.size()
-  */
-  void WriteHead( std::ostream & o, 
-                  const std::vector< Parameter > & params ) const;
+  void WriteCSVOutput( std::ostream & os,
+                       const std::vector< Parameter > & parameters,
+                       const std::vector< std::string > & outputNames ) const;
 
   void WriteHead( std::ostream & o,
                   const std::vector< Parameter > & params,
-                  const std::vector< std::string > & outputs) const;
+                  const std::vector< std::string > & outputs = std::vector< std::string >() ) const;
+
+  void WriteData( std::ostream & out ) const;
+
   void PrintDataToFile( const std::vector< Parameter > & params );
   void LoadTrace();
 

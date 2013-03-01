@@ -73,10 +73,10 @@ int main(int argc, char ** argv) {
   // Stop the external process
   externalModel.StopProcess();
 
-  trace.WriteHead( std::cout,
+  trace.WriteCSVOutput( std::cout,
                    externalModel.GetParameters(),
                    externalModel.GetScalarOutputNames() );
-  trace.Write( std::cout );
+  //trace.WriteData( std::cout );
 
   return EXIT_SUCCESS;
 }
