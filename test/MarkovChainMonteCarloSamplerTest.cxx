@@ -77,7 +77,7 @@ int main(int argc, char ** argv){
   for(int i = 0; i < parameters->size(); i++)
     run.ActivateParameter( (*parameters)[i].m_Name );
     
-  madai::Trace trace(info_dir, "default" );
+  madai::Trace trace;
   if(run.m_BurnIn == 0){
     trace.Add(run.m_InitialTheta);
   }
@@ -86,20 +86,17 @@ int main(int argc, char ** argv){
     run.m_ParameterValues.push_back(0);
     
   run.m_AcceptCount = 0;
-  for(run.m_IterationNumber = 1; run.m_IterationNumber < trace.m_MaxIterations; run.m_IterationNumber++){
+  //for(run.m_IterationNumber = 1; run.m_IterationNumber <
+  //trace.m_MaxIterations; run.m_IterationNumber++){
+  for ( int i = 0; i < 100; ++i ) {
     run.NextSample(&trace);
   }
-  if(trace.m_CurrentIteration!=0){
-    trace.WriteOut(t_model.GetParameters());
-  }
-  trace.MakeTrace();
   
   // At this point the trace for the new run has been created.
   // Now want to compare it to a previous run.
   
   FILE* fp1 = fopen( comparison_trace.c_str(), "r");
-  std::string trace_file_name;
-  trace_file_name = trace.m_TraceDirectory.c_str();
+  std::string trace_file_name( "default" );
   trace_file_name += "/trace.dat";
   FILE* fp2 = fopen(trace_file_name.c_str(), "r");
   if(fp1 == NULL){
@@ -107,7 +104,7 @@ int main(int argc, char ** argv){
     return EXIT_FAILURE;
   }
   if(fp2 == NULL){
-    std::cerr << "Error opening " << trace.m_TraceDirectory+"/trace.dat" << std::endl;
+    std::cerr << "Error opening " << trace_file_name << std::endl;
     return EXIT_FAILURE;
   }
   double* set1 = new double[parameters->size()+5]();
