@@ -68,6 +68,14 @@ public:
   TraceElement & operator[]( unsigned int index );
   const TraceElement & operator[]( unsigned int index ) const;
 
+  /** Write the trace to a comma-separated value file.
+   *
+   * Parameters and output names are assumed to come from a
+   * Model. Returns true if writing succeeded, false otherwise. */
+  bool WriteCSVFile( const std::string & filename,
+		     const std::vector< Parameter > & parameters,
+		     const std::vector< std::string > & outputNames = std::vector< std::string >() ) const;
+
   void WriteCSVOutput( std::ostream & os,
                        const std::vector< Parameter > & parameters,
                        const std::vector< std::string > & outputNames = std::vector< std::string >() ) const;

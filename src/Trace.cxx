@@ -100,6 +100,23 @@ void write_vector( std::ostream& o, std::vector< T > const & v, char delim ) {
 }
 
 
+bool
+Trace
+::WriteCSVFile( const std::string & filename,
+		const std::vector< Parameter > & parameters,
+		const std::vector< std::string > & outputNames ) const
+{
+  try {
+    std::ofstream file( filename.c_str() );
+    this->WriteCSVOutput( file, parameters );
+  } catch ( ... ) {
+    return false;
+  }
+
+  return true;
+}
+
+
 void
 Trace
 ::WriteCSVOutput( std::ostream & os,
