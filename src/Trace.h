@@ -70,19 +70,16 @@ public:
 
   void WriteCSVOutput( std::ostream & os,
                        const std::vector< Parameter > & parameters,
-                       const std::vector< std::string > & outputNames ) const;
+                       const std::vector< std::string > & outputNames = std::vector< std::string >() ) const;
+
+protected:
+  std::vector< TraceElement > m_TraceElements;
 
   void WriteHead( std::ostream & o,
                   const std::vector< Parameter > & params,
                   const std::vector< std::string > & outputs = std::vector< std::string >() ) const;
 
   void WriteData( std::ostream & out ) const;
-
-  void PrintDataToFile( const std::vector< Parameter > & params );
-  void LoadTrace();
-
-protected:
-  std::vector< TraceElement > m_TraceElements;
 
 }; // class Trace
 

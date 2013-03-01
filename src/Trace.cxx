@@ -149,14 +149,18 @@ Trace
 ::WriteData( std::ostream & out ) const {
   unsigned int n = this->GetSize();
   for ( unsigned int i = 0; i < n; i++ ) {
-    write_vector( out, (*this)[i].m_ParameterValues, ',' );
+    const TraceElement & element = (*this)[i];
+    write_vector( out, element.m_ParameterValues, ',' );
     out << ',';
-    write_vector( out, (*this)[i].m_OutputValues, ',' );
-    out << ',';
-    out << (*this)[i].m_LogLikelihood;
-    if ( (*this)[i].m_Comments.size() > 0 ) {
+
+    if ( element.m_OutputValues.size() > 0 ) {
+      write_vector( out, element.m_OutputValues, ',' );
+      out << ',';
+    }
+    out << element.m_LogLikelihood;
+    if ( element.m_Comments.size() > 0 ) {
       out << ",\"";
-      write_vector( out, (*this)[i].m_Comments, ';' );
+      write_vector( out, element.m_Comments, ';' );
       out << '"';
     }
     out << '\n';
@@ -165,69 +169,5 @@ Trace
 }
 
 
-void
-Trace
-::PrintDataToFile( const std::vector< Parameter > & params )
-{
-#if 0
-  std::cout << "Printing data to file." << std::endl;
-  std::ofstream outputfile;
-  std::stringstream ss;
-  ss << m_WriteOutCounter+1;
-  std::string out_file = m_TraceDirectory+"/output"+ss.str()+".dat";
-
-  outputfile.open( out_file.c_str() );
-  std::cout << "Writing out to: " << out_file << std::endl;
-  if ( outputfile ) {
-    outputfile << "#ITERATION,";
-    if ( !params.empty() ) {
-      std::vector< Parameter >::const_iterator itr = params.begin();
-      for ( itr; itr < params.end(); itr++ ) {
-        outputfile << itr->m_Name << ',';
-      }
-    }
-    outputfile << std::endl;
-
-    for ( int i = 0; i < m_Writeout; i++ ) {
-      outputfile << i+m_WriteOutCounter*m_Writeout << ",";
-      if ( !m_TraceElements[i].m_ParameterValues.empty() ) {
-        for ( int j = 0; j < m_TraceElements[i].m_ParameterValues.size(); j++ ) {
-          outputfile << m_TraceElements[i].m_ParameterValues[j];
-          if ( j != m_TraceElements[i].m_ParameterValues.size()-1 ) {
-            outputfile<< ",";
-          }
-        }
-      }
-    }
-    outputfile << std::endl;
-    outputfile.close();
-  } else {
-    std::cout << "Error: Couldn't open the output file" << std::endl;
-    exit( 1 );
-  }
-#endif
-}
-
-
-void
-Trace
-::LoadTrace()
-{
-#if 0
-  std::stringstream ss;
-  ss << "cat ";
-
-  for ( int i = 1; i <= ceil( (double) (m_MaxIterations) / (double)(m_Writeout) ); i++ ) {
-    std::cout << "Parsing " << m_TraceDirectory << "/output" << i << ".dat" << std::endl;
-    ss << m_TraceDirectory << "/output" << i << ".dat ";
-  }
-  ss << "> " << m_TraceDirectory << "/trace.dat" << std::endl;
-
-  std::string command = ss.str();
-  std::system( command.c_str() );
-
-  ss.str( string() );
-#endif
-}
 
 } // end namespace madai
