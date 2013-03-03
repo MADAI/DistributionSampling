@@ -34,33 +34,50 @@ Trace
 }
 
 
-void
+bool
+Trace
+::Add( const TraceElement & element ) {
+  if ( this->GetSize() > 0 ) {
+    // Check for consistency with previous element in trace.
+    const TraceElement & previousElement = m_TraceElements.back();
+    if ( element.m_ParameterValues.size() != previousElement.m_ParameterValues.size() ) {
+      return false;
+    }
+    if ( element.m_OutputValues.size() != previousElement.m_OutputValues.size() ) {
+      return false;
+    }
+  }
+
+  m_TraceElements.push_back( element );
+
+  return true;
+}
+
+
+bool
 Trace
 ::Add( const std::vector< double > & parameterValues,
        const std::vector< double > & outputValues,
        double logLikelihood )
 {
-  m_TraceElements.push_back( TraceElement( parameterValues,
-                                           outputValues,
-                                           logLikelihood) );
+  return this->Add( TraceElement( parameterValues, outputValues, logLikelihood ) );
 }
 
 
-void
+bool
 Trace
 ::Add( const std::vector< double > & parameterValues,
        const std::vector< double > & outputValues )
 {
-  m_TraceElements.push_back( TraceElement( parameterValues,
-                                           outputValues ) );
+  return this->Add( TraceElement( parameterValues, outputValues ) );
 }
 
 
-void
+bool
 Trace
 ::Add( const std::vector< double > & parameterValues )
 {
-  m_TraceElements.push_back( TraceElement( parameterValues ) );
+  return this->Add( TraceElement( parameterValues ) );
 }
 
 
@@ -69,6 +86,14 @@ Trace
 ::GetSize() const
 {
   return this->m_TraceElements.size();
+}
+
+
+void
+Trace
+::Clear()
+{
+  m_TraceElements.clear();
 }
 
 
@@ -189,14 +214,16 @@ Trace
 
       this->Add( parameterValues, outputValues, logLikelihood );
 
-      
+
     }
 
     file.close();
   } catch ( ... ) {
+    // Writing failed
     return false;
   }
 
+  // Writing succeeded
   return true;
 }
 

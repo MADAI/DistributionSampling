@@ -45,25 +45,31 @@ public:
   Trace();
   virtual ~Trace();
 
+  /** Add a TraceElement to the Trace. */
+  bool Add( const TraceElement & element );
+
   /** Add an entry from parameter, output values, and log-likelihood. */
-  void Add( const std::vector< double > & parameterValues,
+  bool Add( const std::vector< double > & parameterValues,
             const std::vector< double > & outputValues,
             double logLikelihood );
 
   /** Add an entry from parameter and output values.
    *
    * Sets log-likelihood to 0.0. */
-  void Add( const std::vector< double > & parameterValues,
+  bool Add( const std::vector< double > & parameterValues,
             const std::vector< double > & outputValues );
 
   /** Add an entry from parameter values alone.
    *
    * \todo It seems like you should always have to record an output
    * from a model. */
-  void Add( const std::vector< double > & parameterValues );
+  bool Add( const std::vector< double > & parameterValues );
 
   /** Get the number of entries in the Trace. */
   unsigned int GetSize() const;
+
+  /** Remove all elements from the Trace. */
+  void Clear();
 
   TraceElement & operator[]( unsigned int index );
   const TraceElement & operator[]( unsigned int index ) const;

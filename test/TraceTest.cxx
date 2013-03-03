@@ -22,7 +22,10 @@ int main( int argc, char* argv[] )
   parameters.push_back( 1.0 );
   parameters.push_back( 2.3 );
 
-  trace.Add( parameters );
+  if ( !trace.Add( parameters ) ) {
+    std::cerr << "Failed to add initial trace element." << std::endl;
+    return EXIT_FAILURE;
+  }
 
   if ( trace.GetSize() != 1 ) {
     std::cerr << "Trace should have 1 element, has "
@@ -38,6 +41,15 @@ int main( int argc, char* argv[] )
     return EXIT_FAILURE;
   }
 
+  // Test clearing out the Trace
+  trace.Clear();
+
+  if ( trace.GetSize() != 0 ) {
+    std::cerr << "Trace should have 0 elements, has "
+	      << trace.GetSize() << " instead." << std::endl;
+    return EXIT_FAILURE;
+  }
+
   // Test the Add() method that takes parameter values and output values.
   std::vector< double > outputs;
   outputs.push_back( -2.1 );
@@ -47,7 +59,15 @@ int main( int argc, char* argv[] )
 
   outputs[0] = -4.89;
 
-  trace.Add( parameters, outputs );
+  if ( !trace.Add( parameters, outputs ) ) {
+    std::cerr << "Could not add first trace entry the second time" << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  if ( !trace.Add( parameters, outputs ) ) {
+    std::cerr << "Could not add second trace entry" << std::endl;
+    return EXIT_FAILURE;
+  }
 
   if ( trace.GetSize() != 2 ) {
     std::cerr << "Trace should have 2 elements, has "
@@ -79,7 +99,10 @@ int main( int argc, char* argv[] )
   outputs[0] = -22.0;
 
   double logLikelihood = 0.82;
-  trace.Add( parameters, outputs, logLikelihood );
+  if ( !trace.Add( parameters, outputs, logLikelihood ) ) {
+    std::cerr << "Could not add third trace element" << std::endl;
+    return EXIT_FAILURE;
+  }
 
   if ( trace.GetSize() != 3 ) {
     std::cerr << "Trace should have 3 elements, has "
