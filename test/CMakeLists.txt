@@ -26,7 +26,7 @@ add_executable( MarkovChainMonteCarloSamplerTest MarkovChainMonteCarloSamplerTes
 target_link_libraries( MarkovChainMonteCarloSamplerTest ${LIBRARIES} )
 add_test( MarkovChainMonteCarloSamplerTest MarkovChainMonteCarloSamplerTest
   ${TEST_BASE_DIR}/TestModel
-  ${TEST_BASE_DIR}/TestModel/MarkovChainMonteCarloSamplerTestTrace.dat )
+  ${TEST_BASE_DIR}/MarkovChainMonteCarloSamplerTest/MarkovChainMonteCarloSamplerTest.csv )
 
 add_executable( ModelTest ModelTest.cxx )
 target_link_libraries( ModelTest ${LIBRARIES} )
@@ -43,3 +43,7 @@ add_test( RegularStepGradientDescentOptimizerTest RegularStepGradientDescentOpti
 add_executable( TraceTest TraceTest.cxx )
 target_link_libraries( TraceTest ${LIBRARIES} )
 add_test( TraceTest TraceTest )
+
+add_executable( TraceElementTest TraceElementTest.cxx )
+target_link_libraries( TraceElementTest ${LIBRARIES} )
+add_test( TraceElementTest TraceElementTest )
