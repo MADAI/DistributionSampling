@@ -219,11 +219,11 @@ Trace
 
     file.close();
   } catch ( ... ) {
-    // Writing failed
+    // Reading failed
     return false;
   }
 
-  // Writing succeeded
+  // Reading succeeded
   return true;
 }
 
