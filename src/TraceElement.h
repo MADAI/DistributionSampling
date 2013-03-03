@@ -42,7 +42,14 @@ public:
   TraceElement(const std::vector< double > & parameterValues);
 
   TraceElement();
+
+  /** Clear all the parameter values, output values, and comments, and
+   * set the log likelihood to 0.0. */
   void Reset();
+
+  /** Returns true if there are any parameter values, output values,
+   * or comments. */
+  bool IsValid() const;
 
   std::vector< double > m_ParameterValues;
   std::vector< double > m_OutputValues;

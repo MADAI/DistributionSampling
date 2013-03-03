@@ -62,6 +62,15 @@ TraceElement
 }
 
 
+bool
+TraceElement
+::IsValid() const {
+  return ( m_ParameterValues.size() > 0
+	   || m_OutputValues.size() > 0
+	   || m_Comments.size() > 0 );
+}
+
+
 TraceElement
 ::TraceElement() :
   m_LogLikelihood(0.0)
