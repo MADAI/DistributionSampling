@@ -111,6 +111,12 @@ int main( int argc, char* argv[] )
   }
 
 
+  // Create a new Trace
+  madai::Trace referenceTrace;
+  referenceTrace.Add( parameters, outputs, 0.0 );
+  referenceTrace.Add( parameters, outputs, 0.0 );
+  referenceTrace.Add( parameters, outputs, 0.0 );
+
   // Write trace file
   std::vector< madai::Parameter > parameterVector;
   parameterVector.reserve( parameters.size() );
@@ -120,11 +126,49 @@ int main( int argc, char* argv[] )
 
   std::vector< std::string > outputNames;
   outputNames.reserve( outputs.size() );
+
+  std::cout << "Number of outputs: " << outputs.size() << std::endl;
   for ( size_t i = 0; i < outputs.size(); ++i ) {
     outputNames.push_back( std::string( "Output" ) );
   }
 
-  trace.WriteCSVFile( "TraceTest.csv", parameterVector, outputNames );
+  referenceTrace.WriteCSVFile( "TraceTest.csv", parameterVector, outputNames );
+
+  // Try reading trace file that was just written
+  madai::Trace readTrace;
+  readTrace.ImportCSVFile( "TraceTest.csv", parameterVector.size(), outputNames.size() );
+
+  // Compare the test trace and trace we read in
+  if ( trace.GetSize() != readTrace.GetSize() ) {
+    std::cerr << "readTrace.GetSize() (" << readTrace.GetSize() << ") != trace.GetSize() ("
+	      << trace.GetSize() << ") " << std::endl;
+    return EXIT_FAILURE;
+  }
+  for ( int i = 0; i < trace.GetSize(); ++i ) {
+    madai::TraceElement referenceElement = referenceTrace[i];
+    madai::TraceElement readElement = readTrace[i];
+
+    if ( referenceElement.m_ParameterValues != readElement.m_ParameterValues ) {
+      std::cerr << "Parameter values in read trace do not match at entry " << i << std::endl;
+      std::cerr << "Got " << readElement.m_ParameterValues << ", should have been "
+		<< referenceElement.m_ParameterValues << std::endl;
+      return EXIT_FAILURE;
+    }
+
+    if ( referenceElement.m_OutputValues != readElement.m_OutputValues ) {
+      std::cerr << "Output values in read trace do not match at entry " << i << std::endl;
+      std::cerr << "Got " << readElement.m_OutputValues << ", should have been "
+		<< referenceElement.m_OutputValues << std::endl;
+      return EXIT_FAILURE;
+    }
+
+    if ( referenceElement.m_LogLikelihood != readElement.m_LogLikelihood ) {
+      std::cerr << "Log likelihood in read trace does not match at entry " << i << std::endl;
+      std::cerr << "Got " << readElement.m_LogLikelihood << ", should have been "
+		<< referenceElement.m_LogLikelihood << std::endl;
+      return EXIT_FAILURE;
+    }
+  }
 
   return EXIT_SUCCESS;
 }

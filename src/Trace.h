@@ -80,6 +80,13 @@ public:
                        const std::vector< Parameter > & parameters,
                        const std::vector< std::string > & outputNames = std::vector< std::string >() ) const;
 
+  /** Import a trace from a comma-separated value file. You must tell
+      it how many of the first columns are parameters and how many are
+      outputs. */
+  bool ImportCSVFile( const std::string & filename,
+		      int numberOfParameters,
+		      int numberOfOutputs );
+
 protected:
   std::vector< TraceElement > m_TraceElements;
 

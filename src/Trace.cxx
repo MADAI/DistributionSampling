@@ -108,7 +108,8 @@ Trace
 {
   try {
     std::ofstream file( filename.c_str() );
-    this->WriteCSVOutput( file, parameters );
+    this->WriteCSVOutput( file, parameters, outputNames );
+    file.close();
   } catch ( ... ) {
     return false;
   }
@@ -125,6 +126,78 @@ Trace
 {
   this->WriteHead( os, parameters, outputNames );
   this->WriteData( os );
+}
+
+
+bool
+Trace
+::ImportCSVFile( const std::string & filename,
+		 int numberOfParameters,
+		 int numberOfOutputs )
+{
+  try {
+    std::ifstream file( filename.c_str() );
+    // Read in header
+    for ( int i = 0; i < numberOfParameters; ++i ) {
+      std::string parameterName;
+      std::getline( file, parameterName, ',' );
+      parameterName = parameterName.substr( 1, parameterName.size() - 2 );
+    }
+
+    for ( int i = 0; i < numberOfOutputs; ++i ) {
+      std::string outputName;
+      std::getline( file, outputName, ',' );
+    }
+
+    // Likelihood output
+    std::string likelihoodName;
+    std::getline( file, likelihoodName );
+    likelihoodName = likelihoodName.substr( 1, likelihoodName.size() - 2 );
+
+    // Now read data
+    while ( !file.eof() ) {
+
+      std::vector< double > parameterValues;
+      for ( int i = 0; i < numberOfParameters; ++i ) {
+	std::string parameterString;
+	std::getline( file, parameterString, ',' );
+	if ( file.eof() ) {
+	  break;
+	}
+	double parameterValue = atof( parameterString.c_str() );
+
+	parameterValues.push_back( parameterValue );
+      }
+
+      std::vector< double > outputValues;
+      for ( int i = 0; i < numberOfOutputs; ++i ) {
+	std::string outputString;
+	std::getline( file, outputString, ',' );
+	if ( file.eof() ) {
+	  break;
+	}
+	double outputValue = atof( outputString.c_str() );
+	outputValues.push_back( outputValue );
+      }
+
+      std::string logLikelihoodString;
+      std::getline( file, logLikelihoodString );
+      if ( file.eof() ) {
+	break;
+      }
+      double logLikelihood = atof( logLikelihoodString.c_str() );
+
+      this->Add( parameterValues, outputValues, logLikelihood );
+
+      
+    }
+
+    file.close();
+  } catch ( ... ) {
+    return false;
+  }
+
+  return true;
 }
 
 
@@ -152,6 +225,7 @@ Trace
   }
   if ( !outputs.empty() ) {
     std::vector<std::string>::const_iterator itr = outputs.begin();
+    std::cout << "Output name: " << *itr << std::endl;
     o << '"' << *itr << '"';
     for ( itr++; itr < outputs.end(); itr++ ) {
       o << ',' << '"' << *itr << '"';
