@@ -42,7 +42,12 @@ namespace madai {
  * replay it. */
 class Trace {
 public:
+  //@{
+  /**
+   * \todo Constructor Documentation
+   */
   Trace();
+  //@}
   virtual ~Trace();
 
   /** Add a TraceElement to the Trace. */
@@ -71,8 +76,12 @@ public:
   /** Remove all elements from the Trace. */
   void Clear();
 
+  /** Get the Nth \ref TraceElement.
+   */
+  //@{
   TraceElement & operator[]( unsigned int index );
   const TraceElement & operator[]( unsigned int index ) const;
+  //@}
 
   /** Write the trace to a comma-separated value file.
    *
@@ -94,6 +103,7 @@ public:
 		      int numberOfOutputs );
 
 protected:
+  /** all of the trace elements */
   std::vector< TraceElement > m_TraceElements;
 
   void WriteHead( std::ostream & o,

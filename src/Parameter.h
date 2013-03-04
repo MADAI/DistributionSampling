@@ -25,17 +25,38 @@
 
 namespace madai {
 
+
+/**
+ * \class Parameter
+ * represents one input to a Model or ScalarFunction
+ */
 class Parameter {
 public:
+  /**
+   * constructor.  Range defaults to [0,1]
+   */
   Parameter( std::string nm, double mn = 0.0, double mx = 1.0 ) :
     m_Name(nm),
     m_MinimumPossibleValue(mn),
     m_MaximumPossibleValue(mx) { }
+
+    /**
+     * destructor.
+     */
   virtual ~Parameter() { }
 
+  /**
+   * a short description of the parameter.
+   */
   std::string m_Name;
+
+  //@{
+  /**
+   * range of possible values for this Parameter
+   */
   double      m_MinimumPossibleValue;
   double      m_MaximumPossibleValue;
+  //@}
 }; // end class Parameter
 
 } // end namespace madai
