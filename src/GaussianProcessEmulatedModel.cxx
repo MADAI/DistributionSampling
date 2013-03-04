@@ -31,8 +31,7 @@ GaussianProcessEmulatedModel
 GaussianProcessEmulatedModel
 ::~GaussianProcessEmulatedModel()
 {
-  if (m_emulator != NULL) 
-    delete m_emulator;
+  delete m_emulator;
 }
 
 /**
