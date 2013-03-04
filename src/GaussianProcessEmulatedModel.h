@@ -73,19 +73,6 @@ class GaussianProcessEmulatedModel : public Model {
     return METHOD_NOT_IMPLEMENTED;
   }
 
-  /**
-   * METHOD_NOT_IMPLEMENTED
-   */
-  virtual ErrorType GetScalarAndGradientOutputs(
-    const std::vector< double > & parameters,
-    const std::vector< bool > & activeParameters,
-    std::vector< double > & scalars,
-    unsigned int outputIndex,
-    std::vector< double > & gradient) const
-  {
-    return METHOD_NOT_IMPLEMENTED;
-  }
-
 
 private:
   /** pointer to emulator object in libEmuPlusPlus */
