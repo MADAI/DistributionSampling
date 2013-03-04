@@ -53,16 +53,12 @@ GaussianProcessEmulatedModel
   int numberOfParameters = m_emulator->getNumberOfParameters();
   int numberOfOutputs = m_emulator->getNumberOfOutputs();
   for (int i = 0; i < numberOfParameters; ++i) {
-    // std::string name("param");
-    // double min = 0.0;
-    // double max = 1.0;
     std::string name(m_emulator->getParameterName(i));
     double min = m_emulator->getParameterMinimum(i);
     double max = m_emulator->getParameterMaximum(i);
     this->AddParameter(name, min, max);
   }
   for (int i = 0; i < numberOfOutputs; ++i) {
-    // std::string name("output");
     std::string name(m_emulator->getOutputName(i));
     this->AddScalarOutputName(name );
   }
