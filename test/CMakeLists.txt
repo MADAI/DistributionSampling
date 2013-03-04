@@ -22,8 +22,12 @@ add_executable( Gaussian2DModelTest Gaussian2DModelTest.cxx )
 target_link_libraries( Gaussian2DModelTest ${LIBRARIES} )
 add_test( Gaussian2DModelTest Gaussian2DModelTest )
 
-#add_executable( MarkovChainMonteCarloSamplerTest MarkovChainMonteCarloSamplerTest.cxx )
-#target_link_libraries( MarkovChainMonteCarloSamplerTest ${LIBRARIES} )
+add_executable( MarkovChainMonteCarloSamplerTest
+  MarkovChainMonteCarloSamplerTest.cxx
+  TestModel.cxx
+  TestLikelihoodDistribution.cxx
+  TestPriorDistribution.cxx )
+target_link_libraries( MarkovChainMonteCarloSamplerTest ${LIBRARIES} )
 #add_test( MarkovChainMonteCarloSamplerTest MarkovChainMonteCarloSamplerTest
 #  ${TEST_BASE_DIR}/TestModel
 #  ${TEST_BASE_DIR}/MarkovChainMonteCarloSamplerTest/MarkovChainMonteCarloSamplerTest.csv )

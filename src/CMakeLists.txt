@@ -19,9 +19,6 @@ set( SRC_FILES
   RHIC_PriorDistribution.cxx
   RegularStepGradientDescentSampler.cxx
   SimpleMetropolisHastingsSampler.cxx
-  TestLikelihoodDistribution.cxx
-  TestModel.cxx
-  TestPriorDistribution.cxx
   Trace.cxx
   TraceElement.cxx
 )
