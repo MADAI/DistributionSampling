@@ -20,14 +20,16 @@
 
 namespace madai {
 
-GaussianProcessEmulatedModel::GaussianProcessEmulatedModel() :
+GaussianProcessEmulatedModel
+::GaussianProcessEmulatedModel() :
   m_emulator(NULL)
 {
 	this->m_StateFlag = UNINITIALIZED;
   // Note that all methods must check for (this->m_emulator == NULL).
 }
 
-GaussianProcessEmulatedModel::~GaussianProcessEmulatedModel()
+GaussianProcessEmulatedModel
+::~GaussianProcessEmulatedModel()
 {
   if (this->m_emulator != NULL)
     delete this->m_emulator;
@@ -37,7 +39,9 @@ GaussianProcessEmulatedModel::~GaussianProcessEmulatedModel()
  * Loads a configuration from a file.  The format of the file is
  * defined by this function.  We'll lock it down later.
  */
-Model::ErrorType GaussianProcessEmulatedModel::LoadConfigurationFile( const std::string fileName )
+Model::ErrorType
+GaussianProcessEmulatedModel
+::LoadConfigurationFile( const std::string fileName )
 {
   this->m_emulator = new emulator(fileName);
   if (! this->m_emulator->IsOkay()) {
@@ -70,7 +74,9 @@ Model::ErrorType GaussianProcessEmulatedModel::LoadConfigurationFile( const std:
  * Get the scalar outputs from the model evaluated at x.  If an
  * error happens, the scalar output array will be left incomplete.
  */
-Model::ErrorType GaussianProcessEmulatedModel::GetScalarOutputsAndCovariance(
+Model::ErrorType
+GaussianProcessEmulatedModel
+::GetScalarOutputsAndCovariance(
   const std::vector< double > & parameters,
   std::vector< double > & scalars,
   std::vector< double > & scalarCovariance) const
@@ -91,7 +97,9 @@ Model::ErrorType GaussianProcessEmulatedModel::GetScalarOutputsAndCovariance(
  * Get the scalar outputs from the model evaluated at a position in
  * the parameter space.
  */
-Model::ErrorType GaussianProcessEmulatedModel::GetScalarOutputs(
+Model::ErrorType
+GaussianProcessEmulatedModel
+::GetScalarOutputs(
   const std::vector< double > & parameters,
   std::vector< double > & scalars ) const
 {
