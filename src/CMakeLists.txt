@@ -1,6 +1,5 @@
 set( SRC_FILES
   GaussianProcessEmulatedModel.cxx
-  DiceModel.cxx
   Distribution.cxx
   ExternalModel.cxx
   Gaussian2DModel.cxx

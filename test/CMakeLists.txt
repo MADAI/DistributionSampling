@@ -5,10 +5,6 @@ set( LIBRARIES
 
 set( TEST_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
 
-#add_executable( DiceMCMC DiceMCMC.cxx )
-#target_link_libraries( DiceMCMC ${LIBRARIES} )
-#add_test( DiceMCMC DiceMCMC ${TEST_BASE_DIR}/DiceMCMC )
-
 add_executable( ExternalModelMCMCTest ExternalModelMCMCTest.cxx )
 target_link_libraries( ExternalModelMCMCTest ${LIBRARIES} )
 add_test( ExternalModelMCMCTest
