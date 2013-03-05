@@ -29,7 +29,6 @@
 #include "random.h"
 
 #include "Model.h"
-#include "MultiModel.h"
 #include "Sampler.h"
 #include "Trace.h"
 

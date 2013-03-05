@@ -16,9 +16,7 @@
  *
  *=========================================================================*/
 
-#include "MultiModel.h"
-
-#include "MarkovChainMonteCarloSampler.h"
+#include "Distribution.h"
 
 
 namespace madai {

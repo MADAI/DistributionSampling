@@ -1,8 +1,5 @@
 set( SRC_FILES
   GaussianProcessEmulatedModel.cxx
-  CosmoLikelihoodDistribution.cxx
-  CosmoModel.cxx
-  CosmoPriorDistribution.cxx
   DiceModel.cxx
   Distribution.cxx
   ExternalModel.cxx
@@ -10,13 +7,9 @@ set( SRC_FILES
   LikelihoodDistribution.cxx
   MarkovChainMonteCarloSampler.cxx
   Model.cxx
-  MultiModel.cxx
   Sampler.cxx
   PriorDistribution.cxx
   ProcessPipe.c
-  RHICModel.cxx
-  RHIC_LikelihoodDistribution.cxx
-  RHIC_PriorDistribution.cxx
   RegularStepGradientDescentSampler.cxx
   SimpleMetropolisHastingsSampler.cxx
   Trace.cxx
