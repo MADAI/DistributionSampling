@@ -4,11 +4,9 @@ set( SRC_FILES
   Distribution.cxx
   ExternalModel.cxx
   Gaussian2DModel.cxx
-  LikelihoodDistribution.cxx
   MarkovChainMonteCarloSampler.cxx
   Model.cxx
   Sampler.cxx
-  PriorDistribution.cxx
   ProcessPipe.c
   RegularStepGradientDescentSampler.cxx
   SimpleMetropolisHastingsSampler.cxx
