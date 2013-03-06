@@ -37,3 +37,7 @@ add_test( TraceTest TraceTest )
 add_executable( TraceElementTest TraceElementTest.cxx )
 target_link_libraries( TraceElementTest ${LIBRARIES} )
 add_test( TraceElementTest TraceElementTest )
+
+add_executable( UniformDistributionTest UniformDistributionTest.cxx )
+target_link_libraries( UniformDistributionTest ${LIBRARIES} )
+add_test( UniformDistributionTest UniformDistributionTest )
