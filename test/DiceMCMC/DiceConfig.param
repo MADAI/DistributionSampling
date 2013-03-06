@@ -1,7 +1,0 @@
-bool SUM_DICE false
-bool DISTINGUISHABLE false
-int DICE 2
-int SIDES 4
-bool WEIGHTED true
-vector WEIGHTS1 4 2 1 1
-vector WEIGHTS2 1 1 2 4

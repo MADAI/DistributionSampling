@@ -1,5 +1,0 @@
-vector MIXING_STD_DEV .01 .01 .01 .01 .01 .01
-bool SYMMETRIC_PROPOSAL false
-bool RESCALED_PROPOSAL false
-bool FLAT_STEP true
-
