@@ -1,11 +1,11 @@
 set( SRC_FILES
   Random.cxx
   GaussianProcessEmulatedModel.cxx
+  Parameter.cxx
   Distribution.cxx
   ExternalModel.cxx
   Gaussian2DModel.cxx
   GaussianDistribution.cxx
-  MarkovChainMonteCarloSampler.cxx
   Model.cxx
   Sampler.cxx
   ProcessPipe.c

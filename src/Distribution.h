@@ -30,6 +30,7 @@ class Distribution {
 public:
   Distribution();
   virtual ~Distribution();
+  virtual Distribution * Clone() const = 0;
 
   virtual double GetLogProbabilityDensity(double value) const = 0;
   virtual double GetProbabilityDensity(double value) const = 0;

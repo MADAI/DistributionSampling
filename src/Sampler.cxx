@@ -28,17 +28,10 @@ Sampler
 ::Sampler( const Model *model ) :
   m_Model(model),
   m_CurrentParameters(model->GetNumberOfParameters(),0.0),
-  m_OutputScalarToOptimizeIndex( 0 ),
-  m_ActiveParameterIndices(model->GetNumberOfParameters(), true),
-  m_OptimizeOnLikelihood(false)
+  m_ActiveParameterIndices(model->GetNumberOfParameters(), true)
 {
   assert(model != NULL);
   unsigned int np = this->m_Model->GetNumberOfParameters();
-  unsigned int nt = this->m_Model->GetNumberOfScalarOutputs();
-  assert(this->m_OutputScalarToOptimizeIndex < nt);
-
-  // Initialize the vector for current parameters.
-  m_CurrentParameters.resize( m_Model->GetNumberOfParameters() );
 
   // Activate all parameters by default.
   const std::vector< Parameter > & params = this->m_Model->GetParameters();
@@ -48,10 +41,6 @@ Sampler
     {
     this->m_ActiveParameters.insert( params[i].m_Name );
     }
-
-  this->m_OutputScalarToOptimize
-    = this->m_Model->GetScalarOutputNames().at(
-      this->m_OutputScalarToOptimizeIndex);
 }
 
 
@@ -200,45 +189,6 @@ Sampler
 }
 
 
-Sampler::ErrorType
-Sampler
-::SetOutputScalarToOptimize( const std::string & scalarName )
-{
-  unsigned int idx = this->GetOutputScalarIndex( scalarName );
-  if ( idx == static_cast< unsigned int >( -1 ) )
-    return INVALID_PARAMETER_INDEX_ERROR;
-  this->m_OutputScalarToOptimize = scalarName;
-  this->m_OutputScalarToOptimizeIndex = idx;
-  return NO_ERROR;
-}
-
-
-Sampler::ErrorType
-Sampler
-::SetOutputScalarToOptimize( unsigned int idx )
-{
-  if (idx >= m_Model->GetNumberOfScalarOutputs())
-    return INVALID_PARAMETER_INDEX_ERROR;
-  this->m_OutputScalarToOptimizeIndex = idx;
-  this->m_OutputScalarToOptimize = this->m_Model->GetScalarOutputNames()[idx];
-  return NO_ERROR;
-}
-
-
-std::string
-Sampler
-::GetOutputScalarToOptimizeName()
-{
-  return this->m_OutputScalarToOptimize;
-}
-
-
-unsigned int
-Sampler
-::GetOutputScalarToOptimizeIndex() const
-{
-  return this->m_OutputScalarToOptimizeIndex;
-}
 
 
 const std::vector< double > &
@@ -249,19 +199,6 @@ Sampler
 }
 
 
-unsigned int
-Sampler
-::GetOutputScalarIndex( const std::string & scalarName ) const
-{
-  std::vector< std::string > const & outputs = this->m_Model->GetScalarOutputNames();
-  for ( unsigned int i = 0; i < outputs.size(); i++ )
-    {
-    if ( outputs[i] == scalarName )
-      return i;
-    }
-
-  return static_cast< unsigned int >(-1); // Intentional underflow
-}
 
 
 unsigned int
@@ -278,46 +215,6 @@ Sampler
   return static_cast< unsigned int >(-1); // Intentional underflow
 }
 
-
-// To check if the model supplis a method for calculating the Likelihood and Prior
-bool
-Sampler
-::IsLikeAndPrior() const
-{
-  std::cerr << "Using point at center of each parameter range" << std::endl;
-  double * range = new double[2]();
-  std::vector< double > temp_vals( this->m_Model->GetNumberOfParameters(), 0.0 );
-
-  for ( unsigned int i = 0; i < this->m_Model->GetNumberOfParameters(); i++ ) {
-    this->m_Model->GetRange( i, range );
-    temp_vals[i] = (range[0] + range[1]) / 2;
-    std::cerr << temp_vals[i] << "  ";
-  }
-  std::cerr << std::endl;
-
-  double Likelihood, Prior;
-  if ( this->m_Model->GetLikeAndPrior( temp_vals, Likelihood, Prior ) != Model::NO_ERROR ) {
-    std::cerr << "GetLikeAndPrior not defined in model" << std::endl;
-    return false;
-  } else {
-    std::cerr << "GetLikeAndPrior is defined" << std::endl;
-    return true;
-  }
-}
-
-
-
-bool
-Sampler
-::GetOptimizeOnLikelihood() const {
-  return this->m_OptimizeOnLikelihood;
-}
-
-void
-Sampler
-::SetOptimizeOnLikelihood(bool val) {
-  this->m_OptimizeOnLikelihood = val;
-}
 
 } // end namespace madai
 

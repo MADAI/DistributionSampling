@@ -54,6 +54,8 @@ int main(int argc, char ** argv) {
 
   madai::SimpleMetropolisHastingsSampler simple_mcmc(&externalModel);
 
+  simple_mcmc.SetStepSize(0.1);
+
   std::vector< madai::Parameter > const & parameters
     = externalModel.GetParameters();
 
@@ -61,8 +63,15 @@ int main(int argc, char ** argv) {
   //   simple_mcmc.ActivateParameter(parameters[i].m_Name);
   // } // should be unnecesary
 
-  simple_mcmc.SetOutputScalarToOptimize
-    ( externalModel.GetScalarOutputNames().at(0) );
+  int t = externalModel.GetNumberOfScalarOutputs();
+  std::vector< double > observedScalarValues;
+  for(int i = 0; i < t; ++i)
+    observedScalarValues.push_back(0.2);
+  externalModel.SetObservedScalarValues(observedScalarValues);
+  std::vector< double > observedScalarCovariance(t * t, 0.0);
+  for(int i = 0; i < t; ++i)
+    observedScalarCovariance[i + (t * i)] = 0.05;
+  externalModel.SetObservedScalarCovariance(observedScalarCovariance);
 
   madai::Trace trace;
   unsigned int numberIter = 500;

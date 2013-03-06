@@ -33,7 +33,9 @@ class Model;
 
 /** \class Sampler
  *
- * Base class for algorithms that sample from a distribution. */
+ * Makes a distribution proportional to exp(LogPosteriorLikelihood)
+ * Base class for algorithms that sample from a distribution.
+ */
 class Sampler {
 public:
   /** ErrorType */
@@ -90,54 +92,20 @@ public:
   /** Get the current value of a parameter. */
   virtual double GetParameterValue( const std::string & parameterName );
 
-  //@{
-  /**
-   * Sets/Gets the output scalar value. Either refer to a scalar by
-   * name or index within this->m_model->m_ScalarOutputNames.
-  */
-  ErrorType SetOutputScalarToOptimize( const std::string & scalarName );
-  ErrorType SetOutputScalarToOptimize( unsigned int index );
-  std::string GetOutputScalarToOptimizeName();
-  unsigned int GetOutputScalarToOptimizeIndex() const;
-  //@}
-
   /** Compute the next set of parameters and the output scalar values,
    * and save them in the trace file. */
   virtual void NextSample(Trace *trace) = 0;
 
   /** Get the current parameter values. */
   const std::vector< double > & GetCurrentParameters() const;
-
-  /**
-   * If true, make a distribution proportional to exp(LogPosteriorLikelihood)
-   * If false, make a distribution proportional to m_OutputScalarToOptimize
-   *
-   * LogPosteriorLikelihood comes from the
-   * m_Model->GetScalarOutputsAndLogLikelihood() function;
-   */
-  virtual bool GetOptimizeOnLikelihood() const;
-
-  /**
-   * If true, make a distribution proportional to exp(LogPosteriorLikelihood)
-   * If false, make a distribution proportional to m_OutputScalarToOptimize
-   *
-   * LogPosteriorLikelihood comes from the
-   * m_Model->GetScalarOutputsAndLogLikelihood() function;
-   */
-  virtual void SetOptimizeOnLikelihood(bool val);
+  double & GetCurrentLogLikelihood() const;
 
 protected:
   /** intentionally hidden */
   Sampler() {};
-  /** useful for a implementation */
-  unsigned int GetOutputScalarIndex( const std::string & scalarName ) const;
+
   /** useful for a implementation */
   unsigned int GetParameterIndex( const std::string & parameterName ) const;
-
-  /**
-   * \todo WHAT IS THIS?
-   */
-  bool IsLikeAndPrior() const;
 
   /** The Model from which this Sampler takes samples. */
   const Model *           m_Model;
@@ -148,16 +116,9 @@ protected:
   /** Stores the point in parameter space. This will change when
    *  NextSample() is called. */
   std::vector< double >   m_CurrentParameters;
-
-  /** The name of the output scalar to optimize. */
-  std::string             m_OutputScalarToOptimize;
-
-  /** The index of the output scalar to optimize. */
-  unsigned int            m_OutputScalarToOptimizeIndex;
+  double                  m_CurrentLogLikelihood;
 
   /**
-   * If true, make a distribution proportional to exp(LogPosteriorLikelihood)
-   * If false, make a distribution proportional to m_OutputScalarToOptimize
    *
    * LogPosteriorLikelihood comes from the
    * m_Model->GetScalarOutputsAndLogLikelihood() function;
