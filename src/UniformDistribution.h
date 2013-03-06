@@ -16,20 +16,38 @@
  *
  *=========================================================================*/
 
+#ifndef __UniformDistribution_h__
+#define __UniformDistribution_h__
+
 #include "Distribution.h"
 
 
 namespace madai {
 
-Distribution
-::Distribution()
-{
-}
+class UniformDistribution : public Distribution {
+public:
+  UniformDistribution();
+  virtual ~UniformDistribution();
 
+  /** Set/get the minimum value of the uniform distribution. */
+  void SetMinimum( double minimum );
+  double GetMinimum() const;
 
-Distribution
-::~Distribution()
-{
-}
+  /** Set/get the maximum value of the uniform distribution. */
+  void SetMaximum( double maximum );
+  double GetMaximum() const;
+
+  virtual double GetLogProbabilityDensity( double value ) const;
+  virtual double GetProbabilityDensity( double value ) const;
+  virtual double GetPercentile( double percentile ) const;
+
+protected:
+  double m_Minimum;
+  double m_Maximum;
+
+  inline bool InRange( double value ) const;
+};
 
 } // end namespace madai
+
+#endif // __UniformDistribution_h__
