@@ -1,4 +1,5 @@
 set( SRC_FILES
+  Random.cxx
   GaussianProcessEmulatedModel.cxx
   Distribution.cxx
   ExternalModel.cxx

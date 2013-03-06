@@ -100,6 +100,12 @@ GaussianDistribution
   return 0.0;
 }
 
+double
+GaussianDistribution
+::GetSample(madai::Random & r) const
+{
+  return r.Gaussian(this->m_Mean, this->m_StandardDeviation);
+}
 
 double
 GaussianDistribution
