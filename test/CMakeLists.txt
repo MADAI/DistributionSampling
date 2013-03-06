@@ -30,6 +30,10 @@ add_executable( NumericalGradientEstimationTest NumericalGradientEstimationTest.
 target_link_libraries( NumericalGradientEstimationTest ${LIBRARIES} )
 add_test( NumericalGradientEstimationTest NumericalGradientEstimationTest )
 
+add_executable( RandomTest RandomTest.cxx )
+target_link_libraries( RandomTest ${LIBRARIES} )
+add_test( RandomTest RandomTest )
+
 add_executable( RegularStepGradientDescentOptimizerTest RegularStepGradientDescentOptimizerTest.cxx )
 target_link_libraries( RegularStepGradientDescentOptimizerTest ${LIBRARIES} )
 add_test( RegularStepGradientDescentOptimizerTest RegularStepGradientDescentOptimizerTest )
@@ -45,3 +49,4 @@ add_test( TraceElementTest TraceElementTest )
 add_executable( UniformDistributionTest UniformDistributionTest.cxx )
 target_link_libraries( UniformDistributionTest ${LIBRARIES} )
 add_test( UniformDistributionTest UniformDistributionTest )
+

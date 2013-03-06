@@ -40,6 +40,7 @@ public:
   virtual double GetLogProbabilityDensity( double value ) const;
   virtual double GetProbabilityDensity( double value ) const;
   virtual double GetPercentile( double percentile ) const;
+  virtual double GetSample(madai::Random & r) const;
 
 protected:
   double m_Minimum;

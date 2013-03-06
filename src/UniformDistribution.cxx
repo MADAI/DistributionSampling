@@ -17,6 +17,7 @@
  *=========================================================================*/
 
 #include "UniformDistribution.h"
+#include "Random.h"
 
 #include <cmath>
 #include <limits>
@@ -97,6 +98,13 @@ UniformDistribution
 ::GetPercentile( double percentile ) const
 {
   return percentile * ( m_Maximum - m_Minimum ) + m_Minimum;
+}
+
+double
+UniformDistribution
+::GetSample(madai::Random & r) const
+{
+  return r.Uniform(m_Minimum, m_Maximum);
 }
 
 

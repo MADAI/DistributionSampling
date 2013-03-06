@@ -19,9 +19,10 @@
 #ifndef __Distribution_h__
 #define __Distribution_h__
 
+#include "Random.h"
 
 namespace madai {
-    
+
 /** \class Distribution
  *
  * Base class for distributions. */
@@ -33,7 +34,8 @@ public:
   virtual double GetLogProbabilityDensity(double value) const = 0;
   virtual double GetProbabilityDensity(double value) const = 0;
   virtual double GetPercentile(double percentile) const = 0;
-  
+  virtual double GetSample(madai::Random & r) const = 0;
+
 protected:
 
 };
