@@ -21,6 +21,8 @@
 
 #include "Distribution.h"
 
+#include "boost/math/distributions/normal.hpp"
+
 
 namespace madai {
 
@@ -54,6 +56,10 @@ protected:
 
   /** Compute the exponent. */
   inline double GetExponent( double value ) const;
+
+private:
+  /** Underlying class from Boost library that computes the things we want. */
+  boost::math::normal * m_InternalDistribution;
 
 };
 

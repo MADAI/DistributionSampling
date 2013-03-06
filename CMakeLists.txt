@@ -6,6 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMake")
 find_package( coral REQUIRED )
 find_package( MADAIEmulator REQUIRED )
 find_package( GSL REQUIRED )
+find_package( Boost REQUIRED )
 set(CORELIBS
   ${coral_LIBRARIES}
   ${MADAIEmulator_LIBRARIES}
@@ -15,6 +16,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${coral_INCLUDE_DIRS}
   ${MADAIEmulator_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 
 link_directories(
