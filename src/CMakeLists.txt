@@ -11,6 +11,7 @@ set( SRC_FILES
   SimpleMetropolisHastingsSampler.cxx
   Trace.cxx
   TraceElement.cxx
+  UniformDistribution.cxx
 )
 
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${DistributionSampling_BINARY_DIR}/lib )
