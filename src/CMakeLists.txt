@@ -3,6 +3,7 @@ set( SRC_FILES
   Distribution.cxx
   ExternalModel.cxx
   Gaussian2DModel.cxx
+  GaussianDistribution.cxx
   MarkovChainMonteCarloSampler.cxx
   Model.cxx
   Sampler.cxx
