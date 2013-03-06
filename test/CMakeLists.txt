@@ -14,6 +14,10 @@ add_test( ExternalModelMCMCTest
 #target_link_libraries( Gaussian2DMCMCTest ${LIBRARIES} )
 #add_test( Gaussian2DMCMCTest Gaussian2DMCMCTest ${TEST_BASE_DIR}/Gaussian2DMCMC )
 
+add_executable( GaussianDistributionTest GaussianDistributionTest.cxx )
+target_link_libraries( GaussianDistributionTest ${LIBRARIES} )
+add_test( GaussianDistributionTest GaussianDistributionTest )
+
 add_executable( Gaussian2DModelTest Gaussian2DModelTest.cxx )
 target_link_libraries( Gaussian2DModelTest ${LIBRARIES} )
 add_test( Gaussian2DModelTest Gaussian2DModelTest )
