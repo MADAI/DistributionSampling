@@ -37,3 +37,7 @@ add_test( TraceTest TraceTest )
 add_executable( TraceElementTest TraceElementTest.cxx )
 target_link_libraries( TraceElementTest ${LIBRARIES} )
 add_test( TraceElementTest TraceElementTest )
+
+add_executable( RandomTest RandomTest.cxx )
+target_link_libraries( RandomTest ${LIBRARIES} )
+add_test( RandomTest RandomTest )

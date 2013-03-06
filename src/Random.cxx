@@ -23,13 +23,18 @@ extern "C" {
 
 #include "Random.h"
 
+namespace {
+	const gsl_rng_type * MADAI_RANDOM_GENERATOR = gsl_rng_mt19937;
+};
+
 namespace madai {
+
 /**
  * Constructor.  Uses time() for seed.
  */
 Random::Random()
 {
-  this->m_rng = gsl_rng_alloc (gsl_rng_mt19937);
+  this->m_rng = gsl_rng_alloc (MADAI_RANDOM_GENERATOR);
   this->Reseed();
 }
 
@@ -38,7 +43,7 @@ Random::Random()
  */
 Random::Random(unsigned long int seed)
 {
-  this->m_rng = gsl_rng_alloc (gsl_rng_taus);
+  this->m_rng = gsl_rng_alloc (MADAI_RANDOM_GENERATOR);
   this->Reseed(seed);
 }
 
@@ -87,7 +92,7 @@ double Random::Uniform()
  */
 double Random::Uniform(double min, double max)
 {
-  return min + (gsl_rng_uniform(this->m_rng) / (max - min));
+  return min + (gsl_rng_uniform(this->m_rng) * (max - min));
 }
 
 /**
