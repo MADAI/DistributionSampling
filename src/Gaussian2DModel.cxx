@@ -142,27 +142,6 @@ Gaussian2DModel
 }
 
 
-Model::ErrorType
-Gaussian2DModel
-::GetLikeAndPrior( const std::vector< double > & parameters,
-                   double & Like,
-                   double & Prior) const
-{
-  std::vector< double > output;
-  ErrorType error = this->GetScalarOutputs( parameters, output );
-  if ( error != NO_ERROR )
-    {
-    return error;
-    }
-  Like = log( output[0] );
-
-  // We'll use a uniform prior for now;
-  Prior = 1;
-
-  return NO_ERROR;
-}
-
-
 void
 Gaussian2DModel
 ::GetDeviations( double & DevX, double & DevY ) const

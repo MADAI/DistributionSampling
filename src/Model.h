@@ -27,8 +27,13 @@
 
 namespace madai {
 
+/** \class Model
+ *
+ * Base class for Models. */
 class Model {
 public:
+
+  /** Error codes returned by various methods. */
   typedef enum {
     NO_ERROR = 0,
     INVALID_PARAMETER_INDEX,
@@ -43,11 +48,19 @@ public:
   Model();
   virtual ~Model();
 
-  /** Loads a configuration from a file. Subclasses should override
-   * this method as this implementation does nothing. **/
+  /** Loads a configuration from a file
+   *
+   *  Subclasses should override this method as this implementation
+   * does nothing.
+   *
+   * \param fileName Name of the configuration file to load
+   */
   virtual ErrorType LoadConfigurationFile( const std::string fileName );
 
-  /** Has the model been initialized? */
+  /** Has the model been initialized?
+   *
+   * \return Returns true if the Model has been initialized, false
+   * otherwise. */
   bool IsReady() const;
 
   /** Get the number of parameters. */
@@ -68,7 +81,14 @@ public:
   /** Get the valid range for the parameter at parameterIndex. */
   virtual ErrorType GetRange( unsigned int parameterIndex, double range[2] ) const;
 
-  /** Get the scalar outputs from the model evaluated at x. */
+  /** Get the scalar outputs from the model evaluated at x
+   *
+   * \param parameters Parameter values where the Model should be
+   * evaluated. The length of this vector must equal the number of the
+   * parameters in the Model.
+   * \param scalars A vector to hold the scalar outputs from the Model
+   * when evaluated at the point in parameter space specified by the
+   * parameters argument. */
   virtual ErrorType GetScalarOutputs( const std::vector< double > & parameters,
                                       std::vector< double > & scalars ) const = 0;
 
@@ -79,7 +99,17 @@ public:
    * for only the active parameters. That is, the first element in the
    * vector will contain the gradient component for the first active
    * parameter, the second element in the vector will contain the
-   * gradient component for the second active parameter, and so on. */
+   * gradient component for the second active parameter, and so on.
+   *
+   * \param parameters Point in parameter space where the Model should
+   * be evaluated.
+   * \param activeParameters List of parameters for which the gradient
+   * should be computed.
+   * \param scalars Output argument that will contain the scalars from
+   * evaluating the Model.
+   * \param outputIndex To remove.
+   * \param gradient Output argument that will contain the gradient
+   * components requested via the activeParameters vector. */
   virtual ErrorType GetScalarAndGradientOutputs(
     const std::vector< double > & parameters,
     const std::vector< bool > & activeParameters,
@@ -87,35 +117,38 @@ public:
     unsigned int outputIndex,
     std::vector< double > & gradient) const;
 
-  /**
-   * Expect vector of length GetNumberOfScalarOutputs().  If you never
-   * set this, all model scalar outputs are assumed to already have
-   * the observed value subtracted off.  By default, we use the zero
-   * vector as ObservedScalarValues.  To unset this value, pass a
-   * zero-length vector, which is interpreted as the zero vector.
+  /** Expect vector of length GetNumberOfScalarOutputs().
+   * 
+   * If you never set this, all model scalar outputs are assumed to
+   * already have the observed value subtracted off.  By default, we
+   * use the zero vector as ObservedScalarValues.  To unset this
+   * value, pass a zero-length vector, which is interpreted as the
+   * zero vector.
    */
   virtual ErrorType SetObservedScalarValues(
     const std::vector< double > & observedScalarValues);
 
-  /**
-   * Expects a t-by-t symmetric covariance matrix, flattened into a
-   * vector of length (t*t), where t = GetNumberOfScalarOutputs().
+  /** Expects a t-by-t symmetric covariance matrix, flattened into a
+   * vector of length (t*t), where t = GetNumberOfScalarOutputs()
+   *
    * This matrix represents the variances in the field measurements of
    * the observed scalars.  Consequently, the "distance" in output
    * space is based on the inverse of the covariance (the precision
    * matrix).
    *
-   *  If you never set this, assumes zero.  To calculate
-   *  log-likelihood, either the observed value, the model outputs, or
-   *  both MUST have a covariance value.
+   * If you never set this, assumes zero.  To calculate
+   * log-likelihood, either the observed value, the model outputs, or
+   * both MUST have a covariance value.
    */
   virtual ErrorType SetObservedScalarCovariance(
     const std::vector< double > & observedScalarCovariance);
 
-  /**
-   * 1) Calculate all of the scalar values at this point in parameter
+  /** Gets the scalar outputs and log-likelihood of the model for a
+   * point in parameter space
+   *
+   * 1) Calculates all of the scalar values at this point in parameter
    * space.
-   * 2) calculate log-likelihood, using
+   * 2) calculates log-likelihood, using
    *     model scalars outputs
    *     model scalar output covariance
    *     observed scalar values
@@ -135,21 +168,18 @@ public:
    * @return logPriorLikelihood + LogLikelihood
    *
    * If both covariances are zero, the matrix will not be invertable
-   * and the log-likelihood will be negative-infinity.
-   *
-   * If LogPriorLikelihoodFunction is NULL, it is assumed to be zero.
-   */
-  virtual ErrorType GetScalarOutputsAndLogLikelihood(
+   * and the log-likelihood will be negative-infinity. */
+   virtual ErrorType GetScalarOutputsAndLogLikelihood(
     const std::vector< double > & parameters,
     std::vector< double > & scalars,
     double & logLikelihood);
 
-  /**
-   * Some models don't know the output values precisely, instead they
-   * produce a distribution of possible output values, with a mean and
-   * covariance.  In that case, this function should be overridden by
-   * subclasses to return those means and that covariance matrix
-   * (flattened into a vector).
+  /** Some models don't know the output values precisely
+   *
+   * Instead they produce a distribution of possible output values,
+   * with a mean and covariance.  In that case, this function should
+   * be overridden by subclasses to return those means and that
+   * covariance matrix (flattened into a vector).
    *
    * If not overridden, this will simply call GetScalarOutputs() and
    * return an empty vector for scalarCovariance, representing a zero
@@ -160,20 +190,18 @@ public:
     std::vector< double > & scalars,
     std::vector< double > & scalarCovariance);
 
-  /**
-   * return the sum of the LogPriorLikelihood for each x[i]
-   * return the log of the prior likelihood at point x in parameter
-   * space.
-   */
+  /** Returns the sum of the LogPriorLikelihood for each x[i] which is
+   * the log of the prior likelihood for the parameters */
   virtual double GetLogPriorLikelihood(const std::vector< double > & x) const;
 
-  /** Set/get the gradient estimate step size. */
+  /** Set the gradient estimate step size used in GetScalarAndGradientOutputs */
   void SetGradientEstimateStepSize( double stepSize );
+
+  /** Get the gradient estimate step size. */
   double GetGradientEstimateStepSize() const;
 
   /** Returns an error code as a string. */
   static std::string GetErrorTypeAsString( ErrorType error );
-
 
 
 protected:
@@ -200,8 +228,7 @@ protected:
   /** Current state of the model. */
   InternalState m_StateFlag;
 
-  /**
-   * Add a parameter.
+  /** Add a parameter.
    *
    * \deprecated Use the priorDistribution form of this command.
    */
@@ -217,16 +244,14 @@ protected:
   void AddScalarOutputName( const std::string & name );
 
 
-  /**
-   * A GetNumberOfScalarOutputs()-length vector.
-   * if empty, assume zero vector.
-   */
+  /** A GetNumberOfScalarOutputs()-length vector.
+   * if empty, assume zero vector */
   std::vector< double > m_ObservedScalarValues;
-  /**
-   * A (GetNumberOfScalarOutputs x GetNumberOfScalarOutputs) matrix,
-   * flattened so that we can use a gsl_matrix_view to look at it.
-   * If empty, assume zero matrix.
-   */
+
+  /** A (GetNumberOfScalarOutputs x GetNumberOfScalarOutputs) matrix,
+   * flattened so that we can use a gsl_matrix_view to look at it
+   *
+   * If empty, assume zero matrix. */
   std::vector< double > m_ObservedScalarCovariance;
 
 }; // end Model

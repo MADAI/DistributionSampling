@@ -41,6 +41,7 @@ namespace madai {
  * parameters and produce model outputs. */
 class ExternalModel : public Model {
 public:
+  /** Encodes covariance type */
   typedef enum {
     NO_COVARIANCE,
     TRIANGULAR_COVARIANCE,
@@ -51,45 +52,35 @@ public:
   ExternalModel();
   virtual ~ExternalModel();
 
-  /**
-   * Start the external process and leave it open for queries.
-   */
+  /** Start the external process and leave it open for queries
+   *
+   * \param processPath Path to the process to be run
+   * \param arguments Vector of arguments to pass to the process */
   virtual ErrorType StartProcess( const std::string & processPath,
                                   const std::vector< std::string > & arguments );
 
-  /**
-   * Stop the external process.
-   */
+  /** Stop the external process */
   virtual ErrorType StopProcess();
 
-  /**
-   * Get the scalar outputs from the model evaluated at x.  If an
-   * error happens, the scalar output array will be left incomplete.
-   */
+  /** Get the scalar outputs from the model evaluated at x
+   *
+   * If an error happens, the scalar output array will be left
+   * incomplete. */
   virtual ErrorType GetScalarOutputsAndCovariance(
       const std::vector< double > & parameters,
       std::vector< double > & scalars,
       std::vector< double > & scalarCovariance) const;
 
-  /**
-   * Get the scalar outputs from the model evaluated at a position in
-   * the parameter space.
-   */
+  /** Get the scalar outputs from the model evaluated at a position in
+   * the parameter space. */
   virtual ErrorType GetScalarOutputs( const std::vector< double > & parameters,
                                       std::vector< double > & scalars ) const;
 
-  /**
-   * METHOD_NOT_IMPLEMENTED
-   */
-  virtual Model::ErrorType GetLikeAndPrior(
-    const std::vector<double>&, double&, double&) const {
-    return METHOD_NOT_IMPLEMENTED;
-  }
-
-
 private:
+  /** Container for process-related information */
   ProcessPipe m_Process;
 
+  /** Shape of the covariance matrix reported by the external model */
   CovarianceMode m_CovarianceMode;
 
 }; // end ExternalModel

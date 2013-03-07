@@ -24,30 +24,50 @@
 
 namespace madai {
 
+/** \class UniformDistribution
+ *
+ * Provides access to various aspects of a uniform distribution. */
 class UniformDistribution : public Distribution {
 public:
   UniformDistribution();
   virtual ~UniformDistribution();
+
   virtual Distribution * Clone() const;
 
-  /** Set/get the minimum value of the uniform distribution. */
+  /** Set the minimum value of the uniform distribution. */
   void SetMinimum( double minimum );
+
+  /** Get the minimum value of the uniform distribution. */
   double GetMinimum() const;
 
-  /** Set/get the maximum value of the uniform distribution. */
+  /** Set the maximum value of the uniform distribution. */
   void SetMaximum( double maximum );
+
+  /** Get the maximum value of the uniform distribution. */
   double GetMaximum() const;
 
-  virtual double GetLogProbabilityDensity( double value ) const;
-  virtual double GetProbabilityDensity( double value ) const;
+
+  virtual double GetLogProbabilityDensity( double x ) const;
+
+  virtual double GetProbabilityDensity( double x ) const;
+
   virtual double GetPercentile( double percentile ) const;
+
   virtual double GetSample(madai::Random & r) const;
 
 protected:
+  /** Minimum value at which the probability density is non-zero. */
   double m_Minimum;
+
+  /** Maximum value at which the probability density is non-zero. */
   double m_Maximum;
 
-  inline bool InRange( double value ) const;
+  /** Indicates whether the given value is in the range [m_Minimum,
+   *  m_Maximum]
+   *
+   * \param x The argument to the probability density function.
+   * \return True if the parameter value is in the range, false otherwise. */
+  inline bool InRange( double x ) const;
 };
 
 } // end namespace madai

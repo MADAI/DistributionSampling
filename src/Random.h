@@ -25,74 +25,85 @@
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 
+
+namespace madai {
+
 /**
  * A random number generator.  contains a seed.
  */
-namespace madai {
-
 class Random {
 public:
-  /**
-   * Constructor.  Uses time() for seed.
-   */
+  /** Constructor
+   *
+   * Uses time() for seed. */
   Random();
-  /**
-   * Constructor.
+
+  /** Constructor
+   *
+   * \param seed Seed to initialize the random number generator.
    */
   Random(unsigned long int seed);
 
-  /**
-   * Destructor.
-   */
+  /** Destructor */
   virtual ~Random();
-  /**
-   * reseed
+
+  /** Reseed the random number generator
+   *
+   * \param seed Seed to reinitialize the random number generator.
    */
   virtual void Reseed(unsigned long int seed);
-  /**
-   * reseed with time()
-   */
+
+  /** Reseed with the current time. */
   virtual void Reseed();
-  /**
-   * Returns an integer < N and >= 0
-   */
+
+  /** Returns an integer < N and >= 0 */
   virtual int Integer(unsigned long int N);
 
-  /**
-   * min=0.0, max=1.0
-   */
+  /** Returns a uniform random number in the range [0.0, 1.0] */
   virtual double Uniform();
-  /**
-   *
-   */
+
+  /** Returns a uniform random number in the range [min, max] */
   virtual double Uniform(double min, double max);
-  /**
-   * mean=0.0, var=1.0
-   */
+
+  /** Returns a random number from a Gaussian distribution with mean
+   * 0.0 and standard deviation 1.0 */
   virtual double Gaussian();
-  /**
-   *
-   */
+
+  /** Returns a random number from a Gaussian distribution with mean
+   * and standard deviation supplied as arguments */
   virtual double Gaussian(double mean, double standardDeviation);
 
 private:
-  /** explicitly disallowed */
+  /** Explicitly disallowed */
   Random& operator=(madai::Random &);
-  /** explicitly disallowed */
+
+  /** Explicitly disallowed */
   Random(madai::Random const &);
 
-  typedef boost::mt19937                                          BaseGeneratorType;
-  typedef boost::uniform_int<>                                    UniformIntDistributionType;
-  typedef boost::uniform_real<>                                   UniformRealDistributionType;
-  typedef boost::normal_distribution<>                            NormalDistributionType;
-  typedef boost::variate_generator< BaseGeneratorType&,
-                                    UniformRealDistributionType > UniformRealGeneratorType;
+  /** Typedefs for random number generation */
+  //@{
+  typedef boost::mt19937               BaseGeneratorType;
+  typedef boost::uniform_int<>         UniformIntDistributionType;
+  typedef boost::uniform_real<>        UniformRealDistributionType;
+  typedef boost::normal_distribution<> NormalDistributionType;
+  typedef boost::variate_generator<
+    BaseGeneratorType&,
+    UniformRealDistributionType >      UniformRealGeneratorType;
+  //@}
 
-  /** Uniform random integer generator. */
+  /** Mersenne Twister random number generator */
   BaseGeneratorType           m_BaseGenerator;
+
+  /** Uniform int distribution */
   UniformIntDistributionType  m_UniformIntDistribution;
+
+  /** Uniform real distribution */
   UniformRealDistributionType m_UniformRealDistribution;
+
+  /** Uniform real generator */
   UniformRealGeneratorType    m_UniformRealGenerator;
+
+  /** Normal distribution */
   NormalDistributionType      m_NormalDistribution;
 
 };

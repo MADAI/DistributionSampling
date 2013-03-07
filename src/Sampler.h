@@ -53,81 +53,132 @@ public:
   /** Destructor. */
   virtual ~Sampler();
 
-  /** Get/set the current Model */
+  /** Set the current Model
+   *
+   * \param model The Model on which the Sampler will operate. */
   void SetModel( const Model * model );
+
+  /** Get the current Model
+   *
+   * \return The Model in which the Sampler operates. */
   const Model * GetModel() const;
 
   /** Get a list of the names of the active parameters. */
   std::set< std::string > GetActiveParameters();
 
-  /** Activate a parameter by name. */
+  /** Activate a Parameter by name
+   *
+   * Activating a Parameter means that the Parameter value will be
+   * varied by the sampler.
+   *
+   * \param parameterName Name of the parameter to activate. */
   void ActivateParameter( const std::string & parameterName );
 
-  /**
-   * Activate a parameter by index.  Indexes correspond to indexes
-   * within this->GetParameters().
+  /** Activate a Parameter by index
+   *
+   * Activating a Parameter means that the Parameter value will be
+   * varied by the sampler.
+   *
+   * \param parameterIndex The index of the Parameter to
+   * activate. This index corresponds to the position of the Parameter
+   * in the vector of Parameters returned by Sampler::GetParameters().
    */
   void ActivateParameter( unsigned int parameterIndex );
 
-  /** Deactivate a parameter by name. */
+  /** Deactivate a parameter by name
+   *
+   * Deactivating a Parameter means that the Parameter value will not be
+   * varied by the sampler.
+   *
+   * \param parameterName Name of the Parameter to deactivate. */
   void DeactivateParameter( const std::string & parameterName );
 
   /**
-   * Deactivate a parameter by index. Indexes correspond to indexes
-   * within this->GetParameters().
+   * Deactivate a parameter by index
+   *
+   * Deactivating a Parameter means that the Parameter value will not be
+   * varied by the sampler.
+   *
+   * \param parameterIndex The index of the Parameter to
+   * deactivate. This index corresponds to the position of the Parameter
+   * in the vector of Parameters returned by Sampler::GetParameters().
    */
   void DeactivateParameter( unsigned int parameterIndex );
 
-  /** Get the number of parameters. */
+  /** Get the number of parameters
+   *
+   * \return The number of Parameters as defined by the Model from which
+   *  this Sampler draws samples. */
   virtual unsigned int GetNumberOfParameters() const;
 
-  /** Get the list of parameters. These are not the parameter values
-   * but instead a description of the parameter. */
+  /** Get the list of parameters
+   *
+   * These are not the parameter values but instead a description of
+   * the parameter. */
   virtual const std::vector< Parameter > & GetParameters() const;
 
   /** Get the number of active parameters. */
   unsigned int GetNumberOfActiveParameters() const;
 
-  /** Check whether a parameter is active. */
+  /** Check whether a parameter is active
+   *
+   * \param parameterName Name of the Parameter. */
   bool IsParameterActive( const std::string & parameterName );
 
-  /** Resets a parameter value. */
+  /** Sets a parameter value by name
+   *
+   * \param parameterName The name of the Parameter whose value should
+   *  be set.
+   * \param value The new value of the Parameter. */
   virtual ErrorType SetParameterValue( const std::string & parameterName,
                                        double value );
-  /** Get the current value of a parameter. */
+
+  /** Get the current value of a parameter
+   *
+   * \param parameterName The name of the Parameter whose value you
+   *   want.
+   * \return The value of the Parameter. */
   virtual double GetParameterValue( const std::string & parameterName );
 
-  /** Compute the next set of parameters, output scalar values, and log likelihood. */
+  /** Compute the next set of parameters, output scalar values, and
+   * log likelihood
+   *
+   * \return A new Sample. */
   virtual Sample NextSample() = 0;
 
   /** Get the current parameter values. */
   const std::vector< double > & GetCurrentParameters() const;
+
+  /** Get the current log-likelihood. */
   double & GetCurrentLogLikelihood() const;
 
 protected:
-  /** Initialize the Sampler. */
+  /** Initialize the Sampler
+   *
+   * \param model The Model from which the Sampler should draw
+   *  samples. */
   virtual void Initialize( const Model * model );
 
-  /** useful for a implementation */
+  /** Given the name of a Parameter, return its index
+   *
+   * \param parameterName Name of the Parameter for which the index is
+   *   sought.
+   * \return The index of the Parameter if found, the maximum value of
+   *   unsigned int otherwise. */
   unsigned int GetParameterIndex( const std::string & parameterName ) const;
 
   /** The Model from which this Sampler takes samples. */
-  const Model *           m_Model;
+  const Model * m_Model;
 
   /** Set of strings naming the active parameters. */
   std::set< std::string > m_ActiveParameters;
 
   /** Stores the point in parameter space. This will change when
    *  NextSample() is called. */
-  std::vector< double >   m_CurrentParameters;
-  double                  m_CurrentLogLikelihood;
+  std::vector< double > m_CurrentParameters;
 
-  /**
-   *
-   * LogPosteriorLikelihood comes from the
-   * m_Model->GetScalarOutputsAndLogLikelihood() function;
-   */
-  bool                    m_OptimizeOnLikelihood;
+  /** Stores the current log-likelihood. */
+  double m_CurrentLogLikelihood;
 
   /** Subclasses that need to reset internal state when a parameter
   value has been changed outside the operation of the optimization

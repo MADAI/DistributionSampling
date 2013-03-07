@@ -32,10 +32,17 @@ namespace madai {
 #else /* NOT __cplusplus */
 
 #include <stdio.h>
+/** Container for process-related information */
 typedef struct ProcessPipe {
+  /** stdin for the process */
   FILE * question;
+
+  /** stdout for the process */
   FILE * answer;
-  long int pid; /* in case other signals need to be sent. */
+
+  /** Process id kept in case other signals need to be sent. */
+  long int pid;
+
 } ProcessPipe;
 
 #endif /* __cplusplus */

@@ -26,18 +26,29 @@
 
 namespace madai {
 
+/** \class GaussianDistribution
+ *
+ * Provides access to various aspects of a Gaussian (or normal) distribution. */
 class GaussianDistribution : public Distribution {
 public:
+  /** Constructor */
   GaussianDistribution();
+
+  /** Destructor */
   virtual ~GaussianDistribution();
+
   virtual Distribution * Clone() const;
 
-  /** Set/get the mean of the Gaussian distribution. */
+  /** Set the mean of the Gaussian distribution. */
   void SetMean( double mean );
+
+  /** Get the mean of the Gaussian distribution. */
   double GetMean() const;
 
-  /** Set/get the standard deviation of the Gaussian distribution. */
+  /** Set the standard deviation of the Gaussian distribution. */
   void SetStandardDeviation( double standardDeviation );
+
+  /** Get the standard deviation of the Gaussian distribution. */
   double GetStandardDeviation() const;
 
   virtual double GetLogProbabilityDensity( double value ) const;

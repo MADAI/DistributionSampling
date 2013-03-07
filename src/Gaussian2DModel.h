@@ -36,7 +36,7 @@ public:
    * configuration file is a text file containing four numbers
    * separated by whitespace (space, tab, newline). The numbers are
    * the mean in x, mean in y, standard deviation in x and standard
-   * devaition in y of the 2D Gaussian function. */
+   * deviation in y of the 2D Gaussian function. */
   ErrorType LoadConfigurationFile( const std::string fileName );
     
   /** Get the valid range for the parameter at parameterIndex. */
@@ -52,23 +52,31 @@ public:
                                          std::vector< double > & scalars,
                                          unsigned int outputIndex,
                                          std::vector< double > & gradient) const;
-  // Not implemented yet.
-  // Proposed function for interaction with the MCMC
-  virtual ErrorType GetLikeAndPrior( const std::vector< double > & parameters,
-                                     double & Like,
-                                     double & Prior ) const;
 
+  /** Get the x and y means */
   void GetMeans( double & MeanX, double & MeanY ) const;
+
+  /** Get the standard deviations in x and y */
   void GetDeviations( double & DvX, double & DevY ) const;
 
 protected:
+  /** Means in x and y */
+  //@{
   double m_MeanX;
   double m_MeanY;
+  //@}
+
+  /** Standard deviations in x and y */
+  //@{
   double m_StandardDeviationX;
   double m_StandardDeviationY;
+  //@}
 
+  /** Computes the partial derivatives of x and y */
+  //@{
   double PartialX( double x, double value ) const;
   double PartialY( double y, double value ) const;
+  //@}
 
 }; // end class Gaussian2DModel
 

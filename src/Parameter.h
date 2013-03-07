@@ -33,42 +33,36 @@ namespace madai {
  */
 class Parameter {
 public:
-  /**
-   * constructor.  default is a uniform prior on [0,1]
-   */
+  /** Constructor
+   *
+   * Default is a uniform prior on [0, 1] */
   Parameter( std::string nm);
 
-  /**
-   * constructor.  default is a uniform prior on [min,max]
-   */
+  /** Constructor
+   *
+   * Default is a uniform prior on [min, max] */
   Parameter( std::string nm, double min, double max);
 
-  /**
-   * constructor.  Makes a copy of the supplied Distribution.
-   */
+  /** Constructor
+   *
+   * Makes a copy of the supplied Distribution. */
   Parameter( std::string nm, const Distribution & distribution);
 
   //@{
-  /**
-   * copy constructors and assignmnet operator.
-   */
+  /** Copy constructors and assignment operator */
   Parameter( const Parameter & other);
   Parameter & operator=( const Parameter & other);
   //@}
 
-    /**
-     * destructor.
-     */
+  /** Destructor */
   virtual ~Parameter();
 
-  /**
-   * a short description of the parameter.
-   */
+  /** A short description of the parameter */
   std::string m_Name;
 
   //@{
-  /**
-   * range of possible values for this Parameter
+  /** Range of possible values for this Parameter
+   *
    * \warning depricated
    */
   double      m_MinimumPossibleValue;
@@ -76,9 +70,7 @@ public:
   //@}
 
   //@{
-  /**
-   * \todo document
-   */
+  /** The distribution used as a prior for this parameter */
   const Distribution * GetPriorDistribution() const;
   Distribution * m_PriorDistribution;
   //@}

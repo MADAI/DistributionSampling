@@ -80,10 +80,10 @@ UniformDistribution
 
 double
 UniformDistribution
-::GetLogProbabilityDensity( double value ) const
+::GetLogProbabilityDensity( double x ) const
 {
-  if ( this->InRange( value ) ) {
-    return log( this->GetProbabilityDensity( value ) );
+  if ( this->InRange( x ) ) {
+    return log( this->GetProbabilityDensity( x ) );
   } else {
     return -std::numeric_limits< double >::infinity();
   }
@@ -92,9 +92,9 @@ UniformDistribution
 
 double
 UniformDistribution
-::GetProbabilityDensity( double value ) const
+::GetProbabilityDensity( double x ) const
 {
-  if ( this->InRange( value ) ) {
+  if ( this->InRange( x ) ) {
     return 1.0 / ( m_Maximum - m_Minimum );
   } else {
     return 0.0;
@@ -119,8 +119,8 @@ UniformDistribution
 
 bool
 UniformDistribution
-::InRange( double value ) const {
-  return ( value >= m_Minimum && value <= m_Maximum );
+::InRange( double x ) const {
+  return ( x >= m_Minimum && x <= m_Maximum );
 }
 
 } // end namespace madai

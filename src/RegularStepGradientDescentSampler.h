@@ -48,8 +48,12 @@ public:
   void MinimizeOff();
 
 protected:
+  /** Scaling factor applied to the gradient when taking the next
+   * Sample. */
   double m_StepSize;
 
+  /** True if the algorithm should attempt to minimize the function,
+   * false if it should maximize. */
   bool m_Minimize;
 
 }; // end class RegularStepGradientDescentSampler

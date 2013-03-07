@@ -113,6 +113,9 @@ Trace
 }
 
 
+/** Utility for writing a vector to an output stream
+ *
+ * The vector elements are delimited by the given delimiter */
 template <class T>
 void write_vector( std::ostream& o, std::vector< T > const & v, char delim ) {
   if ( !v.empty() ) {
