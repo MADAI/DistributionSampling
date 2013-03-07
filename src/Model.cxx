@@ -390,7 +390,6 @@ Model
 }
 
 
-
 /** return the sum of the LogPriorLikelihood for each x[i] */
 double
 Model
@@ -399,7 +398,7 @@ Model
   const std::vector< Parameter > & params = this->GetParameters();
   assert(x.size() == params.size());
   double logPriorLikelihood = 0.0;
-  for (size_t i = 0; i < params.size() ; ++i) {
+  for ( size_t i = 0; i < params.size(); ++i ) {
     logPriorLikelihood +=
       params[i].GetPriorDistribution()->GetLogProbabilityDensity(x[i]);
   }
@@ -408,6 +407,3 @@ Model
 
 
 } // end namespace madai
-
-
-

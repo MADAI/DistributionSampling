@@ -24,8 +24,8 @@ namespace madai {
 
 Sample
 ::Sample( const std::vector< double > & parameter_values,
-	  const std::vector< double > & output_values,
-	  double LogLikelihood ) :
+    const std::vector< double > & output_values,
+    double LogLikelihood ) :
   m_ParameterValues( parameter_values ),
   m_OutputValues( output_values ),
   m_LogLikelihood( LogLikelihood )
@@ -35,7 +35,7 @@ Sample
 
 Sample
 ::Sample( const std::vector< double > & parameter_values,
-	  const std::vector< double > & output_values ) :
+    const std::vector< double > & output_values ) :
   m_ParameterValues( parameter_values ),
   m_OutputValues( output_values ),
   m_LogLikelihood( 0.0 )
@@ -66,8 +66,8 @@ bool
 Sample
 ::IsValid() const {
   return ( m_ParameterValues.size() > 0
-	   || m_OutputValues.size() > 0
-	   || m_Comments.size() > 0 );
+     || m_OutputValues.size() > 0
+     || m_Comments.size() > 0 );
 }
 
 

@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright 2013 The University of North Carolina at Chapel Hill
+ *  Copyright The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef MADAI_RANDOM_H
-#define MADAI_RANDOM_H
+#ifndef __Random_h__
+#define __Random_h__
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/normal_distribution.hpp>
@@ -28,7 +28,8 @@
 
 namespace madai {
 
-/**
+/** \class Random
+ *
  * A random number generator.  contains a seed.
  */
 class Random {
@@ -110,4 +111,4 @@ private:
 
 }
 
-#endif /* MADAI_RANDOM_H */
+#endif // __Random_h__g4

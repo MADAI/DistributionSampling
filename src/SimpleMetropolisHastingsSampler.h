@@ -69,10 +69,8 @@ protected:
 
 private:
 
-  /**
-   * random number object.
-   */
-  madai::Random m_random;
+  /** Random number object */
+  madai::Random m_Random;
 }; // end class SimpleMetropolisHastingsSampler
 
 } // end namespace madai

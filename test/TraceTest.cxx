@@ -1,3 +1,21 @@
+/*=========================================================================
+ *
+ *  Copyright The University of North Carolina at Chapel Hill
+ *  All rights reserved.
+ *
+ *  Licensed under the MADAI Software License. You may obtain a copy of
+ *  this license at
+ *
+ *         https://madai-public.cs.unc.edu/software/license/
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *=========================================================================*/
+
 #include <cstdlib>
 
 #include "Parameter.h"
@@ -13,7 +31,7 @@ int main( int argc, char* argv[] )
   // Check that the size of the trace is 0 to begin with
   if ( trace.GetSize() != 0 ) {
     std::cerr << "Empty trace should have size 0, had size "
-	      << trace.GetSize() << " instead." << std::endl;
+        << trace.GetSize() << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -29,7 +47,7 @@ int main( int argc, char* argv[] )
 
   if ( trace.GetSize() != 1 ) {
     std::cerr << "Trace should have 1 sample, has "
-	      << trace.GetSize() << " instead." << std::endl;
+        << trace.GetSize() << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -37,7 +55,7 @@ int main( int argc, char* argv[] )
   if ( sample.m_ParameterValues != parameters ) {
     std::cerr << "Unexpected parameter values in first Add()" << std::endl;
     std::cerr << "Expected " << parameters << ", got "
-	      << sample.m_ParameterValues << " instead." << std::endl;
+        << sample.m_ParameterValues << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -46,7 +64,7 @@ int main( int argc, char* argv[] )
 
   if ( trace.GetSize() != 0 ) {
     std::cerr << "Trace should have 0 samples, has "
-	      << trace.GetSize() << " instead." << std::endl;
+        << trace.GetSize() << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -71,7 +89,7 @@ int main( int argc, char* argv[] )
 
   if ( trace.GetSize() != 2 ) {
     std::cerr << "Trace should have 2 samples, has "
-	      << trace.GetSize() << " instead." << std::endl;
+        << trace.GetSize() << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -80,14 +98,14 @@ int main( int argc, char* argv[] )
   if ( sample.m_ParameterValues != parameters ) {
     std::cerr << "Unexpected parameter values in second Add()" << std::endl;
     std::cerr << "Expected " << parameters << ", got "
-	      << sample.m_ParameterValues << " instead." << std::endl;
+        << sample.m_ParameterValues << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
   if ( sample.m_OutputValues != outputs ) {
     std::cerr << "Unexpected outputs in second Add()" << std::endl;
     std::cerr << "Expected " << outputs << ", got "
-	      << sample.m_OutputValues << std::endl;
+        << sample.m_OutputValues << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -106,7 +124,7 @@ int main( int argc, char* argv[] )
 
   if ( trace.GetSize() != 3 ) {
     std::cerr << "Trace should have 3 samples, has "
-	      << trace.GetSize() << " instead." << std::endl;
+        << trace.GetSize() << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -115,21 +133,21 @@ int main( int argc, char* argv[] )
   if ( sample.m_ParameterValues != parameters ) {
     std::cerr << "Unexpected parameter values in third Add()" << std::endl;
     std::cerr << "Expected " << parameters << ", got "
-	      << sample.m_ParameterValues << " instead." << std::endl;
+        << sample.m_ParameterValues << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
   if ( sample.m_OutputValues != outputs ) {
     std::cerr << "Unexpected outputs in third Add()" << std::endl;
     std::cerr << "Expected " << outputs << ", got "
-	      << sample.m_OutputValues << std::endl;
+        << sample.m_OutputValues << std::endl;
     return EXIT_FAILURE;
   }
 
   if ( sample.m_LogLikelihood != logLikelihood ) {
     std::cerr << "Unexpected log likelihood in thrid Add()" << std::endl;
     std::cerr << "Expected " << logLikelihood << ", got "
-	      << sample.m_LogLikelihood << std::endl;
+        << sample.m_LogLikelihood << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -164,7 +182,7 @@ int main( int argc, char* argv[] )
   // Compare the test trace and trace we read in
   if ( trace.GetSize() != readTrace.GetSize() ) {
     std::cerr << "readTrace.GetSize() (" << readTrace.GetSize() << ") != trace.GetSize() ("
-	      << trace.GetSize() << ") " << std::endl;
+        << trace.GetSize() << ") " << std::endl;
     return EXIT_FAILURE;
   }
   for ( int i = 0; i < trace.GetSize(); ++i ) {
@@ -174,21 +192,21 @@ int main( int argc, char* argv[] )
     if ( referenceSample.m_ParameterValues != readSample.m_ParameterValues ) {
       std::cerr << "Parameter values in read trace do not match at entry " << i << std::endl;
       std::cerr << "Got " << readSample.m_ParameterValues << ", should have been "
-		<< referenceSample.m_ParameterValues << std::endl;
+    << referenceSample.m_ParameterValues << std::endl;
       return EXIT_FAILURE;
     }
 
     if ( referenceSample.m_OutputValues != readSample.m_OutputValues ) {
       std::cerr << "Output values in read trace do not match at entry " << i << std::endl;
       std::cerr << "Got " << readSample.m_OutputValues << ", should have been "
-		<< referenceSample.m_OutputValues << std::endl;
+    << referenceSample.m_OutputValues << std::endl;
       return EXIT_FAILURE;
     }
 
     if ( referenceSample.m_LogLikelihood != readSample.m_LogLikelihood ) {
       std::cerr << "Log likelihood in read trace does not match at entry " << i << std::endl;
       std::cerr << "Got " << readSample.m_LogLikelihood << ", should have been "
-		<< referenceSample.m_LogLikelihood << std::endl;
+    << referenceSample.m_LogLikelihood << std::endl;
       return EXIT_FAILURE;
     }
   }

@@ -207,16 +207,12 @@ Sampler
 }
 
 
-
-
 const std::vector< double > &
 Sampler
 ::GetCurrentParameters() const
 {
   return m_CurrentParameters;
 }
-
-
 
 
 unsigned int
@@ -235,4 +231,3 @@ Sampler
 
 
 } // end namespace madai
-

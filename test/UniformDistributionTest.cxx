@@ -41,7 +41,7 @@ int main( int argc, char* argv[] )
   distribution.SetMinimum( newMinimum );
   if ( distribution.GetMinimum() != newMinimum ) {
     std::cerr << "UniformDistribution::GetMinimum() expected to be " << newMinimum
-	      << ", was " << distribution.GetMinimum() << std::endl;
+        << ", was " << distribution.GetMinimum() << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -49,21 +49,21 @@ int main( int argc, char* argv[] )
   distribution.SetMaximum( newMaximum );
   if ( distribution.GetMaximum() != newMaximum ) {
     std::cerr << "UniformDistribution::GetMaximum() expected to be " << newMaximum
-	      << ", was " << distribution.GetMaximum() << std::endl;
+        << ", was " << distribution.GetMaximum() << std::endl;
     return EXIT_FAILURE;
   }
 
   if ( distribution.GetLogProbabilityDensity( newMinimum - 1.0 ) !=
        -std::numeric_limits< double >::infinity() ) {
     std::cerr << "UniformDistribution::GetLogProbabilityDensity() for value less than "
-	      << "minimum was not -infinity." << std::endl;
+        << "minimum was not -infinity." << std::endl;
     return EXIT_FAILURE;
   }
 
   if ( distribution.GetLogProbabilityDensity( newMaximum + 1.0 ) !=
        -std::numeric_limits< double >::infinity() ) {
     std::cerr << "UniformDistribution::GetLogProbabilityDensity() for value greater than "
-	      << "maximum was not -infinity." << std::endl;
+        << "maximum was not -infinity." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -71,22 +71,22 @@ int main( int argc, char* argv[] )
   double actualLog = distribution.GetLogProbabilityDensity( 0.5 * ( newMinimum + newMaximum ) );
   if ( actualLog != expectedLog ) {
     std::cerr << "UniformDistribution::GetLogProbabilityDensity() for value in range expected "
-	      << "to return " << expectedLog << ", got " << actualLog << " instead."
-	      << std::endl;
+        << "to return " << expectedLog << ", got " << actualLog << " instead."
+        << std::endl;
     return EXIT_FAILURE;
   }
 
   if ( distribution.GetProbabilityDensity( newMinimum - 1.0 ) != 0.0 ) {
     std::cerr << "UniformDistribution::GetProbabilityDensity() for value less than minimum "
-	      << "should have been 0.0, got << "
-	      << distribution.GetProbabilityDensity( newMinimum ) << " instead." << std::endl;
+        << "should have been 0.0, got << "
+        << distribution.GetProbabilityDensity( newMinimum ) << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
   if ( distribution.GetProbabilityDensity( newMaximum + 1.0 ) != 0.0 ) {
     std::cerr << "UniformDistribution::GetProbabilityDensity() for value greater than maximum "
-	      << "should have been 0.0, got "
-	      << distribution.GetProbabilityDensity( newMaximum ) << " instead." << std::endl;
+        << "should have been 0.0, got "
+        << distribution.GetProbabilityDensity( newMaximum ) << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -94,8 +94,8 @@ int main( int argc, char* argv[] )
   double actualDensity = distribution.GetProbabilityDensity( 0.5 * ( newMinimum + newMaximum ) );
   if ( expectedDensity != actualDensity ) {
     std::cerr << "UniformDistribution::GetProbabilityDensity() for value in range should "
-	      << "have been " << expectedDensity << ", got " << actualDensity
-	      << "instead." << std::endl;
+        << "have been " << expectedDensity << ", got " << actualDensity
+        << "instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -104,7 +104,7 @@ int main( int argc, char* argv[] )
   double actualPercentile = distribution.GetPercentile( x );
   if ( expectedPercentile != actualPercentile ) {
     std::cerr << "UniformDistribution::GetPercentile() for value " << x << " should have "
-	      << "been " << expectedPercentile << ", got " << actualPercentile << std::endl;
+        << "been " << expectedPercentile << ", got " << actualPercentile << std::endl;
     return EXIT_FAILURE;
   }
 

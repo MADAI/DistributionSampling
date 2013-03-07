@@ -38,11 +38,11 @@ public:
      output_values is not specified, it defaults to an empty vector.
   */
   Sample( const std::vector< double > & parameterValues,
-	  const std::vector< double > & OutputValues,
-	  double LogLikelihood );
+    const std::vector< double > & OutputValues,
+    double LogLikelihood );
 
   Sample( const std::vector< double > & parameterValues,
-	  const std::vector< double > & OutputValues );
+    const std::vector< double > & OutputValues );
 
   Sample( const std::vector< double > & parameterValues );
 

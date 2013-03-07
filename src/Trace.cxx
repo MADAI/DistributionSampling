@@ -131,8 +131,8 @@ void write_vector( std::ostream& o, std::vector< T > const & v, char delim ) {
 bool
 Trace
 ::WriteCSVFile( const std::string & filename,
-		const std::vector< Parameter > & parameters,
-		const std::vector< std::string > & outputNames ) const
+    const std::vector< Parameter > & parameters,
+    const std::vector< std::string > & outputNames ) const
 {
   try {
     std::ofstream file( filename.c_str() );
@@ -160,8 +160,8 @@ Trace
 bool
 Trace
 ::ImportCSVFile( const std::string & filename,
-		 int numberOfParameters,
-		 int numberOfOutputs )
+     int numberOfParameters,
+     int numberOfOutputs )
 {
   try {
     std::ifstream file( filename.c_str() );
@@ -187,31 +187,31 @@ Trace
 
       std::vector< double > parameterValues;
       for ( int i = 0; i < numberOfParameters; ++i ) {
-	std::string parameterString;
-	std::getline( file, parameterString, ',' );
-	if ( file.eof() ) {
-	  break;
-	}
-	double parameterValue = atof( parameterString.c_str() );
+  std::string parameterString;
+  std::getline( file, parameterString, ',' );
+  if ( file.eof() ) {
+    break;
+  }
+  double parameterValue = atof( parameterString.c_str() );
 
-	parameterValues.push_back( parameterValue );
+  parameterValues.push_back( parameterValue );
       }
 
       std::vector< double > outputValues;
       for ( int i = 0; i < numberOfOutputs; ++i ) {
-	std::string outputString;
-	std::getline( file, outputString, ',' );
-	if ( file.eof() ) {
-	  break;
-	}
-	double outputValue = atof( outputString.c_str() );
-	outputValues.push_back( outputValue );
+  std::string outputString;
+  std::getline( file, outputString, ',' );
+  if ( file.eof() ) {
+    break;
+  }
+  double outputValue = atof( outputString.c_str() );
+  outputValues.push_back( outputValue );
       }
 
       std::string logLikelihoodString;
       std::getline( file, logLikelihoodString );
       if ( file.eof() ) {
-	break;
+  break;
       }
       double logLikelihood = atof( logLikelihoodString.c_str() );
 
@@ -288,7 +288,6 @@ Trace
   }
   out.flush();
 }
-
 
 
 } // end namespace madai

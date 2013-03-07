@@ -42,7 +42,7 @@ int main( int argc, char* argv[] )
   distribution.SetMean( newMean );
   if ( distribution.GetMean() != newMean ) {
     std::cerr << "GaussianDistribution::GetMean() expected to be " << newMean << ", was "
-	      << distribution.GetMean() << " instead." << std::endl;
+        << distribution.GetMean() << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -50,8 +50,8 @@ int main( int argc, char* argv[] )
   distribution.SetStandardDeviation( newStandardDeviation );
   if ( distribution.GetStandardDeviation() != newStandardDeviation ) {
     std::cerr << "GaussianDistribution::GetStandardDeviation() expected to be "
-	      << newStandardDeviation << ", was " << distribution.GetStandardDeviation()
-	      << " instead." << std::endl;
+        << newStandardDeviation << ", was " << distribution.GetStandardDeviation()
+        << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -63,8 +63,8 @@ int main( int argc, char* argv[] )
   double actualLogDensity = distribution.GetLogProbabilityDensity( x );
   if ( expectedLogDensity != actualLogDensity ) {
     std::cerr << "GaussianDistribution::GetLogProbabilityDensity() expected to return "
-	      << expectedLogDensity << ", got " << actualLogDensity << " instead."
-	      << std::endl;
+        << expectedLogDensity << ", got " << actualLogDensity << " instead."
+        << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -73,7 +73,7 @@ int main( int argc, char* argv[] )
   double actualDensity = distribution.GetProbabilityDensity( x );
   if ( fabs( expectedDensity - actualDensity ) > 1e-4 ) {
     std::cerr << "GaussianDistribution::GetProbabilityDensity() expected to return "
-	      << expectedDensity << ", got " << actualDensity << " instead." << std::endl;
+        << expectedDensity << ", got " << actualDensity << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -81,7 +81,7 @@ int main( int argc, char* argv[] )
   double actualPercentile = distribution.GetPercentile( 0.25 );
   if ( fabs( actualPercentile - expectedPercentile ) > 1e-4 ) {
     std::cerr << "GaussianDistribution::GetPercentile( 0.25 ) expected to return "
-	      << expectedPercentile << ", got " << actualPercentile << " instead." << std::endl;
+        << expectedPercentile << ", got " << actualPercentile << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -89,10 +89,9 @@ int main( int argc, char* argv[] )
   actualPercentile = distribution.GetPercentile( 0.75 );
   if ( fabs( actualPercentile - expectedPercentile ) > 1e-4 ) {
     std::cerr << "GaussianDistribution::GetPercentile( 0.75 ) expected to return "
-	      << expectedPercentile << ", got " << actualPercentile << " instead." << std::endl;
+        << expectedPercentile << ", got " << actualPercentile << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
   return EXIT_SUCCESS;
 }
-

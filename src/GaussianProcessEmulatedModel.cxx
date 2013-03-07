@@ -22,16 +22,16 @@ namespace madai {
 
 GaussianProcessEmulatedModel
 ::GaussianProcessEmulatedModel() :
-  m_emulator(NULL)
+  m_Emulator(NULL)
 {
   m_StateFlag = UNINITIALIZED;
-  // Note that all methods must check for (m_emulator == NULL).
+  // Note that all methods must check for (m_Emulator == NULL).
 }
 
 GaussianProcessEmulatedModel
 ::~GaussianProcessEmulatedModel()
 {
-  delete m_emulator;
+  delete m_Emulator;
 }
 
 /**
@@ -42,24 +42,24 @@ Model::ErrorType
 GaussianProcessEmulatedModel
 ::LoadConfigurationFile( const std::string fileName )
 {
-  m_emulator = new emulator(fileName);
-  if (! m_emulator->IsOkay()) {
-     delete m_emulator;
-     m_emulator = NULL;
+  m_Emulator = new emulator(fileName);
+  if (! m_Emulator->IsOkay()) {
+     delete m_Emulator;
+     m_Emulator = NULL;
      m_StateFlag = ERROR;
      return Model::OTHER_ERROR;
   }
   m_StateFlag = READY;
-  int numberOfParameters = m_emulator->getNumberOfParameters();
-  int numberOfOutputs = m_emulator->getNumberOfOutputs();
+  int numberOfParameters = m_Emulator->getNumberOfParameters();
+  int numberOfOutputs = m_Emulator->getNumberOfOutputs();
   for (int i = 0; i < numberOfParameters; ++i) {
-    std::string name(m_emulator->getParameterName(i));
-    double min = m_emulator->getParameterMinimum(i);
-    double max = m_emulator->getParameterMaximum(i);
+    std::string name(m_Emulator->getParameterName(i));
+    double min = m_Emulator->getParameterMinimum(i);
+    double max = m_Emulator->getParameterMaximum(i);
     this->AddParameter(name, min, max);
   }
   for (int i = 0; i < numberOfOutputs; ++i) {
-    std::string name(m_emulator->getOutputName(i));
+    std::string name(m_Emulator->getOutputName(i));
     this->AddScalarOutputName(name );
   }
   return Model::NO_ERROR;
@@ -76,10 +76,10 @@ GaussianProcessEmulatedModel
   std::vector< double > & scalars,
   std::vector< double > & scalarCovariance) const
 {
-  if (m_emulator == NULL)
+  if (m_Emulator == NULL)
     return Model::OTHER_ERROR;
 
-  emulator * emu = const_cast<emulator * >( m_emulator );
+  emulator * emu = const_cast<emulator * >( m_Emulator );
 
   if (this->GetNumberOfParameters() != parameters.size())
     return Model::OTHER_ERROR;
@@ -103,8 +103,4 @@ GaussianProcessEmulatedModel
     parameters, scalars, scalarCovariance);
 }
 
-}; // namespace madai
-
-
-
-
+} // namespace madai

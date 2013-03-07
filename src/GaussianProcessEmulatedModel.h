@@ -76,7 +76,7 @@ class GaussianProcessEmulatedModel : public Model {
 
 private:
   /** pointer to emulator object in libEmuPlusPlus */
-  emulator * m_emulator;
+  emulator * m_Emulator;
 
 }; // end GaussianProcessEmulatedModel
 

@@ -99,8 +99,8 @@ public:
    * \param outputNames Name of the outputs. Shoulde be obtained from a Model.
    * \return Returns true if writing succeeded, false otherwise. */
   bool WriteCSVFile( const std::string & filename,
-		     const std::vector< Parameter > & parameters,
-		     const std::vector< std::string > & outputNames = std::vector< std::string >() ) const;
+         const std::vector< Parameter > & parameters,
+         const std::vector< std::string > & outputNames = std::vector< std::string >() ) const;
 
   /** Write the CSV-formatted output to a std::ostream.
    *

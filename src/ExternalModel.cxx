@@ -444,8 +444,4 @@ ExternalModel
   return NO_ERROR;
 }
 
-
-
 } // end namespace madai
-
-

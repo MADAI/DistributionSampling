@@ -34,7 +34,7 @@ int main( int argc, char* argv[] ) {
 
   if ( !sample.IsValid() ) {
     std::cerr << "Sample should be valid when one or more parameters is set."
-	      << std::endl;
+        << std::endl;
     return EXIT_FAILURE;
   }
 
