@@ -19,9 +19,11 @@
 #ifndef MADAI_RANDOM_H
 #define MADAI_RANDOM_H
 
-extern "C" {
-#include <gsl/gsl_rng.h>
-}
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/normal_distribution.hpp>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
 
 /**
  * A random number generator.  contains a seed.
@@ -54,7 +56,8 @@ public:
   /**
    * Returns an integer < N and >= 0
    */
-  virtual double Integer(unsigned long int N);
+  virtual int Integer(unsigned long int N);
+
   /**
    * min=0.0, max=1.0
    */
@@ -71,12 +74,27 @@ public:
    *
    */
   virtual double Gaussian(double mean, double standardDeviation);
+
 private:
-  gsl_rng * m_rng;
   /** explicitly disallowed */
   Random& operator=(madai::Random &);
   /** explicitly disallowed */
   Random(madai::Random const &);
+
+  typedef boost::mt19937                                          BaseGeneratorType;
+  typedef boost::uniform_int<>                                    UniformIntDistributionType;
+  typedef boost::uniform_real<>                                   UniformRealDistributionType;
+  typedef boost::normal_distribution<>                            NormalDistributionType;
+  typedef boost::variate_generator< BaseGeneratorType&,
+                                    UniformRealDistributionType > UniformRealGeneratorType;
+
+  /** Uniform random integer generator. */
+  BaseGeneratorType           m_BaseGenerator;
+  UniformIntDistributionType  m_UniformIntDistribution;
+  UniformRealDistributionType m_UniformRealDistribution;
+  UniformRealGeneratorType    m_UniformRealGenerator;
+  NormalDistributionType      m_NormalDistribution;
+
 };
 
 }

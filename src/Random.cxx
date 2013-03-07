@@ -15,35 +15,27 @@
  *  limitations under the License.
  *
  *=========================================================================*/
-extern "C" {
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-}
 #include <time.h>
 
 #include "Random.h"
-
-namespace {
-	const gsl_rng_type * MADAI_RANDOM_GENERATOR = gsl_rng_mt19937;
-};
 
 namespace madai {
 
 /**
  * Constructor.  Uses time() for seed.
  */
-Random::Random()
+Random::Random() :
+  m_UniformRealGenerator( m_BaseGenerator, m_UniformRealDistribution )
 {
-  this->m_rng = gsl_rng_alloc (MADAI_RANDOM_GENERATOR);
   this->Reseed();
 }
 
 /**
  * Constructor.
  */
-Random::Random(unsigned long int seed)
+Random::Random(unsigned long int seed) :
+  m_UniformRealGenerator( m_BaseGenerator, m_UniformRealDistribution )
 {
-  this->m_rng = gsl_rng_alloc (MADAI_RANDOM_GENERATOR);
   this->Reseed(seed);
 }
 
@@ -52,7 +44,6 @@ Random::Random(unsigned long int seed)
  */
 Random::~Random()
 {
-  gsl_rng_free(this->m_rng);
 }
 
 /**
@@ -60,7 +51,7 @@ Random::~Random()
  */
 void Random::Reseed(unsigned long int seed)
 {
-  gsl_rng_set(this->m_rng, seed);
+  m_BaseGenerator.seed( seed );
 }
 
 /**
@@ -74,9 +65,9 @@ void Random::Reseed()
 /**
  * Returns an integer < N and >= 0
  */
-double Random::Integer(unsigned long int N)
+int Random::Integer(unsigned long int N)
 {
-  return gsl_rng_uniform_int (this->m_rng, N);
+  return m_UniformIntDistribution( m_BaseGenerator, N );
 }
 
 /**
@@ -84,7 +75,7 @@ double Random::Integer(unsigned long int N)
  */
 double Random::Uniform()
 {
-  return gsl_rng_uniform(this->m_rng);
+  return m_UniformRealGenerator();
 }
 
 /**
@@ -92,7 +83,7 @@ double Random::Uniform()
  */
 double Random::Uniform(double min, double max)
 {
-  return min + (gsl_rng_uniform(this->m_rng) * (max - min));
+  return this->Uniform() * ( max - min ) + min;
 }
 
 /**
@@ -100,7 +91,7 @@ double Random::Uniform(double min, double max)
  */
 double Random::Gaussian()
 {
-  return gsl_ran_ugaussian(this->m_rng);
+  return m_NormalDistribution( m_UniformRealGenerator );
 }
 
 /**
@@ -108,7 +99,7 @@ double Random::Gaussian()
  */
 double Random::Gaussian(double mean, double standardDeviation)
 {
-  return mean + gsl_ran_gaussian (this->m_rng, standardDeviation);
+  return standardDeviation * this->Gaussian() + mean;
 }
 
-};
+}
