@@ -23,15 +23,12 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
 
 #include <cmath>
 #include <map>
 
 #include "Parameter.h"
-#include "parametermap.h"
-
 #include "TraceElement.h"
 
 namespace madai {
