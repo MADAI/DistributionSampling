@@ -90,6 +90,11 @@ Code should adhere to this handful of formatting rules:
 
 - Class member variables should have the "m_" prefix, e.g. m_Value, m_Distance.
 
+- When referring to a member variable, use "m_Var" rather than "this->m_Var".
+
+- When referring to a method in the same class, use "this->Method()"
+  rather than just "Method()".
+
 - Include the header files that defined the types you used, but include
   no more headers than that.
 
