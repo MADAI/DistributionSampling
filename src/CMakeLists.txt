@@ -10,9 +10,9 @@ set( SRC_FILES
   Sampler.cxx
   ProcessPipe.c
   RegularStepGradientDescentSampler.cxx
+  Sample.cxx
   SimpleMetropolisHastingsSampler.cxx
   Trace.cxx
-  TraceElement.cxx
   UniformDistribution.cxx
 )
 

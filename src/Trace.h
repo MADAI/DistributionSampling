@@ -29,7 +29,7 @@
 #include <map>
 
 #include "Parameter.h"
-#include "TraceElement.h"
+#include "Sample.h"
 
 namespace madai {
 
@@ -47,8 +47,8 @@ public:
   //@}
   virtual ~Trace();
 
-  /** Add a TraceElement to the Trace. */
-  bool Add( const TraceElement & element );
+  /** Add a Sample to the Trace. */
+  bool Add( const Sample & element );
 
   /** Add an entry from parameter, output values, and log-likelihood. */
   bool Add( const std::vector< double > & parameterValues,
@@ -73,11 +73,11 @@ public:
   /** Remove all elements from the Trace. */
   void Clear();
 
-  /** Get the Nth \ref TraceElement.
+  /** Get the Nth \ref Sample.
    */
   //@{
-  TraceElement & operator[]( unsigned int index );
-  const TraceElement & operator[]( unsigned int index ) const;
+  Sample & operator[]( unsigned int index );
+  const Sample & operator[]( unsigned int index ) const;
   //@}
 
   /** Write the trace to a comma-separated value file.
@@ -101,7 +101,7 @@ public:
 
 protected:
   /** all of the trace elements */
-  std::vector< TraceElement > m_TraceElements;
+  std::vector< Sample > m_Samples;
 
   void WriteHead( std::ostream & o,
                   const std::vector< Parameter > & params,

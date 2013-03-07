@@ -19,45 +19,45 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "TraceElement.h"
+#include "Sample.h"
 
 int main( int argc, char* argv[] ) {
 
-  // By default, TraceElements should be invalide
-  madai::TraceElement element;
-  if ( element.IsValid() ) {
-    std::cerr << "TraceElement's should not be valid when first created." << std::endl;
+  // By default, Samples should be invalide
+  madai::Sample sample;
+  if ( sample.IsValid() ) {
+    std::cerr << "Sample's should not be valid when first created." << std::endl;
     return EXIT_FAILURE;
   }
 
-  element.m_ParameterValues.push_back( 1.0 );
+  sample.m_ParameterValues.push_back( 1.0 );
 
-  if ( !element.IsValid() ) {
-    std::cerr << "TraceElement should be valid when one or more parameters is set."
+  if ( !sample.IsValid() ) {
+    std::cerr << "Sample should be valid when one or more parameters is set."
 	      << std::endl;
     return EXIT_FAILURE;
   }
 
-  element.Reset();
+  sample.Reset();
 
-  if ( element.IsValid() ) {
-    std::cerr << "TraceElement should not be valid after being reset." << std::endl;
+  if ( sample.IsValid() ) {
+    std::cerr << "Sample should not be valid after being reset." << std::endl;
     return EXIT_FAILURE;
   }
 
-  element.m_OutputValues.push_back( 0.0 );
+  sample.m_OutputValues.push_back( 0.0 );
 
-  if ( !element.IsValid() ) {
-    std::cerr << "TraceElement should be valid when one or more outputs is set." << std::endl;
+  if ( !sample.IsValid() ) {
+    std::cerr << "Sample should be valid when one or more outputs is set." << std::endl;
     return EXIT_FAILURE;
   }
 
-  element.Reset();
+  sample.Reset();
 
-  element.m_Comments.push_back( "Comment" );
+  sample.m_Comments.push_back( "Comment" );
 
-  if ( !element.IsValid() ) {
-    std::cerr << "TraceElement should be valid when one or more comments is set." << std::endl;
+  if ( !sample.IsValid() ) {
+    std::cerr << "Sample should be valid when one or more comments is set." << std::endl;
     return EXIT_FAILURE;
   }
 

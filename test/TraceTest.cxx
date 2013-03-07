@@ -23,21 +23,21 @@ int main( int argc, char* argv[] )
   parameters.push_back( 2.3 );
 
   if ( !trace.Add( parameters ) ) {
-    std::cerr << "Failed to add initial trace element." << std::endl;
+    std::cerr << "Failed to add initial trace sample." << std::endl;
     return EXIT_FAILURE;
   }
 
   if ( trace.GetSize() != 1 ) {
-    std::cerr << "Trace should have 1 element, has "
+    std::cerr << "Trace should have 1 sample, has "
 	      << trace.GetSize() << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
-  madai::TraceElement element = trace[ 0 ];
-  if ( element.m_ParameterValues != parameters ) {
+  madai::Sample sample = trace[ 0 ];
+  if ( sample.m_ParameterValues != parameters ) {
     std::cerr << "Unexpected parameter values in first Add()" << std::endl;
     std::cerr << "Expected " << parameters << ", got "
-	      << element.m_ParameterValues << " instead." << std::endl;
+	      << sample.m_ParameterValues << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -45,7 +45,7 @@ int main( int argc, char* argv[] )
   trace.Clear();
 
   if ( trace.GetSize() != 0 ) {
-    std::cerr << "Trace should have 0 elements, has "
+    std::cerr << "Trace should have 0 samples, has "
 	      << trace.GetSize() << " instead." << std::endl;
     return EXIT_FAILURE;
   }
@@ -70,24 +70,24 @@ int main( int argc, char* argv[] )
   }
 
   if ( trace.GetSize() != 2 ) {
-    std::cerr << "Trace should have 2 elements, has "
+    std::cerr << "Trace should have 2 samples, has "
 	      << trace.GetSize() << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
-  element = trace[ 1 ];
+  sample = trace[ 1 ];
 
-  if ( element.m_ParameterValues != parameters ) {
+  if ( sample.m_ParameterValues != parameters ) {
     std::cerr << "Unexpected parameter values in second Add()" << std::endl;
     std::cerr << "Expected " << parameters << ", got "
-	      << element.m_ParameterValues << " instead." << std::endl;
+	      << sample.m_ParameterValues << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
-  if ( element.m_OutputValues != outputs ) {
+  if ( sample.m_OutputValues != outputs ) {
     std::cerr << "Unexpected outputs in second Add()" << std::endl;
     std::cerr << "Expected " << outputs << ", got "
-	      << element.m_OutputValues << std::endl;
+	      << sample.m_OutputValues << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -100,36 +100,36 @@ int main( int argc, char* argv[] )
 
   double logLikelihood = 0.82;
   if ( !trace.Add( parameters, outputs, logLikelihood ) ) {
-    std::cerr << "Could not add third trace element" << std::endl;
+    std::cerr << "Could not add third trace sample" << std::endl;
     return EXIT_FAILURE;
   }
 
   if ( trace.GetSize() != 3 ) {
-    std::cerr << "Trace should have 3 elements, has "
+    std::cerr << "Trace should have 3 samples, has "
 	      << trace.GetSize() << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
-  element = trace[ 2 ];
+  sample = trace[ 2 ];
 
-  if ( element.m_ParameterValues != parameters ) {
+  if ( sample.m_ParameterValues != parameters ) {
     std::cerr << "Unexpected parameter values in third Add()" << std::endl;
     std::cerr << "Expected " << parameters << ", got "
-	      << element.m_ParameterValues << " instead." << std::endl;
+	      << sample.m_ParameterValues << " instead." << std::endl;
     return EXIT_FAILURE;
   }
 
-  if ( element.m_OutputValues != outputs ) {
+  if ( sample.m_OutputValues != outputs ) {
     std::cerr << "Unexpected outputs in third Add()" << std::endl;
     std::cerr << "Expected " << outputs << ", got "
-	      << element.m_OutputValues << std::endl;
+	      << sample.m_OutputValues << std::endl;
     return EXIT_FAILURE;
   }
 
-  if ( element.m_LogLikelihood != logLikelihood ) {
+  if ( sample.m_LogLikelihood != logLikelihood ) {
     std::cerr << "Unexpected log likelihood in thrid Add()" << std::endl;
     std::cerr << "Expected " << logLikelihood << ", got "
-	      << element.m_LogLikelihood << std::endl;
+	      << sample.m_LogLikelihood << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -168,27 +168,27 @@ int main( int argc, char* argv[] )
     return EXIT_FAILURE;
   }
   for ( int i = 0; i < trace.GetSize(); ++i ) {
-    madai::TraceElement referenceElement = referenceTrace[i];
-    madai::TraceElement readElement = readTrace[i];
+    madai::Sample referenceSample = referenceTrace[i];
+    madai::Sample readSample = readTrace[i];
 
-    if ( referenceElement.m_ParameterValues != readElement.m_ParameterValues ) {
+    if ( referenceSample.m_ParameterValues != readSample.m_ParameterValues ) {
       std::cerr << "Parameter values in read trace do not match at entry " << i << std::endl;
-      std::cerr << "Got " << readElement.m_ParameterValues << ", should have been "
-		<< referenceElement.m_ParameterValues << std::endl;
+      std::cerr << "Got " << readSample.m_ParameterValues << ", should have been "
+		<< referenceSample.m_ParameterValues << std::endl;
       return EXIT_FAILURE;
     }
 
-    if ( referenceElement.m_OutputValues != readElement.m_OutputValues ) {
+    if ( referenceSample.m_OutputValues != readSample.m_OutputValues ) {
       std::cerr << "Output values in read trace do not match at entry " << i << std::endl;
-      std::cerr << "Got " << readElement.m_OutputValues << ", should have been "
-		<< referenceElement.m_OutputValues << std::endl;
+      std::cerr << "Got " << readSample.m_OutputValues << ", should have been "
+		<< referenceSample.m_OutputValues << std::endl;
       return EXIT_FAILURE;
     }
 
-    if ( referenceElement.m_LogLikelihood != readElement.m_LogLikelihood ) {
+    if ( referenceSample.m_LogLikelihood != readSample.m_LogLikelihood ) {
       std::cerr << "Log likelihood in read trace does not match at entry " << i << std::endl;
-      std::cerr << "Got " << readElement.m_LogLikelihood << ", should have been "
-		<< referenceElement.m_LogLikelihood << std::endl;
+      std::cerr << "Got " << readSample.m_LogLikelihood << ", should have been "
+		<< referenceSample.m_LogLikelihood << std::endl;
       return EXIT_FAILURE;
     }
   }

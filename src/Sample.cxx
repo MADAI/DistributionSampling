@@ -16,16 +16,16 @@
  *
  *=========================================================================*/
 
-#include "TraceElement.h"
+#include "Sample.h"
 
 
 namespace madai {
 
 
-TraceElement
-::TraceElement( const std::vector< double > & parameter_values,
-                const std::vector< double > & output_values,
-                double LogLikelihood ) :
+Sample
+::Sample( const std::vector< double > & parameter_values,
+	  const std::vector< double > & output_values,
+	  double LogLikelihood ) :
   m_ParameterValues( parameter_values ),
   m_OutputValues( output_values ),
   m_LogLikelihood( LogLikelihood )
@@ -33,9 +33,9 @@ TraceElement
 }
 
 
-TraceElement
-::TraceElement( const std::vector< double > & parameter_values,
-                const std::vector< double > & output_values ) :
+Sample
+::Sample( const std::vector< double > & parameter_values,
+	  const std::vector< double > & output_values ) :
   m_ParameterValues( parameter_values ),
   m_OutputValues( output_values ),
   m_LogLikelihood( 0.0 )
@@ -43,8 +43,8 @@ TraceElement
 }
 
 
-TraceElement
-::TraceElement( const std::vector< double > & parameter_values) :
+Sample
+::Sample( const std::vector< double > & parameter_values ) :
   m_ParameterValues( parameter_values ),
   m_LogLikelihood( 0.0 )
 {
@@ -52,7 +52,7 @@ TraceElement
 
 
 void
-TraceElement
+Sample
 ::Reset()
 {
   m_ParameterValues.clear();
@@ -63,7 +63,7 @@ TraceElement
 
 
 bool
-TraceElement
+Sample
 ::IsValid() const {
   return ( m_ParameterValues.size() > 0
 	   || m_OutputValues.size() > 0
@@ -71,8 +71,8 @@ TraceElement
 }
 
 
-TraceElement
-::TraceElement() :
+Sample
+::Sample() :
   m_LogLikelihood(0.0)
 {
 }

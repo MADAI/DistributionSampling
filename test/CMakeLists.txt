@@ -42,9 +42,9 @@ add_executable( TraceTest TraceTest.cxx )
 target_link_libraries( TraceTest ${LIBRARIES} )
 add_test( TraceTest TraceTest )
 
-add_executable( TraceElementTest TraceElementTest.cxx )
-target_link_libraries( TraceElementTest ${LIBRARIES} )
-add_test( TraceElementTest TraceElementTest )
+add_executable( SampleTest SampleTest.cxx )
+target_link_libraries( SampleTest ${LIBRARIES} )
+add_test( SampleTest SampleTest )
 
 add_executable( UniformDistributionTest UniformDistributionTest.cxx )
 target_link_libraries( UniformDistributionTest ${LIBRARIES} )

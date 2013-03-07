@@ -36,10 +36,10 @@ Trace
 
 bool
 Trace
-::Add( const TraceElement & element ) {
+::Add( const Sample & element ) {
   if ( this->GetSize() > 0 ) {
     // Check for consistency with previous element in trace.
-    const TraceElement & previousElement = m_TraceElements.back();
+    const Sample & previousElement = m_Samples.back();
     if ( element.m_ParameterValues.size() != previousElement.m_ParameterValues.size() ) {
       return false;
     }
@@ -48,7 +48,7 @@ Trace
     }
   }
 
-  m_TraceElements.push_back( element );
+  m_Samples.push_back( element );
 
   return true;
 }
@@ -60,7 +60,7 @@ Trace
        const std::vector< double > & outputValues,
        double logLikelihood )
 {
-  return this->Add( TraceElement( parameterValues, outputValues, logLikelihood ) );
+  return this->Add( Sample( parameterValues, outputValues, logLikelihood ) );
 }
 
 
@@ -69,7 +69,7 @@ Trace
 ::Add( const std::vector< double > & parameterValues,
        const std::vector< double > & outputValues )
 {
-  return this->Add( TraceElement( parameterValues, outputValues ) );
+  return this->Add( Sample( parameterValues, outputValues ) );
 }
 
 
@@ -77,7 +77,7 @@ bool
 Trace
 ::Add( const std::vector< double > & parameterValues )
 {
-  return this->Add( TraceElement( parameterValues ) );
+  return this->Add( Sample( parameterValues ) );
 }
 
 
@@ -85,7 +85,7 @@ unsigned int
 Trace
 ::GetSize() const
 {
-  return this->m_TraceElements.size();
+  return this->m_Samples.size();
 }
 
 
@@ -93,23 +93,23 @@ void
 Trace
 ::Clear()
 {
-  m_TraceElements.clear();
+  m_Samples.clear();
 }
 
 
-TraceElement &
+Sample &
 Trace
 ::operator[]( unsigned int idx )
 {
-  return this->m_TraceElements[idx];
+  return this->m_Samples[idx];
 }
 
 
-const TraceElement &
+const Sample &
 Trace
 ::operator[]( unsigned int idx ) const
 {
-  return this->m_TraceElements[idx];
+  return this->m_Samples[idx];
 }
 
 
@@ -230,9 +230,9 @@ Trace
 
 /*
     Assert:
-      FOR ALL i < this->m_TraceElements.size():
-        this->m_TraceElements[i].m_ParameterValues.size() == params.size()
-        this->m_TraceElements[i].m_OutputValues.size() == outputs.size()
+      FOR ALL i < this->m_Samples.size():
+        this->m_Samples[i].m_ParameterValues.size() == params.size()
+        this->m_Samples[i].m_OutputValues.size() == outputs.size()
   */
 void
 Trace
@@ -267,18 +267,18 @@ Trace
 ::WriteData( std::ostream & out ) const {
   unsigned int n = this->GetSize();
   for ( unsigned int i = 0; i < n; i++ ) {
-    const TraceElement & element = (*this)[i];
-    write_vector( out, element.m_ParameterValues, ',' );
+    const Sample & sample = (*this)[i];
+    write_vector( out, sample.m_ParameterValues, ',' );
     out << ',';
 
-    if ( element.m_OutputValues.size() > 0 ) {
-      write_vector( out, element.m_OutputValues, ',' );
+    if ( sample.m_OutputValues.size() > 0 ) {
+      write_vector( out, sample.m_OutputValues, ',' );
       out << ',';
     }
-    out << element.m_LogLikelihood;
-    if ( element.m_Comments.size() > 0 ) {
+    out << sample.m_LogLikelihood;
+    if ( sample.m_Comments.size() > 0 ) {
       out << ",\"";
-      write_vector( out, element.m_Comments, ';' );
+      write_vector( out, sample.m_Comments, ';' );
       out << '"';
     }
     out << '\n';

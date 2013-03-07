@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __TraceElement_h__
-#define __TraceElement_h__
+#ifndef __Sample_h__
+#define __Sample_h__
 
 #include <string>
 #include <vector>
@@ -26,27 +26,27 @@
 namespace madai {
 
 
-/** \class TraceElement
+/** \class Sample
  *
  * Individual entry in a Trace.
  */
-class TraceElement {
+class Sample {
 public:
   //@{
   /**
      If LogLikelihood is not set, it defaults to 0.0.  If
      output_values is not specified, it defaults to an empty vector.
   */
-  TraceElement(const std::vector< double > & parameterValues,
-               const std::vector< double > & OutputValues,
-               double LogLikelihood);
+  Sample( const std::vector< double > & parameterValues,
+	  const std::vector< double > & OutputValues,
+	  double LogLikelihood );
 
-  TraceElement(const std::vector< double > & parameterValues,
-               const std::vector< double > & OutputValues );
+  Sample( const std::vector< double > & parameterValues,
+	  const std::vector< double > & OutputValues );
 
-  TraceElement(const std::vector< double > & parameterValues);
+  Sample( const std::vector< double > & parameterValues );
 
-  TraceElement();
+  Sample();
 
   /** Clear all the parameter values, output values, and comments, and
    * set the log likelihood to 0.0. */
@@ -56,10 +56,12 @@ public:
    * or comments. */
   bool IsValid() const;
 
-  /** a set of Parameters values from a model. */
+  /** A set of Parameters values from a model. */
   std::vector< double > m_ParameterValues;
-  /** the model output that correspond to m_ParameterValues in some model. */
+
+  /** The model output that correspond to m_ParameterValues in some model. */
   std::vector< double > m_OutputValues;
+
   /**
      Given some set of field observations, the likelihood is the
      Likelihood that m_ParameterValues is the ground truth.
@@ -73,8 +75,8 @@ public:
   which parameters are activated, etc.. */
   std::vector< std::string > m_Comments;
 
-}; // class TraceElement
+}; // class Sample
 
 } // end namespace madai
 
-#endif // __TraceElement_h__
+#endif // __Sample_h__
