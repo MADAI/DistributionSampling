@@ -39,9 +39,6 @@ public:
    * deviation in y of the 2D Gaussian function. */
   ErrorType LoadConfigurationFile( const std::string fileName );
     
-  /** Get the valid range for the parameter at parameterIndex. */
-  void GetRange( unsigned int parameterIndex, double range[2] );
-
   /** Get the scalar outputs from the model evaluated at x. */
   ErrorType GetScalarOutputs( const std::vector< double > & parameters,
                               std::vector< double > & scalars ) const;

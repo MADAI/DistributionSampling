@@ -78,9 +78,6 @@ public:
   /** Get the names of the scalar outputs of the model. */
   virtual const std::vector< std::string > & GetScalarOutputNames() const;
 
-  /** Get the valid range for the parameter at parameterIndex. */
-  virtual ErrorType GetRange( unsigned int parameterIndex, double range[2] ) const;
-
   /** Get the scalar outputs from the model evaluated at x
    *
    * \param parameters Parameter values where the Model should be

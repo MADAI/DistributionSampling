@@ -88,51 +88,15 @@ int main( int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  if ( parameters[0].m_MinimumPossibleValue != -DBL_MAX ) {
-    std::cerr << "Parameter 0 minimum possible value should be " << -DBL_MAX
-              << ", was " << parameters[0].m_MinimumPossibleValue << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  if ( parameters[0].m_MaximumPossibleValue != DBL_MAX ) {
-    std::cerr << "Parameter 0 maximum possible value should be " << DBL_MAX
-              << ", was " << parameters[0].m_MaximumPossibleValue << std::endl;
-    return EXIT_FAILURE;
-  }
-
   if ( parameters[1].m_Name != "BB" ) {
     std::cerr << "Parameter 1 name should be 'BB', was '"
               << parameters[1].m_Name << "' instead." << std::endl;
     return EXIT_FAILURE;
   }
 
-  if ( parameters[1].m_MinimumPossibleValue != 0.0 ) {
-    std::cerr << "Parameter 1 minimum possible value should be " << 0.0
-              << ", was " << parameters[1].m_MinimumPossibleValue << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  if ( parameters[1].m_MaximumPossibleValue != DBL_MAX ) {
-    std::cerr << "Parameter 1 maximum possible value should be " << DBL_MAX
-              << ", was " << parameters[0].m_MaximumPossibleValue << std::endl;
-    return EXIT_FAILURE;
-  }
-
   if ( parameters[2].m_Name != "CCC" ) {
     std::cerr << "Parameter 2 name should be 'BBB', was '"
               << parameters[2].m_Name << "' instead." << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  if ( parameters[2].m_MinimumPossibleValue != 0.0 ) {
-    std::cerr << "Parameter 2 minimum possible value should be " << 0.0
-              << ", was " << parameters[2].m_MinimumPossibleValue << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  if ( parameters[2].m_MaximumPossibleValue != 1.0 ) {
-    std::cerr << "Parameter 2 maximum possible value should be " << 1.0
-              << ", was " << parameters[2].m_MaximumPossibleValue << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -145,38 +109,6 @@ int main( int argc, char *argv[])
   if ( model->GetScalarOutputNames().size() != 0 ) {
     std::cerr << "Size of vector containing scalar output names should be 0, was "
              << model->GetScalarOutputNames().size() << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  double range[2];
-  madai::Model::ErrorType error = model->GetRange( 4, range );
-  if ( error != madai::Model::INVALID_PARAMETER_INDEX ) {
-    std::cerr << "Model::GetRange() should have returned INVALID_PARAMETER_INDEX,"
-              << " returned " << model->GetErrorTypeAsString( error ) << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  error = model->GetRange( 0, range );
-  if ( range[0] != -DBL_MAX || range[1] != DBL_MAX ) {
-    std::cerr << "ModelGetRange( 0, range ) returned range ("
-              << range[0] << "), " << range[1] << ", but (" << -DBL_MAX << ", "
-              << DBL_MAX << ") was expected." << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  error = model->GetRange( 1, range );
-  if ( range[0] != 0.0 || range[1] != DBL_MAX ) {
-    std::cerr << "ModelGetRange( 1, range ) returned range ("
-              << range[0] << "), " << range[1] << ", but (" << 0.0 << ", "
-              << DBL_MAX << ") was expected." << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  error = model->GetRange( 2, range );
-  if ( range[0] != 0.0 || range[1] != 1.0 ) {
-    std::cerr << "ModelGetRange( 2, range ) returned range ("
-              << range[0] << "), " << range[1] << ", but (" << 0.0 << ", "
-              << 1.0 << ") was expected." << std::endl;
     return EXIT_FAILURE;
   }
 
