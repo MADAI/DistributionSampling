@@ -59,10 +59,6 @@ int main(int argc, char ** argv) {
   std::vector< madai::Parameter > const & parameters
     = externalModel.GetParameters();
 
-  // for (unsigned int i = 0; i < parameters->size(); i++) {
-  //   simple_mcmc.ActivateParameter(parameters[i].m_Name);
-  // } // should be unnecesary
-
   int t = externalModel.GetNumberOfScalarOutputs();
   std::vector< double > observedScalarValues;
   for(int i = 0; i < t; ++i)
@@ -76,7 +72,8 @@ int main(int argc, char ** argv) {
   madai::Trace trace;
   unsigned int numberIter = 500;
   for (unsigned int count = 0; count < numberIter; count ++) {
-    simple_mcmc.NextSample(&trace);
+    madai::Sample sample = simple_mcmc.NextSample();
+    trace.Add( sample );
   }
 
   // Stop the external process

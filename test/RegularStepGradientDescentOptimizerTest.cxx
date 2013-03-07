@@ -52,7 +52,8 @@ int main(int argc, char *argv[])
   std::vector< double > currentParameters;
   for (unsigned int i = 0; i < 50; i++) {
     currentParameters = sampler->GetCurrentParameters();
-    sampler->NextSample( &trace );
+    madai::Sample sample = sampler->NextSample();
+    trace.Add( sample );
   }
 
   double modelMeanX;

@@ -44,7 +44,7 @@ public:
   virtual ~SimpleMetropolisHastingsSampler();
 
   /** append the next point to the Trace  */
-  virtual void NextSample(Trace *trace);
+  virtual Sample NextSample();
 
   //@{
   /**

@@ -37,9 +37,9 @@ RegularStepGradientDescentSampler
 }
 
 
-void
+Sample
 RegularStepGradientDescentSampler
-::NextSample( Trace *trace )
+::NextSample()
 {
   std::vector< bool > activeParameters( m_CurrentParameters.size() );
 
@@ -57,7 +57,7 @@ RegularStepGradientDescentSampler
     m_Model->GetScalarAndGradientOutputs( m_CurrentParameters, activeParameters,
                                           scalars, 0, gradient );
 
-  trace->Add( m_CurrentParameters, scalars );
+  Sample sample( m_CurrentParameters, scalars );
 
   // Update the current parameters to the new position
   double direction = 1.0;
@@ -73,6 +73,8 @@ RegularStepGradientDescentSampler
         m_CurrentParameters[i];
     }
   }
+
+  return sample;
 }
 
 

@@ -63,11 +63,9 @@ void SimpleMetropolisHastingsSampler
   m_StepSize = stepSize;
 }
 
-
-
-void
+Sample
 SimpleMetropolisHastingsSampler
-::NextSample( Trace *trace )
+::NextSample()
 {
   // xc is x_candidate
   Model * m = const_cast< Model * >(m_Model);
@@ -102,8 +100,7 @@ SimpleMetropolisHastingsSampler
         (std::exp(delta_logLikelihood) > this->m_random.Uniform())) {
       this->m_CurrentLogLikelihood = ll;
       this->m_CurrentParameters = xc;
-      trace->Add(xc, yc, ll);
-      return;
+      return Sample( xc, yc, ll );
     } // else, loop.
   }
 }

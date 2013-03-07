@@ -24,6 +24,8 @@
 #include "Model.h"
 #include "Trace.h"
 #include "Parameter.h"
+#include "Sample.h"
+
 
 namespace madai {
 
@@ -92,9 +94,8 @@ public:
   /** Get the current value of a parameter. */
   virtual double GetParameterValue( const std::string & parameterName );
 
-  /** Compute the next set of parameters and the output scalar values,
-   * and save them in the trace file. */
-  virtual void NextSample(Trace *trace) = 0;
+  /** Compute the next set of parameters, output scalar values, and log likelihood. */
+  virtual Sample NextSample() = 0;
 
   /** Get the current parameter values. */
   const std::vector< double > & GetCurrentParameters() const;
