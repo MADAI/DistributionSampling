@@ -86,7 +86,6 @@ Gaussian2DModel
 ::GetScalarAndGradientOutputs( const std::vector< double > & parameters,
                                const std::vector< bool > & activeParameters,
                                std::vector< double > & scalars,
-                               unsigned int outputIndex,
                                std::vector< double > & gradient) const
 {
   scalars.clear();
@@ -95,12 +94,6 @@ Gaussian2DModel
   ErrorType error = this->GetScalarOutputs( parameters, scalars );
   if ( error != NO_ERROR ) {
     return error;
-  }
-
-  // Compute the gradient for the desired output variable, but only
-  // for the active parameters.
-  if ( outputIndex >= this->GetNumberOfScalarOutputs() ) {
-    return INVALID_OUTPUT_INDEX;
   }
 
   if ( activeParameters.size() != this->GetNumberOfParameters() ) {

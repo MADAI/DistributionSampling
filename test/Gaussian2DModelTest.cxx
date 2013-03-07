@@ -136,27 +136,12 @@ int main(int argc, char *argv[])
     activeParameters[i] = true;
   }
   error = model->GetScalarAndGradientOutputs( parameters, activeParameters,
-                                              scalars, 0, gradient );
+                                              scalars, gradient );
   if ( error != madai::Model::NO_ERROR )
   {
     std::cerr << "Error encountered when computing scalar and gradient outputs."
               << std::endl;
     return EXIT_FAILURE;
-  }
-
-  // Cause an intentional error.
-  error = model->GetScalarAndGradientOutputs( parameters, activeParameters,
-                                              scalars, 1, gradient );
-  if ( error == madai::Model::NO_ERROR )
-  {
-    std::cerr << "Did not catch expected error when requesting gradient "
-              << "for invalid output index." << std::endl;
-    return EXIT_FAILURE;
-  }
-  else
-  {
-    std::cout << "Caught expected error when requesting gradient "
-              << "for invalid output index." << std::endl;
   }
 
   std::cout << "Model gradient for parameters [" << parameters[0] << ", "
