@@ -18,15 +18,11 @@
 
 #include "Model.h"
 
-extern "C"{
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_math.h>
-}
+#include <Eigen/Dense>
+
 #include <cassert>
 #include <cmath>
+#include <limits>
 
 namespace madai {
 
@@ -334,7 +330,7 @@ Model
     std::vector< double > & scalars,
     double & logLikelihood)
 {
-  logLikelihood = GSL_NAN; // if error occurs.
+  logLikelihood = std::numeric_limits< double >::signaling_NaN();
   double logPriorLikelihood
     = this->GetLogPriorLikelihood(parameters);
 
@@ -382,34 +378,13 @@ Model
       covariance[i]
         = scalarCovariance[i] + this->m_ObservedScalarCovariance[i];
   }
-  // We should replace this GSL code with some other linalg library.
 
-  gsl_matrix_view cov_view
-    = gsl_matrix_view_array(&(covariance[0]), t, t);
-  gsl_matrix * lu = &cov_view.matrix;
-
-  gsl_vector_view diff_view
-    = gsl_vector_view_array (&(scalarDifferences[0]), t);
-  gsl_vector * diff = &diff_view.vector;
-
-  gsl_vector * tmp = gsl_vector_alloc(t);
-  gsl_permutation * p = gsl_permutation_alloc(t);
-
-  // Need to calculate ((covariance)^(-1) . differences)
-  // tmp = (cov^(-1) . diff)
-  // cov . tmp = diff
-  // solve for tmp.
-  int signum;
-  gsl_linalg_LU_decomp (lu, p, &signum);
-  //FIXME check for singular matrix
-  gsl_linalg_LU_solve (lu, p, diff, tmp);
+  Eigen::Map< Eigen::VectorXd > diff(&(scalarDifferences[0]),t,t);
+  Eigen::Map< Eigen::MatrixXd > cov(&(covariance[0]),t,t);
+  Eigen::VectorXd tmp = cov.colPivHouseholderQr().solve(diff);
+  // FIXME check for singular matrix -> return negative infinity!
   // need to calulate ((diff)^T . tmp), the dot product of two vectors.
-  double innerProduct;
-  gsl_blas_ddot (diff, tmp, &innerProduct);
-
-  gsl_vector_free(tmp);
-  gsl_permutation_free(p);
-
+  double innerProduct = tmp.dot(diff);
   logLikelihood = ((-0.5) * innerProduct) + logPriorLikelihood;
   return NO_ERROR;
 }
