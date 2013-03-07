@@ -51,11 +51,9 @@ RegularStepGradientDescentSampler
   std::vector< double > scalars;
   std::vector< double > gradient;
 
-  // TODO - set the index from the active scalar
-
   Model::ErrorType error =
     m_Model->GetScalarAndGradientOutputs( m_CurrentParameters, activeParameters,
-                                          scalars, 0, gradient );
+                                          scalars, gradient );
 
   Sample sample( m_CurrentParameters, scalars );
 

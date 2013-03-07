@@ -95,11 +95,11 @@ public:
   /** Get both scalar outputs and the gradient of active parameters.
    *
    * The gradient output parameter will contain gradient components of
-   * the output scalar field requested by the outputIndex parameter
-   * for only the active parameters. That is, the first element in the
-   * vector will contain the gradient component for the first active
-   * parameter, the second element in the vector will contain the
-   * gradient component for the second active parameter, and so on.
+   * the log likelihood for only the active parameters. That is, the
+   * first element in the vector will contain the gradient component
+   * for the first active parameter, the second element in the vector
+   * will contain the gradient component for the second active
+   * parameter, and so on.
    *
    * \param parameters Point in parameter space where the Model should
    * be evaluated.
@@ -107,14 +107,12 @@ public:
    * should be computed.
    * \param scalars Output argument that will contain the scalars from
    * evaluating the Model.
-   * \param outputIndex To remove.
    * \param gradient Output argument that will contain the gradient
    * components requested via the activeParameters vector. */
   virtual ErrorType GetScalarAndGradientOutputs(
     const std::vector< double > & parameters,
     const std::vector< bool > & activeParameters,
     std::vector< double > & scalars,
-    unsigned int outputIndex,
     std::vector< double > & gradient) const;
 
   /** Expect vector of length GetNumberOfScalarOutputs().
@@ -172,7 +170,7 @@ public:
    virtual ErrorType GetScalarOutputsAndLogLikelihood(
     const std::vector< double > & parameters,
     std::vector< double > & scalars,
-    double & logLikelihood);
+    double & logLikelihood) const;
 
   /** Some models don't know the output values precisely
    *
@@ -188,7 +186,7 @@ public:
   virtual ErrorType GetScalarOutputsAndCovariance(
     const std::vector< double > & parameters,
     std::vector< double > & scalars,
-    std::vector< double > & scalarCovariance);
+    std::vector< double > & scalarCovariance) const;
 
   /** Returns the sum of the LogPriorLikelihood for each x[i] which is
    * the log of the prior likelihood for the parameters */

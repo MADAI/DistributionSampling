@@ -50,7 +50,6 @@ public:
   ErrorType GetScalarAndGradientOutputs( const std::vector< double > & parameters,
                                          const std::vector< bool > & activeParameters,
                                          std::vector< double > & scalars,
-                                         unsigned int outputIndex,
                                          std::vector< double > & gradient) const;
 
   /** Get the x and y means */
