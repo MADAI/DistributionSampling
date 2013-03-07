@@ -10,11 +10,24 @@ set( DistributionSampling_LIBRARY_DIRS ${DistributionSampling_BINARY_DIR}/lib )
 find_package(Eigen3 REQUIRED)
 list(APPEND DistributionSampling_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} )
 
-## GSL
-find_package( GSL REQUIRED )
-list(APPEND CORELIBS ${GSL_LIBRARIES} )
-list(APPEND DistributionSampling_INCLUDE_DIRS ${GSL_INCLUDE_DIRS} )
-list(APPEND DistributionSampling_LIBRARY_DIRS ${GSL_LIBRARY_DIRS} )
+find_package( Boost REQUIRED )
+set(CORELIBS
+  ${coral_LIBRARIES}
+  ${MADAIEmulator_LIBRARIES}
+)
+
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${coral_INCLUDE_DIRS}
+  ${MADAIEmulator_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+)
+
+link_directories(
+  ${PROJECT_BINARY_DIR}/lib
+  ${coral_LIBRARY_DIRS}
+  ${MADAIEmulator_LIBRARY_DIRS}
+)
 
 ## MADAIEmulator
 find_package( MADAIEmulator REQUIRED )

@@ -20,13 +20,13 @@
 
 #include <cmath>
 
-
 namespace madai {
 
 GaussianDistribution
 ::GaussianDistribution() :
   m_Mean( 0.0 ),
-  m_StandardDeviation( 1.0 )
+  m_StandardDeviation( 1.0 ),
+  m_InternalDistribution( new boost::math::normal( m_Mean, m_StandardDeviation ) )
 {
 }
 
@@ -34,6 +34,7 @@ GaussianDistribution
 GaussianDistribution
 ::~GaussianDistribution()
 {
+  delete m_InternalDistribution;
 }
 
 Distribution *
@@ -52,6 +53,10 @@ GaussianDistribution
 ::SetMean( double mean )
 {
   m_Mean = mean;
+
+  delete m_InternalDistribution;
+  m_InternalDistribution = new boost::math::normal( m_Mean, m_StandardDeviation );
+
 }
 
 
@@ -68,6 +73,10 @@ GaussianDistribution
 ::SetStandardDeviation( double standardDeviation )
 {
   m_StandardDeviation = standardDeviation;
+
+  delete m_InternalDistribution;
+  m_InternalDistribution = new boost::math::normal( m_Mean, m_StandardDeviation );
+
 }
 
 
@@ -91,7 +100,8 @@ double
 GaussianDistribution
 ::GetProbabilityDensity( double value ) const
 {
-  return this->GetNormalizationFactor() * exp( this->GetExponent( value ) );
+  //return this->GetNormalizationFactor() * exp( this->GetExponent( value ) );
+  return boost::math::pdf( *m_InternalDistribution, value );
 }
 
 
@@ -99,15 +109,7 @@ double
 GaussianDistribution
 ::GetPercentile( double percentile ) const
 {
-  // \todo - Implement general version. The percentiles we need most
-  // often are defined here.
-  if ( percentile == 0.25 ) {
-    return -0.67448 * m_StandardDeviation + m_Mean;
-  } else if ( percentile == 0.75 ) {
-    return 0.67448 * m_StandardDeviation + m_Mean;
-  }
-
-  return 0.0;
+  return boost::math::quantile( *m_InternalDistribution, percentile );
 }
 
 double

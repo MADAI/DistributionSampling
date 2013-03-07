@@ -71,7 +71,7 @@ int main( int argc, char* argv[] )
   double expectedDensity = normalization *
     exp( -( x - newMean ) * ( x - newMean ) / ( 2.0 * variance ) );
   double actualDensity = distribution.GetProbabilityDensity( x );
-  if ( expectedDensity != actualDensity ) {
+  if ( fabs( expectedDensity - actualDensity ) > 1e-4 ) {
     std::cerr << "GaussianDistribution::GetProbabilityDensity() expected to return "
 	      << expectedDensity << ", got " << actualDensity << " instead." << std::endl;
     return EXIT_FAILURE;
@@ -79,7 +79,7 @@ int main( int argc, char* argv[] )
 
   double expectedPercentile = -0.67448 * newStandardDeviation + newMean;
   double actualPercentile = distribution.GetPercentile( 0.25 );
-  if ( fabs( actualPercentile - expectedPercentile ) > 1e-6 ) {
+  if ( fabs( actualPercentile - expectedPercentile ) > 1e-4 ) {
     std::cerr << "GaussianDistribution::GetPercentile( 0.25 ) expected to return "
 	      << expectedPercentile << ", got " << actualPercentile << " instead." << std::endl;
     return EXIT_FAILURE;
@@ -87,7 +87,7 @@ int main( int argc, char* argv[] )
 
   expectedPercentile = 0.67448 * newStandardDeviation + newMean;
   actualPercentile = distribution.GetPercentile( 0.75 );
-  if ( fabs( actualPercentile - expectedPercentile ) > 1e-6 ) {
+  if ( fabs( actualPercentile - expectedPercentile ) > 1e-4 ) {
     std::cerr << "GaussianDistribution::GetPercentile( 0.75 ) expected to return "
 	      << expectedPercentile << ", got " << actualPercentile << " instead." << std::endl;
     return EXIT_FAILURE;
