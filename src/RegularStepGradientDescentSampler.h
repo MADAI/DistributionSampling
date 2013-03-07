@@ -31,7 +31,7 @@ namespace madai {
  */
 class RegularStepGradientDescentSampler : public Sampler {
 public:
-  RegularStepGradientDescentSampler( const Model *model );
+  RegularStepGradientDescentSampler();
   ~RegularStepGradientDescentSampler();
 
   Sample NextSample();
@@ -52,7 +52,6 @@ protected:
 
   bool m_Minimize;
 
-  RegularStepGradientDescentSampler() {}; // intentionally hidden
 }; // end class RegularStepGradientDescentSampler
 
 } // end namespace madai

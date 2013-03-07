@@ -25,28 +25,46 @@ namespace madai {
 
 
 Sampler
-::Sampler( const Model *model ) :
-  m_Model(model),
-  m_CurrentParameters(model->GetNumberOfParameters(),0.0),
-  m_ActiveParameterIndices(model->GetNumberOfParameters(), true)
+::Sampler() :
+  m_Model( NULL )
 {
-  assert(model != NULL);
-  unsigned int np = this->m_Model->GetNumberOfParameters();
-
-  // Activate all parameters by default.
-  const std::vector< Parameter > & params = this->m_Model->GetParameters();
-  assert(np == params.size());
-
-  for (unsigned int i = 0; (i < np); ++i)
-    {
-    this->m_ActiveParameters.insert( params[i].m_Name );
-    }
 }
 
 
 Sampler
 ::~Sampler()
 {
+}
+
+
+void
+Sampler
+::Initialize( const Model * model )
+{
+  assert(model != NULL);
+
+  m_Model = model;
+  unsigned int np = m_Model->GetNumberOfParameters();
+
+  // Activate all parameters by default.
+  const std::vector< Parameter > & params = m_Model->GetParameters();
+  assert(np == params.size());
+
+  m_ActiveParameters.clear();
+  for (unsigned int i = 0; (i < np); ++i) {
+    m_ActiveParameters.insert( params[i].m_Name );
+  }
+
+  m_CurrentParameters = std::vector< double >( model->GetNumberOfParameters(), 0.0 );
+  m_ActiveParameterIndices = std::vector< bool >( model->GetNumberOfParameters(), true );
+}
+
+
+void
+Sampler
+::SetModel( const Model * model )
+{
+  this->Initialize( model );
 }
 
 

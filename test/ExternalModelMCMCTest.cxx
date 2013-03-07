@@ -52,7 +52,8 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  madai::SimpleMetropolisHastingsSampler simple_mcmc(&externalModel);
+  madai::SimpleMetropolisHastingsSampler simple_mcmc;
+  simple_mcmc.SetModel( &externalModel );
 
   simple_mcmc.SetStepSize(0.1);
 

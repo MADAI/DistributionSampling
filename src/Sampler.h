@@ -47,14 +47,17 @@ public:
     INVALID_OUTPUT_SCALAR_INDEX_ERROR
   } ErrorType;
 
-  /** default constructor. */
-  Sampler( const Model *model );
-  /** default constructor. */
+  /** Default constructor. */
+  Sampler();
+
+  /** Destructor. */
   virtual ~Sampler();
-  /** return a pointer to the current Model */
+
+  /** Get/set the current Model */
+  void SetModel( const Model * model );
   const Model * GetModel() const;
 
-  /** git a list of the names of the active parameters. */
+  /** Get a list of the names of the active parameters. */
   std::set< std::string > GetActiveParameters();
 
   /** Activate a parameter by name. */
@@ -102,8 +105,8 @@ public:
   double & GetCurrentLogLikelihood() const;
 
 protected:
-  /** intentionally hidden */
-  Sampler() {};
+  /** Initialize the Sampler. */
+  virtual void Initialize( const Model * model );
 
   /** useful for a implementation */
   unsigned int GetParameterIndex( const std::string & parameterName ) const;

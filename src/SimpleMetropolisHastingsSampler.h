@@ -37,9 +37,8 @@ namespace madai {
  */
 class SimpleMetropolisHastingsSampler : public Sampler {
 public:
-  /** constructor.  No way right now to change the model mid-trace.
-      Only parameter values can change  */
-  SimpleMetropolisHastingsSampler( const Model *model );
+  /** Constructor. */
+  SimpleMetropolisHastingsSampler();
   /** destructor */
   virtual ~SimpleMetropolisHastingsSampler();
 
@@ -62,20 +61,13 @@ protected:
   */
   double m_StepSize;
 
-  /** cache this value from the Model */
-  unsigned int m_NumberOfParameters;
-
-  /** cache this value from the Model */
-  unsigned int m_NumberOfOutputs;
-
 protected:
+  virtual void Initialize( const Model * model );
+
   /** based on the length scales of the parameter space */
-  std::vector< double > m_stepScales;
+  std::vector< double > m_StepScales;
 
 private:
-  /** This Sampler needs a Model to sample from, so this constructor
-      is hidden. */
-  SimpleMetropolisHastingsSampler() {};
 
   /**
    * random number object.

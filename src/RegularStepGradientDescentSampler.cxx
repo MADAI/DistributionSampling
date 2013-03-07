@@ -23,8 +23,8 @@ namespace madai {
 
 
 RegularStepGradientDescentSampler
-::RegularStepGradientDescentSampler( const Model *model ) :
-  Sampler( model ),
+::RegularStepGradientDescentSampler() :
+  Sampler(),
   m_StepSize( 1.0e-3 ),
   m_Minimize( true )
 {

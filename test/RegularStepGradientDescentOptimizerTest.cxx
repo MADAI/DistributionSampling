@@ -32,7 +32,8 @@ int main(int argc, char *argv[])
   model->LoadConfigurationFile( "file.txt" ); // TODO - does nothing
 
   madai::RegularStepGradientDescentSampler *sampler =
-    new madai::RegularStepGradientDescentSampler( model );
+    new madai::RegularStepGradientDescentSampler();
+  sampler->SetModel( model );
   sampler->MinimizeOff(); // We want to maximize this function
 
   //madai::Trace *trace = new madai::Trace();
