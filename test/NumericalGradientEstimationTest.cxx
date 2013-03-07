@@ -18,6 +18,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <cmath>
 
 #include "Gaussian2DModel.h"
 #include "VectorUtilities.h"
@@ -58,7 +59,7 @@ int main( int argc, char *argv[] )
     if ( activeParameters[i] ) {
       double actual   = actualGradient[ activeParameterIndex ];
       double estimate = estimatedGradient[ activeParameterIndex ];
-      if ( fabs( actual - estimate ) > 1.0e-5 ) {
+      if ( std::abs( actual - estimate ) > 1.0e-5 ) {
         std::cerr << "Actual gradient and estimated gradient differ at "
                   << "active parameter " << i << std::endl;
         std::cout << "actualGradient: " << actualGradient << std::endl;

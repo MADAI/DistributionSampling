@@ -28,6 +28,7 @@ class GaussianDistribution : public Distribution {
 public:
   GaussianDistribution();
   virtual ~GaussianDistribution();
+  virtual Distribution * Clone() const;
 
   /** Set/get the mean of the Gaussian distribution. */
   void SetMean( double mean );

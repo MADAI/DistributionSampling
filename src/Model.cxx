@@ -26,14 +26,14 @@ extern "C"{
 #include <gsl/gsl_math.h>
 }
 #include <cassert>
+#include <cmath>
 
 namespace madai {
 
 Model
 ::Model() :
   m_GradientEstimateStepSize( 1.0e-4 ),
-  m_StateFlag( UNINITIALIZED ),
-  m_LogPriorLikelihoodFunction( NULL )
+  m_StateFlag( UNINITIALIZED )
 {
 }
 
@@ -158,7 +158,8 @@ Model
       // Compute the scalar outputs for a forward step
       parametersCopy[i] = parameters[i] + h;
       std::vector< double > forwardScalars;
-      scalarOutputError = this->GetScalarOutputs( parametersCopy, forwardScalars );
+      scalarOutputError = this->GetScalarOutputs(
+        parametersCopy, forwardScalars );
       if ( scalarOutputError != NO_ERROR ) {
         return scalarOutputError;
       }
@@ -166,7 +167,8 @@ Model
       // Compute the scalar outputs for a backward step
       parametersCopy[i] = parameters[i] - h;
       std::vector< double > backwardScalars;
-      scalarOutputError = this->GetScalarOutputs( parametersCopy, backwardScalars );
+      scalarOutputError = this->GetScalarOutputs(
+        parametersCopy, backwardScalars );
       if ( scalarOutputError != NO_ERROR ) {
         return scalarOutputError;
       }
@@ -265,6 +267,15 @@ Model
   m_Parameters.push_back( Parameter(name, minimumPossibleValue, maximumPossibleValue) );
 }
 
+void
+Model
+::AddParameter( const std::string & name,
+                const Distribution & priorDistribution)
+{
+  m_Parameters.push_back(
+    Parameter(name, priorDistribution) );
+}
+
 
 void
 Model
@@ -324,13 +335,9 @@ Model
     double & logLikelihood)
 {
   logLikelihood = GSL_NAN; // if error occurs.
-  double logPriorLikelihood = 0.0; // default value.
-  if (this->m_LogPriorLikelihoodFunction != NULL) {
-    ScalarFunction::ErrorType e = this->m_LogPriorLikelihoodFunction->GetOutput(
-      parameters, logPriorLikelihood);
-    if (e != ScalarFunction::NO_ERROR)
-      return OTHER_ERROR;
-  }
+  double logPriorLikelihood
+    = this->GetLogPriorLikelihood(parameters);
+
   size_t t = this->GetNumberOfScalarOutputs();
   assert(t > 0);
   std::vector< double > scalarCovariance;
@@ -376,6 +383,7 @@ Model
         = scalarCovariance[i] + this->m_ObservedScalarCovariance[i];
   }
   // We should replace this GSL code with some other linalg library.
+
   gsl_matrix_view cov_view
     = gsl_matrix_view_array(&(covariance[0]), t, t);
   gsl_matrix * lu = &cov_view.matrix;
@@ -393,6 +401,7 @@ Model
   // solve for tmp.
   int signum;
   gsl_linalg_LU_decomp (lu, p, &signum);
+  //FIXME check for singular matrix
   gsl_linalg_LU_solve (lu, p, diff, tmp);
   // need to calulate ((diff)^T . tmp), the dot product of two vectors.
   double innerProduct;
@@ -405,17 +414,21 @@ Model
   return NO_ERROR;
 }
 
-/**
- * If this function is not set, assume a constant prior.
- * To unset this, call with NULL.
- */
-Model::ErrorType
+
+
+/** return the sum of the LogPriorLikelihood for each x[i] */
+double
 Model
-::SetLogPriorLikelihoodFunction(
-  ScalarFunction * function)
+::GetLogPriorLikelihood(const std::vector< double > & x) const
 {
-  this->m_LogPriorLikelihoodFunction = function;
-  return NO_ERROR;
+  const std::vector< Parameter > & params = this->GetParameters();
+  assert(x.size() == params.size());
+  double logPriorLikelihood = 0.0;
+  for (size_t i = 0; i < params.size() ; ++i) {
+    logPriorLikelihood +=
+      params[i].GetPriorDistribution()->GetLogProbabilityDensity(x[i]);
+  }
+  return logPriorLikelihood;
 }
 
 

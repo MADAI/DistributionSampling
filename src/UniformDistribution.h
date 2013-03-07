@@ -28,6 +28,7 @@ class UniformDistribution : public Distribution {
 public:
   UniformDistribution();
   virtual ~UniformDistribution();
+  virtual Distribution * Clone() const;
 
   /** Set/get the minimum value of the uniform distribution. */
   void SetMinimum( double minimum );

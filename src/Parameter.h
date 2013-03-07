@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include "Distribution.h"
 
 
 namespace madai {
@@ -33,17 +34,32 @@ namespace madai {
 class Parameter {
 public:
   /**
-   * constructor.  Range defaults to [0,1]
+   * constructor.  default is a uniform prior on [0,1]
    */
-  Parameter( std::string nm, double mn = 0.0, double mx = 1.0 ) :
-    m_Name(nm),
-    m_MinimumPossibleValue(mn),
-    m_MaximumPossibleValue(mx) { }
+  Parameter( std::string nm);
+
+  /**
+   * constructor.  default is a uniform prior on [min,max]
+   */
+  Parameter( std::string nm, double min, double max);
+
+  /**
+   * constructor.  Makes a copy of the supplied Distribution.
+   */
+  Parameter( std::string nm, const Distribution & distribution);
+
+  //@{
+  /**
+   * copy constructors and assignmnet operator.
+   */
+  Parameter( const Parameter & other);
+  Parameter & operator=( const Parameter & other);
+  //@}
 
     /**
      * destructor.
      */
-  virtual ~Parameter() { }
+  virtual ~Parameter();
 
   /**
    * a short description of the parameter.
@@ -53,10 +69,20 @@ public:
   //@{
   /**
    * range of possible values for this Parameter
+   * \warning depricated
    */
   double      m_MinimumPossibleValue;
   double      m_MaximumPossibleValue;
   //@}
+
+  //@{
+  /**
+   * \todo document
+   */
+  const Distribution * GetPriorDistribution() const;
+  Distribution * m_PriorDistribution;
+  //@}
+
 }; // end class Parameter
 
 } // end namespace madai

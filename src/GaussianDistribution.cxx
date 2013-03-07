@@ -36,6 +36,16 @@ GaussianDistribution
 {
 }
 
+Distribution *
+GaussianDistribution
+::Clone() const
+{
+  GaussianDistribution * d = new GaussianDistribution();
+  d->SetMean(this->GetMean());
+  d->SetStandardDeviation(this->GetStandardDeviation());
+  return d;
+}
+
 
 void
 GaussianDistribution

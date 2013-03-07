@@ -18,6 +18,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <cmath>
 
 #include "Gaussian2DModel.h"
 #include "RegularStepGradientDescentSampler.h"
@@ -41,8 +42,8 @@ int main(int argc, char *argv[])
   double stepSize = 20.0;
   sampler->SetStepSize( stepSize );
 
-  // Pick which output scalar to optimize.
-  sampler->SetOutputScalarToOptimize( "Value " );
+  // // Pick which output scalar to optimize.
+  // sampler->SetOutputScalarToOptimize( "Value " );
 
   // Set initial parameter values.
   sampler->SetParameterValue( "X", 21.0 );
@@ -58,8 +59,8 @@ int main(int argc, char *argv[])
   double modelMeanY;
   model->GetMeans( modelMeanX, modelMeanY );
 
-  if ( fabs( modelMeanX - currentParameters[0] ) > 1.0e-3 ||
-       fabs( modelMeanY - currentParameters[1] ) > 1.0e-3 ) {
+  if ( std::abs( modelMeanX - currentParameters[0] ) > 1.0e-3 ||
+       std::abs( modelMeanY - currentParameters[1] ) > 1.0e-3 ) {
     std::cerr << "RegularStepGradientDescentSampler failed to converge "
               << "on the expected solution." << std::endl;
     std::cerr << "Expected currentParameters to be (" << modelMeanX << ", "

@@ -68,17 +68,19 @@ protected:
   /** cache this value from the Model */
   unsigned int m_NumberOfOutputs;
 
-  //@{
-  /** Keep track of the last step (or the initial position) so we
-      don't have to recalculate each time. */
-  std::vector< double > m_LastStepParameters;
-  std::vector< double > m_LastStepOutputs;
-  double m_LastStepLogLikelihood;
-  //@}
+protected:
+  /** based on the length scales of the parameter space */
+  std::vector< double > m_stepScales;
+
 private:
   /** This Sampler needs a Model to sample from, so this constructor
       is hidden. */
   SimpleMetropolisHastingsSampler() {};
+
+  /**
+   * random number object.
+   */
+  madai::Random m_random;
 }; // end class SimpleMetropolisHastingsSampler
 
 } // end namespace madai

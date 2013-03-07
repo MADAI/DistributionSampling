@@ -20,13 +20,7 @@
 #define __Model_h__
 
 #include "Parameter.h"
-#include "parametermap.h"
-#include "random.h"
-#include "ScalarFunction.h"
-
-extern "C"{
-#include <gsl/gsl_randist.h>
-}
+#include "Random.h"
 
 #include <cfloat>
 #include <vector>
@@ -92,11 +86,6 @@ public:
     std::vector< double > & scalars,
     unsigned int outputIndex,
     std::vector< double > & gradient) const;
-
-  /** Get the likelihood and prior for the parameters. */
-  virtual ErrorType GetLikeAndPrior( const std::vector< double > & parameters,
-                                     double & LikeNew,
-                                     double & PriorNew) const = 0;
 
   /**
    * Expect vector of length GetNumberOfScalarOutputs().  If you never
@@ -172,11 +161,11 @@ public:
     std::vector< double > & scalarCovariance);
 
   /**
-   * If this function is not set, assume a constant prior.
-   * To unset this, call with NULL as the argument.
-   *
+   * return the sum of the LogPriorLikelihood for each x[i]
+   * return the log of the prior likelihood at point x in parameter
+   * space.
    */
-  virtual ErrorType SetLogPriorLikelihoodFunction( ScalarFunction * function );
+  virtual double GetLogPriorLikelihood(const std::vector< double > & x) const;
 
   /** Set/get the gradient estimate step size. */
   void SetGradientEstimateStepSize( double stepSize );
@@ -185,11 +174,7 @@ public:
   /** Returns an error code as a string. */
   static std::string GetErrorTypeAsString( ErrorType error );
 
-  /** \todo - These should be made protected. */
-  std::string   m_DirectoryName;
-  std::string   m_ParameterFileName;
-  bool          m_LogLike;
-  parameterMap  m_ParameterMap;
+
 
 protected:
   /** Enumeration of internal state. */
@@ -215,10 +200,18 @@ protected:
   /** Current state of the model. */
   InternalState m_StateFlag;
 
-  /** Add a parameter. */
+  /**
+   * Add a parameter.
+   *
+   * \deprecated Use the priorDistribution form of this command.
+   */
   void AddParameter( const std::string & name,
                      double minimumPossibleValue = -DBL_MAX,
                      double maximumPossibleValue =  DBL_MAX );
+
+  /** Add a parameter. */
+  void AddParameter( const std::string & name,
+                     const Distribution & priorDistribution);
 
   /** Add a scalar output name. */
   void AddScalarOutputName( const std::string & name );
@@ -235,11 +228,6 @@ protected:
    * If empty, assume zero matrix.
    */
   std::vector< double > m_ObservedScalarCovariance;
-  /**
-   * A function to get the LogPriorLikelihood at any point in
-   * parameter space.
-   */
-  ScalarFunction * m_LogPriorLikelihoodFunction;
 
 }; // end Model
 

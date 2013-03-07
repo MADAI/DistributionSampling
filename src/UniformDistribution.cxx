@@ -38,6 +38,15 @@ UniformDistribution
 {
 }
 
+Distribution *
+UniformDistribution
+::Clone() const
+{
+  UniformDistribution * d = new UniformDistribution();
+  d->SetMinimum(this->GetMinimum());
+  d->SetMaximum(this->GetMaximum());
+  return d;
+}
 
 void
 UniformDistribution
