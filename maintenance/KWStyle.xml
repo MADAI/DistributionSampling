@@ -11,7 +11,7 @@
   <Comments>/**, *, */,true</Comments>
   <Namespace>madai</Namespace>
   <NameOfClass>[NameOfClass],itk</NameOfClass>
-  <IfNDefDefine>__[NameOfClass]_[Extension]__</IfNDefDefine>
+  <IfNDefDefine>madai_[NameOfClass]_[Extension]_included</IfNDefDefine>
   <EmptyLines>2</EmptyLines>
   <Template>[TNV]</Template>
   <Operator>1,1</Operator>

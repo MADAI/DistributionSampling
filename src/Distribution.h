@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright The University of North Carolina at Chapel Hill
+ *  Copyright 2011-2013 The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __Distribution_h__
-#define __Distribution_h__
+#ifndef madai_Distribution_h_included
+#define madai_Distribution_h_included
 
 #include "Random.h"
 
@@ -74,4 +74,4 @@ protected:
 
 } // namespace madai
 
-#endif
+#endif // madai_Distribution_h_included

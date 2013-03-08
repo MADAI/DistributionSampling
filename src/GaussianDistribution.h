@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright The University of North Carolina at Chapel Hill
+ *  Copyright 2011-2013 The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __GaussianDistribution_h__
-#define __GaussianDistribution_h__
+#ifndef madai_GaussianDistribution_h_included
+#define madai_GaussianDistribution_h_included
 
 #include "Distribution.h"
 
@@ -77,4 +77,4 @@ private:
 
 } // end namespace madai
 
-#endif // __GaussianDistribution_h__
+#endif // madai_GaussianDistribution_h_included

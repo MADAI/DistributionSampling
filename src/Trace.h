@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright The University of North Carolina at Chapel Hill
+ *  Copyright 2011-2013 The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __Trace_h__
-#define __Trace_h__
+#ifndef madai_Trace_h_included
+#define madai_Trace_h_included
 
 #include <fstream>
 #include <iostream>
@@ -151,4 +151,4 @@ protected:
 
 } // namespace madai
 
-#endif // __Trace_h__
+#endif // madai_Trace_h_included

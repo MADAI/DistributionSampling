@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright The University of North Carolina at Chapel Hill
+ *  Copyright 2011-2013 The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __Random_h__
-#define __Random_h__
+#ifndef madai_Random_h_included
+#define madai_Random_h_included
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/normal_distribution.hpp>
@@ -111,4 +111,4 @@ private:
 
 }
 
-#endif // __Random_h__g4
+#endif // madai_Random_h_included

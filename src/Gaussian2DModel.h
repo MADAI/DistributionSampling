@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright The University of North Carolina at Chapel Hill
+ *  Copyright 2011-2013 The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __Gaussian2DModel_h__
-#define __Gaussian2DModel_h__
+#ifndef madai_Gaussian2DModel_h_included
+#define madai_Gaussian2DModel_h_included
 
 #include "Model.h"
 
@@ -82,4 +82,4 @@ protected:
 
 } // end namespace madai
 
-#endif // __Gaussian2DModel_h__
+#endif // madai_Gaussian2DModel_h_included

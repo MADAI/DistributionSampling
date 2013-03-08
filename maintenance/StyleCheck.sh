@@ -3,12 +3,22 @@
 # To use, run this from the top level of the DistributionSampling
 # library source directory.
 
-script_path="`dirname \"$0\"`"
+kwstyle="KWStyle"
+#kwstyle="${HOME}/build/KWStyle/KWStyle"
 
-files=`ls -1 src/*.h src/*.cxx`
+if (! which "$kwstyle" > /dev/null) ; then
+	echo "KWStyle not found";
+	exit 1
+fi
 
-for file in $files; do KWStyle -v $file -xml ${script_path}/KWStyle.xml | sed '/^$/d'; done
+script_path="`cd \`dirname \"$0\"\`; pwd`"
 
-files=`ls -1 test/*.cxx`
+cd "${script_path}/.."
 
-for file in $files; do KWStyle -v $file -xml ${script_path}/KWStyleTest.xml | sed '/^$/d'; done
+for file in src/*.h src/*.cxx; do
+	"$kwstyle" -v "$file" -xml "${script_path}/KWStyle.xml" | sed '/^$/d';
+done
+
+for file in test/*.cxx; do
+	"$kwstyle" -v "$file" -xml "${script_path}/KWStyleTest.xml" | sed '/^$/d';
+done

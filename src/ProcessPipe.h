@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright The University of North Carolina at Chapel Hill
+ *  Copyright 2011-2013 The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __ProcessPipe_h__
-#define __ProcessPipe_h__
+#ifndef madai_ProcessPipe_h_included
+#define madai_ProcessPipe_h_included
 
 #ifdef __cplusplus
 #include <cstdio>
@@ -58,4 +58,4 @@ typedef struct ProcessPipe {
 }
 #endif /* __cplusplus */
 
-#endif  /* __ProcessPipe_h__ */
+#endif  /* madai_ProcessPipe_h_included */

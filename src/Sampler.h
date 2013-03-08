@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright The University of North Carolina at Chapel Hill
+ *  Copyright 2011-2013 The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __Sampler_h__
-#define __Sampler_h__
+#ifndef madai_Sampler_h_included
+#define madai_Sampler_h_included
 
 #include <set>
 
@@ -196,4 +196,4 @@ protected:
 
 } // end namespace madai
 
-#endif // __Sampler_h__x
+#endif // madai_Sampler_h_included

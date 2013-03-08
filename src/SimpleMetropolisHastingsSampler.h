@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright The University of North Carolina at Chapel Hill
+ *  Copyright 2011-2013 The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __SimpleMetropolisHastingsSampler_h__
-#define __SimpleMetropolisHastingsSampler_h__
+#ifndef madai_SimpleMetropolisHastingsSampler_h_included
+#define madai_SimpleMetropolisHastingsSampler_h_included
 
 
 #include "Sampler.h"
@@ -75,4 +75,4 @@ private:
 
 } // end namespace madai
 
-#endif // __SimpleMetropolisHastingsSampler_h__
+#endif // madai_SimpleMetropolisHastingsSampler_h_included

@@ -1,6 +1,6 @@
 /*=========================================================================
  *
- *  Copyright The University of North Carolina at Chapel Hill
+ *  Copyright 2011-2013 The University of North Carolina at Chapel Hill
  *  All rights reserved.
  *
  *  Licensed under the MADAI Software License. You may obtain a copy of
@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef __Model_h__
-#define __Model_h__
+#ifndef madai_Model_h_included
+#define madai_Model_h_included
 
 #include "Parameter.h"
 #include "Random.h"
@@ -118,7 +118,7 @@ public:
     std::vector< double > & gradient) const;
 
   /** Expect vector of length GetNumberOfScalarOutputs().
-   * 
+   *
    * If you never set this, all model scalar outputs are assumed to
    * already have the observed value subtracted off.  By default, we
    * use the zero vector as ObservedScalarValues.  To unset this
@@ -258,4 +258,4 @@ protected:
 
 } // end namespace madai
 
-#endif // __Model_h
+#endif // madai_Model_h_included
