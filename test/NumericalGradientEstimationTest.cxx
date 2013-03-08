@@ -42,16 +42,14 @@ int main( int argc, char *argv[] )
     activeParameters.push_back( true );
   }
 
-  unsigned int outputIndex = 0;
   madai::Model::ErrorType error =
     model->GetScalarAndGradientOutputs( parameters, activeParameters,
-                                        scalars, outputIndex, actualGradient );
+                                        scalars, actualGradient );
 
   std::vector< double > estimatedGradient;
   error =
     model->Model::GetScalarAndGradientOutputs( parameters, activeParameters,
-                                               scalars, outputIndex,
-                                               estimatedGradient );
+                                               scalars, estimatedGradient );
 
   unsigned int activeParameterIndex = 0;
   for ( unsigned int i = 0; i < model->GetNumberOfParameters(); ++i ) {
@@ -76,8 +74,7 @@ int main( int argc, char *argv[] )
   activeParameters[1] = false;
   error =
     model->Model::GetScalarAndGradientOutputs( parameters, activeParameters,
-                                               scalars, outputIndex,
-                                               partialGradient );
+                                               scalars, partialGradient );
   double partial    = partialGradient[0];
   double estimated  = estimatedGradient[0];
   if ( fabs( estimated - partial ) > 1.0e-5 ) {
@@ -90,8 +87,7 @@ int main( int argc, char *argv[] )
   activeParameters[1] = true;
   error =
     model->Model::GetScalarAndGradientOutputs( parameters, activeParameters,
-                                               scalars, outputIndex,
-                                               partialGradient );
+                                               scalars, partialGradient );
 
   partial   = partialGradient[0];
   estimated = estimatedGradient[1];

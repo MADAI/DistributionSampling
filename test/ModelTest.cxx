@@ -203,13 +203,6 @@ int main( int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  if ( madai::Model::GetErrorTypeAsString( madai::Model::INVALID_OUTPUT_INDEX ) != "INVALID_OUTPUT_INDEX" ) {
-    std::cerr << "Expected string 'INVALID_OUTPUT_INDEX', got '"
-              << madai::Model::GetErrorTypeAsString( madai::Model::INVALID_OUTPUT_INDEX )
-              << "' instead." << std::endl;
-    return EXIT_FAILURE;
-  }
-
   if ( madai::Model::GetErrorTypeAsString( madai::Model::INVALID_ACTIVE_PARAMETERS ) != "INVALID_ACTIVE_PARAMETERS" ) {
     std::cerr << "Expected string 'INVALID_ACTIVE_PARAMETERS', got '"
               << madai::Model::GetErrorTypeAsString( madai::Model::INVALID_ACTIVE_PARAMETERS )

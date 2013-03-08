@@ -123,13 +123,8 @@ Model
   const std::vector< double > & parameters,
   const std::vector< bool > & activeParameters,
   std::vector< double > & scalars,
-  unsigned int outputIndex,
   std::vector< double > & gradient) const
 {
-  if ( outputIndex >= this->GetNumberOfScalarOutputs() ) {
-    return INVALID_OUTPUT_INDEX;
-  }
-
   if ( static_cast< unsigned int >( activeParameters.size() ) !=
        this->GetNumberOfParameters() ) {
     return INVALID_ACTIVE_PARAMETERS;
@@ -154,8 +149,9 @@ Model
       // Compute the scalar outputs for a forward step
       parametersCopy[i] = parameters[i] + h;
       std::vector< double > forwardScalars;
-      scalarOutputError = this->GetScalarOutputs(
-        parametersCopy, forwardScalars );
+      double forwardLogLikelihood;
+      scalarOutputError = this->GetScalarOutputsAndLogLikelihood(
+        parametersCopy, forwardScalars, forwardLogLikelihood );
       if ( scalarOutputError != NO_ERROR ) {
         return scalarOutputError;
       }
@@ -163,16 +159,16 @@ Model
       // Compute the scalar outputs for a backward step
       parametersCopy[i] = parameters[i] - h;
       std::vector< double > backwardScalars;
-      scalarOutputError = this->GetScalarOutputs(
-        parametersCopy, backwardScalars );
+      double backwardLogLikelihood;
+      scalarOutputError = this->GetScalarOutputsAndLogLikelihood(
+        parametersCopy, backwardScalars, backwardLogLikelihood );
       if ( scalarOutputError != NO_ERROR ) {
         return scalarOutputError;
       }
 
       // Compute the partial derivative with central differences
-      double f = forwardScalars[ outputIndex ];
-      double b = backwardScalars[ outputIndex ];
-      double partialDerivative = ( f - b ) / ( 2.0 * h );
+      double partialDerivative = ( forwardLogLikelihood - backwardLogLikelihood )
+        / ( 2.0 * h );
 
       // Store the partial derivative in the gradient output
       gradient.push_back( partialDerivative );
@@ -219,10 +215,6 @@ Model
 
   case INVALID_PARAMETER_INDEX:
     outputString = std::string( "INVALID_PARAMETER_INDEX" );
-    break;
-
-  case INVALID_OUTPUT_INDEX:
-    outputString = std::string( "INVALID_OUTPUT_INDEX" );
     break;
 
   case INVALID_ACTIVE_PARAMETERS:
@@ -317,7 +309,7 @@ Model
 ::GetScalarOutputsAndCovariance(
       const std::vector< double > & parameters,
       std::vector< double > & scalars,
-      std::vector< double > & scalarCovariance)
+      std::vector< double > & scalarCovariance) const
 {
   scalarCovariance.clear();
   return this->GetScalarOutputs(parameters, scalars);
@@ -328,7 +320,7 @@ Model
 ::GetScalarOutputsAndLogLikelihood(
     const std::vector< double > & parameters,
     std::vector< double > & scalars,
-    double & logLikelihood)
+    double & logLikelihood) const
 {
   logLikelihood = std::numeric_limits< double >::signaling_NaN();
   double logPriorLikelihood
