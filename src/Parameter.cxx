@@ -21,60 +21,56 @@
 
 namespace madai {
 
-Parameter::Parameter( std::string nm) :
-  m_Name(nm),
-  m_MinimumPossibleValue(0.0),
-  m_MaximumPossibleValue(1.0)
+Parameter::Parameter( std::string name) :
+  m_Name( name )
 {
   UniformDistribution * u = new UniformDistribution();
   u->SetMinimum( 0.0 );
   u->SetMaximum( 1.0 );
-  this->m_PriorDistribution = u;
+  m_PriorDistribution = u;
 }
 
-Parameter::Parameter( std::string nm, double mn, double mx) :
-  m_Name(nm),
-  m_MinimumPossibleValue(mn),
-  m_MaximumPossibleValue(mx)
+
+Parameter::Parameter( std::string name, double minimum, double maximum ) :
+  m_Name( name )
 {
   UniformDistribution * u = new UniformDistribution();
-  u->SetMinimum( mn );
-  u->SetMaximum( mx );
-  this->m_PriorDistribution = u;
+  u->SetMinimum( minimum );
+  u->SetMaximum( maximum );
+  m_PriorDistribution = u;
 }
 
-Parameter::Parameter( std::string nm, const Distribution & distribution) :
-  m_Name(nm),
-  m_PriorDistribution(distribution.Clone())
+
+Parameter::Parameter( std::string name, const Distribution & distribution) :
+  m_Name( name ),
+  m_PriorDistribution( distribution.Clone() )
 {
-  this->m_MinimumPossibleValue = 0.0; //FIXME
-  this->m_MaximumPossibleValue = 1.0; //FIXME
 }
+
 
 Parameter::~Parameter()
 {
-  delete this->m_PriorDistribution;
+  delete m_PriorDistribution;
 }
 
+
 Parameter::Parameter( const Parameter & other) :
-  m_Name(other.m_Name),
-  m_MinimumPossibleValue(other.m_MinimumPossibleValue),
-  m_MaximumPossibleValue(other.m_MaximumPossibleValue),
-  m_PriorDistribution(other.m_PriorDistribution->Clone())
+  m_Name( other.m_Name ),
+  m_PriorDistribution( other.m_PriorDistribution->Clone() )
 {
 }
+
 
 Parameter & Parameter::operator=( const Parameter & other)
 {
-  this->m_Name = other.m_Name;
-  this->m_MinimumPossibleValue = other.m_MinimumPossibleValue;
-  this->m_MaximumPossibleValue = other.m_MaximumPossibleValue;
-  this->m_PriorDistribution = other.m_PriorDistribution->Clone();
+  m_Name = other.m_Name;
+  m_PriorDistribution = other.m_PriorDistribution->Clone();
 }
+
 
 const Distribution * Parameter::GetPriorDistribution() const
 {
-  return this->m_PriorDistribution;
+  return m_PriorDistribution;
 }
 
 } // namespace madai

@@ -94,21 +94,6 @@ Model
 }
 
 
-Model::ErrorType
-Model
-::GetRange( unsigned int parameterIndex, double range[2] ) const
-{
-  if ( parameterIndex > this->GetNumberOfParameters() ) {
-    return INVALID_PARAMETER_INDEX;
-  }
-
-  range[0] = this->m_Parameters.at(parameterIndex).m_MinimumPossibleValue;
-  range[1] = this->m_Parameters.at(parameterIndex).m_MaximumPossibleValue;
-
-  return NO_ERROR;
-}
-
-
 const std::vector< std::string > &
 Model
 ::GetScalarOutputNames() const

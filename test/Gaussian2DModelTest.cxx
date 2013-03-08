@@ -72,26 +72,6 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  // Test parameter ranges
-  for ( unsigned int i = 0; i < 2; i++ )
-  {
-    double range[2];
-    model->GetRange( 0, range );
-    if ( range[0] != -DBL_MAX )
-    {
-      std::cerr << "Got parameter lower range of " << range[0]
-                <<  ", expected " << -DBL_MAX << std::endl;
-      return EXIT_FAILURE;
-    }
-
-    if ( range[1] != DBL_MAX )
-    {
-      std::cerr << "Got parameter upper range of " << range[1]
-                <<  ", expected " << DBL_MAX << std::endl;
-      return EXIT_FAILURE;
-    }
-  }
-
   // Test scalar output number and names.
   if ( model->GetNumberOfScalarOutputs() != 1 )
   {

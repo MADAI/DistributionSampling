@@ -61,15 +61,6 @@ public:
   std::string m_Name;
 
   //@{
-  /** Range of possible values for this Parameter
-   *
-   * \warning depricated
-   */
-  double      m_MinimumPossibleValue;
-  double      m_MaximumPossibleValue;
-  //@}
-
-  //@{
   /** The distribution used as a prior for this parameter */
   const Distribution * GetPriorDistribution() const;
   Distribution * m_PriorDistribution;

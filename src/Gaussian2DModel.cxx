@@ -46,14 +46,6 @@ Gaussian2DModel
   return Model::NO_ERROR;
 }
 
-void
-Gaussian2DModel
-::GetRange( unsigned int parameterIndex, double range[2] )
-{
-  range[0] = m_Parameters[parameterIndex].m_MinimumPossibleValue;
-  range[1] = m_Parameters[parameterIndex].m_MaximumPossibleValue;
-}
-
 
 Model::ErrorType
 Gaussian2DModel
