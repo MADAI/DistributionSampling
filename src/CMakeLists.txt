@@ -1,6 +1,6 @@
 set( SRC_FILES
   Random.cxx
-  GaussianProcessModelEmulator.cxx
+  GaussianProcessEmulator.cxx
   GaussianProcessEmulatedModel.cxx
   Parameter.cxx
   Distribution.cxx

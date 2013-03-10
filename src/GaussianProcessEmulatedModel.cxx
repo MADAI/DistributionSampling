@@ -46,7 +46,7 @@ GaussianProcessEmulatedModel
     return Model::FILE_NOT_FOUND_ERROR;
   if (! m_GPME.Load(input))
     return Model::OTHER_ERROR;
-  if (m_GPME.m_Status != GaussianProcessModelEmulator::READY)
+  if (m_GPME.m_Status != GaussianProcessEmulator::READY)
     return Model::OTHER_ERROR;
   m_StateFlag = READY;
   // std::vector<T>::operator=(const std::vector<T>&)
@@ -66,7 +66,7 @@ GaussianProcessEmulatedModel
   std::vector< double > & scalars,
   std::vector< double > & scalarCovariance) const
 {
-  if (m_GPME.m_Status != GaussianProcessModelEmulator::READY)
+  if (m_GPME.m_Status != GaussianProcessEmulator::READY)
     return Model::OTHER_ERROR;
 
   if (this->GetNumberOfParameters() != parameters.size())
@@ -89,7 +89,7 @@ GaussianProcessEmulatedModel
   const std::vector< double > & parameters,
   std::vector< double > & scalars ) const
 {
-  if (m_GPME.m_Status != GaussianProcessModelEmulator::READY)
+  if (m_GPME.m_Status != GaussianProcessEmulator::READY)
     return Model::OTHER_ERROR;
 
   if (this->GetNumberOfParameters() != parameters.size())

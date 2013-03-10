@@ -17,24 +17,24 @@
  *=========================================================================*/
 
 /*
- * GaussianProcessModelEmulator Class
+ * GaussianProcessEmulator Class
  *
  * \author Hal Canary <cs.unc.edu/~hal/>
  * \author Christopher Coleman-Smith <cec24@phy.duke.edu>
  * \author Cory Quammen <cs.unc.edu/~cquammen>
  */
 
-#ifndef madai_GaussianProcessModelEmulator_h_included
-#define madai_GaussianProcessModelEmulator_h_included
+#ifndef madai_GaussianProcessEmulator_h_included
+#define madai_GaussianProcessEmulator_h_included
 #include <iostream>
 #include <vector>
 #include <Eigen/Dense>
 #include "Parameter.h"
 namespace madai {
 /**
-   \class GaussianProcessModelEmulator
+   \class GaussianProcessEmulator
    \fixme describe the useage of this class. */
-class GaussianProcessModelEmulator
+class GaussianProcessEmulator
 {
 public:
   // ENUMERATIONS
@@ -62,7 +62,7 @@ public:
   // METHODS
   /**
     Default constructor which makes an empty GPEM */
-  GaussianProcessModelEmulator();
+  GaussianProcessEmulator();
 
   /**
     Writes current state to file.  \returns true on sucess. */
@@ -192,12 +192,12 @@ public:
     // /**
     //    Initialize a model and set hyperparameter values to default.* */
     // bool Initialize(
-    //   GaussianProcessModelEmulator * parent,
+    //   GaussianProcessEmulator * parent,
     //   CovarianceFunction covarianceFunction,
     //   int regressionOrder);
 
     /**
-       Called by GaussianProcessModelEmulator::MakeCache().
+       Called by GaussianProcessEmulator::MakeCache().
        Given a set of (thetas, covarianceFunction, regressionOrder),
        populate m_cInverse, m_betaVector, m_hMatrix, m_cInverseZ,
        m_cInverseHtrans, and m_IHTCIH;  */
@@ -235,7 +235,7 @@ public:
     // FIELDS
     /**
        A pointer to the parent */
-    GaussianProcessModelEmulator * m_Parent;
+    GaussianProcessEmulator * m_Parent;
     /**
        Which covariance function is used? */
     CovarianceFunction m_CovarianceFunction;
@@ -271,4 +271,4 @@ public:
 } // end namespace madai
 
 
-#endif /* madai_GaussianProcessModelEmulator_h_included */
+#endif /* madai_GaussianProcessEmulator_h_included */

@@ -37,12 +37,12 @@ USE:
 #include <iostream> // cout, cin
 #include <fstream> // ifstream, ofstream
 #include <cstring> // strcmp, strlen
-#include "GaussianProcessModelEmulator.h"
+#include "GaussianProcessEmulator.h"
 
 #define starts_with(s1,s2) (std::strncmp((s1), (s2), std::strlen(s2)) == 0)
 
-static const madai::GaussianProcessModelEmulator::CovarianceFunction DEFAULT_COVARIACE_FUNCTION
-  = madai::GaussianProcessModelEmulator::SQUARE_EXP_FN;
+static const madai::GaussianProcessEmulator::CovarianceFunction DEFAULT_COVARIACE_FUNCTION
+  = madai::GaussianProcessEmulator::SQUARE_EXP_FN;
 static const int DEFAULT_REGRESSION_ORDER = 1;
 static const double DEFAULT_PCA_FRACTION = 0.99;
 
@@ -80,7 +80,7 @@ static const char useage [] =
 
 struct cmdLineOpts{
   int regressionOrder;
-  madai::GaussianProcessModelEmulator::CovarianceFunction covarianceFunction;
+  madai::GaussianProcessEmulator::CovarianceFunction covarianceFunction;
   bool quietFlag;
   double pcaVariance;
   const char * inputFile; /* first non-flag argument  */
@@ -128,13 +128,13 @@ bool parseCommandLineOptions(int argc, char** argv, struct cmdLineOpts & opts)
       break;
     case 'c':
       if (starts_with(optarg, "POWER_EXPONENTIAL")) {
-        opts.covarianceFunction = madai::GaussianProcessModelEmulator::POWER_EXP_FN;
+        opts.covarianceFunction = madai::GaussianProcessEmulator::POWER_EXP_FN;
       } else if (starts_with(optarg, "SQUARE_EXPONENTIAL")) {
-        opts.covarianceFunction = madai::GaussianProcessModelEmulator::SQUARE_EXP_FN;
+        opts.covarianceFunction = madai::GaussianProcessEmulator::SQUARE_EXP_FN;
       } else if (starts_with(optarg, "MATERN_32")) {
-        opts.covarianceFunction = madai::GaussianProcessModelEmulator::MATERN_32_FN;
+        opts.covarianceFunction = madai::GaussianProcessEmulator::MATERN_32_FN;
       } else if (starts_with(optarg, "MATERN_52")) {
-        opts.covarianceFunction = madai::GaussianProcessModelEmulator::MATERN_52_FN;
+        opts.covarianceFunction = madai::GaussianProcessEmulator::MATERN_52_FN;
       } else {
         std::cerr << "Error: covariance_fn given incorrect argument: "
           << optarg << "\n";
@@ -184,7 +184,7 @@ int main(int argc, char ** argv) {
   struct cmdLineOpts options;
   if (! parseCommandLineOptions(argc, argv, options))
     return EXIT_FAILURE;
-  madai::GaussianProcessModelEmulator gpme;
+  madai::GaussianProcessEmulator gpme;
   if (0 == std::strcmp(options.inputFile, "-")) {
     gpme.LoadTrainingData(std::cin);
   } else {

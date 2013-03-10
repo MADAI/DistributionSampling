@@ -38,7 +38,7 @@ USE:
 #include <fstream>
 #include <cassert>
 #include <cstdlib>
-#include "GaussianProcessModelEmulator.h"
+#include "GaussianProcessEmulator.h"
 #include "UniformDistribution.h"
 #include "GaussianDistribution.h"
 
@@ -137,7 +137,7 @@ std::ostream & operator <<(std::ostream & o, const madai::Parameter & param) {
 /**
    The meat of the program.  Interactive Query of the model. */
 bool Interact(
-    madai::GaussianProcessModelEmulator & gpme,
+    madai::GaussianProcessEmulator & gpme,
     std::istream & input,
     std::ostream & output,
     bool quietFlag)
@@ -206,7 +206,7 @@ int main(int argc, char ** argv) {
   if (!parseCommandLineOptions(argc, argv, options))
     return EXIT_FAILURE;
   std::string inputFile(options.inputFile);
-  madai::GaussianProcessModelEmulator gpme;
+  madai::GaussianProcessEmulator gpme;
   if (inputFile == "-")
     /*
       Please note: if you use stdin to feed in the model, you should
@@ -223,7 +223,7 @@ int main(int argc, char ** argv) {
       return EXIT_FAILURE;
     }
   }
-  if (gpme.m_Status != madai::GaussianProcessModelEmulator::READY)
+  if (gpme.m_Status != madai::GaussianProcessEmulator::READY)
     return EXIT_FAILURE;
 
   if (Interact(gpme, std::cin, std::cout, options.quietFlag))

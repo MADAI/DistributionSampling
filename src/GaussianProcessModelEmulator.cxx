@@ -17,14 +17,14 @@
  *=========================================================================*/
 
 /*
- * GaussianProcessModelEmulator Class
+ * GaussianProcessEmulator Class
  *
  * \author Hal Canary <cs.unc.edu/~hal/>
  * \author Christopher Coleman-Smith <cec24@phy.duke.edu>
  * \author Cory Quammen <cs.unc.edu/~cquammen>
  */
 
-#include "GaussianProcessModelEmulator.h"
+#include "GaussianProcessEmulator.h"
 #include <cstdio> // remove it later
 #include <iostream>
 #include <cmath>
@@ -199,13 +199,13 @@ static inline std::ostream & PrintVector(
 /**
  * A covariance function can be represented as a string. */
 const char * GetCovarianceFunctionString(
-  GaussianProcessModelEmulator::CovarianceFunction cov)
+  GaussianProcessEmulator::CovarianceFunction cov)
 {
   switch (cov) {
-  case GaussianProcessModelEmulator::POWER_EXP_FN:  return "POWER_EXP_FN";
-  case GaussianProcessModelEmulator::SQUARE_EXP_FN: return "SQUARE_EXP_FN";
-  case GaussianProcessModelEmulator::MATERN_32_FN:  return "MATERN_32_FN";
-  case GaussianProcessModelEmulator::MATERN_52_FN:  return "MATERN_52_FN";
+  case GaussianProcessEmulator::POWER_EXP_FN:  return "POWER_EXP_FN";
+  case GaussianProcessEmulator::SQUARE_EXP_FN: return "SQUARE_EXP_FN";
+  case GaussianProcessEmulator::MATERN_32_FN:  return "MATERN_32_FN";
+  case GaussianProcessEmulator::MATERN_52_FN:  return "MATERN_52_FN";
   default:
     assert(false);
     return "UNKNOWN";
@@ -214,19 +214,19 @@ const char * GetCovarianceFunctionString(
 /**
    Read the CovarianceFunction from the command line. */
 bool parseCovarianceFunction(
-    GaussianProcessModelEmulator::CovarianceFunction & cov,
+    GaussianProcessEmulator::CovarianceFunction & cov,
     std::istream & input) {
   if (! input.good()) return false;
   std::string s;
   input >> s;
   if (s == "POWER_EXP_FN")
-    cov = GaussianProcessModelEmulator::POWER_EXP_FN;
+    cov = GaussianProcessEmulator::POWER_EXP_FN;
   else if (s == "SQUARE_EXP_FN")
-    cov = GaussianProcessModelEmulator::SQUARE_EXP_FN;
+    cov = GaussianProcessEmulator::SQUARE_EXP_FN;
   else if (s == "MATERN_32_FN")
-    cov = GaussianProcessModelEmulator::MATERN_32_FN;
+    cov = GaussianProcessEmulator::MATERN_32_FN;
   else if (s == "MATERN_52_FN")
-    cov = GaussianProcessModelEmulator::MATERN_52_FN;
+    cov = GaussianProcessEmulator::MATERN_52_FN;
   else {
     return false;
   }
@@ -330,7 +330,7 @@ bool parseInteger( int & x, std::istream & input ) {
 }
 
 bool parseSubmodels(
-    GaussianProcessModelEmulator::SingleModel & m,
+    GaussianProcessEmulator::SingleModel & m,
     int modelIndex,
     std::istream & input) {
   std::string word;
@@ -370,7 +370,7 @@ bool parseSubmodels(
 }
 
 std::ostream & serializeSubmodels(
-    const GaussianProcessModelEmulator::SingleModel & m,
+    const GaussianProcessEmulator::SingleModel & m,
     int modelIndex,
     std::ostream & o) {
   o << "MODEL " << modelIndex << '\n';
@@ -385,8 +385,8 @@ std::ostream & serializeSubmodels(
   return o;
 }
 
-std::ostream & serializeGaussianProcessModelEmulator(
-    const GaussianProcessModelEmulator & gpme,
+std::ostream & serializeGaussianProcessEmulator(
+    const GaussianProcessEmulator & gpme,
     std::ostream & o) {
 
   serializeComments(gpme.m_Comments,o);
@@ -418,8 +418,8 @@ std::ostream & serializeGaussianProcessModelEmulator(
   return o;
 }
 
-bool parseGaussianProcessModelEmulator(
-    GaussianProcessModelEmulator & gpme,
+bool parseGaussianProcessEmulator(
+    GaussianProcessEmulator & gpme,
     std::istream & input) {
   parseComments(gpme.m_Comments,input);
   std::string word;
@@ -507,31 +507,31 @@ inline int NumberRegressionFunctions(
 }
 
 inline int NumberThetas(
-    GaussianProcessModelEmulator::CovarianceFunction cf,
+    GaussianProcessEmulator::CovarianceFunction cf,
     int numberParameters) {
   switch(cf) {
-  case GaussianProcessModelEmulator::SQUARE_EXP_FN:
+  case GaussianProcessEmulator::SQUARE_EXP_FN:
     return numberParameters + 2;
-  case GaussianProcessModelEmulator::POWER_EXP_FN:
+  case GaussianProcessEmulator::POWER_EXP_FN:
     return numberParameters + 3;
-  case GaussianProcessModelEmulator::MATERN_32_FN:
+  case GaussianProcessEmulator::MATERN_32_FN:
     return 3;
-  case GaussianProcessModelEmulator::MATERN_52_FN:
+  case GaussianProcessEmulator::MATERN_52_FN:
     return 3;
-  case GaussianProcessModelEmulator::UNKNOWN_FN:
+  case GaussianProcessEmulator::UNKNOWN_FN:
     //fall through
   default:
     return -1;
   }
 }
 
-const char * stat(GaussianProcessModelEmulator::StatusType s) {
+const char * stat(GaussianProcessEmulator::StatusType s) {
   switch(s) {
-  case GaussianProcessModelEmulator::READY        : return "READY";
-  case GaussianProcessModelEmulator::UNCACHED     : return "UNCACHED";
-  case GaussianProcessModelEmulator::UNTRAINED    : return "UNTRAINED";
-  case GaussianProcessModelEmulator::UNINITIALIZED: return "UNINITIALIZED";
-  case GaussianProcessModelEmulator::ERROR        :
+  case GaussianProcessEmulator::READY        : return "READY";
+  case GaussianProcessEmulator::UNCACHED     : return "UNCACHED";
+  case GaussianProcessEmulator::UNTRAINED    : return "UNTRAINED";
+  case GaussianProcessEmulator::UNINITIALIZED: return "UNINITIALIZED";
+  case GaussianProcessEmulator::ERROR        :
   default                                         : return "ERROR";
   }
 }
@@ -540,7 +540,7 @@ const char * stat(GaussianProcessModelEmulator::StatusType s) {
 
 namespace madai {
 
-double GaussianProcessModelEmulator::SingleModel::CovarianceCalc(
+double GaussianProcessEmulator::SingleModel::CovarianceCalc(
     const Eigen::VectorXd & v1, const Eigen::VectorXd & v2) const
 {
   int p = m_Parent->m_NumberParameters;
@@ -661,15 +661,15 @@ double GaussianProcessModelEmulator::SingleModel::CovarianceCalc(
 }
 
 
-bool GaussianProcessModelEmulator::Load(std::istream & input)
+bool GaussianProcessEmulator::Load(std::istream & input)
 {
   m_Status = UNINITIALIZED;
-  if (! parseGaussianProcessModelEmulator(*this, input)) {
+  if (! parseGaussianProcessEmulator(*this, input)) {
     std::cerr << "FIXME need error message\n";
     return false;
   }
   // We are finished reading the input file.
-  if (this->CheckStatus() != GaussianProcessModelEmulator::UNCACHED) {
+  if (this->CheckStatus() != GaussianProcessEmulator::UNCACHED) {
     std::cerr << "FIXME status error\t" << stat(this->CheckStatus())
     << '\n';
     return false;
@@ -681,8 +681,8 @@ bool GaussianProcessModelEmulator::Load(std::istream & input)
   return true;
 }
 
-GaussianProcessModelEmulator::StatusType
-GaussianProcessModelEmulator::CheckStatus() {
+GaussianProcessEmulator::StatusType
+GaussianProcessEmulator::CheckStatus() {
   m_Status = UNINITIALIZED;
   if (m_NumberTrainingPoints < 1) {
     return m_Status;
@@ -786,7 +786,7 @@ GaussianProcessModelEmulator::CheckStatus() {
 
 /**
    Set default values to uninitialized values. */
-GaussianProcessModelEmulator::SingleModel::SingleModel() :
+GaussianProcessEmulator::SingleModel::SingleModel() :
   m_Parent(NULL),
   m_CovarianceFunction(UNKNOWN_FN),
   m_RegressionOrder(-1)
@@ -797,7 +797,7 @@ GaussianProcessModelEmulator::SingleModel::SingleModel() :
    Once Load(), Train(), or BasicTraining() finishes, calculate and
    cache some data to make calling GetEmulatorOutputsAndCovariance()
    faster. */
-bool GaussianProcessModelEmulator::MakeCache() {
+bool GaussianProcessEmulator::MakeCache() {
   if ((m_Status != READY) && (m_Status != UNCACHED))
     return false;
   assert(m_NumberPCAOutputs == static_cast<int>(m_PCADecomposedModels.size()));
@@ -808,7 +808,7 @@ bool GaussianProcessModelEmulator::MakeCache() {
   m_Status = READY;
   return true;
 }
-bool GaussianProcessModelEmulator::SingleModel::MakeCache() {
+bool GaussianProcessEmulator::SingleModel::MakeCache() {
   int N = m_Parent->m_NumberTrainingPoints;
   int p = m_Parent->m_NumberParameters;
   int F = NumberRegressionFunctions(m_RegressionOrder, p);
@@ -873,7 +873,7 @@ bool GaussianProcessModelEmulator::SingleModel::MakeCache() {
 
 /**
    Default to uninitialized state. */
-GaussianProcessModelEmulator::GaussianProcessModelEmulator() :
+GaussianProcessEmulator::GaussianProcessEmulator() :
   m_Status(UNINITIALIZED),
   m_NumberParameters(0),
   m_NumberOutputs(0),
@@ -883,9 +883,9 @@ GaussianProcessModelEmulator::GaussianProcessModelEmulator() :
 
 /**
    This takes an empty GPEM and loads training data */
-bool GaussianProcessModelEmulator::LoadTrainingData(std::istream & input) {
+bool GaussianProcessEmulator::LoadTrainingData(std::istream & input) {
   m_Status = UNINITIALIZED;
-  if (! parseGaussianProcessModelEmulator(*this, input))
+  if (! parseGaussianProcessEmulator(*this, input))
     return false;
   m_NumberPCAOutputs = 0;
   this->CheckStatus();
@@ -895,8 +895,8 @@ bool GaussianProcessModelEmulator::LoadTrainingData(std::istream & input) {
 
 /**
    This takes an GPEM and trains it. \returns true on sucess. */
-bool GaussianProcessModelEmulator::SingleModel::Train(
-    GaussianProcessModelEmulator::CovarianceFunction covarianceFunction,
+bool GaussianProcessEmulator::SingleModel::Train(
+    GaussianProcessEmulator::CovarianceFunction covarianceFunction,
     int regressionOrder)
 {
   if (regressionOrder < 0) {
@@ -920,8 +920,8 @@ bool GaussianProcessModelEmulator::SingleModel::Train(
 
 /**
    This takes an GPEM and trains it. \returns true on sucess. */
-bool GaussianProcessModelEmulator::Train(
-    GaussianProcessModelEmulator::CovarianceFunction covarianceFunction,
+bool GaussianProcessEmulator::Train(
+    GaussianProcessEmulator::CovarianceFunction covarianceFunction,
     int regressionOrder,
     double fractionResolvingPower)
 {
@@ -939,7 +939,7 @@ bool GaussianProcessModelEmulator::Train(
 
 /**
    This takes an GPEM and trains it. \returns true on sucess. */
-bool GaussianProcessModelEmulator::BasicTraining(
+bool GaussianProcessEmulator::BasicTraining(
     double fractionResolvingPower,
     CovarianceFunction covarianceFunction,
     int regressionOrder,
@@ -963,7 +963,7 @@ bool GaussianProcessModelEmulator::BasicTraining(
 /**
    Sets default values for all of the hyperparameters. \returns
    true on success. */
-bool GaussianProcessModelEmulator::SingleModel::BasicTraining(
+bool GaussianProcessEmulator::SingleModel::BasicTraining(
     CovarianceFunction covarianceFunction,
     int regressionOrder,
     double defaultNugget,
@@ -975,7 +975,7 @@ bool GaussianProcessModelEmulator::SingleModel::BasicTraining(
   m_Thetas.resize( NumberThetas(m_CovarianceFunction, p));
   scale = std::abs(scale);
   switch(m_CovarianceFunction) {
-  case GaussianProcessModelEmulator::SQUARE_EXP_FN:
+  case GaussianProcessEmulator::SQUARE_EXP_FN:
     m_Thetas.resize(2 + p);
     m_Thetas(0) = amplitude;
     m_Thetas(1) = defaultNugget;
@@ -986,7 +986,7 @@ bool GaussianProcessModelEmulator::SingleModel::BasicTraining(
                                      - priordist->GetPercentile(0.25));
     }
     break;
-  case GaussianProcessModelEmulator::POWER_EXP_FN:
+  case GaussianProcessEmulator::POWER_EXP_FN:
     m_Thetas.resize(3 + p);
     m_Thetas(0) = amplitude;
     m_Thetas(1) = defaultNugget;
@@ -998,9 +998,9 @@ bool GaussianProcessModelEmulator::SingleModel::BasicTraining(
                                      - priordist->GetPercentile(0.25));
     }
     break;
-  case GaussianProcessModelEmulator::MATERN_32_FN:
+  case GaussianProcessEmulator::MATERN_32_FN:
     // fall through
-  case GaussianProcessModelEmulator::MATERN_52_FN:
+  case GaussianProcessEmulator::MATERN_52_FN:
     m_Thetas.resize(3);
     m_Thetas(0) = amplitude;
     m_Thetas(1) = defaultNugget;
@@ -1024,7 +1024,7 @@ bool GaussianProcessModelEmulator::SingleModel::BasicTraining(
   return true;
 }
 
-bool GaussianProcessModelEmulator::PrincipalComponentDecompose(
+bool GaussianProcessEmulator::PrincipalComponentDecompose(
     double fractionResolvingPower)
 {
   if (fractionResolvingPower <= 0.0) {
@@ -1100,7 +1100,7 @@ bool GaussianProcessModelEmulator::PrincipalComponentDecompose(
 /**
    Execute the model at an input point x.  Save a lot of time by not
    calculating the error. */
-bool GaussianProcessModelEmulator::SingleModel::GetEmulatorOutputs (
+bool GaussianProcessEmulator::SingleModel::GetEmulatorOutputs (
     const std::vector< double > & x,
     double & mean) const {
   assert(m_RegressionOrder >= 0);
@@ -1137,7 +1137,7 @@ bool GaussianProcessModelEmulator::SingleModel::GetEmulatorOutputs (
 /**
    Execute the model at an input point x.  Save a lot of time by not
    calculating the covaraince error. */
-bool GaussianProcessModelEmulator::GetEmulatorOutputs (
+bool GaussianProcessEmulator::GetEmulatorOutputs (
     const std::vector< double > & x,
     std::vector< double > & y) const
 {
@@ -1158,7 +1158,7 @@ bool GaussianProcessModelEmulator::GetEmulatorOutputs (
 /**
    Execute the model at an input point x.  Save a lot of time by not
    calculating the error. */
-bool GaussianProcessModelEmulator::SingleModel
+bool GaussianProcessEmulator::SingleModel
 ::GetEmulatorOutputsAndCovariance (
     const std::vector< double > & x,
     double & mean,
@@ -1204,7 +1204,7 @@ bool GaussianProcessModelEmulator::SingleModel
 /**
          Execute the model at an input point x.
          The covariance returned will be a flattened matrix */
-bool GaussianProcessModelEmulator::GetEmulatorOutputsAndCovariance (
+bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
     const std::vector< double > & x,
     std::vector< double > & y,
     std::vector< double > & ycov) const {
@@ -1246,9 +1246,9 @@ bool GaussianProcessModelEmulator::GetEmulatorOutputsAndCovariance (
 }
 
 
-bool GaussianProcessModelEmulator::Write(std::ostream & o) const {
+bool GaussianProcessEmulator::Write(std::ostream & o) const {
   o.precision(17);
-  serializeGaussianProcessModelEmulator(*this, o);
+  serializeGaussianProcessEmulator(*this, o);
   return true;
 }
 } // namespace madai

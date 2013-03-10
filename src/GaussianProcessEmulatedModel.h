@@ -20,7 +20,7 @@
 #define madai_GaussianProcessEmulatedModel_h_included
 
 #include "Model.h"
-#include "GaussianProcessModelEmulator.h"
+#include "GaussianProcessEmulator.h"
 
 #include <string>
 #include <vector>
@@ -73,7 +73,7 @@ class GaussianProcessEmulatedModel : public Model {
   }
 
 private:
-  GaussianProcessModelEmulator m_GPME;
+  GaussianProcessEmulator m_GPME;
 
 }; // end GaussianProcessEmulatedModel
 

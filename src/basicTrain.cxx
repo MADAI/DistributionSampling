@@ -46,7 +46,7 @@ const char useage [] =
 #include <iostream> // cout, cin
 #include <fstream> // ifstream, ofstream
 
-#include "GaussianProcessModelEmulator.h"
+#include "GaussianProcessEmulator.h"
 
 int main(int argc, char ** argv) {
   char const * inputFile = NULL;
@@ -60,7 +60,7 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  madai::GaussianProcessModelEmulator gpme;
+  madai::GaussianProcessEmulator gpme;
   if (0 == strcmp(inputFile, "-")) {
     gpme.LoadTrainingData(std::cin);
   } else {
@@ -69,8 +69,8 @@ int main(int argc, char ** argv) {
   }
 
   double fractionResolvingPower = 0.95;
-  madai::GaussianProcessModelEmulator::CovarianceFunction covarianceFunction
-    = madai::GaussianProcessModelEmulator::SQUARE_EXP_FN;
+  madai::GaussianProcessEmulator::CovarianceFunction covarianceFunction
+    = madai::GaussianProcessEmulator::SQUARE_EXP_FN;
   int regressionOrder = 1;
   double defaultNugget = 1e-3;
   double amplitude = 1.0;
