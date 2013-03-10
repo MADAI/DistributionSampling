@@ -934,6 +934,10 @@ bool GaussianProcessEmulator::Train(
     if (! m_PCADecomposedModels[i].Train(covarianceFunction,regressionOrder))
       return false;
   }
+  if (! this->MakeCache()) {
+    std::cerr << "FIXME need error message\n";
+    return false;
+  }
   return true;
 }
 
@@ -958,6 +962,10 @@ bool GaussianProcessEmulator::BasicTraining(
       return false;
   }
   m_Status = UNCACHED;
+  if (! this->MakeCache()) {
+    std::cerr << "FIXME need error message\n";
+    return false;
+  }
   return true;
 }
 /**

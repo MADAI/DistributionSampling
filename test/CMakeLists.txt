@@ -1,15 +1,6 @@
-# Add a library for just testing
-add_library( DistributionSamplingTest
-  Gaussian2DModel.cxx
-)
-target_link_libraries( DistributionSamplingTest
+set( LIBRARIES
   DistributionSampling
-)
-
-set( LIBRARIES 
-  DistributionSampling
-  DistributionSamplingTest
-  ${CORELIBS} 
+  ${CORELIBS}
 )
 
 set( TEST_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
@@ -62,4 +53,8 @@ add_test( SampleTest SampleTest )
 add_executable( UniformDistributionTest UniformDistributionTest.cxx )
 target_link_libraries( UniformDistributionTest ${LIBRARIES} )
 add_test( UniformDistributionTest UniformDistributionTest )
+
+add_executable( EmulatorTest EmulatorTest.cxx )
+target_link_libraries( EmulatorTest ${LIBRARIES} )
+add_test( EmulatorTest EmulatorTest )
 
