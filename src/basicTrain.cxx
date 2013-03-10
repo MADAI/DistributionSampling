@@ -67,7 +67,22 @@ int main(int argc, char ** argv) {
     std::ifstream is (inputFile);
     gpme.LoadTrainingData(is);
   }
-  if (! gpme.BasicTraining())
+
+  double fractionResolvingPower = 0.95;
+  madai::GaussianProcessModelEmulator::CovarianceFunction covarianceFunction
+    = madai::GaussianProcessModelEmulator::SQUARE_EXP_FN;
+  int regressionOrder = 1;
+  double defaultNugget = 1e-3;
+  double amplitude = 1.0;
+  double scale = 1e-2;
+
+  if (! gpme.BasicTraining(
+          fractionResolvingPower,
+          covarianceFunction,
+          regressionOrder,
+          defaultNugget,
+          amplitude,
+          scale))
     return EXIT_FAILURE;
   if (0 == strcmp(outputFile, "-"))
     gpme.Write(std::cout);

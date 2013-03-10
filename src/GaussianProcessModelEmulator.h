@@ -79,13 +79,18 @@ public:
   /**
     This takes an GPEM and sets default values for all of the
     hyperparameters. \returns true on success. */
-  bool BasicTraining();
-
+  bool BasicTraining(
+    double fractionResolvingPower,
+    CovarianceFunction covarianceFunction,
+    int regressionOrder,
+    double defaultNugget,
+    double amplitude,
+    double scale);
   /**
     This takes an GPEM and trains it. \returns true on sucess. */
   bool Train(
     CovarianceFunction covarianceFunction,
-    int regressionOrder, double pcaVariance);
+    int regressionOrder, double fractionResolvingPower);
 
   /**
     Execute the model at an input point x.  Save a lot of time by not
@@ -201,7 +206,12 @@ public:
     /**
        Sets default values for all of the hyperparameters. \returns
        true on success. */
-    bool BasicTraining();
+    bool BasicTraining(
+        CovarianceFunction covarianceFunction,
+        int regressionOrder,
+        double defaultNugget,
+        double amplitude,
+        double scale);
 
     /**
        Trains the submodel. \returns true on sucess. */

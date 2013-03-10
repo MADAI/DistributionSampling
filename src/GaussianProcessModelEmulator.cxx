@@ -28,6 +28,7 @@
 #include <cstdio> // remove it later
 #include <iostream>
 #include <cmath>
+#include <limits>       // std::numeric_limits
 #include "UniformDistribution.h"
 #include "GaussianDistribution.h"
 using std::fprintf;
@@ -938,38 +939,87 @@ bool GaussianProcessModelEmulator::Train(
 
 /**
    This takes an GPEM and trains it. \returns true on sucess. */
-bool GaussianProcessModelEmulator::BasicTraining()
+bool GaussianProcessModelEmulator::BasicTraining(
+    double fractionResolvingPower,
+    CovarianceFunction covarianceFunction,
+    int regressionOrder,
+    double defaultNugget,
+    double amplitude,
+    double scale)
 {
   if (this->CheckStatus() == UNINITIALIZED)
     return false;
   m_Status = UNTRAINED;
-  static const double DefaultFractionResolvingPower = 0.95;
-  if (! this->PrincipalComponentDecompose(DefaultFractionResolvingPower))
+  if (! this->PrincipalComponentDecompose(fractionResolvingPower))
     return false;
   for (int i = 0; i < m_NumberPCAOutputs; ++i) {
-    if (! m_PCADecomposedModels[i].BasicTraining())
+    if (! m_PCADecomposedModels[i].BasicTraining(covarianceFunction,
+            regressionOrder, defaultNugget, amplitude, scale))
       return false;
   }
   m_Status = UNCACHED;
   return true;
 }
-
 /**
    Sets default values for all of the hyperparameters. \returns
    true on success. */
-bool GaussianProcessModelEmulator::SingleModel::BasicTraining() {
-  m_CovarianceFunction = GaussianProcessModelEmulator::SQUARE_EXP_FN;
-  m_RegressionOrder = 1;
+bool GaussianProcessModelEmulator::SingleModel::BasicTraining(
+    CovarianceFunction covarianceFunction,
+    int regressionOrder,
+    double defaultNugget,
+    double amplitude,
+    double scale) {
+  m_CovarianceFunction = covarianceFunction;
+  m_RegressionOrder = regressionOrder;
   int p = m_Parent->m_NumberParameters;
-  //m_Thetas.resize( NumberThetas(m_CovarianceFunction, p));
-  m_Thetas.resize(2 + p);
-  m_Thetas(0) = 1.0;
-  m_Thetas(1) = 1e-3;
-  for (int j = 0; j < p; ++j) {
-    madai::Parameter & param = m_Parent->m_Parameters[j];
-    madai::Distribution * priordist = param.m_PriorDistribution;
-    m_Thetas(2+j) = std::abs(priordist->GetPercentile(0.75)
-                             - priordist->GetPercentile(0.25));
+  m_Thetas.resize( NumberThetas(m_CovarianceFunction, p));
+  scale = std::abs(scale);
+  switch(m_CovarianceFunction) {
+  case GaussianProcessModelEmulator::SQUARE_EXP_FN:
+    m_Thetas.resize(2 + p);
+    m_Thetas(0) = amplitude;
+    m_Thetas(1) = defaultNugget;
+    for (int j = 0; j < p; ++j) {
+      madai::Parameter & param = m_Parent->m_Parameters[j];
+      madai::Distribution * priordist = param.m_PriorDistribution;
+      m_Thetas(2+j) = scale * std::abs(priordist->GetPercentile(0.75)
+                                     - priordist->GetPercentile(0.25));
+    }
+    break;
+  case GaussianProcessModelEmulator::POWER_EXP_FN:
+    m_Thetas.resize(3 + p);
+    m_Thetas(0) = amplitude;
+    m_Thetas(1) = defaultNugget;
+    m_Thetas(2) = 2.0;
+    for (int j = 0; j < p; ++j) {
+      madai::Parameter & param = m_Parent->m_Parameters[j];
+      madai::Distribution * priordist = param.m_PriorDistribution;
+      m_Thetas(3+j) = scale * std::abs(priordist->GetPercentile(0.75)
+                                     - priordist->GetPercentile(0.25));
+    }
+    break;
+  case GaussianProcessModelEmulator::MATERN_32_FN:
+    // fall through
+  case GaussianProcessModelEmulator::MATERN_52_FN:
+    m_Thetas.resize(3);
+    m_Thetas(0) = amplitude;
+    m_Thetas(1) = defaultNugget;
+    {
+      double min = std::numeric_limits< double >::max();
+      for (int j = 0; j < p; ++j) {
+        madai::Parameter & param = m_Parent->m_Parameters[j];
+        madai::Distribution * priordist = param.m_PriorDistribution;
+        double d = std::abs(priordist->GetPercentile(0.75)
+                          - priordist->GetPercentile(0.25));
+        if (d < min)
+          min = d;
+      }
+      m_Thetas(2) = min * scale;
+    }
+    break;
+  default:
+    std::cerr << "Unknown covariance function.\n";
+    return false;
   }
   return true;
 }
