@@ -762,22 +762,22 @@ GaussianProcessEmulator::CheckStatus() {
     int F = NumberRegressionFunctions(m.m_RegressionOrder,m_NumberParameters);
     if (m.m_BetaVector.size() != F)
       return m_Status;
-    if (m.m_HMatrix.rows() != m_NumberTrainingPoints)
-      return m_Status;
-    if (m.m_HMatrix.cols() != F)
-      return m_Status;
-    if (m.m_CInverseZ.rows() != m_NumberTrainingPoints)
-      return m_Status;
-    if (m.m_CInverseZ.cols() != m_NumberTrainingPoints)
-      return m_Status;
-    if (m.m_CInverseHtrans.rows() != F)
-      return m_Status;
-    if (m.m_CInverseHtrans.cols() != m_NumberTrainingPoints)
-      return m_Status;
-    if (m.m_IHTCIH.rows() != F)
-      return m_Status;
-    if (m.m_IHTCIH.cols() != F)
-      return m_Status;
+    // if (m.m_HMatrix.rows() != m_NumberTrainingPoints)
+    //   return m_Status;
+    // if (m.m_HMatrix.cols() != F)
+    //   return m_Status;
+    // if (m.m_CInverseZ.rows() != m_NumberTrainingPoints)
+    //   return m_Status;
+    // if (m.m_CInverseZ.cols() != m_NumberTrainingPoints)
+    //   return m_Status;
+    // if (m.m_CInverseHtrans.rows() != F)
+    //   return m_Status;
+    // if (m.m_CInverseHtrans.cols() != m_NumberTrainingPoints)
+    //   return m_Status;
+    // if (m.m_IHTCIH.rows() != F)
+    //   return m_Status;
+    // if (m.m_IHTCIH.cols() != F)
+    //   return m_Status;
   }
   m_Status = READY;
   return m_Status;
@@ -816,7 +816,15 @@ bool GaussianProcessEmulator::SingleModel::MakeCache() {
 
   m_CInverse.resize(N, N);
   m_BetaVector.resize(F);
-  m_HMatrix.resize(N, F);
+  // m_HMatrix.resize(N, F);
+
+  m_GammaVector.resize(N);
+  m_RegressionMatrix.resize(N, F);
+  Eigen::MatrixXd HMatrix(N, F);
+  // Eigen::MatrixXd [NxN] m_CInverse = c_matrix.inverse();
+  // Eigen::MatrixXd [FxF] m_RegressionMatrix = (HMatrix.transpose() * CInverse * HMatrix).inverse();
+  // Eigen::VectorXd  [F]  m_BetaVector = RegressionMatrix * HMatrix.transpose() * CInverse * m_ZValues;
+  // Eigen::VectorXd  [N]  m_GammaVector = CInverse * (m_ZValues - (HMatrix * m_BetaVector));
 
   Eigen::MatrixXd c_matrix(N, N);
   // c_matrix is the covariance matrix of the design with itself.
@@ -830,44 +838,49 @@ bool GaussianProcessEmulator::SingleModel::MakeCache() {
     }
   }
 
-  // we have to use this inverted matrix so often, we may as well go
-  // ahead and fully invert it.
-  Eigen::LDLT< Eigen::MatrixXd > Ccholesky(c_matrix);
-  // cInverse = C^{-1}
-  m_CInverse = Ccholesky.solve(Eigen::MatrixXd::Identity(N,N));
-  //double determinant = std::pow(Ccholesky.vectorD().prod(),2);
+  // // we have to use this inverted matrix so often, we may as well go
+  // // ahead and fully invert it.
+  // Eigen::LDLT< Eigen::MatrixXd > Ccholesky(c_matrix);
+  // // cInverse = C^{-1}
+  // m_CInverse = Ccholesky.solve(Eigen::MatrixXd::Identity(N,N));
+  // //double determinant = std::pow(Ccholesky.vectorD().prod(),2);
 
   assert(F == 1 + ((m_RegressionOrder) * p));
   switch(m_RegressionOrder) {
   case 3:
-    m_HMatrix.block(0,p+p+1,N,p) = X.cwiseProduct(X).cwiseProduct(X);
+    HMatrix.block(0,p+p+1,N,p) = X.cwiseProduct(X).cwiseProduct(X);
     // fall through
   case 2:
-    m_HMatrix.block(0,p+1,N,p) = X.cwiseProduct(X);
+    HMatrix.block(0,p+1,N,p) = X.cwiseProduct(X);
     // fall through
   case 1:
-    m_HMatrix.block(0,1,N,p) = X;
+    HMatrix.block(0,1,N,p) = X;
     // fall through
   case 0:
-    m_HMatrix.block(0,0,N,1) = Eigen::MatrixXd::Constant(N,1, 1.0);
+    HMatrix.block(0,0,N,1) = Eigen::MatrixXd::Constant(N,1, 1.0);
     break;
   default:
     assert(false);
   }
 
-  // HTransCInverse =
-  Eigen::MatrixXd HTransCInverse = m_HMatrix.transpose() * m_CInverse;
-  // (H^T C^{-1} H)-1
-  Eigen::LDLT< Eigen::MatrixXd > HCHcholesky(HTransCInverse * m_HMatrix);
-  m_BetaVector = HCHcholesky.solve(HTransCInverse * m_ZValues);
+  m_CInverse = c_matrix.ldlt().solve(Eigen::MatrixXd::Identity(N,N));
+  m_RegressionMatrix = (HMatrix.transpose() * m_CInverse * HMatrix).ldlt().solve(Eigen::MatrixXd::Identity(F,F));
+  m_BetaVector = m_RegressionMatrix * HMatrix.transpose() * m_CInverse * m_ZValues;
+  m_GammaVector = m_CInverse * (m_ZValues - (HMatrix * m_BetaVector));
 
-  m_CInverseZ = m_CInverse * m_ZValues;
-  // m_CInverseHtrans = (m_CInverse * m_HMatrix).transpose();
-  m_CInverseHtrans = m_HMatrix.transpose() * m_CInverse.transpose();
+  // // HTransCInverse =
+  // Eigen::MatrixXd HTransCInverse = m_HMatrix.transpose() * m_CInverse;
+  // // (H^T C^{-1} H)-1
+  // Eigen::LDLT< Eigen::MatrixXd > HCHcholesky(HTransCInverse * m_HMatrix);
+  // m_BetaVector = HCHcholesky.solve(HTransCInverse * m_ZValues);
 
-  Eigen::LDLT< Eigen::MatrixXd > HTCIHcholesky(m_HMatrix.transpose()
-    * m_CInverse * m_HMatrix);
-  m_IHTCIH = HTCIHcholesky.solve(Eigen::MatrixXd::Identity(F,F));
+  // m_CInverseZ = m_CInverse * m_ZValues;
+  // // m_CInverseHtrans = (m_CInverse * m_HMatrix).transpose();
+  // m_CInverseHtrans = m_HMatrix.transpose() * m_CInverse.transpose();
+
+  // Eigen::LDLT< Eigen::MatrixXd > HTCIHcholesky(m_HMatrix.transpose()
+  //   * m_CInverse * m_HMatrix);
+  // m_IHTCIH = HTCIHcholesky.solve(Eigen::MatrixXd::Identity(F,F));
   return true;
 }
 
@@ -1135,11 +1148,19 @@ bool GaussianProcessEmulator::SingleModel::GetEmulatorOutputs (
     h_vector.segment(1+(i*p),p)
       = h_vector.segment(1+((i-1)*p),p).cwiseProduct(point);
   }
-  double emulated_mean = kplus.dot(m_CInverseZ);
-  // emulated_mean is the mean without the regression applied.
-  double regression_cpt = h_vector.dot(m_BetaVector);
-  double residual_cpt = m_BetaVector.dot(m_CInverseHtrans * kplus);
-  mean = regression_cpt + emulated_mean - residual_cpt;
+
+  /////////////////////////////////////
+  // m_CInverse = c_matrix.ldlt().solve(Eigen::MatrixXd::Identity(N,N));
+  // m_RegressionMatrix = (HMatrix.transpose() * CInverse * HMatrix).ldlt().solve(Eigen::MatrixXd::Identity(F,F));
+  // m_BetaVector = RegressionMatrix * HMatrix.transpose() * CInverse * m_ZValues;
+  // m_GammaVector = CInverse * (m_ZValues - (HMatrix * m_BetaVector));
+  mean = h_vector.dot(m_BetaVector) + kplus.dot(m_GammaVector);
+
+  // double emulated_mean = kplus.dot(m_CInverseZ);
+  // // emulated_mean is the mean without the regression applied.
+  // double regression_cpt = h_vector.dot(m_BetaVector);
+  // double residual_cpt = m_BetaVector.dot(m_CInverseHtrans * kplus);
+  // mean = regression_cpt + emulated_mean - residual_cpt;
   return true;
 }
 /**
@@ -1195,17 +1216,29 @@ bool GaussianProcessEmulator::SingleModel
     h_vector.segment(1+(i*p),p)
       = h_vector.segment(1+((i-1)*p),p).cwiseProduct(point);
   }
-  double emulated_mean = kplus.dot(m_CInverseZ);
-  // emulated_mean is the mean without the regression applied.
-  double regression_cpt = h_vector.dot(m_BetaVector);
-  double residual_cpt = m_BetaVector.dot(m_CInverseHtrans * kplus);
-  mean = regression_cpt + emulated_mean - residual_cpt;
 
-  double kappa = this->CovarianceCalc(point, point);
-  Eigen::VectorXd result_nreg = h_vector - (m_CInverseHtrans * kplus);
-  regression_cpt = result_nreg.dot(m_IHTCIH * result_nreg);
-  double emulated_variance = kplus.dot(m_CInverse * kplus);
-  variance = (kappa - emulated_variance + regression_cpt);
+  /////////////////////////////////////
+  // m_CInverse = c_matrix.ldlt().solve(Eigen::MatrixXd::Identity(N,N));
+  // m_RegressionMatrix = (HMatrix.transpose() * m_CInverse * HMatrix).ldlt().solve(Eigen::MatrixXd::Identity(F,F));
+  // m_BetaVector = RegressionMatrix * HMatrix.transpose() * CInverse * m_ZValues;
+  // m_GammaVector = CInverse * (m_ZValues - (HMatrix * m_BetaVector));
+  mean = h_vector.dot(m_BetaVector) + kplus.dot(m_GammaVector);
+
+  // double emulated_mean = kplus.dot(m_CInverseZ);
+  // // emulated_mean is the mean without the regression applied.
+  // double regression_cpt = h_vector.dot(m_BetaVector);
+  // double residual_cpt = m_BetaVector.dot(m_CInverseHtrans * kplus);
+  // mean = regression_cpt + emulated_mean - residual_cpt;
+
+  // double kappa = this->CovarianceCalc(point, point);
+
+  // Eigen::VectorXd result_nreg = h_vector - (m_CInverseHtrans * kplus);
+  // regression_cpt = result_nreg.dot(m_IHTCIH * result_nreg);
+  // double emulated_variance = kplus.dot(m_CInverse * kplus);
+  // variance = (kappa - emulated_variance + regression_cpt);
+
+  Eigen::VectorXd f = h_vector.array() - kplus.dot(m_CInverse * h_vector);
+  variance = this->CovarianceCalc(point, point) - kplus.dot(m_CInverse * kplus) + f.dot(m_RegressionMatrix * f);
   return true;
 }
 

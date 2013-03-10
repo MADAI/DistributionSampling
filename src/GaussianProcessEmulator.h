@@ -174,6 +174,7 @@ public:
      outputValues.  Only the first numberPCAOutputs of them are kept.
      Consequently, PCAEigenvalues is a vector of length
      numberPCAOutputs and PCAEigenvectors is a matrix of size
+
      numberPCAOutputs-by-numberOutputs. */
   Eigen::VectorXd m_PCAEigenvalues;
   Eigen::MatrixXd m_PCAEigenvectors;
@@ -256,12 +257,15 @@ public:
     /**
        Things we cached; values to carry from one calulation to the next.
     */
-    Eigen::MatrixXd m_CInverse;
-    Eigen::VectorXd m_BetaVector;
-    Eigen::MatrixXd m_HMatrix;
-    Eigen::VectorXd m_CInverseZ;
-    Eigen::MatrixXd m_CInverseHtrans;
-    Eigen::MatrixXd m_IHTCIH;
+    Eigen::MatrixXd m_CInverse; // [NxN] = Inverse(C)
+    Eigen::MatrixXd m_RegressionMatrix; // = [FxF] Inverse(Transpose(H) * CInverse * H)
+    Eigen::VectorXd m_BetaVector; // RegressionMatrix * Transpose(H)  * CInverse * z
+    Eigen::VectorXd m_GammaVector; // = CInverse (z - H * BetaVector)
+
+    //Eigen::MatrixXd m_HMatrix;
+    //Eigen::VectorXd m_CInverseZ;
+    //Eigen::MatrixXd m_CInverseHtrans;
+    //Eigen::MatrixXd m_IHTCIH;
     //@}
   };
   /**
