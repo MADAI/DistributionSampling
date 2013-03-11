@@ -30,6 +30,10 @@ add_executable( NumericalGradientEstimationTest NumericalGradientEstimationTest.
 target_link_libraries( NumericalGradientEstimationTest ${LIBRARIES} )
 add_test( NumericalGradientEstimationTest NumericalGradientEstimationTest )
 
+add_executable( SimpleMetropolisHastingsSamplerTest SimpleMetropolisHastingsSamplerTest.cxx )
+target_link_libraries( SimpleMetropolisHastingsSamplerTest ${LIBRARIES} )
+add_test( SimpleMetropolisHastingsSamplerTest SimpleMetropolisHastingsSamplerTest )
+
 add_executable( RandomTest RandomTest.cxx )
 target_link_libraries( RandomTest ${LIBRARIES} )
 add_test( RandomTest RandomTest )
