@@ -20,6 +20,8 @@
 
 #include <cmath>
 
+#include "UniformDistribution.h"
+
 
 namespace madai {
 
@@ -30,8 +32,15 @@ Gaussian2DModel
   m_StandardDeviationX( 4.0 ),
   m_StandardDeviationY( 12.3 )
 {
-  this->AddParameter( "X" );
-  this->AddParameter( "Y" );
+  UniformDistribution xPrior;
+  xPrior.SetMinimum( m_MeanX - 10.0 * m_StandardDeviationX );
+  xPrior.SetMaximum( m_MeanX + 10.0 * m_StandardDeviationX );
+  this->AddParameter( "X",  xPrior );
+
+  UniformDistribution yPrior;
+  yPrior.SetMinimum( m_MeanY - 10.0 * m_StandardDeviationY );
+  yPrior.SetMaximum( m_MeanY + 10.0 * m_StandardDeviationY );
+  this->AddParameter( "Y", yPrior );
 
   this->AddScalarOutputName( "Value" );
 }
@@ -95,10 +104,12 @@ Gaussian2DModel
   double functionValue = scalars[0];
   unsigned int activeParameter = 0;
   if ( activeParameters[0] ) {
-    gradient.push_back( this->PartialX( parameters[0], functionValue ) );
+    gradient.push_back( -functionValue *
+                        this->PartialX( parameters[0], functionValue ) );
   }
   if ( activeParameters[1] ) {
-    gradient.push_back( this->PartialY( parameters[1], functionValue ) );
+    gradient.push_back( -functionValue *
+                        this->PartialY( parameters[1], functionValue ) );
   }
 
   return NO_ERROR;
