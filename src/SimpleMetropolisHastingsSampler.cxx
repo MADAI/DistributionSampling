@@ -103,6 +103,10 @@ SimpleMetropolisHastingsSampler
     }
     double ll; // ll is new_log_likelihood
     m->GetScalarOutputsAndLogLikelihood(xc,yc,ll);
+
+    // Check for NaN
+    assert( ll == ll );
+
     double delta_logLikelihood = ll - m_CurrentLogLikelihood;
 
     if ((delta_logLikelihood > 0) ||
@@ -112,6 +116,9 @@ SimpleMetropolisHastingsSampler
       return Sample( xc, yc, ll );
     } // else, loop.
   }
+
+  // If nothing else, return an empty Sample.
+  return Sample();
 }
 
 } // end namespace madai
