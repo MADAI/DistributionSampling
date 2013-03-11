@@ -150,4 +150,3 @@ int main(int argc, char ** argv) {
   std::cout << "Maximum error over all space: " << error << '\n';
   return EXIT_SUCCESS;
 }
-

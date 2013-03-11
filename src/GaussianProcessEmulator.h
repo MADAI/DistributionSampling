@@ -26,10 +26,10 @@
 
 #ifndef madai_GaussianProcessEmulator_h_included
 #define madai_GaussianProcessEmulator_h_included
-#include <iostream>
-#include <vector>
-#include <Eigen/Dense>
-#include "Parameter.h"
+#include <iostream> // std::istream std::ostream
+#include <vector>   // std::vector
+#include <Eigen/Dense> // Eigen::MatrixXd, Eigen::VectorXd
+#include "Parameter.h" // madai::Parameter
 namespace madai {
 /**
    \class GaussianProcessEmulator
@@ -257,15 +257,17 @@ public:
     /**
        Things we cached; values to carry from one calulation to the next.
     */
-    Eigen::MatrixXd m_CInverse; // [NxN] = Inverse(C)
-    Eigen::MatrixXd m_RegressionMatrix; // = [FxF] Inverse(Transpose(H) * CInverse * H)
-    Eigen::VectorXd m_BetaVector; // RegressionMatrix * Transpose(H)  * CInverse * z
-    Eigen::VectorXd m_GammaVector; // = CInverse (z - H * BetaVector)
-
-    //Eigen::MatrixXd m_HMatrix;
-    //Eigen::VectorXd m_CInverseZ;
-    //Eigen::MatrixXd m_CInverseHtrans;
-    //Eigen::MatrixXd m_IHTCIH;
+    Eigen::MatrixXd m_CInverse;
+    // [NxN] m_CInverse = CMatrix.inverse();
+    Eigen::MatrixXd m_RegressionMatrix;
+    // [FxF] m_RegressionMatrix
+    //     = (HMatrix.transpose() * m_CInverse * HMatrix).inverse();
+    Eigen::VectorXd m_BetaVector;
+    //  [F]  m_BetaVector
+    //   = m_RegressionMatrix * HMatrix.transpose() * m_CInverse * m_ZValues;
+    Eigen::VectorXd m_GammaVector;
+    //  [N]  m_GammaVector
+    //        = m_CInverse * (m_ZValues - (HMatrix * m_BetaVector));
     //@}
   };
   /**
