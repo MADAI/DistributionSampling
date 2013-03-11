@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
   madai::RegularStepGradientDescentSampler *sampler =
     new madai::RegularStepGradientDescentSampler();
   sampler->SetModel( model );
-  sampler->MinimizeOff(); // We want to maximize this function
+  sampler->MinimizeOn(); // We want to minimize this function
 
   //madai::Trace *trace = new madai::Trace();
   madai::Trace trace;
