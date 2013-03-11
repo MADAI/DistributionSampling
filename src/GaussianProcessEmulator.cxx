@@ -1231,4 +1231,42 @@ bool GaussianProcessEmulator::Write(std::ostream & o) const {
   serializeGaussianProcessEmulator(*this, o);
   return true;
 }
+
+/**
+   Writes current state to file.  \returns true on sucess. */
+bool GaussianProcessEmulator::PrintThetas(std::ostream & o) const {
+  o.precision(17);
+  serializeComments(m_Comments,o);
+  o << "THETAS_FILE\n";
+  o << "OUTPUT_MEANS\n";
+  PrintVector(m_OutputMeans, o);
+  o << "OUTPUT_STANDARD_DEVIATIONS\n";
+  PrintVector(m_OutputStandardDeviations, o);
+  o << "OUTPUT_PCA_EIGENVALUES\n";
+  PrintVector(m_PCAEigenvalues, o);
+  o << "OUTPUT_PCA_EIGENVECTORS\n";
+  PrintMatrix(m_PCAEigenvectors, o);
+  o << "SUBMODELS\t"
+    << m_NumberPCAOutputs << "\n\n";
+  for (int i = 0; i < m_NumberPCAOutputs; ++i) {
+    const SingleModel & m = m_PCADecomposedModels[i];
+    o << "MODEL " << i << '\n';
+    o << "COVARIANCE_FUNCTION\t"
+      << GetCovarianceFunctionString(m.m_CovarianceFunction) << '\n';
+    o << "REGRESSION_ORDER\t" << m.m_RegressionOrder << '\n';
+    o << "THETAS\n";
+    PrintVector(m.m_Thetas, o);
+    o << "END_OF_MODEL\n\n";
+  }
+  o << "END_OF_FILE\n";
+  return true;
+}
+
+/**
+   \returns m_Status */
+GaussianProcessEmulator::StatusType
+GaussianProcessEmulator::GetStatus() const {
+  return m_Status;
+}
+
 } // namespace madai

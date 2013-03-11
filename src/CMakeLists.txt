@@ -40,3 +40,10 @@ add_executable(
 target_link_libraries(
   basicTrain
   DistributionSampling)
+
+add_executable(
+  printThetas
+  printThetas.cxx)
+target_link_libraries(
+  printThetas
+  DistributionSampling)

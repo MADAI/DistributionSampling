@@ -107,6 +107,14 @@ public:
     std::vector< double > & y,
     std::vector< double > & ycov) const;
 
+  /**
+     Writes current state to file.  \returns true on sucess. */
+  bool PrintThetas(std::ostream & output) const;
+
+  /**
+     \returns m_Status */
+  StatusType GetStatus() const;
+
 protected:
   /**
      Once Load(), Train(), or BasicTraining() finishes, calculate and
