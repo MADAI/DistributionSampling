@@ -60,9 +60,10 @@ SimpleMetropolisHastingsSampler
   }
   Model * m = const_cast< Model * >(m_Model);
   std::vector< double > y( model->GetNumberOfScalarOutputs() );
-  m->GetScalarOutputsAndLogLikelihood(
+  Model::ErrorType error = m->GetScalarOutputsAndLogLikelihood(
     m_CurrentParameters, y, m_CurrentLogLikelihood);
   // initial starting point LogLikelihood.
+  assert (error == Model::NO_ERROR);
 }
 
 

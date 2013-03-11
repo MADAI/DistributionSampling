@@ -184,8 +184,9 @@ public:
     std::vector< double > & scalars,
     std::vector< double > & scalarCovariance) const;
 
-  /** Returns the sum of the LogPriorLikelihood for each x[i] which is
-   * the log of the prior likelihood for the parameters */
+  /**
+   * Returns the sum of the LogPriorLikelihood for each x[i] which is
+   * the sum of log of the prior likelihood for the parameters */
   virtual double GetLogPriorLikelihood(const std::vector< double > & x) const;
 
   /** Set the gradient estimate step size used in GetScalarAndGradientOutputs */
@@ -197,6 +198,14 @@ public:
   /** Returns an error code as a string. */
   static std::string GetErrorTypeAsString( ErrorType error );
 
+  //@{
+  /**
+   * Should GetScalarOutputsAndLogLikelihood() call
+   * GetScalarOutputsAndCovariance() or just GetScalarOutputs()?
+   */
+  bool GetUseModelCovarianceToCalulateLogLikelihood();
+  void SetUseModelCovarianceToCalulateLogLikelihood(bool);
+  //@}
 
 protected:
   /** Enumeration of internal state. */
@@ -221,6 +230,12 @@ protected:
 
   /** Current state of the model. */
   InternalState m_StateFlag;
+
+  /**
+   * Should GetScalarOutputsAndLogLikelihood() call
+   * GetScalarOutputsAndCovariance() or just GetScalarOutputs()?
+   */
+  bool m_UseModelCovarianceToCalulateLogLikelihood;
 
   /** Add a parameter.
    *

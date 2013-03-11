@@ -267,9 +267,12 @@ public:
     */
     Eigen::MatrixXd m_CInverse;
     // [NxN] m_CInverse = CMatrix.inverse();
-    Eigen::MatrixXd m_RegressionMatrix;
-    // [FxF] m_RegressionMatrix
+    Eigen::MatrixXd m_RegressionMatrix1;
+    // [FxF] m_RegressionMatrix1
     //     = (HMatrix.transpose() * m_CInverse * HMatrix).inverse();
+    Eigen::MatrixXd m_RegressionMatrix2;
+    // [FxN] m_RegressionMatrix2
+    //     = (m_CInverse * HMatrix).transpose();
     Eigen::VectorXd m_BetaVector;
     //  [F]  m_BetaVector
     //   = m_RegressionMatrix * HMatrix.transpose() * m_CInverse * m_ZValues;

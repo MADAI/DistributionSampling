@@ -742,9 +742,13 @@ GaussianProcessEmulator::CheckStatus() {
       return m_Status;
     if (m.m_CInverse.cols() != m_NumberTrainingPoints)
       return m_Status;
-    if (m.m_RegressionMatrix.rows() != F)
+    if (m.m_RegressionMatrix1.rows() != F)
       return m_Status;
-    if (m.m_RegressionMatrix.cols() != F)
+    if (m.m_RegressionMatrix1.cols() != F)
+      return m_Status;
+    if (m.m_RegressionMatrix2.rows() != F)
+      return m_Status;
+    if (m.m_RegressionMatrix2.cols() != m_NumberTrainingPoints)
       return m_Status;
     if (m.m_BetaVector.size() != F)
       return m_Status;
@@ -790,7 +794,8 @@ bool GaussianProcessEmulator::SingleModel::MakeCache() {
   m_CInverse.resize(N, N);
   m_BetaVector.resize(F);
   m_GammaVector.resize(N);
-  m_RegressionMatrix.resize(N, F);
+  m_RegressionMatrix1.resize(N, F);
+  m_RegressionMatrix2.resize(F, N);
 
   // local matrices that appear in formulae.
   Eigen::MatrixXd HMatrix(N, F);
@@ -828,9 +833,13 @@ bool GaussianProcessEmulator::SingleModel::MakeCache() {
 
   // CALCULATE CACHE VARIABLES
   m_CInverse = CMatrix.ldlt().solve(Eigen::MatrixXd::Identity(N,N));
-  m_RegressionMatrix = (HMatrix.transpose() * m_CInverse *
+
+  m_RegressionMatrix1 = (HMatrix.transpose() * m_CInverse *
                         HMatrix).ldlt().solve(Eigen::MatrixXd::Identity(F,F));
-  m_BetaVector = (m_RegressionMatrix * HMatrix.transpose() *
+
+  m_RegressionMatrix2 = (m_CInverse * HMatrix).transpose();
+
+  m_BetaVector = (m_RegressionMatrix1 * HMatrix.transpose() *
                   m_CInverse * m_ZValues);
   m_GammaVector = m_CInverse * (m_ZValues - (HMatrix * m_BetaVector));
   return true;
@@ -1101,11 +1110,13 @@ bool GaussianProcessEmulator::SingleModel::GetEmulatorOutputs (
   }
   // m_CInverse
   //   = CMatrix.ldlt().solve(Eigen::MatrixXd::Identity(N,N));
-  // m_RegressionMatrix
+  // m_RegressionMatrix1
   //   = (HMatrix.transpose() * m_CInverse
   //       * HMatrix).ldlt().solve(Eigen::MatrixXd::Identity(F,F));
+  // m_RegressionMatrix2
+  //     = (m_CInverse * HMatrix).transpose(); //[FxN]
   // m_BetaVector
-  //      = m_RegressionMatrix * HMatrix.transpose() * m_CInverse * m_ZValues;
+  //      = m_RegressionMatrix1 * HMatrix.transpose() * m_CInverse * m_ZValues;
   // m_GammaVector = m_CInverse * (m_ZValues - (HMatrix * m_BetaVector));
   mean = h_vector.dot(m_BetaVector) + kplus.dot(m_GammaVector);
   return true;
@@ -1177,9 +1188,17 @@ bool GaussianProcessEmulator::SingleModel
   // m_GammaVector = m_CInverse * (m_ZValues - (HMatrix * m_BetaVector));
   mean = h_vector.dot(m_BetaVector) + kplus.dot(m_GammaVector);
 
-  Eigen::VectorXd f = h_vector.array() - kplus.dot(m_CInverse * h_vector);
+  // Eigen::VectorXd  f = h_vector - kplus.dot(m_CInverse * h_vector);
+  // variance = this->CovarianceCalc(point, point)
+  //   - kplus.dot(m_CInverse * kplus) + f.dot(m_RegressionMatrix * f);
+
+  // m_RegressionMatrix2
+  //     = (m_CInverse * HMatrix).transpose(); //[FxN]
+
+  Eigen::VectorXd  f = h_vector - (m_RegressionMatrix2 * kplus);
+
   variance = this->CovarianceCalc(point, point)
-    - kplus.dot(m_CInverse * kplus) + f.dot(m_RegressionMatrix * f);
+    - kplus.dot(m_CInverse * kplus) + f.dot(m_RegressionMatrix1 * f);
   return true;
 }
 

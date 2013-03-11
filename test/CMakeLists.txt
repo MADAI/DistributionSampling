@@ -54,7 +54,11 @@ add_executable( UniformDistributionTest UniformDistributionTest.cxx )
 target_link_libraries( UniformDistributionTest ${LIBRARIES} )
 add_test( UniformDistributionTest UniformDistributionTest )
 
-add_executable( EmulatorTest EmulatorTest.cxx )
+add_executable( EmulatorTest EmulatorTest.cxx EmulatorTestGenerator.cxx )
 target_link_libraries( EmulatorTest ${LIBRARIES} )
 add_test( EmulatorTest EmulatorTest )
 
+add_executable( GaussianProcessEmulatedModelTest
+  GaussianProcessEmulatedModelTest.cxx EmulatorTestGenerator.cxx )
+target_link_libraries( GaussianProcessEmulatedModelTest ${LIBRARIES} )
+add_test( GaussianProcessEmulatedModelTest GaussianProcessEmulatedModelTest )

@@ -16,18 +16,15 @@
  *
  *=========================================================================*/
 
+#include <cstdlib>
 #include <iostream>
-#include <fstream>
-#include <cmath>
+#include <string>
 #include <vector>
 
-#include <Eigen/Dense>
 #include "EmulatorTestGenerator.h"
-#include "GaussianProcessEmulator.h"
-
-const char TRAINING_FILE[] = "/tmp/EmulatorTestTraining.dat";
-const char MODEL_FILE[] = "/tmp/EmulatorTestModel.dat";
-const char THETAS_FILE[] = "/tmp/EmulatorTestThetas.dat";
+#include "SimpleMetropolisHastingsSampler.h"
+#include "GaussianProcessEmulatedModel.h"
+#include "Trace.h"
 
 inline double LogisticFunction(double x) {
   return 1.0 / (1.0 + std::exp(-x));
@@ -44,8 +41,14 @@ void model(const std::vector< double > & params, std::vector< double > & out) {
   out.at(1) = LogisticFunction(x - 0.25 * y);
 }
 
-
+/**
+ * Test case for madai::GaussianProcessEmulatedModel and
+ * madai::SimpleMetropolisHastingsSampler classes.
+ */
 int main(int argc, char ** argv) {
+
+  const char TRAINING_FILE[] = "/tmp/EmulatorTestTraining.dat";
+  const char MODEL_FILE[] = "/tmp/EmulatorTestModel.dat";
   static const int N = 100;
   double pmin[2] = {-1, -1};
   double pmax[2] = {1, 1};
@@ -76,50 +79,58 @@ int main(int argc, char ** argv) {
           regressionOrder,
           defaultNugget,
           amplitude,
-          scale))
+          scale)) {
+    std::cerr << "Error in GaussianProcessEmulator::BasicTraining";
     return EXIT_FAILURE;
-
+  }
   out.open(MODEL_FILE);
   gpe.Write(out);
   out.close();
 
-  std::cout.precision(17);
-  double error = 0.0;
-
-  std::vector< double > x(2,0.0);
-  std::vector< double > y(2,0.0);
-  for (int i = 0; i < N; ++i) {
-    x[0] = generator.m_X(i,0);
-    x[1] = generator.m_X(i,1);
-    if (! gpe.GetEmulatorOutputs(x, y))
-      return EXIT_FAILURE;
-    error += std::abs(y[0] - generator.m_Y(i,0));
-    error += std::abs(y[1] - generator.m_Y(i,1));
-  }
-  std::cout << "Sum of errors at training points: " << error << '\n';
-
-  error = 0.0;
-  std::vector< double > y2(2,0.0);
-  double range_over_N = 2.0 / static_cast< double >(N);
-  double half_range_over_N = 0.5 * range_over_N;
-  for (int i = 0; i < N; ++i) {
-    x[0] = range_over_N * i + half_range_over_N;
-    for (int j = 0; j < N; ++j) {
-      x[1] = range_over_N * j + half_range_over_N;
-      gpe.GetEmulatorOutputs(x, y);
-      model(x, y2);
-      error = std::max(error, std::abs(y[0] - y2[0]));
-      error = std::max(error, std::abs(y[1] - y2[1]));
-    }
-  }
-  std::cout << "Maximum error over all space: " << error << '\n';
-
-  out.open(THETAS_FILE);
-  if(! gpe.PrintThetas(out)) {
-    std::cerr << "Error printing Thetas.\n";
+  madai::GaussianProcessEmulatedModel gpem;
+  if (gpem.LoadConfigurationFile( MODEL_FILE ) != madai::Model::NO_ERROR) {
+    std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfigurationFile";
     return EXIT_FAILURE;
   }
-  out.close();
+
+  madai::SimpleMetropolisHastingsSampler mcmc;
+  mcmc.SetModel( &gpem );
+
+  mcmc.SetStepSize(0.1);
+
+  std::vector< madai::Parameter > const & parameters
+    = gpem.GetParameters();
+
+  assert (2 == gpem.GetNumberOfScalarOutputs());
+  int t = gpem.GetNumberOfScalarOutputs();
+  std::vector< double > observedScalarValues;
+  for(int i = 0; i < t; ++i)
+    observedScalarValues.push_back(0.2);
+  gpem.SetObservedScalarValues(observedScalarValues);
+  std::vector< double > observedScalarCovariance(t * t, 0.0);
+  for(int i = 0; i < t; ++i)
+    observedScalarCovariance[i + (t * i)] = 0.05;
+  gpem.SetObservedScalarCovariance(observedScalarCovariance);
+
+  madai::Trace trace;
+  unsigned int numberIter = 500;
+  for (unsigned int count = 0; count < numberIter; count ++) {
+    madai::Sample sample = mcmc.NextSample();
+    trace.Add( sample );
+  }
+
+  gpem.SetUseModelCovarianceToCalulateLogLikelihood(false);
+
+  for (unsigned int count = 0; count < numberIter; count ++) {
+    madai::Sample sample = mcmc.NextSample();
+    trace.Add( sample );
+  }
+
+
+  trace.WriteCSVOutput( std::cout,
+                   gpem.GetParameters(),
+                   gpem.GetScalarOutputNames() );
+  //trace.WriteData( std::cout );
 
   return EXIT_SUCCESS;
 }
