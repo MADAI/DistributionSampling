@@ -27,42 +27,50 @@
 
 int main(int argc, char *argv[])
 {
-  madai::Gaussian2DModel *model =
-    new madai::Gaussian2DModel();
-  model->LoadConfigurationFile( "file.txt" ); // TODO - does nothing
+  madai::Gaussian2DModel model;
 
-  madai::RegularStepGradientDescentSampler *sampler =
-    new madai::RegularStepGradientDescentSampler();
-  sampler->SetModel( model );
-  sampler->MinimizeOn(); // We want to minimize this function
-
-  //madai::Trace *trace = new madai::Trace();
-  madai::Trace trace;
+  madai::RegularStepGradientDescentSampler sampler;
+  sampler.SetModel( &model );
+  sampler.MinimizeOff(); // We want to maximize the likelihood function
 
   // Set the step size.
-  double stepSize = 20.0;
-  sampler->SetStepSize( stepSize );
-
-  // // Pick which output scalar to optimize.
-  // sampler->SetOutputScalarToOptimize( "Value " );
+  double stepSize = 200.0;
+  sampler.SetStepSize( stepSize );
 
   // Set initial parameter values.
-  sampler->SetParameterValue( "X", 21.0 );
-  sampler->SetParameterValue( "Y", -13.5 );
+  sampler.SetParameterValue( "X", 21.0 );
+  sampler.SetParameterValue( "Y", -13.5 );
 
   std::vector< double > currentParameters;
-  for (unsigned int i = 0; i < 50; i++) {
-    currentParameters = sampler->GetCurrentParameters();
-    madai::Sample sample = sampler->NextSample();
-    trace.Add( sample );
+  for (unsigned int i = 0; i < 1000; i++) {
+    currentParameters = sampler.GetCurrentParameters();
+    madai::Sample sample = sampler.NextSample();
+  }
+
+  // Adjust the step size up by a factor of 10
+  stepSize = 2000.0;
+  sampler.SetStepSize( stepSize );
+
+  for (unsigned int i = 0; i < 2000; i++) {
+    currentParameters = sampler.GetCurrentParameters();
+    madai::Sample sample = sampler.NextSample();
+  }
+
+  // Adjust the step size up by a factor of 10
+  stepSize = 400000.0;
+  sampler.SetStepSize( stepSize );
+
+  for (unsigned int i = 0; i < 3000; i++) {
+    currentParameters = sampler.GetCurrentParameters();
+    madai::Sample sample = sampler.NextSample();
   }
 
   double modelMeanX;
   double modelMeanY;
-  model->GetMeans( modelMeanX, modelMeanY );
+  model.GetMeans( modelMeanX, modelMeanY );
 
-  if ( std::abs( modelMeanX - currentParameters[0] ) > 1.0e-3 ||
-       std::abs( modelMeanY - currentParameters[1] ) > 1.0e-3 ) {
+  if ( std::abs( modelMeanX - currentParameters[0] ) > 1.0e-2 ||
+       std::abs( modelMeanY - currentParameters[1] ) > 1.0e-2 ) {
     std::cerr << "RegularStepGradientDescentSampler failed to converge "
               << "on the expected solution." << std::endl;
     std::cerr << "Expected currentParameters to be (" << modelMeanX << ", "
@@ -70,8 +78,6 @@ int main(int argc, char *argv[])
               << currentParameters[1] << ") instead." << std::endl;
     return EXIT_FAILURE;
   }
-
-  //delete trace;
 
   return EXIT_SUCCESS;
 }
