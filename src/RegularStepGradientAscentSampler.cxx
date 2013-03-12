@@ -26,7 +26,7 @@ RegularStepGradientAscentSampler
 ::RegularStepGradientAscentSampler() :
   Sampler(),
   m_StepSize( 1.0e-3 ),
-  m_Minimize( true )
+  m_Maximize( true )
 {
 }
 
@@ -64,7 +64,7 @@ RegularStepGradientAscentSampler
 
   // Update the current parameters to the new position
   double direction = 1.0;
-  if ( m_Minimize ) {
+  if ( !m_Maximize ) {
     direction = -1.0;
   }
 
@@ -91,17 +91,17 @@ RegularStepGradientAscentSampler
 
 void
 RegularStepGradientAscentSampler
-::MinimizeOn()
+::Minimize()
 {
-  m_Minimize = true;
+  m_Maximize = false;
 }
 
 
 void
 RegularStepGradientAscentSampler
-::MinimizeOff()
+::Maximize()
 {
-  m_Minimize = false;
+  m_Maximize = true;
 }
 
 } // end namespace madai

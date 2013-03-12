@@ -39,22 +39,22 @@ public:
   /** Set the step size. */
   void SetStepSize( double stepSize );
 
-  /** Set search mode to minimize.
-   *
-   * Minimization is on by default. */
-  void MinimizeOn();
+  /** Set search mode to minimize. */
+  void Minimize();
 
-  /** Set search mode to maximize. */
-  void MinimizeOff();
+  /** Set search mode to maximize.
+   *
+   * Maximization is on by default. */
+  void Maximize();
 
 protected:
   /** Scaling factor applied to the gradient when taking the next
    * Sample. */
   double m_StepSize;
 
-  /** True if the algorithm should attempt to minimize the function,
-   * false if it should maximize. */
-  bool m_Minimize;
+  /** True if the algorithm should attempt to maximize the function,
+   * false if it should minimize. */
+  bool m_Maximize;
 
 }; // end class RegularStepGradientAscentSampler
 

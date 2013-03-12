@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 
   madai::RegularStepGradientAscentSampler sampler;
   sampler.SetModel( &model );
-  sampler.MinimizeOff(); // We want to maximize the likelihood function
+  sampler.Maximize(); // We want to maximize the likelihood function
 
   // Set the step size.
   double stepSize = 200.0;
