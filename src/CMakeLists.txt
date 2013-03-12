@@ -4,7 +4,6 @@ set( SRC_FILES
   Parameter.cxx
   Distribution.cxx
   ExternalModel.cxx
-  Gaussian2DModel.cxx
   GaussianDistribution.cxx
   Model.cxx
   Sampler.cxx

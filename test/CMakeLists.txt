@@ -1,5 +1,14 @@
+# Add a library for just testing
+add_library( DistributionSamplingTest
+  Gaussian2DModel.cxx
+)
+target_link_libraries( DistributionSamplingTest
+  DistributionSampling
+)
+
 set( LIBRARIES 
   DistributionSampling
+  DistributionSamplingTest
   ${CORELIBS} 
 )
 
