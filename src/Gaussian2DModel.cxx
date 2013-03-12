@@ -47,8 +47,7 @@ Gaussian2DModel
   // Usually the observed scalar values would be set from outside the
   // Model object. As this is a test object, however, we are setting
   // the observed values here.
-  std::vector< double > observedScalars( 1, 1.0 );
-  this->SetObservedScalarValues( observedScalars );
+  m_ObservedScalarValues = std::vector< double >( 1, 1.0 );
 }
 
 
@@ -108,6 +107,8 @@ Gaussian2DModel
 
   double functionValue = scalars[0];
   unsigned int activeParameter = 0;
+  assert( activeParameters.size() == 2 );
+  assert( m_ObservedScalarValues.size() == 1 );
   if ( activeParameters[0] ) {
     gradient.push_back( -(functionValue - m_ObservedScalarValues[0]) *
                         this->PartialX( parameters[0], functionValue ) );
@@ -118,6 +119,14 @@ Gaussian2DModel
   }
 
   return NO_ERROR;
+}
+
+
+Model::ErrorType
+Gaussian2DModel
+::SetObservedScalarValues( const std::vector< double > & observedScalarValues )
+{
+  // Do nothing
 }
 
 

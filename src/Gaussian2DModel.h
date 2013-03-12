@@ -26,7 +26,7 @@ namespace madai {
 
 /** \class Gaussian2DModel
  *
- * A simple example of a model. */
+ * A test model used internally. */
 class Gaussian2DModel : public Model {
 public:
   Gaussian2DModel();
@@ -48,6 +48,14 @@ public:
                                          const std::vector< bool > & activeParameters,
                                          std::vector< double > & scalars,
                                          std::vector< double > & gradient) const;
+
+  /** Override this to ignore any observed values.
+   *
+   * This is a test model where we are setting the observed values
+   * internally, so we preclude client code from setting observed
+   * values. */
+  virtual ErrorType SetObservedScalarValues(
+    const std::vector< double > & observedScalarValues);
 
   /** Get the x and y means */
   void GetMeans( double & MeanX, double & MeanY ) const;
