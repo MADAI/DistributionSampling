@@ -38,9 +38,9 @@ add_executable( RandomTest RandomTest.cxx )
 target_link_libraries( RandomTest ${LIBRARIES} )
 add_test( RandomTest RandomTest )
 
-add_executable( RegularStepGradientDescentOptimizerTest RegularStepGradientDescentOptimizerTest.cxx )
-target_link_libraries( RegularStepGradientDescentOptimizerTest ${LIBRARIES} )
-add_test( RegularStepGradientDescentOptimizerTest RegularStepGradientDescentOptimizerTest )
+add_executable( RegularStepGradientAscentSamplerTest RegularStepGradientAscentSamplerTest.cxx )
+target_link_libraries( RegularStepGradientAscentSamplerTest ${LIBRARIES} )
+add_test( RegularStepGradientAscentSamplerTest RegularStepGradientAscentSamplerTest )
 
 add_executable( TraceTest TraceTest.cxx )
 target_link_libraries( TraceTest ${LIBRARIES} )
