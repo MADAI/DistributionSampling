@@ -55,7 +55,12 @@ RegularStepGradientDescentSampler
     m_Model->GetScalarAndGradientOutputs( m_CurrentParameters, activeParameters,
                                           scalars, gradient );
 
-  Sample sample( m_CurrentParameters, scalars );
+  // Get the log likelihood
+  double logLikelihood = 0.0;
+  error =
+    m_Model->GetScalarOutputsAndLogLikelihood( m_CurrentParameters, scalars, logLikelihood );
+
+  Sample sample( m_CurrentParameters, scalars, logLikelihood );
 
   // Update the current parameters to the new position
   double direction = 1.0;
