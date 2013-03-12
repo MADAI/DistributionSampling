@@ -17,17 +17,17 @@
  *=========================================================================*/
 
 #include "Random.h"
-#include "EmulatorTestGenerator.h"
+#include "GaussianProcessEmulatorTestGenerator.h"
 
 // template < typename TDerived >
-// void EmulatorTestGenerator::LatinHypercube(
+// void GaussianProcessEmulatorTestGenerator::LatinHypercube(
 //     const Eigen::MatrixBase< TDerived > & m_,
 //     double * parameterMinima,
 //     double * parameterMaxima)
   // Eigen::MatrixBase< TDerived > & m
   //   = const_cast< Eigen::MatrixBase< TDerived > & >(m_);
 
-void EmulatorTestGenerator::LatinHypercube(
+void GaussianProcessEmulatorTestGenerator::LatinHypercube(
     int numberParameters,
     int numberTrainingPoints,
     double * columnMajorMatrix,
@@ -36,7 +36,7 @@ void EmulatorTestGenerator::LatinHypercube(
 {
 }
 
-EmulatorTestGenerator::EmulatorTestGenerator(
+GaussianProcessEmulatorTestGenerator::GaussianProcessEmulatorTestGenerator(
     void (*model)(const std::vector< double > &, std::vector< double > &),
     int numberParameters,
     int numberOutputs,
@@ -89,7 +89,7 @@ EmulatorTestGenerator::EmulatorTestGenerator(
       m_Y(i,j) = y[j];
   }
 }
-void EmulatorTestGenerator::WriteTrainingFile(std::ostream & o)
+void GaussianProcessEmulatorTestGenerator::WriteTrainingFile(std::ostream & o)
 {
   o.precision(17);
   o << "#\n#\n#\nVERSION 1\nPARAMETERS\n"<< m_NumberParameters << "\n";

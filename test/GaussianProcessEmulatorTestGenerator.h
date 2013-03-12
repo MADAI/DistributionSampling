@@ -16,16 +16,16 @@
  *
  *=========================================================================*/
 
-#ifndef madai_EmulatorTestGenerator_h_included
-#define madai_EmulatorTestGenerator_h_included
+#ifndef madai_GaussianProcessEmulatorTestGenerator_h_included
+#define madai_GaussianProcessEmulatorTestGenerator_h_included
 
 #include <iostream>
 #include <vector>
 #include <Eigen/Dense>
 
-class EmulatorTestGenerator {
+class GaussianProcessEmulatorTestGenerator {
 public:
-  EmulatorTestGenerator(
+  GaussianProcessEmulatorTestGenerator(
     void (*model)(const std::vector< double > & , std::vector< double > & ),
     int numberParameters,
     int numberOutputs,
@@ -48,4 +48,4 @@ public:
   std::vector< double > m_ParameterMaxima;
 };
 
-#endif /* madai_EmulatorTestGenerator_h_included */
+#endif /* madai_GaussianProcessEmulatorTestGenerator_h_included */

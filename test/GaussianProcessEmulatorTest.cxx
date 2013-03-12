@@ -22,12 +22,12 @@
 #include <vector>
 
 #include <Eigen/Dense>
-#include "EmulatorTestGenerator.h"
+#include "GaussianProcessEmulatorTestGenerator.h"
 #include "GaussianProcessEmulator.h"
 
-const char TRAINING_FILE[] = "/tmp/EmulatorTestTraining.dat";
-const char MODEL_FILE[] = "/tmp/EmulatorTestModel.dat";
-const char THETAS_FILE[] = "/tmp/EmulatorTestThetas.dat";
+const char TRAINING_FILE[] = "/tmp/GaussianProcessEmulatorTestTraining.dat";
+const char MODEL_FILE[] = "/tmp/GaussianProcessEmulatorTestModel.dat";
+const char THETAS_FILE[] = "/tmp/GaussianProcessEmulatorTestThetas.dat";
 
 inline double LogisticFunction(double x) {
   return 1.0 / (1.0 + std::exp(-x));
@@ -52,7 +52,7 @@ int main(int argc, char ** argv) {
   std::vector< double > parameterMinima(pmin, pmin + 2);
   std::vector< double > parameterMaxima(pmax, pmax + 2);
 
-  EmulatorTestGenerator generator(
+  GaussianProcessEmulatorTestGenerator generator(
       &model,2,2,N, parameterMinima,parameterMaxima);
 
   std::ofstream out(TRAINING_FILE);

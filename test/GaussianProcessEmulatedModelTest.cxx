@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "EmulatorTestGenerator.h"
+#include "GaussianProcessEmulatorTestGenerator.h"
 #include "SimpleMetropolisHastingsSampler.h"
 #include "GaussianProcessEmulatedModel.h"
 #include "Trace.h"
@@ -47,15 +47,15 @@ void model(const std::vector< double > & params, std::vector< double > & out) {
  */
 int main(int argc, char ** argv) {
 
-  const char TRAINING_FILE[] = "/tmp/EmulatorTestTraining.dat";
-  const char MODEL_FILE[] = "/tmp/EmulatorTestModel.dat";
+  const char TRAINING_FILE[] = "/tmp/GaussianProcessEmulatorTestTraining.dat";
+  const char MODEL_FILE[] = "/tmp/GaussianProcessEmulatorTestModel.dat";
   static const int N = 100;
   double pmin[2] = {-1, -1};
   double pmax[2] = {1, 1};
   std::vector< double > parameterMinima(pmin, pmin + 2);
   std::vector< double > parameterMaxima(pmax, pmax + 2);
 
-  EmulatorTestGenerator generator(
+  GaussianProcessEmulatorTestGenerator generator(
       &model,2,2,N, parameterMinima,parameterMaxima);
 
   std::ofstream out(TRAINING_FILE);
