@@ -43,6 +43,12 @@ Gaussian2DModel
   this->AddParameter( "Y", yPrior );
 
   this->AddScalarOutputName( "Value" );
+
+  // Usually the observed scalar values would be set from outside the
+  // Model object. As this is a test object, however, we are setting
+  // the observed values here.
+  std::vector< double > observedScalars( 1, 1.0 );
+  this->SetObservedScalarValues( observedScalars );
 }
 
 
@@ -72,7 +78,6 @@ Gaussian2DModel
   double sx = m_StandardDeviationX;
   double sy = m_StandardDeviationY;
 
-  // Negate the Gaussian so there is a well-defined global minimum
   double value = exp( -( ((dx*dx) / (2.0 * sx * sx)) +
                          ((dy*dy) / (2.0 * sy * sy)) ) );
 
@@ -104,11 +109,11 @@ Gaussian2DModel
   double functionValue = scalars[0];
   unsigned int activeParameter = 0;
   if ( activeParameters[0] ) {
-    gradient.push_back( -functionValue *
+    gradient.push_back( -(functionValue - m_ObservedScalarValues[0]) *
                         this->PartialX( parameters[0], functionValue ) );
   }
   if ( activeParameters[1] ) {
-    gradient.push_back( -functionValue *
+    gradient.push_back( -(functionValue - m_ObservedScalarValues[0]) *
                         this->PartialY( parameters[1], functionValue ) );
   }
 
