@@ -27,11 +27,7 @@
 
 int main(int argc, char *arg[])
 {
-  // Set up the observed scalar value
-  std::vector< double > observedScalars( 1, 1.0 );
-
   madai::Gaussian2DModel model;
-  model.SetObservedScalarValues( observedScalars );
 
   madai::SimpleMetropolisHastingsSampler sampler;
   sampler.SetModel( &model );
