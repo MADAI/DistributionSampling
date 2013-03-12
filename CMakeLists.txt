@@ -51,6 +51,13 @@ option( BUILD_TESTING "Build the tests for DistributionSampling." OFF )
 if ( BUILD_TESTING )
   enable_testing()
   add_subdirectory( test )
+
+  set( DistributionSampling_TEST_INCLUDE_DIRS
+    ${DistributionSampling_SOURCE_DIR}/test )
+  set( DistributionSampling_TEST_LIBRARY_DIRS
+    ${DistributionSampling_BINARY_DIR}/test )
+  set( DistributionSampling_TEST_LIBRARIES DistributionSamplingTest )
+
 endif()
 
 # Configure package file

@@ -1,3 +1,8 @@
 set( DistributionSampling_INCLUDE_DIRS @DistributionSampling_INCLUDE_DIRS@ )
 set( DistributionSampling_LIBRARY_DIRS @DistributionSampling_LIBRARY_DIRS@ )
 set( DistributionSampling_LIBRARIES @DistributionSampling_LIBRARIES@ )
+
+# Export testing paths
+set( DistributionSampling_TEST_INCLUDE_DIRS @DistributionSampling_TEST_INCLUDE_DIRS@ )
+set( DistributionSampling_TEST_LIBRARY_DIRS @DistributionSampling_TEST_LIBRARY_DIRS@ )
+set( DistributionSampling_TEST_LIBRARIES @DistributionSampling_TEST_LIBRARIES@ )
