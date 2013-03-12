@@ -16,14 +16,14 @@
  *
  *=========================================================================*/
 
-#include "RegularStepGradientDescentSampler.h"
+#include "RegularStepGradientAscentSampler.h"
 
 
 namespace madai {
 
 
-RegularStepGradientDescentSampler
-::RegularStepGradientDescentSampler() :
+RegularStepGradientAscentSampler
+::RegularStepGradientAscentSampler() :
   Sampler(),
   m_StepSize( 1.0e-3 ),
   m_Minimize( true )
@@ -31,14 +31,14 @@ RegularStepGradientDescentSampler
 }
 
 
-RegularStepGradientDescentSampler
-::~RegularStepGradientDescentSampler()
+RegularStepGradientAscentSampler
+::~RegularStepGradientAscentSampler()
 {
 }
 
 
 Sample
-RegularStepGradientDescentSampler
+RegularStepGradientAscentSampler
 ::NextSample()
 {
   std::vector< bool > activeParameters( m_CurrentParameters.size() );
@@ -82,7 +82,7 @@ RegularStepGradientDescentSampler
 
 
 void
-RegularStepGradientDescentSampler
+RegularStepGradientAscentSampler
 ::SetStepSize( double stepSize )
 {
   m_StepSize = stepSize;
@@ -90,7 +90,7 @@ RegularStepGradientDescentSampler
 
 
 void
-RegularStepGradientDescentSampler
+RegularStepGradientAscentSampler
 ::MinimizeOn()
 {
   m_Minimize = true;
@@ -98,7 +98,7 @@ RegularStepGradientDescentSampler
 
 
 void
-RegularStepGradientDescentSampler
+RegularStepGradientAscentSampler
 ::MinimizeOff()
 {
   m_Minimize = false;

@@ -9,7 +9,7 @@ set( SRC_FILES
   Model.cxx
   Sampler.cxx
   ProcessPipe.c
-  RegularStepGradientDescentSampler.cxx
+  RegularStepGradientAscentSampler.cxx
   Sample.cxx
   SimpleMetropolisHastingsSampler.cxx
   Trace.cxx

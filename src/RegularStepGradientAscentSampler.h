@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef madai_RegularStepGradientDescentSampler_h_included
-#define madai_RegularStepGradientDescentSampler_h_included
+#ifndef madai_RegularStepGradientAscentSampler_h_included
+#define madai_RegularStepGradientAscentSampler_h_included
 
 
 #include "Sampler.h"
@@ -25,14 +25,14 @@
 
 namespace madai {
 
-/** \class RegularStepGradientDescentSampler
+/** \class RegularStepGradientAscentSampler
  *
- * Straightforward implementation of a gradient descent optimizer.
+ * Straightforward implementation of a gradient ascent optimizing sampler.
  */
-class RegularStepGradientDescentSampler : public Sampler {
+class RegularStepGradientAscentSampler : public Sampler {
 public:
-  RegularStepGradientDescentSampler();
-  ~RegularStepGradientDescentSampler();
+  RegularStepGradientAscentSampler();
+  ~RegularStepGradientAscentSampler();
 
   Sample NextSample();
 
@@ -56,8 +56,8 @@ protected:
    * false if it should maximize. */
   bool m_Minimize;
 
-}; // end class RegularStepGradientDescentSampler
+}; // end class RegularStepGradientAscentSampler
 
 } // end namespace madai
 
-#endif // madai_RegularStepGradientDescentSampler_h_included
+#endif // madai_RegularStepGradientAscentSampler_h_included

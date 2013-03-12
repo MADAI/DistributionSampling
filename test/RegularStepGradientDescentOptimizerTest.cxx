@@ -21,7 +21,7 @@
 #include <cmath>
 
 #include "Gaussian2DModel.h"
-#include "RegularStepGradientDescentSampler.h"
+#include "RegularStepGradientAscentSampler.h"
 #include "Trace.h"
 
 
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 {
   madai::Gaussian2DModel model;
 
-  madai::RegularStepGradientDescentSampler sampler;
+  madai::RegularStepGradientAscentSampler sampler;
   sampler.SetModel( &model );
   sampler.MinimizeOff(); // We want to maximize the likelihood function
 
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
   if ( std::abs( modelMeanX - currentParameters[0] ) > 1.0e-2 ||
        std::abs( modelMeanY - currentParameters[1] ) > 1.0e-2 ) {
-    std::cerr << "RegularStepGradientDescentSampler failed to converge "
+    std::cerr << "RegularStepGradientAscentSampler failed to converge "
               << "on the expected solution." << std::endl;
     std::cerr << "Expected currentParameters to be (" << modelMeanX << ", "
               << modelMeanY << "), got (" << currentParameters[0] << ", "
