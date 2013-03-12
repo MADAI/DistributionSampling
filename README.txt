@@ -7,11 +7,17 @@ Last updated: 2013-03-10
 
 ** PREREQUISITES **
 
+-   A compiler.
+
 -   CMake version 2.8 or greater
     (Available at http://www.cmake.org/cmake/resources/software.html
     or "yum install cmake" or "apt-get install cmake".)
 
--   A compiler
+-   The Boost Library (http://www.boost.org/users/download/
+    or "yum install boost-devel" or "apt-get install libboost-dev")
+
+-   The Eigen3 Library (http://eigen.tuxfamily.org/
+    or "yum install eigen3-devel" or "apt-get install libeigen3-dev")
 
 ** CONFIGURING **
 
