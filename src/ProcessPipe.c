@@ -18,7 +18,9 @@
 
 #include "ProcessPipe.h"
 
-#if defined( __unix__ ) || defined( __APPLE__ )
+#include "Configuration.h"
+
+#if defined( HAS_POSIX_PIPES )
 
 #include <unistd.h> /* fork, pipe, dup2, close, execvp */
 #include <stdio.h>  /* ANSI C standard calls (FILE*) */
@@ -114,7 +116,6 @@ int CreateProcessPipe( ProcessPipe * pp, char * const * argv ) {
 
 #else
 
-#error "Either __APPLE__ or __unix__ should be defined.\
-	What kind of system is this?"
+#error "Posix pipes could not be found on this system. Cannot compile."
 
 #endif

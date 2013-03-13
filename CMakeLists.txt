@@ -14,6 +14,7 @@ set( DistributionSampling_LIBRARY_DIRS ${DistributionSampling_BINARY_DIR}/lib )
 find_package(Eigen3 REQUIRED)
 list(APPEND DistributionSampling_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} )
 
+## BOOST
 find_package( Boost REQUIRED )
 set(CORELIBS
   ${coral_LIBRARIES}
@@ -22,6 +23,7 @@ set(CORELIBS
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${DistributionSampling_BINARY_DIR}
   ${coral_INCLUDE_DIRS}
   ${MADAIEmulator_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
@@ -38,6 +40,23 @@ find_package( MADAIEmulator REQUIRED )
 list(APPEND CORELIBS ${MADAIEmulator_LIBRARIES} )
 list(APPEND DistributionSampling_INCLUDE_DIRS ${MADAIEmulator_INCLUDE_DIRS} )
 list(APPEND DistributionSampling_LIBRARY_DIRS ${MADAIEmulator_LIBRARY_DIRS} )
+
+## Compile time checks for the existence of required headers
+set( try_compile_directory ${DistributionSampling_BINARY_DIR}/TryCompiles )
+try_compile( HAS_POSIX_PIPES ${try_compile_directory}
+  ${DistributionSampling_SOURCE_DIR}/CMake/HasPosixPipes.cxx
+  OUTPUT_VARIABLE HAS_POSIX_PIPES_COMPILE_OUTPUT
+)
+
+if ( HAS_POSIX_PIPES )
+  message( STATUS "posix pipes found" )
+else()
+  message( FATAL_ERROR "No posix pipes are available on this system!" )
+  message( ${HAS_POSIX_PIPES_COMPILE_OUTPUT} )
+endif()
+
+## Distribution Library configuration file
+configure_file( src/Configuration.h.in ${DistributionSampling_BINARY_DIR}/Configuration.h )
 
 ##
 
