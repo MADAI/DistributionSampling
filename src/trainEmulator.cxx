@@ -41,8 +41,8 @@ USE:
 
 #define starts_with(s1,s2) (std::strncmp((s1), (s2), std::strlen(s2)) == 0)
 
-static const madai::GaussianProcessEmulator::CovarianceFunction DEFAULT_COVARIACE_FUNCTION
-  = madai::GaussianProcessEmulator::SQUARE_EXP_FN;
+static const madai::GaussianProcessEmulator::CovarianceFunctionType DEFAULT_COVARIACE_FUNCTION
+  = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
 static const int DEFAULT_REGRESSION_ORDER = 1;
 static const double DEFAULT_PCA_FRACTION = 0.99;
 
@@ -80,7 +80,7 @@ static const char useage [] =
 
 struct cmdLineOpts{
   int regressionOrder;
-  madai::GaussianProcessEmulator::CovarianceFunction covarianceFunction;
+  madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction;
   bool quietFlag;
   double pcaVariance;
   const char * inputFile; /* first non-flag argument  */
@@ -128,13 +128,13 @@ bool parseCommandLineOptions(int argc, char** argv, struct cmdLineOpts & opts)
       break;
     case 'c':
       if (starts_with(optarg, "POWER_EXPONENTIAL")) {
-        opts.covarianceFunction = madai::GaussianProcessEmulator::POWER_EXP_FN;
+        opts.covarianceFunction = madai::GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
       } else if (starts_with(optarg, "SQUARE_EXPONENTIAL")) {
-        opts.covarianceFunction = madai::GaussianProcessEmulator::SQUARE_EXP_FN;
+        opts.covarianceFunction = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
       } else if (starts_with(optarg, "MATERN_32")) {
-        opts.covarianceFunction = madai::GaussianProcessEmulator::MATERN_32_FN;
+        opts.covarianceFunction = madai::GaussianProcessEmulator::MATERN_32_FUNCTION;
       } else if (starts_with(optarg, "MATERN_52")) {
-        opts.covarianceFunction = madai::GaussianProcessEmulator::MATERN_52_FN;
+        opts.covarianceFunction = madai::GaussianProcessEmulator::MATERN_52_FUNCTION;
       } else {
         std::cerr << "Error: covariance_fn given incorrect argument: "
           << optarg << "\n";

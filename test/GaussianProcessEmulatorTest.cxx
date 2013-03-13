@@ -63,8 +63,8 @@ int main(int argc, char ** argv) {
   std::ifstream ifs(TRAINING_FILE);
   gpe.LoadTrainingData(ifs);
   double fractionResolvingPower = 0.999;
-  madai::GaussianProcessEmulator::CovarianceFunction covarianceFunction
-    = madai::GaussianProcessEmulator::SQUARE_EXP_FN;
+  madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction
+    = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
   int regressionOrder = 1;
   double defaultNugget = 1e-3;
   double amplitude = 1.0;

@@ -69,8 +69,8 @@ int main(int argc, char ** argv) {
   }
 
   double fractionResolvingPower = 0.95;
-  madai::GaussianProcessEmulator::CovarianceFunction covarianceFunction
-    = madai::GaussianProcessEmulator::SQUARE_EXP_FN;
+  madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction
+    = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
   int regressionOrder = 1;
   double defaultNugget = 1e-3;
   double amplitude = 1.0;

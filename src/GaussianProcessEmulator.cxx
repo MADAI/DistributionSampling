@@ -195,34 +195,34 @@ static inline std::ostream & PrintVector(
 /**
  * A covariance function can be represented as a string. */
 const char * GetCovarianceFunctionString(
-  GaussianProcessEmulator::CovarianceFunction cov)
+  GaussianProcessEmulator::CovarianceFunctionType cov)
 {
   switch (cov) {
-  case GaussianProcessEmulator::POWER_EXP_FN:  return "POWER_EXP_FN";
-  case GaussianProcessEmulator::SQUARE_EXP_FN: return "SQUARE_EXP_FN";
-  case GaussianProcessEmulator::MATERN_32_FN:  return "MATERN_32_FN";
-  case GaussianProcessEmulator::MATERN_52_FN:  return "MATERN_52_FN";
+  case GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION:  return "POWER_EXPONENTIAL_FUNCTION";
+  case GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION: return "SQUARE_EXPONENTIAL_FUNCTION";
+  case GaussianProcessEmulator::MATERN_32_FUNCTION:  return "MATERN_32_FUNCTION";
+  case GaussianProcessEmulator::MATERN_52_FUNCTION:  return "MATERN_52_FUNCTION";
   default:
     assert(false);
     return "UNKNOWN";
   }
 }
 /**
-   Read the CovarianceFunction from the command line. */
+   Read the CovarianceFunctionType from the command line. */
 bool parseCovarianceFunction(
-    GaussianProcessEmulator::CovarianceFunction & cov,
+    GaussianProcessEmulator::CovarianceFunctionType & cov,
     std::istream & input) {
   if (! input.good()) return false;
   std::string s;
   input >> s;
-  if (s == "POWER_EXP_FN")
-    cov = GaussianProcessEmulator::POWER_EXP_FN;
-  else if (s == "SQUARE_EXP_FN")
-    cov = GaussianProcessEmulator::SQUARE_EXP_FN;
-  else if (s == "MATERN_32_FN")
-    cov = GaussianProcessEmulator::MATERN_32_FN;
-  else if (s == "MATERN_52_FN")
-    cov = GaussianProcessEmulator::MATERN_52_FN;
+  if (s == "POWER_EXPONENTIAL_FUNCTION")
+    cov = GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
+  else if (s == "SQUARE_EXPONENTIAL_FUNCTION")
+    cov = GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
+  else if (s == "MATERN_32_FUNCTION")
+    cov = GaussianProcessEmulator::MATERN_32_FUNCTION;
+  else if (s == "MATERN_52_FUNCTION")
+    cov = GaussianProcessEmulator::MATERN_52_FUNCTION;
   else {
     return false;
   }
@@ -501,18 +501,18 @@ inline int NumberRegressionFunctions(
 }
 
 inline int NumberThetas(
-    GaussianProcessEmulator::CovarianceFunction cf,
+    GaussianProcessEmulator::CovarianceFunctionType cf,
     int numberParameters) {
   switch(cf) {
-  case GaussianProcessEmulator::SQUARE_EXP_FN:
+  case GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION:
     return numberParameters + 2;
-  case GaussianProcessEmulator::POWER_EXP_FN:
+  case GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION:
     return numberParameters + 3;
-  case GaussianProcessEmulator::MATERN_32_FN:
+  case GaussianProcessEmulator::MATERN_32_FUNCTION:
     return 3;
-  case GaussianProcessEmulator::MATERN_52_FN:
+  case GaussianProcessEmulator::MATERN_52_FUNCTION:
     return 3;
-  case GaussianProcessEmulator::UNKNOWN_FN:
+  case GaussianProcessEmulator::UNKNOWN_FUNCTION:
     //fall through
   default:
     return -1;
@@ -530,6 +530,44 @@ const char * stat(GaussianProcessEmulator::StatusType s) {
   }
 }
 
+template < typename TDerived >
+inline void MakeHMatrix(
+    const Eigen::MatrixBase< TDerived > & X,
+    const Eigen::MatrixBase< TDerived > & H_,
+    int regressionOrder)
+{
+  int p = X.cols(), N = X.rows();
+  int numberRegressionFunctions = 1 + (regressionOrder * p);
+  Eigen::MatrixBase< TDerived > & H
+    = const_cast< Eigen::MatrixBase< TDerived > & >(H_);
+  H.derived().resize(N, numberRegressionFunctions);
+  H.block(0,0,N,1) = Eigen::MatrixXd::Constant(N,1, 1.0);
+  if (regressionOrder > 0)
+    H.block(0,1,N,p) = X;
+  for (int i = 1; i < regressionOrder; ++i) {
+    H.block(0,1+(i*p),N,p) = H.block(0,1+((i-1)*p),N,p).cwiseProduct(X);
+  }
+}
+template < typename TDerived >
+inline void MakeHVector(
+    const Eigen::MatrixBase< TDerived > & point,
+    const Eigen::MatrixBase< TDerived > & hvec_,
+    int regressionOrder)
+{
+  int p = point.size();
+  int numberRegressionFunctions = 1 + (regressionOrder * p);
+  Eigen::MatrixBase< TDerived > & hvec
+    = const_cast< Eigen::MatrixBase< TDerived > & >(hvec_);
+  hvec.derived().resize(numberRegressionFunctions,1);
+  hvec(0) = 1.0;
+  if (regressionOrder > 0)
+    hvec.segment(1,p) = point;
+  for (int i = 1; i < regressionOrder; ++i) {
+    hvec.segment(1+(i*p),p)
+      = hvec.segment(1+((i-1)*p),p).cwiseProduct(point);
+  }
+}
+
 } // anonymous namespace
 
 namespace madai {
@@ -541,7 +579,7 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
   int numberThetas = m_Thetas.size();
   assert(numberThetas > 0);
   switch(m_CovarianceFunction) {
-  case POWER_EXP_FN:
+  case POWER_EXPONENTIAL_FUNCTION:
     {
       assert(numberThetas == (p + 3));
       assert ((m_Thetas(2) > 0.0) && (m_Thetas(2) <= 2.0));
@@ -560,7 +598,7 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
         covariance += exp(m_Thetas(1));
       return covariance;
     }
-  case SQUARE_EXP_FN:
+  case SQUARE_EXPONENTIAL_FUNCTION:
     {
       assert(numberThetas == (p + 2));
       int truecount  = 0;
@@ -581,7 +619,7 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
       }
       return covariance;
     }
-  case MATERN_32_FN:
+  case MATERN_32_FUNCTION:
     {
       assert(numberThetas == 3);
       static const double ROOT3 = 1.7320508075688772;
@@ -611,7 +649,7 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
         covariance += nugget;
       return covariance;
     }
-  case MATERN_52_FN:
+  case MATERN_52_FUNCTION:
     {
       assert(numberThetas == 3);
       int truecount = 0;
@@ -724,7 +762,7 @@ GaussianProcessEmulator::CheckStatus() {
     SingleModel & m = m_PCADecomposedModels[i];
     if (m.m_Parent == NULL)
       return m_Status;
-    if (m.m_CovarianceFunction == UNKNOWN_FN)
+    if (m.m_CovarianceFunction == UNKNOWN_FUNCTION)
       return m_Status;
     if (m.m_RegressionOrder < 0)
       return m_Status;
@@ -764,7 +802,7 @@ GaussianProcessEmulator::CheckStatus() {
    Set default values to uninitialized values. */
 GaussianProcessEmulator::SingleModel::SingleModel() :
   m_Parent(NULL),
-  m_CovarianceFunction(UNKNOWN_FN),
+  m_CovarianceFunction(UNKNOWN_FUNCTION),
   m_RegressionOrder(-1)
 { }
 
@@ -784,6 +822,7 @@ bool GaussianProcessEmulator::MakeCache() {
   m_Status = READY;
   return true;
 }
+
 bool GaussianProcessEmulator::SingleModel::MakeCache() {
   int N = m_Parent->m_NumberTrainingPoints;
   int p = m_Parent->m_NumberParameters;
@@ -801,6 +840,9 @@ bool GaussianProcessEmulator::SingleModel::MakeCache() {
   Eigen::MatrixXd HMatrix(N, F);
   Eigen::MatrixXd CMatrix(N, N);
 
+  // CALCULATE HMatrix
+  MakeHMatrix(X, HMatrix, m_RegressionOrder);
+
   // CALCULATE CMatrix
   // CMatrix is the covariance matrix of the design with itself.
   for (int j = 0; j < N; ++j) {
@@ -811,24 +853,6 @@ bool GaussianProcessEmulator::SingleModel::MakeCache() {
       if (j != k)
         CMatrix(k,j) = CMatrix(j,k);
     }
-  }
-  // CALCULATE HMatrix
-  assert(F == 1 + ((m_RegressionOrder) * p));
-  switch(m_RegressionOrder) {
-  case 3:
-    HMatrix.block(0,p+p+1,N,p) = X.cwiseProduct(X).cwiseProduct(X);
-    // fall through
-  case 2:
-    HMatrix.block(0,p+1,N,p) = X.cwiseProduct(X);
-    // fall through
-  case 1:
-    HMatrix.block(0,1,N,p) = X;
-    // fall through
-  case 0:
-    HMatrix.block(0,0,N,1) = Eigen::MatrixXd::Constant(N,1, 1.0);
-    break;
-  default:
-    assert(false);
   }
 
   // CALCULATE CACHE VARIABLES
@@ -870,7 +894,7 @@ bool GaussianProcessEmulator::LoadTrainingData(std::istream & input) {
 /**
    This takes an GPEM and trains it. \returns true on sucess. */
 bool GaussianProcessEmulator::SingleModel::Train(
-    GaussianProcessEmulator::CovarianceFunction covarianceFunction,
+    GaussianProcessEmulator::CovarianceFunctionType covarianceFunction,
     int regressionOrder)
 {
   if (regressionOrder < 0) {
@@ -895,7 +919,7 @@ bool GaussianProcessEmulator::SingleModel::Train(
 /**
    This takes an GPEM and trains it. \returns true on sucess. */
 bool GaussianProcessEmulator::Train(
-    GaussianProcessEmulator::CovarianceFunction covarianceFunction,
+    GaussianProcessEmulator::CovarianceFunctionType covarianceFunction,
     int regressionOrder,
     double fractionResolvingPower)
 {
@@ -919,7 +943,7 @@ bool GaussianProcessEmulator::Train(
    This takes an GPEM and trains it. \returns true on sucess. */
 bool GaussianProcessEmulator::BasicTraining(
     double fractionResolvingPower,
-    CovarianceFunction covarianceFunction,
+    CovarianceFunctionType covarianceFunction,
     int regressionOrder,
     double defaultNugget,
     double amplitude,
@@ -946,7 +970,7 @@ bool GaussianProcessEmulator::BasicTraining(
    Sets default values for all of the hyperparameters. \returns
    true on success. */
 bool GaussianProcessEmulator::SingleModel::BasicTraining(
-    CovarianceFunction covarianceFunction,
+    CovarianceFunctionType covarianceFunction,
     int regressionOrder,
     double defaultNugget,
     double amplitude,
@@ -957,7 +981,7 @@ bool GaussianProcessEmulator::SingleModel::BasicTraining(
   m_Thetas.resize( NumberThetas(m_CovarianceFunction, p));
   scale = std::abs(scale);
   switch(m_CovarianceFunction) {
-  case GaussianProcessEmulator::SQUARE_EXP_FN:
+  case GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION:
     m_Thetas.resize(2 + p);
     m_Thetas(0) = amplitude;
     m_Thetas(1) = defaultNugget;
@@ -968,7 +992,7 @@ bool GaussianProcessEmulator::SingleModel::BasicTraining(
                                      - priordist->GetPercentile(0.25));
     }
     break;
-  case GaussianProcessEmulator::POWER_EXP_FN:
+  case GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION:
     m_Thetas.resize(3 + p);
     m_Thetas(0) = amplitude;
     m_Thetas(1) = defaultNugget;
@@ -980,9 +1004,9 @@ bool GaussianProcessEmulator::SingleModel::BasicTraining(
                                      - priordist->GetPercentile(0.25));
     }
     break;
-  case GaussianProcessEmulator::MATERN_32_FN:
+  case GaussianProcessEmulator::MATERN_32_FUNCTION:
     // fall through
-  case GaussianProcessEmulator::MATERN_52_FN:
+  case GaussianProcessEmulator::MATERN_52_FUNCTION:
     m_Thetas.resize(3);
     m_Thetas(0) = amplitude;
     m_Thetas(1) = defaultNugget;
@@ -1086,7 +1110,8 @@ bool GaussianProcessEmulator::SingleModel::GetEmulatorOutputs (
     const std::vector< double > & x,
     double & mean) const {
   assert(m_RegressionOrder >= 0);
-  Eigen::Map<const Eigen::VectorXd> point(&(x[0]),x.size());
+  // copy the point from vector<double> into VectorXd
+  Eigen::VectorXd point = Eigen::Map<const Eigen::VectorXd>(&(x[0]),x.size());
   int N = m_Parent->m_NumberTrainingPoints;
   int p = m_Parent->m_NumberParameters;
   assert(p > 0);
@@ -1101,13 +1126,8 @@ bool GaussianProcessEmulator::SingleModel::GetEmulatorOutputs (
     kplus(j) = cov;
   }
   Eigen::VectorXd h_vector(F);
-  h_vector(0) = 1.0;
-  if (m_RegressionOrder > 0)
-    h_vector.segment(1,p) = point;
-  for (int i = 2; i < m_RegressionOrder; ++i) {
-    h_vector.segment(1+(i*p),p)
-      = h_vector.segment(1+((i-1)*p),p).cwiseProduct(point);
-  }
+  MakeHVector(point,h_vector,m_RegressionOrder);
+
   // m_CInverse
   //   = CMatrix.ldlt().solve(Eigen::MatrixXd::Identity(N,N));
   // m_RegressionMatrix1

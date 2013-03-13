@@ -42,12 +42,12 @@ public:
     CovarianceFunction describes which type of covariance function our
     GPME uses.*/
   typedef enum {
-    SQUARE_EXP_FN,
-    POWER_EXP_FN,
-    MATERN_32_FN,
-    MATERN_52_FN,
-    UNKNOWN_FN
-  } CovarianceFunction;
+    SQUARE_EXPONENTIAL_FUNCTION,
+    POWER_EXPONENTIAL_FUNCTION,
+    MATERN_32_FUNCTION,
+    MATERN_52_FUNCTION,
+    UNKNOWN_FUNCTION
+  } CovarianceFunctionType;
   /**
     is it trained and ready to go?  If an error occurs in a
     constructor, this will be set to .*/
@@ -81,7 +81,7 @@ public:
     hyperparameters. \returns true on success. */
   bool BasicTraining(
     double fractionResolvingPower,
-    CovarianceFunction covarianceFunction,
+    CovarianceFunctionType covarianceFunction,
     int regressionOrder,
     double defaultNugget,
     double amplitude,
@@ -89,7 +89,7 @@ public:
   /**
     This takes an GPEM and trains it. \returns true on sucess. */
   bool Train(
-    CovarianceFunction covarianceFunction,
+    CovarianceFunctionType covarianceFunction,
     int regressionOrder, double fractionResolvingPower);
 
   /**
@@ -202,7 +202,7 @@ public:
     //    Initialize a model and set hyperparameter values to default.* */
     // bool Initialize(
     //   GaussianProcessEmulator * parent,
-    //   CovarianceFunction covarianceFunction,
+    //   CovarianceFunctionType covarianceFunction,
     //   int regressionOrder);
 
     /**
@@ -216,7 +216,7 @@ public:
        Sets default values for all of the hyperparameters. \returns
        true on success. */
     bool BasicTraining(
-        CovarianceFunction covarianceFunction,
+        CovarianceFunctionType covarianceFunction,
         int regressionOrder,
         double defaultNugget,
         double amplitude,
@@ -225,7 +225,7 @@ public:
     /**
        Trains the submodel. \returns true on sucess. */
     bool Train(
-        CovarianceFunction covarianceFunction,
+        CovarianceFunctionType covarianceFunction,
         int regressionOrder);
 
     /**
@@ -247,7 +247,7 @@ public:
     GaussianProcessEmulator * m_Parent;
     /**
        Which covariance function is used? */
-    CovarianceFunction m_CovarianceFunction;
+    CovarianceFunctionType m_CovarianceFunction;
     /**
        Which order polynomial is used as a regression function? */
     int m_RegressionOrder;
