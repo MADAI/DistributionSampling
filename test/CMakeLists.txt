@@ -5,6 +5,9 @@ set( LIBRARIES
 
 set( TEST_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
 
+add_library( DistributionSamplingTestLib STATIC Gaussian2DModel.cxx )
+target_link_libraries( DistributionSamplingTestLib ${LIBRARIES} )
+
 add_executable( ExternalModelMCMCTest ExternalModelMCMCTest.cxx )
 target_link_libraries( ExternalModelMCMCTest ${LIBRARIES} )
 add_test( ExternalModelMCMCTest
@@ -19,7 +22,7 @@ target_link_libraries( GaussianDistributionTest ${LIBRARIES} )
 add_test( GaussianDistributionTest GaussianDistributionTest )
 
 add_executable( Gaussian2DModelTest Gaussian2DModelTest.cxx )
-target_link_libraries( Gaussian2DModelTest ${LIBRARIES} )
+target_link_libraries( Gaussian2DModelTest ${LIBRARIES} DistributionSamplingTestLib )
 add_test( Gaussian2DModelTest Gaussian2DModelTest )
 
 add_executable( ModelTest ModelTest.cxx )
@@ -27,11 +30,11 @@ target_link_libraries( ModelTest ${LIBRARIES} )
 add_test( ModelTest ModelTest )
 
 add_executable( NumericalGradientEstimationTest NumericalGradientEstimationTest.cxx )
-target_link_libraries( NumericalGradientEstimationTest ${LIBRARIES} )
+target_link_libraries( NumericalGradientEstimationTest ${LIBRARIES} DistributionSamplingTestLib )
 add_test( NumericalGradientEstimationTest NumericalGradientEstimationTest )
 
 add_executable( SimpleMetropolisHastingsSamplerTest SimpleMetropolisHastingsSamplerTest.cxx )
-target_link_libraries( SimpleMetropolisHastingsSamplerTest ${LIBRARIES} )
+target_link_libraries( SimpleMetropolisHastingsSamplerTest ${LIBRARIES} DistributionSamplingTestLib )
 add_test( SimpleMetropolisHastingsSamplerTest SimpleMetropolisHastingsSamplerTest )
 
 add_executable( RandomTest RandomTest.cxx )
@@ -39,7 +42,7 @@ target_link_libraries( RandomTest ${LIBRARIES} )
 add_test( RandomTest RandomTest )
 
 add_executable( RegularStepGradientAscentSamplerTest RegularStepGradientAscentSamplerTest.cxx )
-target_link_libraries( RegularStepGradientAscentSamplerTest ${LIBRARIES} )
+target_link_libraries( RegularStepGradientAscentSamplerTest ${LIBRARIES} DistributionSamplingTestLib )
 add_test( RegularStepGradientAscentSamplerTest RegularStepGradientAscentSamplerTest )
 
 add_executable( TraceTest TraceTest.cxx )

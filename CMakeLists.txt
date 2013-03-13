@@ -37,7 +37,7 @@ endif()
 
 ## Distribution Library configuration file
 configure_file( src/Configuration.h.in ${DistributionSampling_BINARY_DIR}/Configuration.h )
-
+list(APPEND DistributionSampling_INCLUDE_DIRS ${DistributionSampling_BINARY_DIR} )
 ##
 
 ## include and link
