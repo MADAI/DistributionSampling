@@ -88,37 +88,39 @@ SimpleMetropolisHastingsSampler
                       m_ActiveParameterIndices.end(), true )
           == numberOfActiveParameters);
 
-  for ( unsigned int giveup = 1048576; giveup != 0; --giveup ) {
-    unsigned int k = 0;
-    for ( unsigned int i = 0; i < m_Model->GetNumberOfParameters(); i++ ) {
-      if ( m_ActiveParameterIndices[i] ) {
-        double step
-          = (m_StepSize   // scale each step by this variable
-             * m_Random.Gaussian() // random direction, length
-             * m_StepScales[i]); // scaled by parameter domain size
-        xc[i] = m_CurrentParameters[i] + step;
-      } else {
-        xc[i] = m_CurrentParameters[i];
-      }
+  for ( unsigned int i = 0; i < m_Model->GetNumberOfParameters(); i++ ) {
+    if ( m_ActiveParameterIndices[i] ) {
+      double step
+        = (m_StepSize   // scale each step by this variable
+           //* m_Random.Gaussian() // random direction, length
+           * ( m_Random.Uniform() - 0.5 ) // random direction, length
+           * m_StepScales[i]); // scaled by parameter domain size
+      xc[i] = m_CurrentParameters[i] + step;
+    } else {
+      xc[i] = m_CurrentParameters[i];
     }
-    double ll; // ll is new_log_likelihood
-    m->GetScalarOutputsAndLogLikelihood(xc,yc,ll);
+  }
+  double ll; // ll is new_log_likelihood
+  m->GetScalarOutputsAndLogLikelihood(xc,yc,ll);
 
-    // Check for NaN
-    assert( ll == ll );
+  // Check for NaN
+  assert( ll == ll );
 
-    double delta_logLikelihood = ll - m_CurrentLogLikelihood;
+  double delta_logLikelihood = ll - m_CurrentLogLikelihood;
 
-    if ((delta_logLikelihood > 0) ||
-        (std::exp(delta_logLikelihood) > m_Random.Uniform())) {
-      m_CurrentLogLikelihood = ll;
-      m_CurrentParameters = xc;
-      return Sample( xc, yc, ll );
-    } // else, loop.
+  if ((delta_logLikelihood > 0) ||
+      (std::exp(delta_logLikelihood) > m_Random.Uniform())) {
+    m_CurrentLogLikelihood = ll;
+    m_CurrentParameters = xc;
+    m_CurrentOutputs = yc;
+    return Sample( xc, yc, ll );
   }
 
-  // If nothing else, return an empty Sample.
-  return Sample();
+  // Stay at this point in parameter space
+  return Sample( m_CurrentParameters,
+                 m_CurrentOutputs,
+                 m_CurrentLogLikelihood );
+
 }
 
 } // end namespace madai
