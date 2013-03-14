@@ -57,6 +57,14 @@ public:
   virtual ErrorType SetObservedScalarValues(
     const std::vector< double > & observedScalarValues);
 
+  /** Override this to ignore any oberved value covariance.
+   *
+   * This is a test model where we are setting the observed values
+   * internally, so we preclude client code from setting observed
+   * covariance. */
+  virtual ErrorType SetObservedScalarCovariance(
+    const std::vector< double > & observedScalarCovariance);
+
   /** Get the x and y means */
   void GetMeans( double & MeanX, double & MeanY ) const;
 

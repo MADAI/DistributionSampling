@@ -47,7 +47,8 @@ Gaussian2DModel
   // Usually the observed scalar values would be set from outside the
   // Model object. As this is a test object, however, we are setting
   // the observed values here.
-  m_ObservedScalarValues = std::vector< double >( 1, 1.0 );
+  m_ObservedScalarValues.push_back( 1.0 );
+  m_ObservedScalarCovariance.push_back( 0.01 );
 }
 
 
@@ -126,7 +127,15 @@ Model::ErrorType
 Gaussian2DModel
 ::SetObservedScalarValues( const std::vector< double > & observedScalarValues )
 {
-  // Do nothing
+  // Do nothing. The values are set internally.
+}
+
+
+Model::ErrorType
+Gaussian2DModel
+::SetObservedScalarCovariance( const std::vector< double > & observedScalarCovariance)
+{
+  // Do nothing. The values are set internally.
 }
 
 
