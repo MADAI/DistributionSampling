@@ -56,6 +56,7 @@ Sampler
   }
 
   m_CurrentParameters = std::vector< double >( model->GetNumberOfParameters(), 0.0 );
+  m_CurrentOutputs = std::vector< double >( model->GetNumberOfScalarOutputs(), 0.0 );
   m_ActiveParameterIndices = std::vector< bool >( model->GetNumberOfParameters(), true );
 }
 

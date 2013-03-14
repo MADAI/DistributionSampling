@@ -173,9 +173,13 @@ protected:
   /** Set of strings naming the active parameters. */
   std::set< std::string > m_ActiveParameters;
 
-  /** Stores the point in parameter space. This will change when
+  /** Stores the point in parameter space. This will often change when
    *  NextSample() is called. */
   std::vector< double > m_CurrentParameters;
+
+  /** Stores the outputs for the point in parameter space. This will
+   * often change when NextSample() is called. */
+  std::vector< double > m_CurrentOutputs;
 
   /** Stores the current log-likelihood. */
   double m_CurrentLogLikelihood;
