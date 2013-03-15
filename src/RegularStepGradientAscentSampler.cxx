@@ -89,6 +89,14 @@ RegularStepGradientAscentSampler
 }
 
 
+double
+RegularStepGradientAscentSampler
+::GetStepSize() const
+{
+  return m_StepSize;
+}
+
+
 void
 RegularStepGradientAscentSampler
 ::Minimize()
@@ -102,6 +110,14 @@ RegularStepGradientAscentSampler
 ::Maximize()
 {
   m_Maximize = true;
+}
+
+
+bool
+RegularStepGradientAscentSampler
+::GetMaximize() const
+{
+  return m_Maximize;
 }
 
 } // end namespace madai

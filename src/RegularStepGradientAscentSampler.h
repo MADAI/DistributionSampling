@@ -39,6 +39,9 @@ public:
   /** Set the step size. */
   void SetStepSize( double stepSize );
 
+  /** Get the step size. */
+  double GetStepSize() const;
+
   /** Set search mode to minimize. */
   void Minimize();
 
@@ -46,6 +49,9 @@ public:
    *
    * Maximization is on by default. */
   void Maximize();
+
+  /** Get whether the maximization mode is on. */
+  bool GetMaximize() const;
 
 protected:
   /** Scaling factor applied to the gradient when taking the next

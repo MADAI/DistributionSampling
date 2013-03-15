@@ -65,8 +65,14 @@ public:
   virtual ErrorType SetObservedScalarCovariance(
     const std::vector< double > & observedScalarCovariance);
 
+  /** Set the means. */
+  void SetMeans( double mean[2] );
+
   /** Get the x and y means */
   void GetMeans( double & MeanX, double & MeanY ) const;
+
+  /** Set the standard deviations. */
+  void SetDeviations( double stddev[2] );
 
   /** Get the standard deviations in x and y */
   void GetDeviations( double & DvX, double & DevY ) const;

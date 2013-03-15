@@ -163,12 +163,11 @@ Gaussian2DModel
 
 void
 Gaussian2DModel
-::GetDeviations( double & DevX, double & DevY ) const
+::SetMeans( double means[2] )
 {
-  DevX = this->m_StandardDeviationX;
-  DevY = this->m_StandardDeviationY;
+  m_MeanX = means[0];
+  m_MeanY = means[1];
 }
-
 
 void
 Gaussian2DModel
@@ -177,5 +176,24 @@ Gaussian2DModel
   MeanX = this->m_MeanX;
   MeanY = this->m_MeanY;
 }
+
+
+void
+Gaussian2DModel
+::SetDeviations( double stddev[2] )
+{
+  m_StandardDeviationX = stddev[0];
+  m_StandardDeviationY = stddev[1];
+}
+
+
+void
+Gaussian2DModel
+::GetDeviations( double & DevX, double & DevY ) const
+{
+  DevX = this->m_StandardDeviationX;
+  DevY = this->m_StandardDeviationY;
+}
+
 
 } // end namespace madai
