@@ -594,6 +594,7 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
   assert(numberThetas == (p + offset));
   const double & amplitude = m_Thetas(0);
   const double & nugget = m_Thetas(1);
+  double nug = 0.0;
 
   double distanceSquared = 0.0;
   for (int i = 0; i < p; i++) {
@@ -602,7 +603,7 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
     distanceSquared += std::pow( (d / l), 2);
   }
   if (distanceSquared < EPSILON) {
-    return nugget + amplitude;
+    nug = nugget;
   }
 
   switch(m_CovarianceFunction) {
@@ -610,25 +611,25 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
     {
       const double & power = m_Thetas(2);
       assert ((power > 0.0) && (power <= 2.0));
-      return amplitude * std::exp(
+      return nug + amplitude * std::exp(
           -0.5 * std::pow(distanceSquared,0.5 * power));
     }
   case SQUARE_EXPONENTIAL_FUNCTION:
     {
-      return amplitude * std::exp( -0.5 * distanceSquared);
+      return nug + amplitude * std::exp( -0.5 * distanceSquared);
     }
   case MATERN_32_FUNCTION:
     {
       static const double ROOT3 = 1.7320508075688772;
       double distance = std::sqrt(distanceSquared);
-      return amplitude * (1 + ROOT3 * distance)
+      return nug + amplitude * (1 + ROOT3 * distance)
         * std::exp(- ROOT3 * distance);
     }
   case MATERN_52_FUNCTION:
     {
       static const double ROOT5 = 2.23606797749979;
       double distance = std::sqrt(distanceSquared);
-      return amplitude *
+      return nug + amplitude *
         (1 + (ROOT5 * distance) + ((5.0 / 3.0) * distanceSquared)) *
         std:: exp(- ROOT5 * distance);
     }

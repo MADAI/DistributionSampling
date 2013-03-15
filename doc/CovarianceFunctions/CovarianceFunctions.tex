@@ -11,53 +11,28 @@
 
 \subsection*{Squared-Exponential}
 
-\[ ‖u-v‖_Θ = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(θ_{2+i})^2}} \]
-\[
-C_Θ(u, v) = \left\{
-\begin{array}{cl}
-θ_0 + θ_1 & \text{if } ‖u-v‖_Θ < ε,\\
-θ_0 \exp\left({-\frac{1}{2} ‖u-v‖_Θ^2}\right)
- & \text{otherwise}
-\end{array} \right.
-\]
+\[ ‖u-v‖_Θ = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(θ_{2+i})^2}} \qquad
+ δ_{uv} = 1 \text{ if } (‖u-v‖_Θ < ε) \textrm{ else } δ_{uv} = 0 \]
+\[ C_Θ(u, v) = θ_0 \exp\left({-\frac{1}{2} ‖u-v‖_Θ^2}\right) + θ_1δ_{uv} \]
 
 \subsection*{Power-Exponential}
 
-\[ ‖u-v‖_Θ = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(θ_{3+i})^2}} \]
-\[
-C_Θ(u, v) = \left\{
-\begin{array}{cl}
-θ_0 + θ_1 & \text{if } ‖u-v‖_Θ < ε,\\
-θ_0 \exp\left({-\frac{1}{2} ‖u-v‖_Θ^{θ_2}}\right)
- & \text{otherwise}
-\end{array} \right.
-\]
+\[ ‖u-v‖_Θ = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(θ_{3+i})^2}} \qquad
+ δ_{uv} = 1 \text{ if } (‖u-v‖_Θ < ε) \textrm{ else } δ_{uv} = 0 \]
+\[ C_Θ(u, v) = θ_0 \exp\left({-\frac{1}{2} ‖u-v‖_Θ^{θ_2}}\right) + θ_1δ_{uv} \]
 
 \subsection*{Matérn 3/2}
-\[ ‖u-v‖_Θ = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(θ_{2+i})^2}} \]
-
-\[
-C_Θ(u, v) = \left\{
-\begin{array}{cl}
-θ_0 + θ_1 & \text{if } ‖u-v‖_Θ < ε,\\
-{θ_0} \left({ 1 + θ_2 \sqrt{3} ‖u-v‖_Θ }\right)
-\exp \left({ - θ_2 \sqrt{3} ‖u-v‖_Θ }\right)
- & \text{otherwise}
-\end{array} \right.
-\]
+\[ ‖u-v‖_Θ = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(θ_{2+i})^2}} \qquad
+ δ_{uv} = 1 \text{ if } (‖u-v‖_Θ < ε) \textrm{ else } δ_{uv} = 0 \]
+\[ C_Θ(u, v) = {θ_0} \left({ 1 + θ_2 \sqrt{3} ‖u-v‖_Θ }\right)
+\exp \left({ - θ_2 \sqrt{3} ‖u-v‖_Θ }\right) + θ_1δ_{uv} \]
 
 
 \subsection*{Matérn 5/2}
-\[ ‖u-v‖_Θ = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(θ_{2+i})^2}} \]
-\[
-C_Θ(u, v) = \left\{
-\begin{array}{cl}
-θ_0 + θ_1 & \text{if } ‖u-v‖_Θ < ε,\\
-{θ_0} \left({ 1 + \sqrt{5} ‖u-v‖_Θ
- + \dfrac{5}{3} \left({‖u-v‖_Θ}\right)^2  }\right)
-\exp \left({ - \sqrt{5} ‖u-v‖ }\right)
- & \text{otherwise}
-\end{array} \right.
-\]
+\[ ‖u-v‖_Θ = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(θ_{2+i})^2}} \qquad
+ δ_{uv} = 1 \text{ if } (‖u-v‖_Θ < ε) \textrm{ else } δ_{uv} = 0 \]
+\[ C_Θ(u, v) = {θ_0} \left({ 1 + \sqrt{5} ‖u-v‖_Θ
+ + \dfrac{5}{3} \left({‖u-v‖_Θ}\right)^2  }\right) + θ_1δ_{uv} \]
+
 
 \end{document}
