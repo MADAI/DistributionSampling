@@ -10,14 +10,20 @@ Last updated: 2013-03-10
 -   A compiler.
 
 -   CMake version 2.8 or greater
-    (Available at http://www.cmake.org/cmake/resources/software.html
-    or "yum install cmake" or "apt-get install cmake".)
+    (Available at http://www.cmake.org/cmake/resources/software.html)
+    - "yum install cmake" on Red Hat-based systems
+    - "apt-get install cmake" on Debian-based systems
+    - "port install cmake" on Macintosh systems with macports installed
 
 -   The Boost Library (http://www.boost.org/users/download/
-    or "yum install boost-devel" or "apt-get install libboost-dev")
+    - "yum install boost-devel" on Red Hat-based systems
+    - "apt-get install libboost-dev" on Debian-based systems
+    - "port install boost" on Macintosh systems with macports installed
 
--   The Eigen3 Library (http://eigen.tuxfamily.org/
-    or "yum install eigen3-devel" or "apt-get install libeigen3-dev")
+-   The Eigen3 Library (http://eigen.tuxfamily.org/)
+    - "yum install eigen3-devel" on Red Hat-based systems
+    - "apt-get install libeigen3-dev" on Debian-based systems
+    - "port install eigen3" on Macports systems with macports installed
 
 ** CONFIGURING **
 
@@ -25,11 +31,11 @@ Last updated: 2013-03-10
     file is located. For example, if the directory containing this
     README.txt file is located in
 
-    /home/user/cquammen/madai/stat/DistributionSampling
+    $HOME/madai/stat/DistributionSampling
 
     a good build directory might be
 
-    /home/user/cquammen/madai/build/stat/DistributionSampling-build
+    $HOME/madai/build/stat/DistributionSampling-build
 
 2). Navigate to the build directory created in step 1.
 
@@ -44,7 +50,7 @@ Last updated: 2013-03-10
 
     Using the example directories above, this command is
 
-    $ cmake "/home/user/cquammen/madai/stat/DistributionSampling" \
+    $ cmake "$HOME/madai/stat/DistributionSampling" \
           -DBUILD_TESTING:BOOL="1" \
           -DCMAKE_BUILD_TYPE:STRING="Debug"
 
