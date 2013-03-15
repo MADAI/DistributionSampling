@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
   sampler.Maximize(); // We want to maximize the likelihood function
 
   // Set the step size.
-  double stepSize = 200.0;
+  double stepSize = 2.0;
   sampler.SetStepSize( stepSize );
 
   // Set initial parameter values.

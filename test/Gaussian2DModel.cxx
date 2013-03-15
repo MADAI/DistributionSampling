@@ -48,7 +48,7 @@ Gaussian2DModel
   // Model object. As this is a test object, however, we are setting
   // the observed values here.
   m_ObservedScalarValues.push_back( 1.0 );
-  m_ObservedScalarCovariance.push_back( 0.01 );
+  m_ObservedScalarCovariance.push_back( 0.1 );
 }
 
 
@@ -112,11 +112,13 @@ Gaussian2DModel
   assert( m_ObservedScalarValues.size() == 1 );
   if ( activeParameters[0] ) {
     gradient.push_back( -(functionValue - m_ObservedScalarValues[0]) *
-                        this->PartialX( parameters[0], functionValue ) );
+                        this->PartialX( parameters[0], functionValue ) /
+                        m_ObservedScalarCovariance[0] );
   }
   if ( activeParameters[1] ) {
     gradient.push_back( -(functionValue - m_ObservedScalarValues[0]) *
-                        this->PartialY( parameters[1], functionValue ) );
+                        this->PartialY( parameters[1], functionValue ) /
+                        m_ObservedScalarCovariance[0] );
   }
 
   return NO_ERROR;
