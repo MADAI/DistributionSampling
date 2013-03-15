@@ -49,6 +49,9 @@ Gaussian2DModel
   // the observed values here.
   m_ObservedScalarValues.push_back( 1.0 );
   m_ObservedScalarCovariance.push_back( 0.1 );
+
+  // This model is always ready
+  m_StateFlag = Model::READY;
 }
 
 

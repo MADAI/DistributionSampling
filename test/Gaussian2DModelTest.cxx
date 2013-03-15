@@ -26,6 +26,12 @@ int main(int argc, char *argv[])
 {
   madai::Gaussian2DModel *model = new madai::Gaussian2DModel();
 
+  // Test that this model is initialized
+  if ( ! model->IsReady() ) {
+    std::cerr << "Model is not ready, but should be" << std::endl;
+    return EXIT_FAILURE;
+  }
+
   // Test loading a configuration file.
   // TODO - change the file name when LoadConfigurationFile actually
   // parses a file.
