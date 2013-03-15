@@ -42,6 +42,7 @@ ExternalModel
   // that if they are not NULL at destruction we will know to close them.
   m_Process.question = NULL;
   m_Process.answer   = NULL;
+  m_Process.pid      = -1;
 }
 
 
@@ -58,7 +59,9 @@ ExternalModel
     // stdin is closed for reading.
   }
   // If it doesn't clean itself up, we send a ctrl-c.
-  kill((pid_t)(m_Process.pid), SIGINT);
+  if ( m_Process.pid != -1 ) {
+    kill((pid_t)(m_Process.pid), SIGINT);
+  }
 }
 
 
