@@ -1,5 +1,6 @@
 set( SRC_FILES
   Random.cxx
+  GaussianProcessEmulator.cxx
   GaussianProcessEmulatedModel.cxx
   Parameter.cxx
   Distribution.cxx
@@ -18,3 +19,31 @@ set( SRC_FILES
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${DistributionSampling_BINARY_DIR}/lib )
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} )
 add_library( DistributionSampling ${SRC_FILES} )
+
+add_executable(
+  emulate
+  emulate.cxx )
+target_link_libraries(
+  emulate
+  DistributionSampling)
+
+add_executable(
+  trainEmulator
+  trainEmulator.cxx)
+target_link_libraries(
+  trainEmulator
+  DistributionSampling)
+
+add_executable(
+  basicTrain
+  basicTrain.cxx)
+target_link_libraries(
+  basicTrain
+  DistributionSampling)
+
+add_executable(
+  printThetas
+  printThetas.cxx)
+target_link_libraries(
+  printThetas
+  DistributionSampling)

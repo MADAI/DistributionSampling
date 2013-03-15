@@ -16,7 +16,7 @@
 #  limitations under the License.
 
 # Change these variables:
-MADAIEMULATOR_DIR="${HOME}/build/MADAIEmulator"
+
 TARGET_BUILD_DIR="${HOME}/build/DistributionSampling"
 BUILD_TYPE="Debug"
 #BUILD_TYPE="Release"
@@ -25,7 +25,6 @@ SRC_DIR="$(cd "$(dirname "$0")" ; pwd)"
 mkdir -p "$TARGET_BUILD_DIR"
 cd "$TARGET_BUILD_DIR"
 cmake "$SRC_DIR" \
-  -DMADAIEmulator_DIR:PATH="${MADAIEMULATOR_DIR}" \
   -DBUILD_TESTING:BOOL="1" \
   -DCMAKE_BUILD_TYPE:STRING="${BUILD_TYPE}" \
   && make && echo "SUCCESS:" "$TARGET_BUILD_DIR"

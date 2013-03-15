@@ -40,6 +40,11 @@ public:
 
   /** Constructor
    *
+   * Unuseable state */
+  Parameter( );
+
+  /** Constructor
+   *
    * Default is a uniform prior on [min, max] */
   Parameter( std::string nm, double min, double max);
 

@@ -1,21 +1,23 @@
 Project: DistributionSampling
 README.txt author: Cory Quammen <cquammen@cs.unc.edu>,
     Hal Canary <cs.unc.edu/~hal>
-Last updated: 2013-02-25
+Last updated: 2013-03-10
 
 *** BUILD INSTRUCTIONS FOR LINUX AND MAC ***
 
 ** PREREQUISITES **
 
+-   A compiler.
+
 -   CMake version 2.8 or greater
     (Available at http://www.cmake.org/cmake/resources/software.html
     or "yum install cmake" or "apt-get install cmake".)
 
--   A compiler
+-   The Boost Library (http://www.boost.org/users/download/
+    or "yum install boost-devel" or "apt-get install libboost-dev")
 
--   The Coral library (from the madai/rhic repository).
-
--   The MADAIEmulator library
+-   The Eigen3 Library (http://eigen.tuxfamily.org/
+    or "yum install eigen3-devel" or "apt-get install libeigen3-dev")
 
 ** CONFIGURING **
 
@@ -34,8 +36,6 @@ Last updated: 2013-02-25
 3). Type ("$ " represents your shell prompt.)
 
     $ cmake ".../stat/DistributionSampling" \
-          -Dcoral_DIR:PATH=".../build/coral" \
-          -DMADAIEmulator_DIR:PATH=".../build/MADAIEmulator" \
           -DBUILD_TESTING:BOOL="1" \
           -DCMAKE_BUILD_TYPE:STRING="Debug"
 
@@ -45,8 +45,6 @@ Last updated: 2013-02-25
     Using the example directories above, this command is
 
     $ cmake "/home/user/cquammen/madai/stat/DistributionSampling" \
-          -Dcoral_DIR:PATH="/home/user/cquammen/madai/build/MADAIEmulator" \
-          -DMADAIEmulator_DIR:PATH="/home/user/cquammen/madai/build/coral" \
           -DBUILD_TESTING:BOOL="1" \
           -DCMAKE_BUILD_TYPE:STRING="Debug"
 

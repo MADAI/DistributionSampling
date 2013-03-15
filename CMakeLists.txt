@@ -10,36 +10,16 @@ set( DistributionSamplingLibrary_VERSION_REVISION 0 )
 set( DistributionSampling_INCLUDE_DIRS ${DistributionSampling_SOURCE_DIR}/src )
 set( DistributionSampling_LIBRARY_DIRS ${DistributionSampling_BINARY_DIR}/lib )
 
+list(APPEND DistributionSampling_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src )
+list(APPEND DistributionSampling_LIBRARY_DIRS ${PROJECT_BINARY_DIR}/lib )
+
 ## EIGEN
 find_package(Eigen3 REQUIRED)
 list(APPEND DistributionSampling_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} )
 
 ## BOOST
 find_package( Boost REQUIRED )
-set(CORELIBS
-  ${coral_LIBRARIES}
-  ${MADAIEmulator_LIBRARIES}
-)
-
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-  ${DistributionSampling_BINARY_DIR}
-  ${coral_INCLUDE_DIRS}
-  ${MADAIEmulator_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-)
-
-link_directories(
-  ${PROJECT_BINARY_DIR}/lib
-  ${coral_LIBRARY_DIRS}
-  ${MADAIEmulator_LIBRARY_DIRS}
-)
-
-## MADAIEmulator
-find_package( MADAIEmulator REQUIRED )
-list(APPEND CORELIBS ${MADAIEmulator_LIBRARIES} )
-list(APPEND DistributionSampling_INCLUDE_DIRS ${MADAIEmulator_INCLUDE_DIRS} )
-list(APPEND DistributionSampling_LIBRARY_DIRS ${MADAIEmulator_LIBRARY_DIRS} )
+list(APPEND DistributionSampling_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} )
 
 ## Compile time checks for the existence of required headers
 set( try_compile_directory ${DistributionSampling_BINARY_DIR}/TryCompiles )
@@ -57,12 +37,14 @@ endif()
 
 ## Distribution Library configuration file
 configure_file( src/Configuration.h.in ${DistributionSampling_BINARY_DIR}/Configuration.h )
-
+list(APPEND DistributionSampling_INCLUDE_DIRS ${DistributionSampling_BINARY_DIR} )
 ##
 
+## include and link
 include_directories( ${DistributionSampling_INCLUDE_DIRS})
 link_directories( ${DistributionSampling_LIBRARY_DIRS} )
-set( DistributionSampling_LIBRARIES  DistributionSampling  ${CORELIBS})
+
+set( DistributionSampling_LIBRARIES  DistributionSampling)
 
 add_subdirectory( src )
 
@@ -80,4 +62,7 @@ if ( BUILD_TESTING )
 endif()
 
 # Configure package file
-configure_file( DistributionSamplingConfig.cmake.in ${PROJECT_BINARY_DIR}/DistributionSamplingConfig.cmake @ONLY )
+configure_file(
+  DistributionSamplingConfig.cmake.in
+  ${PROJECT_BINARY_DIR}/DistributionSamplingConfig.cmake
+  @ONLY )

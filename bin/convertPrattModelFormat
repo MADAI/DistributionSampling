@@ -1,0 +1,187 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+##=========================================================================
+##
+##  Copyright 2011-2013 The University of North Carolina at Chapel Hill
+##  All rights reserved.
+##
+##  Licensed under the MADAI Software License. You may obtain a copy of
+##  this license at
+##
+##         https://madai-public.cs.unc.edu/software/license/
+##
+##  Unless required by applicable law or agreed to in writing, software
+##  distributed under the License is distributed on an "AS IS" BASIS,
+##  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+##  See the License for the specific language governing permissions and
+##  limitations under the License.
+##
+##=========================================================================
+
+"""
+This converts the "Pratt Format" (to be fully documented by Scott
+Pratt at some point) into the "Emulator Training Format" (to be fully
+documented by Hal Canary at some point).
+
+\author Hal Canary <cs.unc.edu/~hal/>
+"""
+useage = """
+Usage:
+    convertPrattModelFormat DIRECTORY_NAME > TRAINING.dat
+"""
+
+import sys, math, random, os, glob
+
+class Parameter(object):
+	def __init__(self, name, distribution):
+		self._Name = name
+		self._PriorDistribution = distribution
+	def __repr__(self):
+		return 'Parameter(%r,%r)' % (self._Name,self._PriorDistribution)
+	def __str__(self):
+		return '%s\t%s' % (self._Name,self._PriorDistribution)
+	@property
+	def Name(self):
+		return self._Name
+	@Name.setter
+	def Name(self, x):
+		self._Name = x
+	@property
+	def PriorDistribution(self):
+		return self._PriorDistribution
+	@Name.setter
+	def PriorDistribution(self, x):
+		assert isinstance(x, Distribution)
+		self._PriorDistribution = x
+
+class Distribution(object):
+	pass
+
+class GaussianDistribution(Distribution):
+	def __init__(self,Mean=0.0,StandardDeviation=1.0):
+		self._Mean = Mean
+		self._StandardDeviation = StandardDeviation
+	def __repr__(self):
+		return 'GaussianDistribution(%r,%r)' % (self._Mean,self._StandardDeviation)
+	def __str__(self):
+		return 'GAUSSIAN\t%r\t%r' % (self._Mean,self._StandardDeviation)
+	@property
+	def Mean(self):
+		return self._Mean
+	@Mean.setter
+	def Mean(self, x):
+		self._Mean = x
+	@property
+	def StandardDeviation(self):
+		return self._StandardDeviation
+	@StandardDeviation.setter
+	def StandardDeviation(self, x):
+		self._StandardDeviation = x
+
+class UniformDistribution(Distribution):
+	def __init__(self,Minimum=0.0,Maximum=1.0):
+		self._Minimum = Minimum
+		self._Maximum = Maximum
+	def __repr__(self):
+		return 'UniformDistribution(%r,%r)' % (self._Minimum,self._Maximum)
+	def __str__(self):
+		return 'UNIFORM\t%r\t%r' % (self._Minimum,self._Maximum)
+	@property
+	def Minimum(self):
+		return self._Minimum
+	@Minimum.setter
+	def Minimum(self, x):
+		self._Minimum = x
+	@property
+	def Maximum(self):
+		return self._Maximum
+	@Maximum.setter
+	def Maximum(self, x):
+		self._Maximum = x
+
+def PrintEmulatorFormat(o,X,Y,Parameters,OutputNames):
+	def print_matrix(M):
+		print >>o, '%d %d' % (len(M),len(M[0]))
+		for row in M:
+			print >>o, ' '.join(map(repr,row))
+	N = len(X) # number of model points
+	assert (N > 0) and (len(Y) == N)
+	p, t = len(X[0]), len(Y[0])
+	assert all(len(x) == p for x in X) and all(len(y) == t for y in Y)
+	assert (len(Parameters) == p) and (len(OutputNames) == t)
+	assert len(Parameters) == p and len(OutputNames) == t
+	print >>o, '#\n# generateSomeTestData.py\n#'
+	print >>o, 'VERSION 1\nPARAMETERS\n%d' % p
+	for param in Parameters:
+		print >>o, str(param)
+	print >>o, 'OUTPUTS\n%d' % (len(Y[0]))
+	for output in OutputNames:
+		print >>o, output
+	print >>o, 'NUMBER_OF_TRAINING_POINTS\t%d' % (N,)
+	print >>o, 'PARAMETER_VALUES'
+	print_matrix(X)
+	print >>o, 'OUTPUT_VALUES'
+	print_matrix(Y)
+	print >>o, 'END_OF_FILE'
+
+def ReadPrattModelFormat(directory):
+	def string_to_parameter(s):
+		parts = s.strip().split()
+		name = parts[0]
+		ptype = parts[1]
+		dist = None
+		if ptype == 'uniform':
+			dist = UniformDistribution()
+			dist.Minimum = float(parts[2])
+			dist.Maximum = float(parts[3])
+		elif ptype == 'gaussian':
+			dist = GaussianDistribution()
+			dist.Mean = float(parts[2])
+			dist.StandardDeviation = float(parts[3])
+		else:
+			raise Exception("unknown prior")
+		return Parameter(name,dist)
+
+	assert os.path.isdir(directory)
+	resultsd = os.path.join(directory,'experimental_results')
+	analysisd = os.path.join(directory,'statistical_analysis')
+	outputd = os.path.join(directory,'model_output')
+
+	with open(os.path.join(analysisd,'observable_names.dat'),'r') as f:
+		OutputNames = [name.strip() for name in f]
+	with open(os.path.join(analysisd,'parameter_priors.dat'),'r') as f:
+		Parameters = [string_to_parameter(x) for x in f]
+
+	X,Y = [],[]
+	def getParameterIndex(params,name):
+		results = [i for i,p in enumerate(params) if p.Name == name]
+		if len(results) == 0:
+			raise Exception('no parameter by that name')
+		return results[0]
+	# def getOutputIndex(names,name):
+	#   return names.index[name]
+	for rund in sorted(glob.iglob(os.path.join(outputd,"run[0-9]*"))):
+		pfile = os.path.join(rund,'parameters.dat')
+		rfile = os.path.join(rund,'results.dat')
+		assert os.path.isfile(pfile) and os.path.isfile(rfile)
+		x = [0.0 for p in Parameters]
+		with open(pfile,'r') as f:
+			for line in f:
+				name, value = line.strip().split()
+				index = getParameterIndex(Parameters,name)
+				x[index] = float(value)
+		X.append(x)
+		y = [0.0 for p in OutputNames]
+		with open(rfile,'r') as f:
+			for line in f:
+				name, value = line.strip().split()
+				y[OutputNames.index(name)] = float(value)
+		Y.append(y)
+	return X,Y,Parameters,OutputNames
+
+if __name__ == '__main__':
+	if len(sys.argv) < 2:
+		print useage
+		exit(1)
+	X,Y,Parameters,OutputNames = ReadPrattModelFormat(sys.argv[1])
+	PrintEmulatorFormat(sys.stdout,X,Y,Parameters,OutputNames)

@@ -47,8 +47,15 @@ public:
 
   //@{
   /**
-     Set/Get the StepSize, which is the maximum distance in Parameter
-     space to move, under euclidean L2 norm.
+     Set/Get the StepSize, which controls the average distance in Parameter
+     space to move.
+
+     In each direction, the step distance is given by:
+       step[i] = StepSize * StepScales[i] * RandomGaussian();
+
+     Where StepScales[i] is precalulated as:
+       = Model->GetParameters()[i].GetPriorDistribution()->GetPercentile(0.75)
+       - Model->GetParameters()[i].GetPriorDistribution()->GetPercentile(0.25);
   */
   virtual void SetStepSize( double stepSize );
   virtual double GetStepSize() { return this->m_StepSize; }

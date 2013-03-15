@@ -21,6 +21,11 @@
 
 namespace madai {
 
+Parameter::Parameter( ) :
+  m_PriorDistribution( NULL )
+{
+}
+
 Parameter::Parameter( std::string name) :
   m_Name( name )
 {
@@ -64,6 +69,8 @@ Parameter::Parameter( const Parameter & other) :
 Parameter & Parameter::operator=( const Parameter & other)
 {
   m_Name = other.m_Name;
+  if ( m_PriorDistribution != NULL )
+    delete m_PriorDistribution;
   m_PriorDistribution = other.m_PriorDistribution->Clone();
 }
 

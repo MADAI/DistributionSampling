@@ -29,7 +29,8 @@ namespace madai {
 Model
 ::Model() :
   m_GradientEstimateStepSize( 1.0e-4 ),
-  m_StateFlag( UNINITIALIZED )
+  m_StateFlag( UNINITIALIZED ),
+  m_UseModelCovarianceToCalulateLogLikelihood(true)
 {
 }
 
@@ -231,6 +232,22 @@ Model
 }
 
 
+bool
+Model
+::GetUseModelCovarianceToCalulateLogLikelihood()
+{
+  return m_UseModelCovarianceToCalulateLogLikelihood;
+}
+
+
+void
+Model
+::SetUseModelCovarianceToCalulateLogLikelihood(bool v)
+{
+  m_UseModelCovarianceToCalulateLogLikelihood = v;
+}
+
+
 void
 Model
 ::AddParameter( const std::string & name,
@@ -307,6 +324,8 @@ Model
     std::vector< double > & scalars,
     double & logLikelihood) const
 {
+
+
   logLikelihood = std::numeric_limits< double >::signaling_NaN();
   double logPriorLikelihood
     = this->GetLogPriorLikelihood(parameters);
@@ -314,9 +333,15 @@ Model
   size_t t = this->GetNumberOfScalarOutputs();
   assert(t > 0);
   std::vector< double > scalarCovariance;
-  Model::ErrorType result = this->GetScalarOutputsAndCovariance(
-    parameters, scalars, scalarCovariance);
-
+  // initially scalarCovariance is a empty vector
+  Model::ErrorType result;
+  if (m_UseModelCovarianceToCalulateLogLikelihood) {
+    result = this->GetScalarOutputsAndCovariance(
+        parameters, scalars, scalarCovariance);
+  } else {
+    // (! m_UseModelCovarianceToCalulateLogLikelihood)
+    result = this->GetScalarOutputs(parameters, scalars);
+  }
   if (result != NO_ERROR)
     return result;
   if (scalars.size() != t)
@@ -324,7 +349,6 @@ Model
 
   std::vector< double > scalarDifferences(t);
   std::vector<double> covariance(t * t);
-
   double distSq = 0.0;
   if (this->m_ObservedScalarValues.size() == 0) {
     for (size_t i = 0; i < t; ++i) {
@@ -356,12 +380,13 @@ Model
         = scalarCovariance[i] + this->m_ObservedScalarCovariance[i];
   }
 
-  Eigen::Map< Eigen::VectorXd > diff(&(scalarDifferences[0]),t,t);
+  Eigen::Map< Eigen::VectorXd > diff(&(scalarDifferences[0]),t);
   Eigen::Map< Eigen::MatrixXd > cov(&(covariance[0]),t,t);
-  Eigen::VectorXd tmp = cov.colPivHouseholderQr().solve(diff);
+
   // FIXME check for singular matrix -> return negative infinity!
-  // need to calulate ((diff)^T . tmp), the dot product of two vectors.
-  double innerProduct = tmp.dot(diff);
+  //assert( cov.determinant() >= 0.0 ); // is there a better way?
+
+  double innerProduct = cov.colPivHouseholderQr().solve(diff).dot(diff);
   logLikelihood = ((-0.5) * innerProduct) + logPriorLikelihood;
   return NO_ERROR;
 }

@@ -17,21 +17,20 @@
  *=========================================================================*/
 
 #include "GaussianProcessEmulatedModel.h"
+#include <fstream>
 
 namespace madai {
 
 GaussianProcessEmulatedModel
-::GaussianProcessEmulatedModel() :
-  m_Emulator(NULL)
+::GaussianProcessEmulatedModel()
 {
   m_StateFlag = UNINITIALIZED;
-  // Note that all methods must check for (m_Emulator == NULL).
 }
 
 GaussianProcessEmulatedModel
 ::~GaussianProcessEmulatedModel()
 {
-  delete m_Emulator;
+  // nothing to do.
 }
 
 /**
@@ -42,26 +41,17 @@ Model::ErrorType
 GaussianProcessEmulatedModel
 ::LoadConfigurationFile( const std::string fileName )
 {
-  m_Emulator = new emulator(fileName);
-  if (! m_Emulator->IsOkay()) {
-     delete m_Emulator;
-     m_Emulator = NULL;
-     m_StateFlag = ERROR;
-     return Model::OTHER_ERROR;
-  }
+  std::ifstream input(fileName.c_str());
+  if (! input.good())
+    return Model::FILE_NOT_FOUND_ERROR;
+  if (! m_GPME.Load(input))
+    return Model::OTHER_ERROR;
+  if (m_GPME.m_Status != GaussianProcessEmulator::READY)
+    return Model::OTHER_ERROR;
   m_StateFlag = READY;
-  int numberOfParameters = m_Emulator->getNumberOfParameters();
-  int numberOfOutputs = m_Emulator->getNumberOfOutputs();
-  for (int i = 0; i < numberOfParameters; ++i) {
-    std::string name(m_Emulator->getParameterName(i));
-    double min = m_Emulator->getParameterMinimum(i);
-    double max = m_Emulator->getParameterMaximum(i);
-    this->AddParameter(name, min, max);
-  }
-  for (int i = 0; i < numberOfOutputs; ++i) {
-    std::string name(m_Emulator->getOutputName(i));
-    this->AddScalarOutputName(name );
-  }
+  // std::vector<T>::operator=(const std::vector<T>&)
+  m_Parameters = m_GPME.m_Parameters;
+  m_ScalarOutputNames = m_GPME.m_OutputNames;
   return Model::NO_ERROR;
 }
 
@@ -76,15 +66,16 @@ GaussianProcessEmulatedModel
   std::vector< double > & scalars,
   std::vector< double > & scalarCovariance) const
 {
-  if (m_Emulator == NULL)
+  if (m_GPME.m_Status != GaussianProcessEmulator::READY)
     return Model::OTHER_ERROR;
-
-  emulator * emu = const_cast<emulator * >( m_Emulator );
 
   if (this->GetNumberOfParameters() != parameters.size())
     return Model::OTHER_ERROR;
 
-  emu->QueryEmulator(parameters, scalars, scalarCovariance);
+  if (! m_GPME.GetEmulatorOutputsAndCovariance(
+          parameters, scalars, scalarCovariance))
+    return Model::OTHER_ERROR;
+
   return Model::NO_ERROR;
 }
 
@@ -98,9 +89,16 @@ GaussianProcessEmulatedModel
   const std::vector< double > & parameters,
   std::vector< double > & scalars ) const
 {
-  std::vector< double > scalarCovariance;
-  return this->GetScalarOutputsAndCovariance(
-    parameters, scalars, scalarCovariance);
+  if (m_GPME.m_Status != GaussianProcessEmulator::READY)
+    return Model::OTHER_ERROR;
+
+  if (this->GetNumberOfParameters() != parameters.size())
+    return Model::OTHER_ERROR;
+
+  if (! m_GPME.GetEmulatorOutputs (parameters, scalars))
+    return Model::OTHER_ERROR;
+
+  return Model::NO_ERROR;
 }
 
 } // namespace madai

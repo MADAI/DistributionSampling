@@ -20,11 +20,10 @@
 #define madai_GaussianProcessEmulatedModel_h_included
 
 #include "Model.h"
-#include "EmuPlusPlus.h"
+#include "GaussianProcessEmulator.h"
 
 #include <string>
 #include <vector>
-
 
 namespace madai {
 
@@ -73,10 +72,8 @@ class GaussianProcessEmulatedModel : public Model {
     return METHOD_NOT_IMPLEMENTED;
   }
 
-
 private:
-  /** pointer to emulator object in libEmuPlusPlus */
-  emulator * m_Emulator;
+  GaussianProcessEmulator m_GPME;
 
 }; // end GaussianProcessEmulatedModel
 
