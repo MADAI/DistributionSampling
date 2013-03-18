@@ -16,8 +16,6 @@ set( SRC_FILES
   UniformDistribution.cxx
 )
 
-set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${DistributionSampling_BINARY_DIR}/lib )
-set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} )
 add_library( DistributionSampling ${SRC_FILES} )
 
 add_executable(

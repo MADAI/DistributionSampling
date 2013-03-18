@@ -5,6 +5,8 @@ set( LIBRARIES
 
 set( TEST_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
 
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ )
+
 add_library( DistributionSamplingTest STATIC Gaussian2DModel.cxx )
 target_link_libraries( DistributionSamplingTest ${LIBRARIES} )
 

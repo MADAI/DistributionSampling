@@ -13,6 +13,10 @@ set( DistributionSampling_LIBRARY_DIRS ${DistributionSampling_BINARY_DIR}/lib )
 list(APPEND DistributionSampling_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src )
 list(APPEND DistributionSampling_LIBRARY_DIRS ${PROJECT_BINARY_DIR}/lib )
 
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${DistributionSampling_BINARY_DIR}/bin )
+set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${DistributionSampling_BINARY_DIR}/lib )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} )
+
 ## EIGEN
 find_package(Eigen3 REQUIRED)
 list(APPEND DistributionSampling_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} )
