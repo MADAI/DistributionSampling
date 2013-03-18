@@ -50,6 +50,7 @@ link_directories( ${DistributionSampling_LIBRARY_DIRS} )
 
 set( DistributionSampling_LIBRARIES  DistributionSampling)
 
+add_subdirectory( applications )
 add_subdirectory( src )
 
 option( BUILD_TESTING "Build the tests for DistributionSampling." OFF )
