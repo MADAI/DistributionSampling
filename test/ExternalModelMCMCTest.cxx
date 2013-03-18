@@ -22,8 +22,11 @@
 #include <vector>
 
 #include "ExternalModel.h"
+#include "GaussianDistribution.h"
 #include "SimpleMetropolisHastingsSampler.h"
 #include "Trace.h"
+#include "UniformDistribution.h"
+
 
 /**
  * Test case for madai::ExternalModel and
@@ -52,13 +55,119 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
+  // Let's check that the parameters are defined as expected. This
+  // assumes that the external process is the file in
+  // DistributionSampling/test/ExternalModelMCMCTest/ExampleProcess.py
+  const std::vector< madai::Parameter > & parameters =
+    externalModel.GetParameters();
+  if ( parameters.size() != 3 ) {
+    std::cerr << "Only " << parameters.size()
+              << " parameters retrieved from " << argv[0] << ", expected 3.";
+    return EXIT_FAILURE;
+  }
+
+  madai::Distribution * distribution = NULL;
+  madai::UniformDistribution * uniformDistribution = NULL;
+  madai::GaussianDistribution * gaussianDistribution = NULL;
+
+  if ( parameters[0].m_Name != "param_0" ) {
+    std::cerr << "Name of parameter 0 is '" << parameters[0].m_Name
+              << "', expected 'param_0'" << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  distribution = parameters[0].m_PriorDistribution;
+  uniformDistribution = dynamic_cast< madai::UniformDistribution * >( distribution );
+  if ( !uniformDistribution ) {
+    std::cerr << "Prior distribution for parameter 0 is not a "
+              << "UniformDistribution, but should be\n";
+    return EXIT_FAILURE;
+  } else {
+    if ( uniformDistribution->GetMinimum() != -1.0 ) {
+      std::cerr << "Prior distribution minimum for parameter 0 was "
+                << uniformDistribution->GetMinimum() << ", should have been "
+                << -1.0 << "\n";
+      return EXIT_FAILURE;
+    }
+    if ( uniformDistribution->GetMaximum() != 2.0 ) {
+      std::cerr << "Prior distribution maximum for parameter 0 was "
+                << uniformDistribution->GetMaximum() << ", should have been "
+                << 2.0 << "\n";
+      return EXIT_FAILURE;
+    }
+  }
+
+  if ( parameters[1].m_Name != "param_1" ) {
+    std::cerr << "Name of parameter 1 is '" << parameters[1].m_Name
+              << "', expected 'param_1'" << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  distribution = parameters[1].m_PriorDistribution;
+  uniformDistribution = dynamic_cast< madai::UniformDistribution * >( distribution );
+  if ( !uniformDistribution ) {
+    std::cerr << "Prior distribution for parameter 1 is not a "
+              << "UniformDistribution, but should be\n";
+    return EXIT_FAILURE;
+  } else {
+    if ( uniformDistribution->GetMinimum() != -2.1 ) {
+      std::cerr << "Prior distribution minimum for parameter 1 was "
+                << uniformDistribution->GetMinimum() << ", should have been "
+                << -2.1 << "\n";
+      return EXIT_FAILURE;
+    }
+    if ( uniformDistribution->GetMaximum() != 3.7 ) {
+      std::cerr << "Prior distribution maximum for parameter 1 was "
+                << uniformDistribution->GetMaximum() << ", should have been "
+                << 3.7 << "\n";
+      return EXIT_FAILURE;
+    }
+  }
+
+  if ( parameters[2].m_Name != "param_2" ) {
+    std::cerr << "Name of parameter 2 is '" << parameters[2].m_Name
+              << "', expected 'param_2'" << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  distribution = parameters[2].m_PriorDistribution;
+  gaussianDistribution = dynamic_cast< madai::GaussianDistribution * >( distribution );
+  if ( !gaussianDistribution ) {
+    std::cerr << "Prior distribution for parameter 2 is not a "
+              << "GaussianDistribution, but should be\n";
+    return EXIT_FAILURE;
+  } else {
+    if ( gaussianDistribution->GetMean() != -5.0 ) {
+      std::cerr << "Prior distribution mean for parameter 2 was "
+                << gaussianDistribution->GetMean() << ", should have been "
+                << -5.0 << "\n";
+      return EXIT_FAILURE;
+    }
+    if ( gaussianDistribution->GetStandardDeviation() != 3.1 ) {
+      std::cerr << "Prior distribution standard deviation for parameter 2 was "
+                << gaussianDistribution->GetStandardDeviation()
+                << ", should have been " << 3.1 << "\n";
+      return EXIT_FAILURE;
+    }
+  }
+
+  // Now check the outputs
+  std::vector< std::string > outputNames = externalModel.GetScalarOutputNames();
+  if ( outputNames.size() != 1 ) {
+    std::cerr << "Number of outputs is " << outputNames.size() << ", should be 1\n";
+    return EXIT_FAILURE;
+  }
+
+  if ( outputNames[0] != "output" ) {
+    std::cerr << "Output 0 is named '" << outputNames[0]
+              << "', should have been 'output'" << std::endl;
+    return EXIT_FAILURE;
+  }
+
   madai::SimpleMetropolisHastingsSampler simple_mcmc;
   simple_mcmc.SetModel( &externalModel );
 
   simple_mcmc.SetStepSize(0.1);
-
-  std::vector< madai::Parameter > const & parameters
-    = externalModel.GetParameters();
 
   int t = externalModel.GetNumberOfScalarOutputs();
   std::vector< double > observedScalarValues;
@@ -83,7 +192,6 @@ int main(int argc, char ** argv) {
   trace.WriteCSVOutput( std::cout,
                    externalModel.GetParameters(),
                    externalModel.GetScalarOutputNames() );
-  //trace.WriteData( std::cout );
 
   return EXIT_SUCCESS;
 }

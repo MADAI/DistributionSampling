@@ -29,6 +29,8 @@
 #include <signal.h> // kill, SIGINT
 
 #include "ExternalModel.h"
+#include "GaussianDistribution.h"
+#include "UniformDistribution.h"
 
 #define str_equal(s1,s2) (std::strcmp ((s1), (s2)) == 0)
 
@@ -212,17 +214,53 @@ ExternalModel
       std::cerr << "fscanf failure @ parameterName\n";
       return OTHER_ERROR;
     }
+
     std::string parameterName( buffer );
-    double parameterMin, parameterMax;
-    if ( 1 != std::fscanf(m_Process.answer, "%lf", &parameterMin)) {
-      std::cerr << "fscanf failure @ parametermin\n";
+
+    eat_whitespace( m_Process.answer );
+    if ( 1 != std::fscanf( m_Process.answer, "%4095s", buffer ) ) {
+      std::cerr << "fscanf failure @ parameterName\n";
       return OTHER_ERROR;
     }
-    if ( 1 != std::fscanf(m_Process.answer, "%lf", &parameterMax)) {
-      std::cerr << "fscanf failure @ parametermin\n";
+
+    if ( str_equal( buffer, "UNIFORM" ) ) {
+      double parameterMin, parameterMax;
+      if ( 1 != std::fscanf(m_Process.answer, "%lf", &parameterMin)) {
+        std::cerr << "fscanf failure @ parametermin\n";
+        return OTHER_ERROR;
+      }
+      if ( 1 != std::fscanf(m_Process.answer, "%lf", &parameterMax)) {
+        std::cerr << "fscanf failure @ parametermin\n";
+        return OTHER_ERROR;
+      }
+
+      UniformDistribution uniformDistribution;
+      uniformDistribution.SetMinimum( parameterMin );
+      uniformDistribution.SetMaximum( parameterMax );
+
+      this->AddParameter( parameterName, uniformDistribution );
+
+    } else if ( str_equal( buffer, "GAUSSIAN" ) ) {
+      double parameterMean, parameterStandardDeviation;
+      if ( 1 != std::fscanf( m_Process.answer, "%lf", &parameterMean ) ) {
+        std::cerr << "fscanf failure @ parameterMean\n";
+        return OTHER_ERROR;
+      }
+      if ( 1 != std::fscanf( m_Process.answer, "%lf", &parameterStandardDeviation ) ) {
+        std::cerr << "fscanf failure @ parameterStandardDeviation\n";
+        return OTHER_ERROR;
+      }
+
+      GaussianDistribution gaussianDistribution;
+      gaussianDistribution.SetMean( parameterMean );
+      gaussianDistribution.SetStandardDeviation( parameterStandardDeviation );
+
+      this->AddParameter( parameterName, gaussianDistribution );
+    } else {
+      std::cerr << "Unknown parameter prior distribution type '"
+                << buffer << "'\n";
       return OTHER_ERROR;
     }
-    this->AddParameter( parameterName, parameterMin, parameterMax );
   }
 
   if ( 1 != std::fscanf( m_Process.answer, "%4095s", buffer) ) {
