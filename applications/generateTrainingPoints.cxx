@@ -21,8 +21,11 @@
 #include <iostream>
 
 #include "GaussianDistribution.h"
+#include "LatinHypercubeGenerator.h"
 #include "Parameter.h"
 #include "UniformDistribution.h"
+
+#include "madaisys/SystemTools.hxx"
 
 
 static const char usage[] =
@@ -224,6 +227,60 @@ int main( int argc, char * argv[] ) {
     return EXIT_FAILURE;
   }
 
+  // Create the Latin hypercube sampling
+  madai::LatinHypercubeGenerator sampleGenerator;
+  std::vector< madai::Sample > samples = sampleGenerator.Generate( 100, parameters );
+
+  // Create the directory structure
+  bool directoryCreated = madaisys::SystemTools::MakeDirectory( options.outputDirectory );
+  if ( !directoryCreated ) {
+    std::cerr << "Could not create directory '" << options.outputDirectory
+              << "'\n";
+    return EXIT_FAILURE;
+  }
+
+  std::string directory( options.outputDirectory );
+  std::string experimental_results( directory + "/experimental_results" );
+  std::string model_outputs( directory + "/model_outputs" );
+  std::string statistical_analysis( directory + "/statistical_analysis" );
+
+  directoryCreated = directoryCreated &&
+    madaisys::SystemTools::MakeDirectory( experimental_results.c_str() );
+  directoryCreated = directoryCreated &&
+    madaisys::SystemTools::MakeDirectory( model_outputs.c_str() );
+  directoryCreated = directoryCreated &&
+    madaisys::SystemTools::MakeDirectory( statistical_analysis.c_str() );
+
+  // Now create the run directories
+  for ( size_t i = 0; i < samples.size(); ++i ) {
+    const madai::Sample & sample = samples[i];
+
+    char buffer[128];
+    sprintf( buffer, "/model_outputs/run%04d", static_cast<int>( i ) );
+    std::string runDirectory( directory + std::string( buffer ) );
+
+    std::cout << runDirectory << "\n";
+
+    directoryCreated = directoryCreated &&
+      madaisys::SystemTools::MakeDirectory( runDirectory.c_str() );
+
+    // Write the parameters to the parameters.dat file
+    std::string parametersFile( runDirectory + "/parameters.dat" );
+    FILE *fp = fopen( parametersFile.c_str(), "w" );
+    if ( !fp ) {
+      std::cerr << "Could not open file '" << parametersFile << "'\n";
+      return EXIT_FAILURE;
+    }
+
+    assert( parameters.size() == sample.m_ParameterValues.size() );
+    for ( size_t j = 0; j < parameters.size(); ++j ) {
+      fprintf( fp, "%s %f\n",
+               parameters[ j ].m_Name.c_str(),
+               sample.m_ParameterValues[ j ] );
+    }
+
+    fclose( fp );
+  }
 
   return EXIT_SUCCESS;
 }
