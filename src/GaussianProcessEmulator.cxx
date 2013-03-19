@@ -399,8 +399,8 @@ std::ostream & serializeGaussianProcessEmulator(
   PrintMatrix(gpme.m_OutputValues, o);
   o << "OUTPUT_MEANS\n";
   PrintVector(gpme.m_OutputMeans, o);
-  o << "OUTPUT_STANDARD_DEVIATIONS\n";
-  PrintVector(gpme.m_OutputStandardDeviations, o);
+  o << "OUTPUT_UNCERTAINTY_SCALES\n";
+  PrintVector(gpme.m_OutputUncertaintyScales, o);
   o << "OUTPUT_PCA_EIGENVALUES\n";
   PrintVector(gpme.m_PCAEigenvalues, o);
   o << "OUTPUT_PCA_EIGENVECTORS\n";
@@ -456,8 +456,8 @@ bool parseGaussianProcessEmulator(
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
-    } else if (word == "OUTPUT_STANDARD_DEVIATIONS") {
-      if (! ReadVector(gpme.m_OutputStandardDeviations, input)) {
+    } else if (word == "OUTPUT_UNCERTAINTY_SCALES") {
+      if (! ReadVector(gpme.m_OutputUncertaintyScales, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
@@ -743,12 +743,14 @@ GaussianProcessEmulator::CheckStatus() {
   if (m_OutputValues.cols() != m_NumberOutputs) {
     return m_Status;
   }
+  if(m_OutputUncertaintyScales.size() != m_NumberOutputs) {
+    m_OutputUncertaintyScales
+      = Eigen::VectorXd::Constant(m_NumberOutputs,1.0);
+  }
   m_Status = UNTRAINED;
   if(m_NumberPCAOutputs < 1)
     return m_Status;
   if(m_OutputMeans.size() != m_NumberOutputs)
-    return m_Status;
-  if(m_OutputStandardDeviations.size() != m_NumberOutputs)
     return m_Status;
   if(m_PCAEigenvalues.size() != m_NumberPCAOutputs)
     return m_Status;
@@ -1049,21 +1051,14 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose(
   Eigen::MatrixXd Y_minus_means
     = m_OutputValues.rowwise() - (m_OutputValues.colwise().mean());
 
-  //original training set (rows:numberTrainingPoints) (cols:numberOutputs) */
-  //Eigen::VectorXd m_OutputStandardDeviation;
-  m_OutputStandardDeviations.resize(t);
-
-  for (int outputIndex = 0; outputIndex < t; ++outputIndex)
-    m_OutputStandardDeviations(outputIndex)
-      = std::sqrt(Y_minus_means.col(outputIndex).squaredNorm());
 
   Eigen::MatrixXd Y_standardized(N,t);
   for (int outputIndex = 0; outputIndex < t; ++outputIndex) {
-    double one_over_std_dev
-      = 1.0 / m_OutputStandardDeviations(outputIndex);
+    double oneOverUncertaintyScale
+      = 1.0 / m_OutputUncertaintyScales(outputIndex);
     for (int pointIndex = 0; pointIndex < N; ++pointIndex) {
       Y_standardized(pointIndex, outputIndex)
-        = one_over_std_dev * Y_minus_means(pointIndex, outputIndex);
+        = oneOverUncertaintyScale * Y_minus_means(pointIndex, outputIndex);
     }
   }
 
@@ -1163,7 +1158,7 @@ bool GaussianProcessEmulator::GetEmulatorOutputs (
   y.resize(m_NumberOutputs);
   Eigen::Map< Eigen::VectorXd > mean(&(y[0]),m_NumberOutputs);
   mean = m_OutputMeans +
-    m_OutputStandardDeviations.cwiseProduct(m_PCAEigenvectors * mean_pca);
+    m_OutputUncertaintyScales.cwiseProduct(m_PCAEigenvectors * mean_pca);
   return true;
 }
 
@@ -1249,15 +1244,15 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
   Eigen::Map< Eigen::VectorXd > mean(&(y[0]), t);
   Eigen::Map< Eigen::MatrixXd > covariance(&(ycov[0]), t, t);
   mean = m_OutputMeans +
-    m_OutputStandardDeviations.cwiseProduct(m_PCAEigenvectors * mean_pca);
+    m_OutputUncertaintyScales.cwiseProduct(m_PCAEigenvectors * mean_pca);
 
   // var_pca = m_PCAEigenvalues.cwiseProduct(var_pca);
   // help!
 
-  Eigen::MatrixXd variances
-    = m_OutputStandardDeviations * m_OutputStandardDeviations.transpose();
+  Eigen::MatrixXd uncertaintyScales
+    = m_OutputUncertaintyScales * m_OutputUncertaintyScales.transpose();
   covariance
-    = variances.cwiseProduct(
+    = uncertaintyScales.cwiseProduct(
         m_PCAEigenvectors * var_pca.asDiagonal() *
         m_PCAEigenvectors.transpose());
 
@@ -1279,8 +1274,8 @@ bool GaussianProcessEmulator::PrintThetas(std::ostream & o) const {
   o << "THETAS_FILE\n";
   o << "OUTPUT_MEANS\n";
   PrintVector(m_OutputMeans, o);
-  o << "OUTPUT_STANDARD_DEVIATIONS\n";
-  PrintVector(m_OutputStandardDeviations, o);
+  o << "OUTPUT_UNCERTAINTY_SCALES\n";
+  PrintVector(m_OutputUncertaintyScales, o);
   o << "OUTPUT_PCA_EIGENVALUES\n";
   PrintVector(m_PCAEigenvalues, o);
   o << "OUTPUT_PCA_EIGENVECTORS\n";

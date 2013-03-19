@@ -1,0 +1,114 @@
+%% -*- coding: utf-8 -*-
+%% Author - hal Canary
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{utfsymb}
+\usepackage{clrscode3e}
+\usepackage{hyperref}
+\usepackage{fullpage}
+\begin{document}
+\begin{flushright}MADAI Gaussian Proccess Emulator Algorithm\end{flushright}
+\begin{itemize}
+
+\item $P =$ parameter space $⊂ ℝ^p$
+
+\item $T =$ output space $⊂ ℝ^t$
+
+\item $C_Θ: P × P → ℝ$ is some covariance function, depends on $Θ$.
+
+\item $N ∈ ℤ^{+}$ is the number of training points for the emulator.
+
+\item $X ∈ P^N ⊂ ℝ^{N×p}$ is the design: a list of points, represented as a $N×p$ matrix.
+
+\item $Y ∈ T^N ⊂ ℝ^{N×t}$ is the training set: a list of output values,  represented as a $N×t$ matrix.
+
+\item $\widetilde{σ} ∈ ℝ^t$ is the output uncertanty, a measure of the uncertainty of each output value. The resolving power of that output is inversely proportional to this number.  If unspecified, is assumed to be 1 for each output.
+
+\item $A◦B$ is the entrywise product of two matrices with $(A◦B)[i,j] = A[i,j] B[i,j]$.
+
+\end{itemize}
+
+\begin{codebox}
+\Procname{$\proc{PrincipalComponentDecompose}(X,Y,\id{fractionResolvingPower})$}
+\li \For $i ∈ [0, …, t-1]$ \Do
+\li   $y_{\id{mean}}[i] \gets \proc{Mean}(Y.\id{column}(i))$
+\li   \For $j ∈ [0, …, N-1]$ \Do
+\li      $\widetilde{Y}[i,j] \gets \dfrac{Y[i,j] - y_{\id{mean}}[i]}{\widetilde{σ}[i]} $ \End \End
+\li $(Λ, V) = \proc{SelfAdjointEigenSolver}(\tfrac{1}{N} \widetilde{Y}^⊤ \widetilde{Y})$
+\li $[λ_0,…,λ_{t-1}] = Λ$, $[v_0,…,v_{t-1}] = V$
+\li $r = \underset{r ∈ [1, …, t]}{\operatorname{minimum}}\left({ \textrm{such that} \left({\dfrac{\displaystyle\prod_{i=0}^{r-1} \sqrt{1 + λ_i}}{\displaystyle\prod_{i=0}^{t-1} \sqrt{1 + λ_i}}}\right) > \id{fractionResolvingPower}}\right)$
+\li $Λ \gets $ the subset of $Λ$ with the largest $r$ eigenvalues.
+\li $V \gets $ the subset of $V$ corresponding to the largest $r$ eigenvalues.
+\li $Z = \widetilde{Y} V ∈ ℝ^{N×r}$
+\li \For $i ∈ [0, …, r-1]$ \Do
+\li	  $z_i \gets Z.\id{column}(i)$
+\li   $\id{SubModel}[i] \gets \proc{MakeSingleModel}(X,z_i)$
+\End
+\end{codebox}
+
+\begin{codebox}
+\Procname{$\proc{MakeHVector}(x, \id{RegressionOrder})$}
+\li $h \gets$ vector of size $1 + (\id{RegressionOrder} × p)$
+\li $h[0] = 0$
+\li \For $j ∈ [1, …, \id{RegressionOrder}]$ \Do
+\li   \For $k ∈ [0, …, p-1]$ \Do
+\li     $h[1+(j×p)-p+k] = (x[k])^j$
+      \End\End
+\li \Return $h$
+\end{codebox}
+
+\begin{codebox}
+\Procname{$\proc{MakeSingleModel}(X,z)$}
+\li Set $\id{RegressionOrder}$.
+\li Set $Θ$ and $C_Θ$.
+\li $\id{C} \gets$ matrix of size $N×N$
+\li	$\id{C}[i,j] = C_Θ(x_i,x_j)$ for each pair of points in $X$
+\li $H \gets$ matrix of size $N×(1 + (\id{RegressionOrder} × p))$
+\li \For $i ∈ [0, …, N-1]$ and $x_i ∈ X$ \Do
+\li    $H.\id{row}(i) = \proc{MakeHVector}(x_i)$
+    \End
+\li Set $ C^{-1} = (C)^{-1} $
+\li Set $ R_1 = (H^⊤ C^{-1} ~ H)^{-1} $
+\li Set $ R_2 = (C^{-1} ~ H)^⊤ $
+\li Set $β = R_1 H^⊤ C^{-1} ~ z$
+\li Set $γ = C^{-1} (z - H β) $
+\li \Return $\id{SubModel}(\id{RegressionOrder}, C_Θ, β, γ, Ω, Φ)$
+\end{codebox}
+
+\begin{codebox}
+\Procname{$\proc{GetEmulatorOutputs}(x)$}
+\li $μ \gets$ vector of length $r$
+\li \For $i ∈ [0, …, r-1]$ \Do
+\li   $μ[i] = \proc{GetSingleEmulatorOutput}(\id{SubModel}[i], x, \const{False})$ \End
+\li \Return $y_{\id{mean}} + (\widetilde{σ} ◦ (Vμ)) $
+\end{codebox}
+
+\begin{codebox}
+\Procname{$\proc{GetSingleEmulatorOutput}(\id{SubModel},x^*,\id{ReturnVariance})$}
+\li $k = $ vector of length $N$.
+\li $k[i] = C_Θ(x_i,x^*)$ for $x_i ∈ X$.
+\li $h \gets$ vector of size $1 + (\id{RegressionOrder} × p)$
+\li $h = \proc{MakeHVector}(x^*)$
+\li $μ = (h·β) + (k·γ)$
+\li \If $\const{not}$ $\id{ReturnVariance}$\Then \li \Return $μ$ \End
+
+\li $κ = C_Θ(x^*,x^*)$
+\li $f = h - (R_2 ~ k)$
+\li $σ^2 = κ - (k^⊤ C^{-1} k) + (f^⊤ R_1 ~ f)$
+\li \Return $(μ,σ^2)$
+\end{codebox}
+
+\begin{codebox}
+\Procname{$\proc{GetEmulatorOutputsAndCovariance}(x)$}
+\li $\widetilde{μ} \gets$ vector of length $r$
+\li $\widetilde{v} \gets$ vector of length $r$
+\li \For $i ∈ [0, …, r-1]$ \Do
+\li   ($\widetilde{μ}[i],\widetilde{v}[i]) = \proc{GetSingleEmulatorOutput}(\id{SubModel}[i], x, \const{True})$ \End
+\li $μ \gets y_{\id{mean}} + (\widetilde{σ} ◦ (V \widetilde{μ})) $
+\zi \Comment I DON'T THINK THIS NEXT LINE IS CORRECT.
+\li $Σ = ((\widetilde{σ}) (\widetilde{σ})^⊤) ◦ (V \operatorname{diag}(\widetilde{v}) V^⊤) $
+\li \Return $(μ, Σ)$
+\end{codebox}
+
+
+\end{document}

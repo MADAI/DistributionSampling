@@ -170,10 +170,10 @@ public:
 
   //@{
   /**
-     The mean values and standard deviations of the columns of
+     The mean values and uncertainty of the columns of
      outputValues (size:numberOutputs) */
   Eigen::VectorXd m_OutputMeans;
-  Eigen::VectorXd m_OutputStandardDeviations;
+  Eigen::VectorXd m_OutputUncertaintyScales;
   //@}
 
   //@{
