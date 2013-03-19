@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include "Parameter.h"
 #include "Sample.h"
 
 
@@ -55,7 +56,7 @@ public:
    * disabled, each dimension is divided up evenly. This is off by
    * default. */
   void SetDivideSpaceByPercentile( bool value );
-  double GetDivideSpaceByPercentile() const;
+  bool GetDivideSpaceByPercentile() const;
 
 
   /** Generates a list of parameters distributed in a high-dimensional
@@ -64,10 +65,8 @@ public:
    *
    * Note that the output Samples have only parameter values, no
    * output values nor log likelihoods. */
-  std::vector< Sample > Generate( int numberOfParameters,
-                                  int numberOfTrainingPoints,
-                                  const std::vector< double > & parameterMinima,
-                                  const std::vector< double > & parameterMaxima );
+  std::vector< Sample > Generate( int numberOfTrainingPoints,
+                                  const std::vector< Parameter > parameters );
 
 protected:
   Random * m_Random;
@@ -75,6 +74,9 @@ protected:
   double m_StandardDeviations;
 
   bool m_DivideSpaceByPercentile;
+
+  void DivideDimension( int numberOfTrainingPoints, const Parameter & parameter,
+                        std::vector< double > & subdivisions );
 
 };
 

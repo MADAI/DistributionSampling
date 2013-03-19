@@ -18,14 +18,18 @@
 
 #include "LatinHypercubeGenerator.h"
 
+#include "GaussianDistribution.h"
 #include "Random.h"
+#include "UniformDistribution.h"
 
 
 namespace madai {
 
 LatinHypercubeGenerator
 ::LatinHypercubeGenerator() :
-  m_Random( new Random() )
+  m_Random( new Random() ),
+  m_StandardDeviations( 3.0 ),
+  m_DivideSpaceByPercentile( false )
 {
 }
 
@@ -69,24 +73,58 @@ LatinHypercubeGenerator
 }
 
 
+void
+LatinHypercubeGenerator
+::DivideDimension( int numberOfTrainingPoints, const Parameter & parameter,
+                   std::vector< double > & subdivisions )
+{
+  subdivisions.resize( numberOfTrainingPoints );
+
+  const Distribution * priorDistribution = parameter.GetPriorDistribution();
+
+  double rangeOverN = 1.0 / static_cast< double >( numberOfTrainingPoints );
+  if ( m_DivideSpaceByPercentile ) {
+    for ( int i = 0; i < numberOfTrainingPoints; ++i ) {
+      double percentile = rangeOverN * ( i + 0.5 );
+      subdivisions[i] = priorDistribution->GetPercentile( percentile );
+    }
+  } else {
+    // Divide space evenly
+    const UniformDistribution * uniformDistribution =
+      dynamic_cast< const UniformDistribution * >( priorDistribution );
+    const GaussianDistribution * gaussianDistribution =
+      dynamic_cast< const GaussianDistribution * >( gaussianDistribution );
+
+    double parameterMinimum = 0.0, parameterMaximum = 1.0;
+    if ( uniformDistribution ) {
+      parameterMinimum = uniformDistribution->GetMinimum();
+      parameterMaximum = uniformDistribution->GetMaximum();
+    } else if ( gaussianDistribution ) {
+      double span = m_StandardDeviations * gaussianDistribution->GetStandardDeviation();
+      parameterMinimum = gaussianDistribution->GetMean() - span;
+      parameterMaximum = gaussianDistribution->GetMean() + span;
+    }
+
+    rangeOverN *= ( parameterMaximum - parameterMinimum );
+    double start = ( 0.5 * rangeOverN ) + parameterMinimum;
+    for ( int i = 0; i < numberOfTrainingPoints; ++i ) {
+      subdivisions[i] = rangeOverN * i + start;
+    }
+  }
+}
+
+
 std::vector< Sample >
 LatinHypercubeGenerator
-::Generate( int numberOfParameters,
-            int numberOfTrainingPoints,
-            const std::vector< double > & parameterMinima,
-            const std::vector< double > & parameterMaxima )
+::Generate( int numberOfTrainingPoints,
+            const std::vector< Parameter > parameters )
 {
   // Generate one vector per parameter with numberOfTrainingPoints
   // subdivisions in the range [ parameterMinima, parameterMaxima ]
-  std::vector< std::vector< double > > parameterSubdivisions( numberOfParameters );
-  for ( int i = 0; i < numberOfParameters; ++i ) {
-    double rangeOverN = (parameterMaxima[i] - parameterMinima[i]) /
-      static_cast< double >( numberOfTrainingPoints );
-    double start = (0.5 * rangeOverN ) + parameterMinima[i];
-    parameterSubdivisions[i].resize( numberOfTrainingPoints );
-    for ( int j = 0; j < numberOfTrainingPoints; ++j ) {
-      parameterSubdivisions[i][j] = (rangeOverN * j) + start;
-    }
+  std::vector< std::vector< double > > parameterSubdivisions( parameters.size() );
+  for ( size_t i = 0; i < parameters.size(); ++i ) {
+    this->DivideDimension( numberOfTrainingPoints, parameters[i],
+                           parameterSubdivisions[i] );
 
     // Randomly shuffle the subdivisions
     m_Random->ShuffleVector( parameterSubdivisions[i] );
@@ -96,8 +134,8 @@ LatinHypercubeGenerator
   // the shuffled subdivisions.
   std::vector< Sample > samples( numberOfTrainingPoints );
   for ( int i = 0; i < numberOfTrainingPoints; ++i ) {
-    std::vector< double > parameterValues( numberOfParameters );
-    for ( int j = 0; j < numberOfParameters; ++j ) {
+    std::vector< double > parameterValues( parameters.size() );
+    for ( int j = 0; j < parameters.size(); ++j ) {
       parameterValues[j] = parameterSubdivisions[j][i];
     }
 
