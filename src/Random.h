@@ -87,9 +87,7 @@ public:
     // the current index.
     for ( size_t i = n-1; i >= 1; i-- ) {
     int randomInt = this->Integer( i + 1 );
-    T tmp = v[i];
-    v[i] = v[randomInt];
-    v[randomInt] = tmp;
+    std::swap( v[i], v[randomInt] );
     }
 
   }
