@@ -27,6 +27,10 @@ add_executable( Gaussian2DModelTest Gaussian2DModelTest.cxx )
 target_link_libraries( Gaussian2DModelTest ${LIBRARIES} DistributionSamplingTest )
 add_test( Gaussian2DModelTest Gaussian2DModelTest )
 
+add_executable( LatinHypercubeGeneratorTest LatinHypercubeGeneratorTest.cxx )
+target_link_libraries( LatinHypercubeGeneratorTest ${LIBRARIES} )
+add_test( LatinHypercubeGeneratorTest LatinHypercubeGeneratorTest )
+
 add_executable( ModelTest ModelTest.cxx )
 target_link_libraries( ModelTest ${LIBRARIES} )
 add_test( ModelTest ModelTest )
