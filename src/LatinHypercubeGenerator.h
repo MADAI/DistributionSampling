@@ -42,8 +42,24 @@ public:
   /** Destructor */
   virtual ~LatinHypercubeGenerator();
 
+  /** Set the number of standard deviations about the mean used to
+   * determine the bounds of the latin hypercube sampling for
+   * parameters with Gaussian priors. Defaults to 3.0.
+   *
+   * This is only used when DivideSpaceByPercentile is enabled. */
+  void SetStandardDeviations( double standardDeviations );
+  double GetStandardDeviations() const;
+
+  /** If enabled, this option divides the parameter space according to
+   * the percentile of the prior distribution in each dimension. If
+   * disabled, each dimension is divided up evenly. This is off by
+   * default. */
+  void SetDivideSpaceByPercentile( bool value );
+  double GetDivideSpaceByPercentile() const;
+
+
   /** Generates a list of parameters distributed in a high-dimensional
-   * parameter space according to a Latin hypercube sampling pattern:
+   * parameter space according to a Latin hypercube sampling pattern.
    * http://en.wikipedia.org/wiki/Latin_hypercube_sampling
    *
    * Note that the output Samples have only parameter values, no
@@ -55,6 +71,10 @@ public:
 
 protected:
   Random * m_Random;
+
+  double m_StandardDeviations;
+
+  bool m_DivideSpaceByPercentile;
 
 };
 

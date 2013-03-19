@@ -37,6 +37,38 @@ LatinHypercubeGenerator
 }
 
 
+void
+LatinHypercubeGenerator
+::SetStandardDeviations( double standardDeviations )
+{
+  m_StandardDeviations = standardDeviations;
+}
+
+
+double
+LatinHypercubeGenerator
+::GetStandardDeviations() const
+{
+  return m_StandardDeviations;
+}
+
+
+void
+LatinHypercubeGenerator
+::SetDivideSpaceByPercentile( bool value )
+{
+  m_DivideSpaceByPercentile = value;
+}
+
+
+bool
+LatinHypercubeGenerator
+::GetDivideSpaceByPercentile() const
+{
+  return m_DivideSpaceByPercentile;
+}
+
+
 std::vector< Sample >
 LatinHypercubeGenerator
 ::Generate( int numberOfParameters,
