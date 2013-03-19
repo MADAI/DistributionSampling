@@ -16,27 +16,15 @@
  *
  *=========================================================================*/
 
-#include "Random.h"
 #include "GaussianProcessEmulatorTestGenerator.h"
 
-// template < typename TDerived >
-// void GaussianProcessEmulatorTestGenerator::LatinHypercube(
-//     const Eigen::MatrixBase< TDerived > & m_,
-//     double * parameterMinima,
-//     double * parameterMaxima)
-  // Eigen::MatrixBase< TDerived > & m
-  //   = const_cast< Eigen::MatrixBase< TDerived > & >(m_);
+#include "LatinHypercubeGenerator.h"
+#include "Random.h"
+#include "Sample.h"
 
-void GaussianProcessEmulatorTestGenerator::LatinHypercube(
-    int numberParameters,
-    int numberTrainingPoints,
-    double * columnMajorMatrix,
-    const double * parameterMinima,
-    const double * parameterMaxima)
-{
-}
 
-GaussianProcessEmulatorTestGenerator::GaussianProcessEmulatorTestGenerator(
+GaussianProcessEmulatorTestGenerator
+::GaussianProcessEmulatorTestGenerator(
     void (*model)(const std::vector< double > &, std::vector< double > &),
     int numberParameters,
     int numberOutputs,
@@ -53,43 +41,32 @@ GaussianProcessEmulatorTestGenerator::GaussianProcessEmulatorTestGenerator(
   assert (parameterMaxima.size() >= numberParameters);
   assert((numberTrainingPoints > 0) && (numberParameters > 0));
 
+  madai::LatinHypercubeGenerator latinHypercubeGenerator;
+  std::vector< madai::Sample > samples =
+    latinHypercubeGenerator.Generate( numberParameters, numberTrainingPoints,
+                                      parameterMinima, parameterMaxima );
+
   m_X.resize(numberTrainingPoints,numberParameters);
   m_Y.resize(numberTrainingPoints,numberOutputs);
-
-  madai::Random random;
-
-  for (int j = 0; j < numberParameters; ++j) {
-    assert (parameterMaxima[j] != parameterMinima[j]);
-    double range_over_N = (parameterMaxima[j] - parameterMinima[j])
-      / static_cast< double >(numberTrainingPoints);
-    double start = (0.5 * range_over_N) + parameterMinima[j];
-    for (int i = 0; i < numberTrainingPoints; ++i) {
-      double d = (range_over_N * i) + start;
-      m_X(i,j) = d;
-    }
-  }
-
-  for (int j = 0; j < numberParameters; ++j) {
-    for (int i = numberTrainingPoints-1; i >= 0; --i) {
-      int k = random.Integer(i + 1);
-      double tmp = m_X(k,j);
-      m_X(k,j) = m_X(i,j);
-      m_X(i,j) = tmp;
-    }
-  }
 
   std::vector< double > x(numberParameters+4,0.0);
   std::vector< double > y(numberOutputs+4,0.0);
 
   for(int i = 0; i < numberTrainingPoints; ++i) {
-    for(int j = 0; j < numberParameters; ++j)
+    for(int j = 0; j < numberParameters; ++j) {
+      m_X(i,j) = samples[i].m_ParameterValues[j];
       x[j] = m_X(i,j);
+    }
     (*model)(x,y);
-    for(int j = 0; j < numberOutputs; ++j)
+    for(int j = 0; j < numberOutputs; ++j) {
       m_Y(i,j) = y[j];
+    }
   }
 }
-void GaussianProcessEmulatorTestGenerator::WriteTrainingFile(std::ostream & o)
+
+void
+GaussianProcessEmulatorTestGenerator
+::WriteTrainingFile(std::ostream & o)
 {
   o.precision(17);
   o << "#\n#\n#\nVERSION 1\nPARAMETERS\n"<< m_NumberParameters << "\n";
