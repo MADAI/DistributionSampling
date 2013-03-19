@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+echo "Adding 'git prepush' alias" &&
+git config alias.prepush 'log --graph --stat origin/master..' &&
+echo "Adding 'git gerrit-push' alias" &&
+git config alias.gerrit-push "!bash GitSetup/git-gerrit-push" &&
+true
