@@ -21,6 +21,7 @@
 #include "LatinHypercubeGenerator.h"
 #include "Random.h"
 #include "Sample.h"
+#include "UniformDistribution.h"
 
 
 GaussianProcessEmulatorTestGenerator
@@ -29,22 +30,18 @@ GaussianProcessEmulatorTestGenerator
     int numberParameters,
     int numberOutputs,
     int numberTrainingPoints,
-    const std::vector< double > & parameterMinima,
-    const std::vector< double > & parameterMaxima) :
+    const std::vector< madai::Parameter > & parameters ) :
   m_NumberParameters(numberParameters),
   m_NumberOutputs(numberOutputs),
   m_NumberTrainingPoints(numberTrainingPoints),
-  m_ParameterMinima(parameterMinima),
-  m_ParameterMaxima(parameterMaxima)
+  m_Parameters( parameters )
 {
-  assert (parameterMinima.size() >= numberParameters);
-  assert (parameterMaxima.size() >= numberParameters);
+  assert (parameters.size() >= numberParameters);
   assert((numberTrainingPoints > 0) && (numberParameters > 0));
 
   madai::LatinHypercubeGenerator latinHypercubeGenerator;
   std::vector< madai::Sample > samples =
-    latinHypercubeGenerator.Generate( numberParameters, numberTrainingPoints,
-                                      parameterMinima, parameterMaxima );
+    latinHypercubeGenerator.Generate( numberTrainingPoints, parameters );
 
   m_X.resize(numberTrainingPoints,numberParameters);
   m_Y.resize(numberTrainingPoints,numberOutputs);
@@ -70,9 +67,13 @@ GaussianProcessEmulatorTestGenerator
 {
   o.precision(17);
   o << "#\n#\n#\nVERSION 1\nPARAMETERS\n"<< m_NumberParameters << "\n";
-  for(int i = 0; i < m_NumberParameters; ++i)
-    o << "param_" << i << " UNIFORM " << m_ParameterMinima[i]
-      << " " << m_ParameterMaxima[i] << "\n";
+  for(int i = 0; i < m_NumberParameters; ++i) {
+    const madai::Distribution * distribution = m_Parameters[i].GetPriorDistribution();
+    const madai::UniformDistribution * uniformDistribution =
+      dynamic_cast< const madai::UniformDistribution * >( distribution );
+    o << "param_" << i << " UNIFORM " << uniformDistribution->GetMinimum()
+      << " " << uniformDistribution->GetMaximum() << "\n";
+  }
   o << "OUTPUTS\n" << m_NumberOutputs << "\n";
   for(int i = 0; i < m_NumberOutputs; ++i)
     o << "output_" << i << "\n";

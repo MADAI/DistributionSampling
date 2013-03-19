@@ -23,6 +23,8 @@
 #include <vector>
 #include <Eigen/Dense>
 
+#include <Parameter.h>
+
 class GaussianProcessEmulatorTestGenerator {
 public:
   GaussianProcessEmulatorTestGenerator(
@@ -30,22 +32,23 @@ public:
     int numberParameters,
     int numberOutputs,
     int numberTrainingPoints,
-    const std::vector< double > & parameterMinima,
-    const std::vector< double > & parameterMaxima) ;
+    const std::vector< madai::Parameter > & parameters );
+
   void WriteTrainingFile(std::ostream & o);
+
   static void LatinHypercube(
       int numberParameters,
       int numberTrainingPoints,
       double * columnMajorMatrix,
       const double * parameterMinima,
       const double * parameterMaxima);
+
   Eigen::MatrixXd m_X;
   Eigen::MatrixXd m_Y;
   int m_NumberParameters;
   int m_NumberOutputs;
   int m_NumberTrainingPoints;
-  std::vector< double > m_ParameterMinima;
-  std::vector< double > m_ParameterMaxima;
+  std::vector< madai::Parameter > m_Parameters;
 };
 
 #endif /* madai_GaussianProcessEmulatorTestGenerator_h_included */

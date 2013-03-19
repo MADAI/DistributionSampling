@@ -21,19 +21,21 @@
 #include <vector>
 
 #include "LatinHypercubeGenerator.h"
+#include "Parameter.h"
 
 
 int main( int argc, char* argv[] )
 {
-  int numberOfParameters = 3;
   int numberOfTrainingPoints = 4;
-  std::vector< double > minima( numberOfTrainingPoints, 0.0 );
-  std::vector< double > maxima( numberOfTrainingPoints, 1.0 );
+
+  std::vector< madai::Parameter > parameters;
+  parameters.push_back( madai::Parameter( "param_0", 0.0, 1.0 ) );
+  parameters.push_back( madai::Parameter( "param_1", 0.0, 1.0 ) );
+  parameters.push_back( madai::Parameter( "param_2", 0.0, 1.0 ) );
 
   madai::LatinHypercubeGenerator generator;
   std::vector< madai::Sample > samples = 
-    generator.Generate( numberOfParameters,
-                        numberOfTrainingPoints, minima, maxima );
+    generator.Generate( numberOfTrainingPoints, parameters );
 
   std::cout << "Number of samples: " << samples.size() << std::endl;
   for ( size_t i = 0; i < samples.size(); ++i ) {
