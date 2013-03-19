@@ -25,6 +25,8 @@
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 
+#include <vector>
+
 
 namespace madai {
 
@@ -73,6 +75,24 @@ public:
   /** Returns a random number from a Gaussian distribution with mean
    * and standard deviation supplied as arguments */
   virtual double Gaussian(double mean, double standardDeviation);
+
+  /** Shuffles the vector passed to it. */
+  template< class T >
+  void ShuffleVector( std::vector< T > & v )
+  {
+    size_t n = v.size();
+
+    // Iterate over items from the back, replacing the current index
+    // with an item randomly drawn from the portion of the vector before
+    // the current index.
+    for ( size_t i = n-1; i >= 1; i-- ) {
+    int randomInt = this->Integer( i + 1 );
+    T tmp = v[i];
+    v[i] = v[randomInt];
+    v[randomInt] = tmp;
+    }
+
+  }
 
 private:
   /** Explicitly disallowed */
