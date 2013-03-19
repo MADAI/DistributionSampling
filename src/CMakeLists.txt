@@ -6,6 +6,7 @@ set( SRC_FILES
   Distribution.cxx
   ExternalModel.cxx
   GaussianDistribution.cxx
+  LatinHypercubeGenerator.cxx
   Model.cxx
   Sampler.cxx
   ProcessPipe.c
