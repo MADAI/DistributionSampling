@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "GaussianProcessEmulatorTestGenerator.h"
-#include "SimpleMetropolisHastingsSampler.h"
+#include "MetropolisHastingsSampler.h"
 #include "GaussianProcessEmulatedModel.h"
 #include "Trace.h"
 
@@ -43,7 +43,7 @@ void model(const std::vector< double > & params, std::vector< double > & out) {
 
 /**
  * Test case for madai::GaussianProcessEmulatedModel and
- * madai::SimpleMetropolisHastingsSampler classes.
+ * madai::MetropolisHastingsSampler classes.
  */
 int main(int argc, char ** argv) {
 
@@ -93,7 +93,7 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  madai::SimpleMetropolisHastingsSampler mcmc;
+  madai::MetropolisHastingsSampler mcmc;
   mcmc.SetModel( &gpem );
 
   mcmc.SetStepSize(0.1);

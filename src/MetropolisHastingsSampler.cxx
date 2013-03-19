@@ -16,7 +16,7 @@
  *
  *=========================================================================*/
 
-#include "SimpleMetropolisHastingsSampler.h"
+#include "MetropolisHastingsSampler.h"
 
 #include <cassert> // assert
 #include <cmath> // std::exp
@@ -25,22 +25,22 @@
 namespace madai {
 
 
-SimpleMetropolisHastingsSampler
-::SimpleMetropolisHastingsSampler() :
+MetropolisHastingsSampler
+::MetropolisHastingsSampler() :
   Sampler(),
   m_StepSize( 1.0e-2 )
 {
 }
 
 
-SimpleMetropolisHastingsSampler
-::~SimpleMetropolisHastingsSampler()
+MetropolisHastingsSampler
+::~MetropolisHastingsSampler()
 {
 }
 
 
 void
-SimpleMetropolisHastingsSampler
+MetropolisHastingsSampler
 ::Initialize( const Model * model )
 {
   assert(model != NULL);
@@ -67,14 +67,14 @@ SimpleMetropolisHastingsSampler
 }
 
 
-void SimpleMetropolisHastingsSampler
+void MetropolisHastingsSampler
 ::SetStepSize( double stepSize )
 {
   m_StepSize = stepSize;
 }
 
 Sample
-SimpleMetropolisHastingsSampler
+MetropolisHastingsSampler
 ::NextSample()
 {
   // xc is x_candidate

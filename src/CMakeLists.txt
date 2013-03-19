@@ -12,7 +12,7 @@ set( SRC_FILES
   ProcessPipe.c
   RegularStepGradientAscentSampler.cxx
   Sample.cxx
-  SimpleMetropolisHastingsSampler.cxx
+  MetropolisHastingsSampler.cxx
   Trace.cxx
   UniformDistribution.cxx
 )

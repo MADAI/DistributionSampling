@@ -23,14 +23,14 @@
 
 #include "ExternalModel.h"
 #include "GaussianDistribution.h"
-#include "SimpleMetropolisHastingsSampler.h"
+#include "MetropolisHastingsSampler.h"
 #include "Trace.h"
 #include "UniformDistribution.h"
 
 
 /**
  * Test case for madai::ExternalModel and
- * madai::SimpleMetropolisHastingsSampler classes.
+ * madai::MetropolisHastingsSampler classes.
  */
 int main(int argc, char ** argv) {
 
@@ -164,7 +164,7 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  madai::SimpleMetropolisHastingsSampler simple_mcmc;
+  madai::MetropolisHastingsSampler simple_mcmc;
   simple_mcmc.SetModel( &externalModel );
 
   simple_mcmc.SetStepSize(0.1);

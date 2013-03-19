@@ -21,7 +21,7 @@
 #include <cmath>
 
 #include "Gaussian2DModel.h"
-#include "SimpleMetropolisHastingsSampler.h"
+#include "MetropolisHastingsSampler.h"
 #include "Trace.h"
 
 
@@ -29,7 +29,7 @@ int main(int argc, char *arg[])
 {
   madai::Gaussian2DModel model;
 
-  madai::SimpleMetropolisHastingsSampler sampler;
+  madai::MetropolisHastingsSampler sampler;
   sampler.SetModel( &model );
   sampler.SetStepSize( 2.0 );
 

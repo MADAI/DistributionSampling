@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef madai_SimpleMetropolisHastingsSampler_h_included
-#define madai_SimpleMetropolisHastingsSampler_h_included
+#ifndef madai_MetropolisHastingsSampler_h_included
+#define madai_MetropolisHastingsSampler_h_included
 
 
 #include "Sampler.h"
@@ -26,7 +26,7 @@
 namespace madai {
 
 /**
- * \class SimpleMetropolisHastingsSampler
+ * \class MetropolisHastingsSampler
  *
  * This is a simple implemetation of the Metropolis Hastings
  * algorithm.  It is "simple" in that each step is a point whose
@@ -35,12 +35,12 @@ namespace madai {
  * the step is randomly chosen from the uniform distribution on the
  * range [0, StepSize].
  */
-class SimpleMetropolisHastingsSampler : public Sampler {
+class MetropolisHastingsSampler : public Sampler {
 public:
   /** Constructor. */
-  SimpleMetropolisHastingsSampler();
+  MetropolisHastingsSampler();
   /** destructor */
-  virtual ~SimpleMetropolisHastingsSampler();
+  virtual ~MetropolisHastingsSampler();
 
   /** append the next point to the Trace  */
   virtual Sample NextSample();
@@ -78,8 +78,8 @@ private:
 
   /** Random number object */
   madai::Random m_Random;
-}; // end class SimpleMetropolisHastingsSampler
+}; // end class MetropolisHastingsSampler
 
 } // end namespace madai
 
-#endif // madai_SimpleMetropolisHastingsSampler_h_included
+#endif // madai_MetropolisHastingsSampler_h_included

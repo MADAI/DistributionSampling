@@ -31,6 +31,10 @@ add_executable( LatinHypercubeGeneratorTest LatinHypercubeGeneratorTest.cxx )
 target_link_libraries( LatinHypercubeGeneratorTest ${LIBRARIES} )
 add_test( LatinHypercubeGeneratorTest LatinHypercubeGeneratorTest )
 
+add_executable( MetropolisHastingsSamplerTest MetropolisHastingsSamplerTest.cxx )
+target_link_libraries( MetropolisHastingsSamplerTest ${LIBRARIES} DistributionSamplingTest )
+add_test( MetropolisHastingsSamplerTest MetropolisHastingsSamplerTest )
+
 add_executable( ModelTest ModelTest.cxx )
 target_link_libraries( ModelTest ${LIBRARIES} )
 add_test( ModelTest ModelTest )
@@ -38,10 +42,6 @@ add_test( ModelTest ModelTest )
 add_executable( NumericalGradientEstimationTest NumericalGradientEstimationTest.cxx )
 target_link_libraries( NumericalGradientEstimationTest ${LIBRARIES} DistributionSamplingTest )
 add_test( NumericalGradientEstimationTest NumericalGradientEstimationTest )
-
-add_executable( SimpleMetropolisHastingsSamplerTest SimpleMetropolisHastingsSamplerTest.cxx )
-target_link_libraries( SimpleMetropolisHastingsSamplerTest ${LIBRARIES} DistributionSamplingTest )
-add_test( SimpleMetropolisHastingsSamplerTest SimpleMetropolisHastingsSamplerTest )
 
 add_executable( RandomTest RandomTest.cxx )
 target_link_libraries( RandomTest ${LIBRARIES} )
