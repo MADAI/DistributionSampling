@@ -75,6 +75,16 @@ public:
   which parameters are activated, etc.. */
   std::vector< std::string > m_Comments;
 
+
+  /**
+   Provide this operator so that we can do:
+
+     void SortSamples(std::vector< Sample > & s) {
+       std::sort(s.begin(),s.end());
+     }
+  */
+  bool operator<(const Sample & rhs) const;
+
 }; // class Sample
 
 } // end namespace madai

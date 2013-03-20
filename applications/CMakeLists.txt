@@ -25,3 +25,10 @@ add_executable(
 target_link_libraries(
   printThetas
   DistributionSampling)
+
+add_executable(
+  generateMCMCtrace
+  generateMCMCtrace.cxx)
+target_link_libraries(
+  generateMCMCtrace
+  DistributionSampling)

@@ -77,4 +77,16 @@ Sample
 {
 }
 
+/**
+   Provide this operator so that we can do:
+
+     void SortSamples(std::vector< Sample > & s) {
+       std::sort(s.begin(),s.end());
+     }
+*/
+bool Sample
+::operator<(const Sample & rhs) const {
+    return (m_LogLikelihood < rhs.m_LogLikelihood);
+}
+
 } // end namespace madai
