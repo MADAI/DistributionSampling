@@ -24,6 +24,17 @@
 #include <cmath>
 #include <limits>
 
+namespace {
+template<class S, class T>
+int findIndex(const S & v, const T & s)
+{
+  typename S::const_iterator it = std::find(v.begin(), v.end(), s);
+  if (it == v.end())
+    return -1;
+  return std::distance(v.begin(), it);
+}
+}
+
 namespace madai {
 
 Model
@@ -245,6 +256,52 @@ Model
 ::SetUseModelCovarianceToCalulateLogLikelihood(bool v)
 {
   m_UseModelCovarianceToCalulateLogLikelihood = v;
+}
+
+
+/**
+   Load a file with experimental observations in it.  The model will
+   be comared against this. */
+Model::ErrorType
+Model
+::LoadObservations(std::istream & i)
+{
+  // std::ifstream i("DIRECTORY/experimental_results/results.dat");
+  const std::vector< std::string > & scalarOutputNames = this->GetScalarOutputNames();
+  unsigned int numberOfScalarOutputs = this->GetNumberOfScalarOutputs();
+  assert(scalarOutputNames.size() == numberOfScalarOutputs);
+  assert (numberOfScalarOutputs > 0);
+  std::vector< double > observedScalarValues(numberOfScalarOutputs, 0.0);
+  std::vector< double > observedScalarCovariance(
+      numberOfScalarOutputs * numberOfScalarOutputs, 0.0);
+  for (unsigned int j = 0; j < numberOfScalarOutputs; ++j)
+    observedScalarCovariance[j * (1 + numberOfScalarOutputs)] = 1.0;
+  while (true) { // will loop forever if input stream lasts forever.
+    std::string name;
+    double value, uncertainty;
+    if(! (i >> name >> value >> uncertainty))
+      break;
+    int index = findIndex(scalarOutputNames, name);
+    if (index != -1) {
+      observedScalarValues[index] = value;
+      // observedScalarCovariance is a square matrix;
+      observedScalarCovariance[index * (1 + numberOfScalarOutputs)] = std::pow(uncertainty, 2);
+      // uncertainty^2 is variance.
+    }
+  }
+  // assume extra values are all zero.
+  Model::ErrorType e;
+  e = this->SetObservedScalarValues(observedScalarValues);
+  if (e != madai::Model::NO_ERROR) {
+    std::cerr << "Error in Model::SetObservedScalarValues\n";
+    return e;
+  }
+  e = this->SetObservedScalarCovariance(observedScalarCovariance);
+  if (e != madai::Model::NO_ERROR) {
+    std::cerr << "Error in Model::SetObservedScalarCovariance\n";
+    return e;
+  }
+  return madai::Model::NO_ERROR;
 }
 
 

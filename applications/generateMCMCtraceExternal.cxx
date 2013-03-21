@@ -23,7 +23,7 @@
 #include <algorithm>
 
 #include "MetropolisHastingsSampler.h"
-#include "GaussianProcessEmulatedModel.h"
+#include "ExternalModel.h"
 #include "Trace.h"
 
 
@@ -34,36 +34,41 @@ int main(int argc, char ** argv) {
 
   if (argc < 4) {
     std::cerr << "Useage:\n  "
-      "generateMCMCTrace emulatorFile observationsFile N\n\n";
+      "generateMCMCTraceExternal observationsFile N ExternalARGS....\n\n";
     return EXIT_FAILURE; //\fixme useage
   }
-  const char * emulatorFile = argv[1];
-  const char * observationsFile = argv[2];
-  int numberIter = atoi(argv[3]);
+  const char * observationsFile = argv[1];
+  int numberIter = atoi(argv[2]);
+  std::string executable( argv[3] );
+  std::vector< std::string > arguments;
+  for (int i = 4 ; i < argc; ++i)
+    arguments.push_back(argv[i]);
 
-  madai::GaussianProcessEmulatedModel gpem;
-  if (gpem.LoadConfigurationFile( emulatorFile ) != madai::Model::NO_ERROR) {
-    std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfigurationFile\n";
+  madai::ExternalModel em;
+  em.StartProcess( executable, arguments );
+  if (! em.IsReady()) {
+    std::cerr << "Something is wrong with the external model\n";
     return EXIT_FAILURE;
   }
 
-  gpem.SetUseModelCovarianceToCalulateLogLikelihood(false);
+  em.SetUseModelCovarianceToCalulateLogLikelihood(false);
 
   std::ifstream observations(observationsFile);
-  if (! gpem.LoadObservations(observations)) {
+  if (madai::Model::NO_ERROR != em.LoadObservations(observations)) {
     std::cerr << "error loading observations.\n";
+    em.StopProcess();
     return EXIT_FAILURE;
   }
   observations.close();
 
   madai::MetropolisHastingsSampler mcmc;
-  mcmc.SetModel( &gpem );
+  mcmc.SetModel( &em );
   mcmc.SetStepSize(0.1);
 
   std::vector< madai::Parameter > const & parameters
-    = gpem.GetParameters();
+    = em.GetParameters();
 
-  int t = gpem.GetNumberOfScalarOutputs();
+  int t = em.GetNumberOfScalarOutputs();
 
   std::vector< madai::Sample> samples;
   for (int count = 0; count < numberIter; count ++)
@@ -78,7 +83,7 @@ int main(int argc, char ** argv) {
   }
   trace.WriteCSVOutput(
       std::cout,
-      gpem.GetParameters(),
-      gpem.GetScalarOutputNames() );
+      em.GetParameters(),
+      em.GetScalarOutputNames() );
   return EXIT_SUCCESS;
 }

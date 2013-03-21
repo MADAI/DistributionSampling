@@ -40,7 +40,7 @@ int CreateProcessPipe( ProcessPipe * pp, char * const * argv ) {
   int answer_pipe[2];
   pid_t pid;
 
-  printf("argv[0]: %s\n", argv[0]);
+  //printf("argv[0]: %s\n", argv[0]);
 
   if ( argv == NULL ) {
     return perror_failure("argv is NULL :(");
@@ -49,7 +49,7 @@ int CreateProcessPipe( ProcessPipe * pp, char * const * argv ) {
   if ( argv[0] == NULL ) {
     return perror_failure("argv[0] is NULL :(");
   }
-	
+
   if ( pipe( question_pipe ) < 0 ) {
     return perror_failure("pipe [question]");
   }

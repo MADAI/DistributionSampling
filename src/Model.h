@@ -24,6 +24,7 @@
 
 #include <cfloat>
 #include <vector>
+#include <iostream>
 
 namespace madai {
 
@@ -206,6 +207,13 @@ public:
   bool GetUseModelCovarianceToCalulateLogLikelihood();
   void SetUseModelCovarianceToCalulateLogLikelihood(bool);
   //@}
+
+  /**
+     Load a file with experimental observations in it.  The model will
+     be comared against this.  Will call
+     this->SetObservedScalarValues() and
+     this->SetObservedScalarCovariance(). */
+  virtual ErrorType LoadObservations(std::istream & i);
 
 protected:
   /** Enumeration of internal state. */
