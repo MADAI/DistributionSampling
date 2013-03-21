@@ -70,9 +70,14 @@ int main(int argc, char ** argv) {
 
   int t = em.GetNumberOfScalarOutputs();
 
+  int step = numberIter / 100, percent = 0;
   std::vector< madai::Sample> samples;
-  for (int count = 0; count < numberIter; count ++)
+  for (int count = 0; count < numberIter; count ++) {
+    if (count % step == 0)
+      std::cerr <<  '\r' << percent++ << "%";
     samples.push_back(mcmc.NextSample());
+  }
+  std::cerr << "\r" ;
 
   std::sort(samples.begin(),samples.end());
 

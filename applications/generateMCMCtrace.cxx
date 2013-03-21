@@ -50,7 +50,7 @@ int main(int argc, char ** argv) {
   gpem.SetUseModelCovarianceToCalulateLogLikelihood(false);
 
   std::ifstream observations(observationsFile);
-  if (! gpem.LoadObservations(observations)) {
+  if (madai::Model::NO_ERROR != gpem.LoadObservations(observations)) {
     std::cerr << "error loading observations.\n";
     return EXIT_FAILURE;
   }
@@ -65,9 +65,14 @@ int main(int argc, char ** argv) {
 
   int t = gpem.GetNumberOfScalarOutputs();
 
+  int step = numberIter / 100, percent = 0;
   std::vector< madai::Sample> samples;
-  for (int count = 0; count < numberIter; count ++)
+  for (int count = 0; count < numberIter; count ++) {
+    if (count % step == 0)
+      std::cerr <<  '\r' << percent++ << "%";
     samples.push_back(mcmc.NextSample());
+  }
+  std::cerr << "\r" ;
 
   std::sort(samples.begin(),samples.end());
 
