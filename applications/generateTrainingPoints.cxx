@@ -233,38 +233,15 @@ bool ReadParameters( const struct CommandLineOptions & options,
 }
 
 
-int main( int argc, char * argv[] ) {
-  struct CommandLineOptions options;
-  if ( !ParseCommandLineOptions( argc, argv, options ) ) {
-    return EXIT_FAILURE;
-  }
-
-  if ( options.verbose ) {
-    std::cout << "Options: \n";
-    std::cout << "  --verbose: " << options.verbose << "\n";
-    std::cout << "  ParametersFile: " << options.parametersFile << "\n";
-    std::cout << "  OutputDirectory: " << options.outputDirectory << "\n";
-  }
-
-  // Read in parameter priors
-  std::vector< madai::Parameter > parameters;
-  bool parametersRead = ReadParameters( options, parameters );
-  if ( !parametersRead ) {
-    std::cerr << "Could not read parameters from prior file '"
-              << options.parametersFile << "'" << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  // Create the Latin hypercube sampling
-  madai::LatinHypercubeGenerator sampleGenerator;
-  std::vector< madai::Sample > samples = sampleGenerator.Generate( 100, parameters );
-
+bool WriteDirectoriesFormat( const struct CommandLineOptions & options,
+                             const std::vector< madai::Parameter > & parameters,
+                             const std::vector< madai::Sample > & samples ) {
   // Create the directory structure
   bool directoryCreated = madaisys::SystemTools::MakeDirectory( options.outputDirectory );
   if ( !directoryCreated ) {
     std::cerr << "Could not create directory '" << options.outputDirectory
               << "'\n";
-    return EXIT_FAILURE;
+    return false;
   }
 
   std::string directory( options.outputDirectory );
@@ -297,7 +274,7 @@ int main( int argc, char * argv[] ) {
     FILE *fp = fopen( parametersFile.c_str(), "w" );
     if ( !fp ) {
       std::cerr << "Could not open file '" << parametersFile << "'\n";
-      return EXIT_FAILURE;
+      return false;
     }
 
     assert( parameters.size() == sample.m_ParameterValues.size() );
@@ -308,6 +285,115 @@ int main( int argc, char * argv[] ) {
     }
 
     fclose( fp );
+  }
+
+  return true;
+}
+
+
+bool WriteEmulatorFormat( const struct CommandLineOptions & options,
+                          const std::vector< madai::Parameter > & parameters,
+                          const std::vector< madai::Sample > & samples ) {
+  // Create the output directory
+  bool directoryCreated = madaisys::SystemTools::MakeDirectory( options.outputDirectory );
+  if ( !directoryCreated ) {
+    std::cerr << "Could not create directory '" << options.outputDirectory
+              << "'\n";
+    return false;
+  }
+
+  // Open the output file
+  std::string outputFile( options.outputDirectory );
+  outputFile += "/emulator.dat";
+  FILE * fp = fopen( outputFile.c_str(), "w" );
+  if ( !fp ) {
+    std::cerr << "Could not create output file '" << outputFile << "'\n";
+    return false;
+  }
+
+  // Print VERSION
+  fprintf( fp, "VERSION 1\n" );
+
+  // Print the PARAMETERS
+  fprintf( fp, "PARAMETERS\n" );
+
+  for ( size_t i = 0; i < parameters.size(); ++i ) {
+    fprintf( fp, "%s ", parameters[i].m_Name.c_str() );
+    const madai::Distribution * priorDistribution =
+      parameters[i].GetPriorDistribution();
+    const madai::UniformDistribution * uniformDistribution =
+      dynamic_cast< const madai::UniformDistribution *>( priorDistribution );
+    const madai::GaussianDistribution * gaussianDistribution =
+      dynamic_cast< const madai::GaussianDistribution *>( priorDistribution );
+    if ( uniformDistribution ) {
+      fprintf( fp, "UNIFORM %f %f\n",
+               uniformDistribution->GetMinimum(),
+               uniformDistribution->GetMaximum() );
+    } else if ( gaussianDistribution ) {
+      fprintf( fp, "GAUSSIAN %f %f\n",
+               gaussianDistribution->GetMean(),
+               gaussianDistribution->GetStandardDeviation() );
+    } else {
+      std::cerr << "Unknown prior type\n";
+      return false;
+    }
+  }
+
+  // Print training points
+  fprintf( fp, "NUMBER_OF_TRAINING_POINTS %d\n",
+           static_cast< int >( samples.size() ) );
+
+  // Print parameter values at training points
+  fprintf( fp, "PARAMETER_VALUES\n" );
+
+  for ( size_t i = 0; i < samples.size(); ++i ) {
+    const madai::Sample & sample = samples[i];
+
+    for ( size_t j = 0; j < sample.m_ParameterValues.size(); ++j ) {
+      fprintf( fp, "%f ", sample.m_ParameterValues[j] );
+    }
+    fprintf( fp, "\n" );
+  }
+
+  fclose( fp );
+
+  return true;
+}
+
+
+int main( int argc, char * argv[] ) {
+  struct CommandLineOptions options;
+  if ( !ParseCommandLineOptions( argc, argv, options ) ) {
+    return EXIT_FAILURE;
+  }
+
+  if ( options.verbose ) {
+    std::cout << "Options: \n";
+    std::cout << "  --verbose: " << options.verbose << "\n";
+    std::cout << "  ParametersFile: " << options.parametersFile << "\n";
+    std::cout << "  OutputDirectory: " << options.outputDirectory << "\n";
+  }
+
+  // Read in parameter priors
+  std::vector< madai::Parameter > parameters;
+  bool parametersRead = ReadParameters( options, parameters );
+  if ( !parametersRead ) {
+    std::cerr << "Could not read parameters from prior file '"
+              << options.parametersFile << "'" << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  // Create the Latin hypercube sampling
+  madai::LatinHypercubeGenerator sampleGenerator;
+  std::vector< madai::Sample > samples = sampleGenerator.Generate( 100, parameters );
+
+  if ( options.formatType == DIRECTORIES_FORMAT ) {
+    WriteDirectoriesFormat( options, parameters, samples );
+  } else if ( options.formatType == EMULATOR_FORMAT ) {
+    WriteEmulatorFormat( options, parameters, samples );
+  } else {
+    std::cerr << "Unknown output format type" << std::endl;
+    return EXIT_FAILURE;
   }
 
   return EXIT_SUCCESS;
