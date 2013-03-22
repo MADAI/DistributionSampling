@@ -420,9 +420,10 @@ int main( int argc, char * argv[] ) {
 
   // Create the Latin hypercube sampling
   madai::LatinHypercubeGenerator sampleGenerator;
-  std::vector< madai::Sample > samples = sampleGenerator.Generate( 100, parameters );
   sampleGenerator.SetStandardDeviations( options.standardDeviations );
   sampleGenerator.SetPartitionSpaceByPercentile( options.partitionSpaceByPercentile );
+
+  std::vector< madai::Sample > samples = sampleGenerator.Generate( 100, parameters );
 
   if ( options.formatType == DIRECTORIES_FORMAT ) {
     WriteDirectoriesFormat( options, parameters, samples );
