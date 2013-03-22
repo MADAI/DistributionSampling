@@ -41,7 +41,7 @@ Model
 ::Model() :
   m_GradientEstimateStepSize( 1.0e-4 ),
   m_StateFlag( UNINITIALIZED ),
-  m_UseModelCovarianceToCalulateLogLikelihood(true)
+  m_UseModelCovarianceToCalulateLogLikelihood( false )
 {
 }
 

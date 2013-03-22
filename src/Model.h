@@ -203,6 +203,9 @@ public:
   /**
    * Should GetScalarOutputsAndLogLikelihood() call
    * GetScalarOutputsAndCovariance() or just GetScalarOutputs()?
+   *
+   * Defaults to not using the model covariance in the log likelihood
+   * calculation.
    */
   bool GetUseModelCovarianceToCalulateLogLikelihood();
   void SetUseModelCovarianceToCalulateLogLikelihood(bool);
