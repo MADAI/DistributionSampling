@@ -47,7 +47,7 @@ public:
      if N it not, it will be rounded up.
   */
   virtual void SetNumberSamples( unsigned int N );
-  virtual unsigned int GetNumberSamples() { return this->m_NumberSamples; }
+  virtual unsigned int GetNumberSamples();
   //@}
 
 protected:

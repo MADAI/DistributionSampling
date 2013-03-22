@@ -64,7 +64,6 @@ UniformSampler
 void UniformSampler
 ::SetNumberSamples( unsigned int N )
 {
-  m_StepSize = stepSize;
   if (m_Model == NULL)
     return;
   unsigned int p = m_Model->GetNumberOfParameters();
@@ -102,7 +101,7 @@ UniformSampler
 
   std::vector< double > y( m_Model->GetNumberOfScalarOutputs(), 0.0 );
   double ll; // ll is new_log_likelihood
-  m->GetScalarOutputsAndLogLikelihood(xc,yc,ll);
+  m->GetScalarOutputsAndLogLikelihood(x,y,ll);
   return Sample( x, y, ll );
 
 }

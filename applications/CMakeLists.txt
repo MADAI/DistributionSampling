@@ -46,3 +46,17 @@ add_executable(
 target_link_libraries(
   generateTrainingPoints
   DistributionSampling)
+
+add_executable(
+  generateUniformTrace
+  generateUniformTrace.cxx)
+target_link_libraries(
+  generateUniformTrace
+  DistributionSampling)
+
+add_executable(
+  generateUniformTraceExternal
+  generateUniformTraceExternal.cxx)
+target_link_libraries(
+  generateUniformTraceExternal
+  DistributionSampling)
