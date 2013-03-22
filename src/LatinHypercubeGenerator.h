@@ -51,12 +51,12 @@ public:
   void SetStandardDeviations( double standardDeviations );
   double GetStandardDeviations() const;
 
-  /** If enabled, this option divides the parameter space according to
+  /** If enabled, this option partitions the parameter space according to
    * the percentile of the prior distribution in each dimension. If
    * disabled, each dimension is divided up evenly. This is off by
    * default. */
-  void SetDivideSpaceByPercentile( bool value );
-  bool GetDivideSpaceByPercentile() const;
+  void SetPartitionSpaceByPercentile( bool value );
+  bool GetPartitionSpaceByPercentile() const;
 
 
   /** Generates a list of parameters distributed in a high-dimensional
@@ -73,10 +73,11 @@ protected:
 
   double m_StandardDeviations;
 
-  bool m_DivideSpaceByPercentile;
+  bool m_PartitionSpaceByPercentile;
 
-  void DivideDimension( int numberOfTrainingPoints, const Parameter & parameter,
-                        std::vector< double > & subdivisions );
+  void PartitionDimension( int numberOfTrainingPoints,
+                           const Parameter & parameter,
+                           std::vector< double > & subdivisions );
 
 };
 

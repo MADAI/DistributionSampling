@@ -29,7 +29,7 @@ LatinHypercubeGenerator
 ::LatinHypercubeGenerator() :
   m_Random( new Random() ),
   m_StandardDeviations( 3.0 ),
-  m_DivideSpaceByPercentile( false )
+  m_PartitionSpaceByPercentile( false )
 {
 }
 
@@ -59,31 +59,32 @@ LatinHypercubeGenerator
 
 void
 LatinHypercubeGenerator
-::SetDivideSpaceByPercentile( bool value )
+::SetPartitionSpaceByPercentile( bool value )
 {
-  m_DivideSpaceByPercentile = value;
+  m_PartitionSpaceByPercentile = value;
 }
 
 
 bool
 LatinHypercubeGenerator
-::GetDivideSpaceByPercentile() const
+::GetPartitionSpaceByPercentile() const
 {
-  return m_DivideSpaceByPercentile;
+  return m_PartitionSpaceByPercentile;
 }
 
 
 void
 LatinHypercubeGenerator
-::DivideDimension( int numberOfTrainingPoints, const Parameter & parameter,
-                   std::vector< double > & subdivisions )
+::PartitionDimension( int numberOfTrainingPoints,
+                      const Parameter & parameter,
+                      std::vector< double > & subdivisions )
 {
   subdivisions.resize( numberOfTrainingPoints );
 
   const Distribution * priorDistribution = parameter.GetPriorDistribution();
 
   double rangeOverN = 1.0 / static_cast< double >( numberOfTrainingPoints );
-  if ( m_DivideSpaceByPercentile ) {
+  if ( m_PartitionSpaceByPercentile ) {
     for ( int i = 0; i < numberOfTrainingPoints; ++i ) {
       double percentile = rangeOverN * ( i + 0.5 );
       subdivisions[i] = priorDistribution->GetPercentile( percentile );
@@ -123,8 +124,8 @@ LatinHypercubeGenerator
   // subdivisions in the range [ parameterMinima, parameterMaxima ]
   std::vector< std::vector< double > > parameterSubdivisions( parameters.size() );
   for ( size_t i = 0; i < parameters.size(); ++i ) {
-    this->DivideDimension( numberOfTrainingPoints, parameters[i],
-                           parameterSubdivisions[i] );
+    this->PartitionDimension( numberOfTrainingPoints, parameters[i],
+                              parameterSubdivisions[i] );
 
     // Randomly shuffle the subdivisions
     m_Random->ShuffleVector( parameterSubdivisions[i] );
