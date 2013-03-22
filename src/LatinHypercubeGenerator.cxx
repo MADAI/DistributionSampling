@@ -94,7 +94,7 @@ LatinHypercubeGenerator
     const UniformDistribution * uniformDistribution =
       dynamic_cast< const UniformDistribution * >( priorDistribution );
     const GaussianDistribution * gaussianDistribution =
-      dynamic_cast< const GaussianDistribution * >( gaussianDistribution );
+      dynamic_cast< const GaussianDistribution * >( priorDistribution );
 
     double parameterMinimum = 0.0, parameterMaximum = 1.0;
     if ( uniformDistribution ) {
