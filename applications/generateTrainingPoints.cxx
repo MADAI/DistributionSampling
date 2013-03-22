@@ -46,11 +46,19 @@ static const char usage[] =
   "\n"
   "Options:\n"
   "\n"
-  "  -h,--help                          Display help message\n"
+  "  -h,--help                          Display help message.\n"
   "\n"
-  "  -v,--verbose                       Print extra information\n"
+  "  -v,--verbose                       Print extra information.\n"
   "\n"
-  "  -f,--format={directories,emulator} Select the output format."
+  "  -f,--format {directories,emulator} Select the output format."
+  "\n"
+  "  -p,--percentile                    Partition space by parameter prior\n"
+  "                                     distribution percentile.\n"
+  "\n"
+  "  -s,--stddev <value>                Number of standard deviations from\n"
+  "                                     mean of a parameter's Gaussian\n"
+  "                                     distributed prior to include in the\n"
+  "                                     sampling.\n"
   "\n";
 
 typedef enum {
@@ -64,6 +72,8 @@ struct CommandLineOptions {
   const char * parametersFile;  // First non-flag argument.
   const char * outputDirectory; // Second non-flag argument.
   FormatType formatType;        // Type of the output
+  bool partitionSpaceByPercentile;
+  double standardDeviations;
 };
 
 
@@ -85,6 +95,8 @@ bool ParseCommandLineOptions( int argc, char* argv[], struct CommandLineOptions 
   options.parametersFile = NULL;
   options.outputDirectory = NULL;
   options.formatType = DIRECTORIES_FORMAT;
+  options.partitionSpaceByPercentile = false;
+  options.standardDeviations = 3.0;
 
   // Parse options
   int argIndex;
@@ -112,6 +124,24 @@ bool ParseCommandLineOptions( int argc, char* argv[], struct CommandLineOptions 
       } else {
         std::cerr << "No format type provided to argument '" << argString
                   << "'. Expected 'directories' or 'emulator'.\n";
+        return false;
+      }
+    } else if ( argString == "-p" || argString == "--percentile" ) {
+      options.partitionSpaceByPercentile = true;
+    } else if ( argString == "-s" || argString == "--stddev" ) {
+      if ( argIndex + 1 < argc ) {
+        argIndex++;
+        std::string argString2( argv[ argIndex ] );
+        options.standardDeviations = atof( argString2.c_str() );
+        if ( options.standardDeviations == 0.0 ) {
+          std::cerr << "Standard deviations set to 0.0 is not valid. "
+                    << "Did you supply a number to '" << argString
+                    << "'?\n";
+          return false;
+        }
+        std::cout << "argString2: " << argString2 << options.standardDeviations << std::endl;
+      } else {
+        std::cerr << "Missing value for '" << argString << "'.\n";
         return false;
       }
     } else {
@@ -370,6 +400,11 @@ int main( int argc, char * argv[] ) {
   if ( options.verbose ) {
     std::cout << "Options: \n";
     std::cout << "  --verbose: " << options.verbose << "\n";
+    std::cout << "  --format: ";
+    if ( options.formatType == DIRECTORIES_FORMAT ) std::cout << "directories\n";
+    if ( options.formatType == EMULATOR_FORMAT ) std::cout << "emulator\n";
+    std::cout << "  --percentile: " << options.partitionSpaceByPercentile << "\n";
+    std::cout << "  --stddev: " << options.standardDeviations << "\n";
     std::cout << "  ParametersFile: " << options.parametersFile << "\n";
     std::cout << "  OutputDirectory: " << options.outputDirectory << "\n";
   }
@@ -386,6 +421,8 @@ int main( int argc, char * argv[] ) {
   // Create the Latin hypercube sampling
   madai::LatinHypercubeGenerator sampleGenerator;
   std::vector< madai::Sample > samples = sampleGenerator.Generate( 100, parameters );
+  sampleGenerator.SetStandardDeviations( options.standardDeviations );
+  sampleGenerator.SetPartitionSpaceByPercentile( options.partitionSpaceByPercentile );
 
   if ( options.formatType == DIRECTORIES_FORMAT ) {
     WriteDirectoriesFormat( options, parameters, samples );
