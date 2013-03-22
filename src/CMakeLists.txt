@@ -13,7 +13,6 @@ set( SRC_FILES
   RegularStepGradientAscentSampler.cxx
   Sample.cxx
   MetropolisHastingsSampler.cxx
-  System.cxx
   Trace.cxx
   UniformDistribution.cxx
 )
