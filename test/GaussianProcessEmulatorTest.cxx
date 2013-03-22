@@ -47,13 +47,14 @@ void model(const std::vector< double > & params, std::vector< double > & out) {
 
 int main(int argc, char ** argv) {
   static const int N = 100;
-  double pmin[2] = {-1, -1};
-  double pmax[2] = {1, 1};
-  std::vector< double > parameterMinima(pmin, pmin + 2);
-  std::vector< double > parameterMaxima(pmax, pmax + 2);
 
-  GaussianProcessEmulatorTestGenerator generator(
-      &model,2,2,N, parameterMinima,parameterMaxima);
+  madai::Parameter param0( "param_0", -1, 1 );
+  madai::Parameter param1( "param_1", -1, 1 );
+  std::vector< madai::Parameter > parameters;
+  parameters.push_back( param0 );
+  parameters.push_back( param1 );
+
+  GaussianProcessEmulatorTestGenerator generator( &model,2,2,N, parameters);
 
   std::ofstream out(TRAINING_FILE);
   generator.WriteTrainingFile(dynamic_cast<std::ostream &>(out));

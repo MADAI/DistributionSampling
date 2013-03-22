@@ -16,25 +16,20 @@
  *
  *=========================================================================*/
 
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
 
 #include "LatinHypercubeGenerator.h"
+#include "Parameter.h"
+
+void printElement( double d ) {
+  std::cout << d << " ";
+}
 
 
-int main( int argc, char* argv[] )
-{
-  int numberOfParameters = 3;
-  int numberOfTrainingPoints = 4;
-  std::vector< double > minima( numberOfTrainingPoints, 0.0 );
-  std::vector< double > maxima( numberOfTrainingPoints, 1.0 );
-
-  madai::LatinHypercubeGenerator generator;
-  std::vector< madai::Sample > samples = 
-    generator.Generate( numberOfParameters,
-                        numberOfTrainingPoints, minima, maxima );
-
+void PrintSamples( const std::vector< madai::Sample > samples ) {
   std::cout << "Number of samples: " << samples.size() << std::endl;
   for ( size_t i = 0; i < samples.size(); ++i ) {
     madai::Sample sample = samples[i];
@@ -43,8 +38,104 @@ int main( int argc, char* argv[] )
     }
     std::cout << std::endl;
   }
+}
 
-  // \todo - test whether a valid latin hypercube was generated
+
+bool CheckForEvenSpacing( const std::vector< madai::Sample > samples ) {
+  if ( samples.size() == 0 ) {
+    return true;
+  }
+
+  size_t numberOfParameters = samples[0].m_ParameterValues.size();
+
+  // Test whether a valid latin hypercube was generated.
+  std::vector< std::vector< double > > parametersForDimension;
+  for ( size_t i = 0; i < numberOfParameters; ++i ) {
+    parametersForDimension.push_back( std::vector< double >( samples.size(), 0.0 ) );
+  }
+
+  for ( size_t i = 0; i < samples.size(); ++i ) {
+    madai::Sample sample = samples[i];
+    for ( size_t j = 0; j < parametersForDimension.size(); ++j ) {
+      parametersForDimension[j][i] = sample.m_ParameterValues[j];
+    }
+  }
+
+  // Sort the parameter vectors
+  for ( size_t j = 0; j < parametersForDimension.size(); ++j ) {
+    std::sort( parametersForDimension[j].begin(),
+               parametersForDimension[j].end() );
+
+    std::cout << "Sorted elements for parameter " << j << ":\n";
+    std::for_each( parametersForDimension[j].begin(),
+                   parametersForDimension[j].end(),
+                   printElement );
+    std::cout << "\n";
+
+    // Now check that the spacing between the parameters in each
+    // dimension is equal to within numerical precision.
+    double expectedDiff = parametersForDimension[j][1] - parametersForDimension[j][0];
+    for ( size_t i = 1; i < parametersForDimension[j].size()-1; ++i ) {
+      double i1 = parametersForDimension[j][i];
+      double i2 = parametersForDimension[j][i+1];
+      if ( fabs( i2 - i1 - expectedDiff ) > 1e-4 ) {
+        std::cerr << "Incorrect spacing between parameter samples in dimension "
+                  << i << ". Should have been " << expectedDiff << ", was "
+                  << (i2 - i1 ) << "\n";
+        return false;
+      }
+    }    
+  }
+
+  return true;
+}
+
+
+int main( int argc, char* argv[] )
+{
+  int numberOfTrainingPoints = 4;
+
+  std::vector< madai::Parameter > parameters;
+  parameters.push_back( madai::Parameter( "param_0", -1.0,  1.0 ) );
+  parameters.push_back( madai::Parameter( "param_1",  2.1,  3.2 ) );
+  parameters.push_back( madai::Parameter( "param_2", -4.7, -2.2 ) );
+
+  // Create generator
+  madai::LatinHypercubeGenerator generator;
+
+  // Check for default values
+  if ( generator.GetStandardDeviations() != 3.0 ) {
+    std::cerr << "Expected default standard deviations to be 3.0, got "
+              << generator.GetStandardDeviations() << " instead\n";
+    return EXIT_FAILURE;
+  }
+
+  if ( generator.GetPartitionSpaceByPercentile() != false ) {
+    std::cerr << "Expected default value for PartitionSpaceByPercentile to be "
+              << "true, got " << generator.GetPartitionSpaceByPercentile()
+              << "instead.\n";
+    return EXIT_FAILURE;
+  }
+
+  std::vector< madai::Sample > samples = 
+    generator.Generate( numberOfTrainingPoints, parameters );
+  PrintSamples( samples );
+
+  if ( !CheckForEvenSpacing( samples ) ) {
+    return EXIT_FAILURE;
+  }
+
+  // Now flip on dividing by percentile and make sure we get even spacing
+  generator.SetPartitionSpaceByPercentile( true );
+  samples = generator.Generate( numberOfTrainingPoints, parameters );  
+
+  PrintSamples( samples );
+
+  if ( !CheckForEvenSpacing( samples ) ) {
+    return EXIT_FAILURE;
+  }
+
+  // \todo - Test sampling of Gaussian distributions
 
   return EXIT_SUCCESS;
 }

@@ -50,13 +50,15 @@ int main(int argc, char ** argv) {
   const char TRAINING_FILE[] = "/tmp/GaussianProcessEmulatorTestTraining.dat";
   const char MODEL_FILE[] = "/tmp/GaussianProcessEmulatorTestModel.dat";
   static const int N = 100;
-  double pmin[2] = {-1, -1};
-  double pmax[2] = {1, 1};
-  std::vector< double > parameterMinima(pmin, pmin + 2);
-  std::vector< double > parameterMaxima(pmax, pmax + 2);
 
-  GaussianProcessEmulatorTestGenerator generator(
-      &model,2,2,N, parameterMinima,parameterMaxima);
+  madai::Parameter param0( "param_0", -1, 1 );
+  madai::Parameter param1( "param_1", -1, 1 );
+  std::vector< madai::Parameter > generatorParameters;
+  generatorParameters.push_back( param0 );
+  generatorParameters.push_back( param1 );
+
+  GaussianProcessEmulatorTestGenerator generator( &model,2,2,N,
+                                                  generatorParameters);
 
   std::ofstream out(TRAINING_FILE);
   generator.WriteTrainingFile(dynamic_cast<std::ostream &>(out));

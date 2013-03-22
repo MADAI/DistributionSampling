@@ -39,3 +39,10 @@ add_executable(
 target_link_libraries(
   generateMCMCtraceExternal
   DistributionSampling)
+
+add_executable(
+  generateTrainingPoints
+  generateTrainingPoints.cxx)
+target_link_libraries(
+  generateTrainingPoints
+  DistributionSampling)

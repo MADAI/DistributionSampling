@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include "Parameter.h"
 #include "Sample.h"
 
 
@@ -42,19 +43,41 @@ public:
   /** Destructor */
   virtual ~LatinHypercubeGenerator();
 
+  /** Set the number of standard deviations about the mean used to
+   * determine the bounds of the latin hypercube sampling for
+   * parameters with Gaussian priors. Defaults to 3.0.
+   *
+   * This is only used when DivideSpaceByPercentile is enabled. */
+  void SetStandardDeviations( double standardDeviations );
+  double GetStandardDeviations() const;
+
+  /** If enabled, this option partitions the parameter space according to
+   * the percentile of the prior distribution in each dimension. If
+   * disabled, each dimension is divided up evenly. This is off by
+   * default. */
+  void SetPartitionSpaceByPercentile( bool value );
+  bool GetPartitionSpaceByPercentile() const;
+
+
   /** Generates a list of parameters distributed in a high-dimensional
-   * parameter space according to a Latin hypercube sampling pattern:
+   * parameter space according to a Latin hypercube sampling pattern.
    * http://en.wikipedia.org/wiki/Latin_hypercube_sampling
    *
    * Note that the output Samples have only parameter values, no
    * output values nor log likelihoods. */
-  std::vector< Sample > Generate( int numberOfParameters,
-                                  int numberOfTrainingPoints,
-                                  const std::vector< double > & parameterMinima,
-                                  const std::vector< double > & parameterMaxima );
+  std::vector< Sample > Generate( int numberOfTrainingPoints,
+                                  const std::vector< Parameter > parameters );
 
 protected:
   Random * m_Random;
+
+  double m_StandardDeviations;
+
+  bool m_PartitionSpaceByPercentile;
+
+  void PartitionDimension( int numberOfTrainingPoints,
+                           const Parameter & parameter,
+                           std::vector< double > & subdivisions );
 
 };
 

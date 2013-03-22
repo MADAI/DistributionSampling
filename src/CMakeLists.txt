@@ -18,3 +18,4 @@ set( SRC_FILES
 )
 
 add_library( DistributionSampling ${SRC_FILES} )
+target_link_libraries( DistributionSampling madaisys )

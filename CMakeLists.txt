@@ -45,13 +45,15 @@ list(APPEND DistributionSampling_INCLUDE_DIRS ${DistributionSampling_BINARY_DIR}
 ##
 
 ## include and link
-include_directories( ${DistributionSampling_INCLUDE_DIRS})
+include_directories( ${DistributionSampling_INCLUDE_DIRS}
+  ${DistributionSampling_BINARY_DIR}/ThirdParty/KWSys/)
 link_directories( ${DistributionSampling_LIBRARY_DIRS} )
 
 set( DistributionSampling_LIBRARIES  DistributionSampling)
 
 add_subdirectory( applications )
 add_subdirectory( src )
+add_subdirectory( ThirdParty )
 
 option( BUILD_TESTING "Build the tests for DistributionSampling." OFF )
 if ( BUILD_TESTING )
