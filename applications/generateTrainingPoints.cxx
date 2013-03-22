@@ -46,16 +46,36 @@ static const char usage[] =
   "\n"
   "Options:\n"
   "\n"
-  "  -h,--help    Display help message\n"
+  "  -h,--help                          Display help message\n"
   "\n"
-  "  -v,--verbose Print extra information\n"
+  "  -v,--verbose                       Print extra information\n"
+  "\n"
+  "  -f,--format={directories,emulator} Select the output format."
   "\n";
+
+typedef enum {
+  DIRECTORIES_FORMAT, // Pratt format
+  EMULATOR_FORMAT     // GaussianProcessEmulator format
+} FormatType;
+
 
 struct CommandLineOptions {
   bool verbose;
   const char * parametersFile;  // First non-flag argument.
   const char * outputDirectory; // Second non-flag argument.
+  FormatType formatType;        // Type of the output
 };
+
+
+std::string LowerCase( char * buffer )
+{
+  std::string outBuffer( buffer );
+
+  std::transform( outBuffer.begin(), outBuffer.end(),
+                  outBuffer.begin(), ::tolower );
+
+  return outBuffer;
+}
 
 
 bool ParseCommandLineOptions( int argc, char* argv[], struct CommandLineOptions & options)
@@ -64,6 +84,7 @@ bool ParseCommandLineOptions( int argc, char* argv[], struct CommandLineOptions 
   options.verbose = false;
   options.parametersFile = NULL;
   options.outputDirectory = NULL;
+  options.formatType = DIRECTORIES_FORMAT;
 
   // Parse options
   int argIndex;
@@ -75,6 +96,24 @@ bool ParseCommandLineOptions( int argc, char* argv[], struct CommandLineOptions 
     } else if ( argString == "-h" || argString == "--help" ) {
       std::cerr << usage;
       return false;
+    } else if ( argString == "-f" || argString == "--format" ) {
+      if ( argIndex + 1 < argc ) {
+        std::string argString2 = LowerCase( argv[ argIndex + 1 ] );
+        if ( argString2 == "directories" ) {
+          options.formatType = DIRECTORIES_FORMAT;
+        } else if ( argString2 == "emulator" ) {
+          options.formatType = EMULATOR_FORMAT;
+        } else {
+          std::cerr << "Unknown format type '" << argString2 << "' provided to '"
+                    << argString << "'. Expected 'directories' or 'emulator'.\n";
+          return false;
+        }
+        argIndex++;
+      } else {
+        std::cerr << "No format type provided to argument '" << argString
+                  << "'. Expected 'directories' or 'emulator'.\n";
+        return false;
+      }
     } else {
       break; // No switch
     }
@@ -101,17 +140,6 @@ bool ParseCommandLineOptions( int argc, char* argv[], struct CommandLineOptions 
 
   // Everything went well
   return true;
-}
-
-
-std::string LowerCase( char * buffer )
-{
-  std::string outBuffer( buffer );
-
-  std::transform( outBuffer.begin(), outBuffer.end(),
-                  outBuffer.begin(), ::tolower );
-
-  return outBuffer;
 }
 
 
