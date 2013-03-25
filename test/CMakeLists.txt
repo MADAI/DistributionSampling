@@ -10,6 +10,10 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ )
 add_library( DistributionSamplingTest STATIC Gaussian2DModel.cxx )
 target_link_libraries( DistributionSamplingTest ${LIBRARIES} )
 
+add_executable( LangevinSamplerTest LangevinSamplerTest.cxx )
+target_link_libraries( LangevinSamplerTest ${LIBRARIES} DistributionSamplingTest )
+add_test( LangevinSamplerTest LangevinSamplerTest )
+
 add_executable( ExternalModelMCMCTest ExternalModelMCMCTest.cxx )
 target_link_libraries( ExternalModelMCMCTest ${LIBRARIES} )
 add_test( ExternalModelMCMCTest

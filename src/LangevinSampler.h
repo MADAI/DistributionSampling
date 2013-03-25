@@ -32,7 +32,8 @@ namespace madai {
  * moves according to the langevin equation.
  */
 
-class LangevinSampler : Sampler {
+class LangevinSampler : public Sampler {
+public:
   // Constructor
   LangevinSampler();
   // Destructor
@@ -55,6 +56,9 @@ class LangevinSampler : Sampler {
   virtual void SetMassScale( double MassScale );
   virtual double GetMassScale() { return this->m_MassScale; }
   
+  virtual ErrorType SetVelocity( const std::string & parameterName, double Velocity );
+  virtual std::vector< double > GetVelocities() { return this->m_CurrentVelocities; }
+  
 protected:
   
   double m_TimeStep;
@@ -64,8 +68,7 @@ protected:
   double m_DragCoefficient;
   double m_MassScale;
   
-  // Keep track of the momentum, position, and time
-  std::vector< double > m_CurrentParameters;
+  // Keep track of the velocities
   std::vector< double > m_CurrentVelocities;
   
   virtual void Initialize( const Model * model );

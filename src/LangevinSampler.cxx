@@ -19,6 +19,8 @@
 #include "LangevinSampler.h"
 
 #include <cassert>
+#include <algorithm>
+#include <cmath>
 
 namespace madai {
 
@@ -76,16 +78,15 @@ LangevinSampler
           == numberOfActiveParameters);
    
   // Get the gradient of the Log Likelihood at the current point
-  std::vector< double > ModelMeans;
   std::vector< double > Gradient;
   m->GetScalarAndGradientOutputs(
     m_CurrentParameters, m_ActiveParameterIndices,
-    ModelMeans, Gradient );
+    m_CurrentOutputs, Gradient );
     
   // Get loglikelihood at the current parameters
   double LogLikelihood;
   m->GetScalarOutputsAndLogLikelihood(
-    m_CurrentParameters, ModelMeans, LogLikelihood );
+    m_CurrentParameters, m_CurrentOutputs, LogLikelihood );
   // Check for NaN
   assert( LogLikelihood == LogLikelihood );
   // rescale gradient by likelihood.
@@ -131,7 +132,7 @@ LangevinSampler
   m_TimeBeforeNextKick -= m_TimeStep;
   
   return Sample( m_CurrentParameters,
-                 ModelMeans,
+                 m_CurrentOutputs,
                  LogLikelihood );
 
 }
@@ -169,6 +170,23 @@ void LangevinSampler
 ::SetMassScale( double MassScale )
 {
   m_MassScale = MassScale;
+}
+
+Sampler::ErrorType
+LangevinSampler
+::SetVelocity( const std::string & parameterName, double Velocity )
+{
+  unsigned int parameterIndex = this->GetParameterIndex( parameterName );
+  
+  if ( parameterIndex == static_cast< unsigned int >( -1 ) ) {
+    return INVALID_PARAMETER_INDEX_ERROR;
+  }
+  
+  m_CurrentVelocities[parameterIndex] = Velocity;
+  
+  // TODO - set dirty flag
+  
+  return NO_ERROR;
 }
   
 } // end namespace madai
