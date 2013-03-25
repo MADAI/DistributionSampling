@@ -82,17 +82,19 @@ LangevinSampler
     m_CurrentParameters, m_ActiveParameterIndices,
     ModelMeans, Gradient );
     
-  // Multiply by likelihood to get gradient of the likelihood
+  // Get loglikelihood at the current parameters
   double LogLikelihood;
   m->GetScalarOutputsAndLogLikelihood(
     m_CurrentParameters, ModelMeans, LogLikelihood );
+  // Check for NaN
+  assert( LogLikelihood == LogLikelihood );
+  // rescale gradient by likelihood.
   for ( unsigned int i = 0; i < Gradient.size(); i++ ) {
     Gradient[i] *= exp( LogLikelihood );
   }
   
-  std::vector< double > Accel( Gradient.size() );
+  std::vector< double > Accel = Gradient;
   for ( unsigned int i = 0; i < Accel.size(); i++ ) {
-    Accel[i] = Gradient[i];
     Accel[i] -= m_DragCoefficient * m_CurrentVelocities[i];
     Accel[i] /= m_MassScale;
   }
@@ -169,4 +171,4 @@ void LangevinSampler
   m_MassScale = MassScale;
 }
   
-}
+} // end namespace madai
