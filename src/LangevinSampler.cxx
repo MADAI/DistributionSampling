@@ -67,6 +67,7 @@ LangevinSampler
 ::NextSample()
 {
   Model * m = const_cast< Model * >(m_Model);
+  double TimeLeft = m_TimeStep;
    
   unsigned int numberOfActiveParameters = this->GetNumberOfActiveParameters();
    
@@ -93,8 +94,15 @@ LangevinSampler
   for ( unsigned int i = 0; i < Accel.size(); i++ ) {
     Accel[i] = Gradient[i];
     Accel[i] -= m_DragCoefficient * m_CurrentVelocities[i];
+    Accel[i] /= m_MassScale;
   }
   if ( m_TimeBeforeNextKick < m_TimeStep ) { // Check if kick happens
+    // Take step up to m_TimeBeforeNextKick
+    for ( unsigned int i = 0; i < m_CurrentParameters.size(); i++ ) {
+      m_CurrentParameters[i] += m_CurrentVelocities * m_TimeBeforeNextKick;
+      m_CurrentParameters[i] += 0.5 * Accel[i] * m_TimeBeforeNextKick * m_TimeBeforeNextKick;
+      m_CurrentVelocities[i] += Accel[i] * m_TimeBeforeNextKick;
+    }
     // Get m_CurrentVelocities.size() number of random numbers
     double r[m_CurrentVelocities.size()];
     double temp = 0;
@@ -106,17 +114,16 @@ LangevinSampler
     temp /= m_KickStrength;
     for ( unsigned int i = 0; i < m_CurrentVelocities.size(); i++ ) {
      m_CurrentVelocities[i] += r[i] / temp;
+     Accel[i] -= m_DragCoefficient * r[i] / temp;
     }
+    TimeLeft -= m_TimeBeforeNextKick;
     m_TimeBeforeNextKick += m_Random.Gaussian( m_MeanTime, m_MeanTime / 10.0 );
-  }
-  for ( unsigned int i = 0; i < Accel.size(); i++ ) {
-    Accel[i] /= m_MassScale;
   }
   
   for ( unsigned int i = 0; i < m_CurrentParameters.size(); i++ ) {
-    m_CurrentParameters[i] += m_CurrentVelocities[i] * m_TimeStep;
-    m_CurrentParameters[i] += 0.5 * Accel[i] * m_TimeStep * m_TimeStep;
-    m_CurrentVelocities[i] += Accel[i] * m_TimeStep;
+    m_CurrentParameters[i] += m_CurrentVelocities[i] * TimeLeft;
+    m_CurrentParameters[i] += 0.5 * Accel[i] * TimeLeft * TimeLeft;
+    m_CurrentVelocities[i] += Accel[i] * TimeLeft;
   }
   
   m_TimeBeforeNextKick -= m_TimeStep;
