@@ -95,17 +95,17 @@ LangevinSampler
     Accel[i] -= m_DragCoefficient * m_CurrentVelocities[i];
   }
   if ( m_TimeBeforeNextKick < m_TimeStep ) { // Check if kick happens
-    // Get Accel.size() number of random numbers
-    double r[Accel.size()];
+    // Get m_CurrentVelocities.size() number of random numbers
+    double r[m_CurrentVelocities.size()];
     double temp = 0;
-    for ( unsigned int i = 0; i < Accel.size(); i++ ) {
+    for ( unsigned int i = 0; i < m_CurrentVelocities.size(); i++ ) {
       r[i] = m_Random.Uniform( -1, 1 );
       temp += r[i] * r[i];
     }
     temp = sqrt( temp );
     temp /= m_KickStrength;
-    for ( unsigned int i = 0; i < Accel.size(); i++ ) {
-      Accel[i] += r[i] / temp;
+    for ( unsigned int i = 0; i < m_CurrentVelocities.size(); i++ ) {
+     m_CurrentVelocities[i] += r[i] / temp;
     }
     m_TimeBeforeNextKick += m_Random.Gaussian( m_MeanTime, m_MeanTime / 10.0 );
   }
