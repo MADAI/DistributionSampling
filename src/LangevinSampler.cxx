@@ -27,8 +27,8 @@ LangevinSampler
 ::LangevinSampler() :
   Sampler(),
   m_TimeStep( 1.0e-2 ),
-  m_MassScale( 10 ),
-  m_MeanTime( 0.1 ),
+  m_MassScale( 1 ),
+  m_MeanTime( 1 ),
   m_KickStrength( 1 ),
   m_DragCoefficient( 1.0e-2 )
 {
@@ -99,7 +99,7 @@ LangevinSampler
   if ( m_TimeBeforeNextKick < m_TimeStep ) { // Check if kick happens
     // Take step up to m_TimeBeforeNextKick
     for ( unsigned int i = 0; i < m_CurrentParameters.size(); i++ ) {
-      m_CurrentParameters[i] += m_CurrentVelocities * m_TimeBeforeNextKick;
+      m_CurrentParameters[i] += m_CurrentVelocities[i] * m_TimeBeforeNextKick;
       m_CurrentParameters[i] += 0.5 * Accel[i] * m_TimeBeforeNextKick * m_TimeBeforeNextKick;
       m_CurrentVelocities[i] += Accel[i] * m_TimeBeforeNextKick;
     }
