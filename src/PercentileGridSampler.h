@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef madai_UniformSampler_h_included
-#define madai_UniformSampler_h_included
+#ifndef madai_PercentileGridSampler_h_included
+#define madai_PercentileGridSampler_h_included
 
 
 #include "Sampler.h"
@@ -26,16 +26,16 @@
 namespace madai {
 
 /**
- * \class UniformSampler
+ * \class PercentileGridSampler
  *
  * This sampler will return ~N samples from the *prior* distribution.
  */
-class UniformSampler : public Sampler {
+class PercentileGridSampler : public Sampler {
 public:
   /** Constructor. */
-  UniformSampler();
+  PercentileGridSampler();
   /** destructor */
-  virtual ~UniformSampler();
+  virtual ~PercentileGridSampler();
 
   /** append the next point to the Trace  */
   virtual Sample NextSample();
@@ -61,8 +61,8 @@ protected:
 
 private:
 
-}; // end class UniformSampler
+}; // end class PercentileGridSampler
 
 } // end namespace madai
 
-#endif // madai_UniformSampler_h_included
+#endif // madai_PercentileGridSampler_h_included

@@ -22,7 +22,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "UniformSampler.h"
+#include "PercentileGridSampler.h"
 #include "GaussianProcessEmulatedModel.h"
 #include "Trace.h"
 
@@ -113,7 +113,7 @@ int main(int argc, char ** argv) {
   }
   observations.close();
 
-  madai::UniformSampler sampler;
+  madai::PercentileGridSampler sampler;
   sampler.SetModel( &gpem );
   sampler.SetNumberSamples(numberIter);
   numberIter = sampler.GetNumberSamples();

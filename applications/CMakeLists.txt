@@ -48,15 +48,15 @@ target_link_libraries(
   DistributionSampling)
 
 add_executable(
-  generateUniformTrace
-  generateUniformTrace.cxx)
+  generatePercentileGridTrace
+  generatePercentileGridTrace.cxx)
 target_link_libraries(
-  generateUniformTrace
+  generatePercentileGridTrace
   DistributionSampling)
 
 add_executable(
-  generateUniformTraceExternal
-  generateUniformTraceExternal.cxx)
+  generatePercentileGridTraceExternal
+  generatePercentileGridTraceExternal.cxx)
 target_link_libraries(
-  generateUniformTraceExternal
+  generatePercentileGridTraceExternal
   DistributionSampling)

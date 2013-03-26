@@ -16,7 +16,7 @@
  *
  *=========================================================================*/
 
-#include "UniformSampler.h"
+#include "PercentileGridSampler.h"
 
 #include <cassert> // assert
 #include <cmath> // std::exp
@@ -25,21 +25,21 @@
 namespace madai {
 
 
-UniformSampler
-::UniformSampler() :
+PercentileGridSampler
+::PercentileGridSampler() :
   Sampler(),
   m_SampleScale(4)
 {
 }
 
 
-UniformSampler
-::~UniformSampler()
+PercentileGridSampler
+::~PercentileGridSampler()
 {
 }
 
 void
-UniformSampler
+PercentileGridSampler
 ::Initialize( const Model * model )
 {
   assert(model != NULL);
@@ -54,14 +54,14 @@ UniformSampler
 
 
 unsigned int
-UniformSampler
+PercentileGridSampler
 ::GetNumberSamples()
 {
   return std::pow(m_SampleScale,m_Model->GetNumberOfParameters());
 }
 
 
-void UniformSampler
+void PercentileGridSampler
 ::SetNumberSamples( unsigned int N )
 {
   if (m_Model == NULL)
@@ -75,7 +75,7 @@ void UniformSampler
 }
 
 Sample
-UniformSampler
+PercentileGridSampler
 ::NextSample()
 {
   Model * m = const_cast< Model * >(m_Model);

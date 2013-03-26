@@ -22,7 +22,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "UniformSampler.h"
+#include "PercentileGridSampler.h"
 #include "ExternalModel.h"
 #include "Trace.h"
 
@@ -117,7 +117,7 @@ int main(int argc, char ** argv) {
   }
   observations.close();
 
-  madai::UniformSampler sampler;
+  madai::PercentileGridSampler sampler;
   sampler.SetModel( &em );
   sampler.SetNumberSamples(numberIter);
   numberIter = sampler.GetNumberSamples();
