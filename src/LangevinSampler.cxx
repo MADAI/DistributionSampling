@@ -89,10 +89,6 @@ LangevinSampler
     m_CurrentParameters, m_CurrentOutputs, LogLikelihood );
   // Check for NaN
   assert( LogLikelihood == LogLikelihood );
-  // rescale gradient by likelihood.
-  for ( unsigned int i = 0; i < Gradient.size(); i++ ) {
-    Gradient[i] *= exp( LogLikelihood );
-  }
   
   std::vector< double > Accel = Gradient;
   for ( unsigned int i = 0; i < Accel.size(); i++ ) {
@@ -183,8 +179,6 @@ LangevinSampler
   }
   
   m_CurrentVelocities[parameterIndex] = Velocity;
-  
-  // TODO - set dirty flag
   
   return NO_ERROR;
 }
