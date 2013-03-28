@@ -16,9 +16,12 @@
  *
  *=========================================================================*/
 
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
+#include <iostream> // std::cerr
+#include <algorithm> // std::transform
+#include <fstream> // std::ifstream, std::ofstream
+#include <string> // std::string
+#include <vector> // std::vector
+#include <sstream> // std::ostringstream
 
 #include "GaussianDistribution.h"
 #include "LatinHypercubeGenerator.h"
@@ -104,6 +107,12 @@ std::string LowerCase( char * buffer )
                   outBuffer.begin(), ::tolower );
 
   return outBuffer;
+}
+
+void LowerCase( std::string & s )
+{
+  std::transform( s.begin(), s.end(),
+                  s.begin(), ::tolower );
 }
 
 
@@ -202,14 +211,29 @@ bool ParseCommandLineOptions( int argc, char* argv[], struct CommandLineOptions 
   return true;
 }
 
+static void discard_comments( std::istream & i, char comment_character ) {
+  int c;
+  while (i.good() && ((c = i.peek()) != EOF)) {
+    if ((c == ' ') || (c == '\t') || ( c == '\n' )) {
+      char ch;
+      i.get(ch); // discard whitespace at beginning of line;
+    } else if (c == comment_character) {
+      std::string s;
+      std::getline( i, s );
+    } else {
+      return; // line begins with some non-comment, non-whitespace character.
+    }
+  }
+}
 
 bool ReadParameters( const struct CommandLineOptions & options,
                      std::vector< madai::Parameter > & parameters )
 {
   parameters.clear();
 
-  FILE *fp = fopen( options.parametersFile, "r" );
-  if ( !fp ) {
+  std::ifstream parameterFile(options.parametersFile);
+  if (! parameterFile.good()) {
+    std::cerr << "[ReadParameters] Unable to open file " << options.parametersFile << ".";
     return false;
   }
 
@@ -217,26 +241,19 @@ bool ReadParameters( const struct CommandLineOptions & options,
     std::cout << "Opened file '" << options.parametersFile << "'\n";
   }
 
-  char buffer[4096];
-
   // Parse each parameter as it is listed on a line
-  while ( 1 == fscanf( fp, "%4095s", buffer ) ) {
-    std::string parameterName( buffer );
-
-    if ( options.verbose ) {
-      std::cout << "Read parameter '" << parameterName << "' ";
+  std::string parameterName;
+  std::string distributionType;
+  discard_comments(parameterFile, '#');
+  while (parameterFile >> distributionType >> parameterName) {
+    if (! parameterFile.good()) {
+      parameterFile.close();
+      break;
     }
-
-    if ( 1 != fscanf( fp, "%4095s", buffer ) ) {
-      std::cerr << "Could not read distribution type\n";
-      fclose( fp );
-      return false;
-    }
-
-    std::string distributionType( LowerCase( buffer ) );
-
+    LowerCase(distributionType);
     if ( options.verbose ) {
-      std::cout << "which is of type '" << distributionType << "' ";
+      std::cout << "Read parameter '" << parameterName << "' "
+                << "which is of type '" << distributionType << "' ";
     }
 
     madai::Distribution *distribution = NULL;
@@ -246,16 +263,15 @@ bool ReadParameters( const struct CommandLineOptions & options,
     if ( distributionType == "uniform" ) {
       // Parse minimum and maximum values
       double minimum, maximum;
-      if ( 2 != fscanf( fp, "%lf %lf", &minimum, &maximum ) ) {
+      parameterFile >> minimum >> maximum;
+      if (! parameterFile.good()) {
         std::cerr << "Could not read uniform distribution minimum and maximum\n";
-        fclose( fp );
+        parameterFile.close();
         return false;
       }
-
       if ( options.verbose ) {
         std::cout << "with range [" << minimum << ", " << maximum << "]\n";
       }
-
       uniform.SetMinimum( minimum );
       uniform.SetMaximum( maximum );
       distribution = &uniform;
@@ -263,9 +279,10 @@ bool ReadParameters( const struct CommandLineOptions & options,
     } else if ( distributionType == "gaussian" ) {
       // Parse mean and standard deviation
       double mean, standardDeviation;
-      if ( 2 != fscanf( fp, "%lf %lf", &mean, &standardDeviation ) ) {
+      parameterFile >> mean >> standardDeviation;
+      if (! parameterFile.good()) {
         std::cerr << "Could not read Gaussian distribution mean and standard deviation\n";
-        fclose( fp );
+        parameterFile.close();
         return false;
       }
 
@@ -279,15 +296,14 @@ bool ReadParameters( const struct CommandLineOptions & options,
       distribution = &gaussian;
     } else {
       std::cerr << "Unknown distribution type '" << distributionType << "'\n";
-      fclose( fp );
+      parameterFile.close();
       return false;
     }
-
     parameters.push_back( madai::Parameter( parameterName, *distribution ) );
+    discard_comments(parameterFile, '#');
   }
 
-  fclose( fp );
-
+  parameterFile.close();
   // Everything went okay
   return true;
 }
@@ -320,31 +336,33 @@ bool WriteDirectoriesFormat( const struct CommandLineOptions & options,
   for ( size_t i = 0; i < samples.size(); ++i ) {
     const madai::Sample & sample = samples[i];
 
-    char buffer[128];
-    sprintf( buffer, "/model_outputs/run%04d", static_cast<int>( i ) );
-    std::string runDirectory( directory + std::string( buffer ) );
+    std::ostringstream buffer;
+    buffer << directory << "/model_outputs/run"
+           << std::setw( 7 ) << std::setfill( '0' ) << i;
+    std::string runDirectory(buffer.str());
 
-    std::cout << runDirectory << "\n";
+    if ( options.verbose ) {
+      std::cout << runDirectory << "\n";
+    }
 
     directoryCreated = directoryCreated &&
       madaisys::SystemTools::MakeDirectory( runDirectory.c_str() );
 
     // Write the parameters to the parameters.dat file
     std::string parametersFile( runDirectory + "/parameters.dat" );
-    FILE *fp = fopen( parametersFile.c_str(), "w" );
-    if ( !fp ) {
+    std::ofstream outfile(parametersFile.c_str());
+    if (! outfile) {
       std::cerr << "Could not open file '" << parametersFile << "'\n";
       return false;
     }
 
     assert( parameters.size() == sample.m_ParameterValues.size() );
     for ( size_t j = 0; j < parameters.size(); ++j ) {
-      fprintf( fp, "%s %f\n",
-               parameters[ j ].m_Name.c_str(),
-               sample.m_ParameterValues[ j ] );
+      outfile << parameters[ j ].m_Name << ' '
+              << sample.m_ParameterValues[ j ] << '\n';
     }
 
-    fclose( fp );
+    outfile.close();
   }
 
   return true;
@@ -365,20 +383,23 @@ bool WriteEmulatorFormat( const struct CommandLineOptions & options,
   // Open the output file
   std::string outputFile( options.outputDirectory );
   outputFile += "/emulator.dat";
-  FILE * fp = fopen( outputFile.c_str(), "w" );
-  if ( !fp ) {
+  std::ofstream outfile(outputFile.c_str());
+  if (! outfile) {
     std::cerr << "Could not create output file '" << outputFile << "'\n";
     return false;
   }
 
+  // Print some comments
+  outfile << "# created by generateTrainingPoints\n";
+
   // Print VERSION
-  fprintf( fp, "VERSION 1\n" );
+  outfile << "VERSION 1\n";
 
   // Print the PARAMETERS
-  fprintf( fp, "PARAMETERS\n" );
+  outfile << "PARAMETERS\n";
 
   for ( size_t i = 0; i < parameters.size(); ++i ) {
-    fprintf( fp, "%s ", parameters[i].m_Name.c_str() );
+    outfile << parameters[i].m_Name << ' ';
     const madai::Distribution * priorDistribution =
       parameters[i].GetPriorDistribution();
     const madai::UniformDistribution * uniformDistribution =
@@ -386,13 +407,13 @@ bool WriteEmulatorFormat( const struct CommandLineOptions & options,
     const madai::GaussianDistribution * gaussianDistribution =
       dynamic_cast< const madai::GaussianDistribution *>( priorDistribution );
     if ( uniformDistribution ) {
-      fprintf( fp, "UNIFORM %f %f\n",
-               uniformDistribution->GetMinimum(),
-               uniformDistribution->GetMaximum() );
+      outfile << "UNIFORM "
+              << uniformDistribution->GetMinimum() << ' '
+              << uniformDistribution->GetMaximum() << '\n';
     } else if ( gaussianDistribution ) {
-      fprintf( fp, "GAUSSIAN %f %f\n",
-               gaussianDistribution->GetMean(),
-               gaussianDistribution->GetStandardDeviation() );
+      outfile << "GAUSSIAN "
+              << gaussianDistribution->GetMean() << ' '
+              << gaussianDistribution->GetStandardDeviation() << '\n';
     } else {
       std::cerr << "Unknown prior type\n";
       return false;
@@ -400,22 +421,20 @@ bool WriteEmulatorFormat( const struct CommandLineOptions & options,
   }
 
   // Print training points
-  fprintf( fp, "NUMBER_OF_TRAINING_POINTS %d\n",
-           static_cast< int >( samples.size() ) );
+  outfile << "NUMBER_OF_TRAINING_POINTS " << samples.size() << '\n';
 
   // Print parameter values at training points
-  fprintf( fp, "PARAMETER_VALUES\n" );
+  outfile << "PARAMETER_VALUES\n";
 
   for ( size_t i = 0; i < samples.size(); ++i ) {
     const madai::Sample & sample = samples[i];
 
     for ( size_t j = 0; j < sample.m_ParameterValues.size(); ++j ) {
-      fprintf( fp, "%f ", sample.m_ParameterValues[j] );
+      outfile << sample.m_ParameterValues[j] << ' ';
     }
-    fprintf( fp, "\n" );
+    outfile << "\n";
   }
-
-  fclose( fp );
+  outfile.close();
 
   return true;
 }
@@ -468,4 +487,3 @@ int main( int argc, char * argv[] ) {
 
   return EXIT_SUCCESS;
 }
-
