@@ -66,6 +66,8 @@ int main(int argc, char ** argv) {
   int t = gpem.GetNumberOfScalarOutputs();
 
   int step = numberIter / 100, percent = 0;
+  if (step < 1)
+    step = 1; // avoid div-by-zero error;
   std::vector< madai::Sample> samples;
   for (int count = 0; count < numberIter; count ++) {
     if (count % step == 0)
