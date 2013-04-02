@@ -776,7 +776,7 @@ bool GaussianProcessEmulator::SingleModel::MakeCache() {
   int N = m_Parent->m_NumberTrainingPoints;
   int p = m_Parent->m_NumberParameters;
   int F = NumberRegressionFunctions(m_RegressionOrder, p);
-  Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
+  const Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
 
   // allocate members
   m_CInverse.resize(N, N);
@@ -932,13 +932,48 @@ bool GaussianProcessEmulator::SingleModel::BasicTraining(
   m_Thetas.resize(numberOfThetas);
 
   switch(m_CovarianceFunction) {
-  case POWER_EXPONENTIAL_FUNCTION:
-    assert(offset == 3);
+
+  case GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION:
+    m_Thetas.resize(2 + p);
+    m_Thetas(0) = amplitude;
+    m_Thetas(1) = defaultNugget;
+    for (int j = 0; j < p; ++j) {
+      const madai::Parameter & param = m_Parent->m_Parameters[j];
+      const madai::Distribution * priordist = param.m_PriorDistribution;
+      m_Thetas(2+j) = scale * std::abs(priordist->GetPercentile(0.75)
+                                     - priordist->GetPercentile(0.25));
+    }
     break;
-  case SQUARE_EXPONENTIAL_FUNCTION:
-  case MATERN_32_FUNCTION:
-  case MATERN_52_FUNCTION:
-    assert(offset == 2);
+  case GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION:
+    m_Thetas.resize(3 + p);
+    m_Thetas(0) = amplitude;
+    m_Thetas(1) = defaultNugget;
+    m_Thetas(2) = 2.0;
+    for (int j = 0; j < p; ++j) {
+      const madai::Parameter & param = m_Parent->m_Parameters[j];
+      const madai::Distribution * priordist = param.m_PriorDistribution;
+      m_Thetas(3+j) = scale * std::abs(priordist->GetPercentile(0.75)
+                                     - priordist->GetPercentile(0.25));
+    }
+    break;
+  case GaussianProcessEmulator::MATERN_32_FUNCTION:
+    // fall through
+  case GaussianProcessEmulator::MATERN_52_FUNCTION:
+    m_Thetas.resize(3);
+    m_Thetas(0) = amplitude;
+    m_Thetas(1) = defaultNugget;
+    {
+      double min = std::numeric_limits< double >::max();
+      for (int j = 0; j < p; ++j) {
+        const madai::Parameter & param = m_Parent->m_Parameters[j];
+        const madai::Distribution * priordist = param.m_PriorDistribution;
+        double d = std::abs(priordist->GetPercentile(0.75)
+                          - priordist->GetPercentile(0.25));
+        if (d < min)
+          min = d;
+      }
+      m_Thetas(2) = min * scale;
+    }
     break;
   default:
     assert(false);
@@ -1042,7 +1077,7 @@ bool GaussianProcessEmulator::SingleModel::GetEmulatorOutputs (
   int p = m_Parent->m_NumberParameters;
   assert(p > 0);
   int F = 1 + (m_RegressionOrder * p);
-  Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
+  const Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
   Eigen::VectorXd kplus(N); // kplus is C(x,D)
   for (int j = 0; j < N; ++j) {
     Eigen::VectorXd xrow = X.row(j);
@@ -1082,8 +1117,10 @@ bool GaussianProcessEmulator::GetEmulatorOutputs (
   Eigen::VectorXd mean_pca(m_NumberPCAOutputs);
   for (int i = 0; i < m_NumberPCAOutputs; ++i) {
     double d;
-    if(! m_PCADecomposedModels[i].GetEmulatorOutputs(x, d))
+    if(! m_PCADecomposedModels[i].GetEmulatorOutputs(x, d)) {
+      std::cerr << "error in SingleModel::GetEmulatorOutputs()\n";
       return false;
+    }
     mean_pca(i) = d;
   }
   y.resize(m_NumberOutputs);
@@ -1107,7 +1144,7 @@ bool GaussianProcessEmulator::SingleModel
   int p = m_Parent->m_NumberParameters;
   assert(p > 0);
   int F = 1 + (m_RegressionOrder * p);
-  Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
+  const Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
   Eigen::VectorXd kplus(N);
   // kplus is C(x,D)
   for (int j = 0; j < N; ++j) {

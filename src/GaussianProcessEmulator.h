@@ -244,7 +244,7 @@ public:
     // FIELDS
     /**
        A pointer to the parent */
-    GaussianProcessEmulator * m_Parent;
+    const GaussianProcessEmulator * m_Parent;
     /**
        Which covariance function is used? */
     CovarianceFunctionType m_CovarianceFunction;
