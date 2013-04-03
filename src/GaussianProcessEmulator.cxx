@@ -417,10 +417,12 @@ bool parseNumberOfModelRuns( int & x, std::string ModelOutDir ) {
 }
 
 template < typename TDerived >
-inline bool parseParameterValues(
+inline bool parseParameterAndOutputValues(
     const Eigen::MatrixBase< TDerived > & m_,
+    const Eigen::MatrixBase< TDerived > & m2_,
     std::string ModelOutDir,
     unsigned int numberParameters,
+    unsigned int numberOutputs,
     unsigned int numberTrainingPoints ) {
   // Get the list of directories in model_outputs/
   std::string command = "ls -1 "+ModelOutDir+" > dirlist";
@@ -430,7 +432,11 @@ inline bool parseParameterValues(
   // Copy m_
   Eigen::MatrixBase< TDerived > & m
   = const_cast< Eigen::MatrixBase< TDerived > & >(m_);
+  // Copy m2_
+  Eigen::MatrixBase< TDerived > & m2
+  = const_cast< Eigen::MatrixBase< TDerived > & >(m2_);
   m.derived().resize( numberTrainingPoints, numberParameters );
+  m2.derived().resize( numberTrainingPoints, numberOutputs );
   unsigned int run_counter = 0;
   if ( !DFile.good() ) return false;
   while ( !DFile.eof() ) {
@@ -447,9 +453,19 @@ inline bool parseParameterValues(
         std::string name;
         parfile >> name >> m( run_counter, i );
       }
+      // Open the results.dat file
+      std::string results_file_name = dir_name+"/results.dat";
+      std::ifstream results_file ( results_file_name.c_str() );
+      if ( !results_file.good() ) return false;
+      for ( unsigned int i = 0; i < numberOutputs; i++ ) {
+        std::string name;
+        results_file >> name >> m( run_counter, i );
+      }
       run_counter++;
     }
   }
+  std::remove( dirlist.c_str() );
+  
   return true;
 }
 
@@ -564,14 +580,14 @@ bool parseModelDataDirectoryStructure(
     std::cerr << "parse Outputs error\n";
     return false;
   }
-  if ( !parseNumberOfModelRuns( 
+  /*if ( !parseNumberOfModelRuns( 
           gpme.m_NumberTrainingPoints, Model_Outs_Dir ) ) {
     std::cerr << "parse Integer error\n";
     return false;
-  }
-  if ( !parseParameterValues( 
-          gpme.m_ParameterValues, Model_Outs_Dir,
-          gpme.m_NumberTrainingPoints, gpme.m_NumberParameters ) ) {
+  }*/
+  if ( !parseParameterAndOutputValues( 
+          gpme.m_ParameterValues, gpme.m_OutputValues, Model_Outs_Dir, 
+          gpme.m_NumberParameters, gpme.m_NumberOutputs, gpme.m_NumberTrainingPoints ) ) {
     std::cerr << "parse Parameter Values error\n";
     return false;
   }
