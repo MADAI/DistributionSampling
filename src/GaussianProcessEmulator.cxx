@@ -419,9 +419,38 @@ bool parseNumberOfModelRuns( int & x, std::string ModelOutDir ) {
 template < typename TDerived >
 inline bool parseParameterValues(
     const Eigen::MatrixBase< TDerived > & m_,
-    std::string ModelOutDir ) {
-  
-  return false;
+    std::string ModelOutDir,
+    unsigned int numberParameters,
+    unsigned int numberTrainingPoints ) {
+  // Get the list of directories in model_outputs/
+  std::string command = "ls -1 "+ModelOutDir+" > dirlist";
+  std::system( command.c_str() );
+  std::string dirlist = "dirlist";
+  std::ifstream DFile ( dirlist.c_str() );
+  // Copy m_
+  Eigen::MatrixBase< TDerived > & m
+  = const_cast< Eigen::MatrixBase< TDerived > & >(m_);
+  m.derived().resize( numberTrainingPoints, numberParameters );
+  unsigned int run_counter = 0;
+  if ( !DFile.good() ) return false;
+  while ( !DFile.eof() ) {
+    std::string dir_name;
+    DFile >> dir_name;
+    char* temp;
+    std::strncpy( temp, dir_name.c_str(), 3 );
+    if ( std::strcmp( temp, "run" ) == 0 ) {
+      // Open the parameters.dat file
+      std::string par_file_name = dir_name+"/parameters.dat";
+      std::ifstream parfile ( par_file_name.c_str() );
+      if ( !parfile.good() ) return false;
+      for ( unsigned int i = 0; i < numberParameters; i++ ) {
+        std::string name;
+        parfile >> name >> m( run_counter, i );
+      }
+      run_counter++;
+    }
+  }
+  return true;
 }
 
 template < typename TDerived >
@@ -541,7 +570,8 @@ bool parseModelDataDirectoryStructure(
     return false;
   }
   if ( !parseParameterValues( 
-          gpme.m_ParameterValues, Model_Outs_Dir ) ) {
+          gpme.m_ParameterValues, Model_Outs_Dir,
+          gpme.m_NumberTrainingPoints, gpme.m_NumberParameters ) ) {
     std::cerr << "parse Parameter Values error\n";
     return false;
   }
