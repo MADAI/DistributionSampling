@@ -409,6 +409,7 @@ bool parseNumberOfModelRuns( int & x, std::string ModelOutDir ) {
       run_counter++;
     }
   }
+  std::remove( dirlist.c_str() );
   x = run_counter;
   assert ( x > 0 );
   
