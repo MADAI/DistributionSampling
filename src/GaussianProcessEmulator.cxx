@@ -26,7 +26,6 @@
 
 #include <cmath>        // std::exp std::amp
 #include <limits>       // std::numeric_limits
-#include <sys/stat.h>   // sys::stat
 #include <fstream>      // std::ofstream std::ifstream
 #include "GaussianProcessEmulator.h"
 #include "UniformDistribution.h"
@@ -394,8 +393,26 @@ bool parseInteger( int & x, std::istream & input ) {
 }
 
 bool parseNumberOfModelRuns( int & x, std::string ModelOutDir ) {
+  std::string command = "ls -1 "+ModelOutDir+" > dirlist";
+  std::system( command.c_str() );
   
-  return false;
+  std::string dirlist = "dirlist";
+  std::ifstream DFile ( dirlist.c_str() );
+  if ( !DFile.good() ) return false;
+  unsigned int run_counter = 0;
+  while ( !DFile.eof() ) {
+    std::string dir_name;
+    DFile >> dir_name;
+    char* temp;
+    std::strncpy( temp, dir_name.c_str(), 3 );
+    if ( std::strcmp( temp, "run" ) == 0 ) {
+      run_counter++;
+    }
+  }
+  x = run_counter;
+  assert ( x > 0 );
+  
+  return true;
 }
 
 template < typename TDerived >
