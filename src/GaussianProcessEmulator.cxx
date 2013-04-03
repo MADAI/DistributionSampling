@@ -343,8 +343,24 @@ bool parseOutputs(
     std::vector< std::string > & outputNames,
     int & numberOutputs,
     std::string AnalysisDir ) {
+  // First cehck to see if file exists
+  std::string ObservablesFileName = AnalysisDir+"/observable_names.dat";
+  std::ifstream input ( ObservablesFileName.c_str() );
+  if ( !input.good() ) return false;
+  outputNames.clear(); // Empty the output vector
+  while ( !input.eof() ) {
+    while ( input.peek() == '#' ) { // Disregard commented lines
+      std::string s;
+      std::getline( input, s );
+    }
+    std::string name;
+    input >> name;
+    outputNames.push_back( name );
+  }
+  numberOutputs = outputNames.size();
+  assert( numberOutputs > 0 );
   
-  return false;
+  return true;
 }
 
 bool parseOutputs(
