@@ -68,6 +68,9 @@ public:
     Writes current state to file.  \returns true on sucess. */
   bool Write(std::ostream & output) const;
   /**
+    Writes current state of PCADecomposition to file. */
+  bool WritePCA(std::ostream & output) const;
+  /**
     This loads a fully-ready-to-go GPEM
     \returns true on success. */
   bool Load(std::istream & input);

@@ -557,6 +557,27 @@ std::ostream & serializeGaussianProcessEmulator(
   o << "END_OF_FILE\n";
   return o;
 }
+
+std::ostream & serializePCADecomposition(
+    const GaussianProcessEmulator & gpme,
+    std::ostream & o ) {
+  serializeComments(gpme.m_Comments,o);
+  o << "VERSION 1\n";
+  o << "OUTPUT_MEANS\n";
+  PrintVector(gpme.m_OutputMeans, o);
+  o << "OUTPUT_UNCERTAINTY_SCALES\n";
+  PrintVector(gpme.m_OutputUncertaintyScales, o);
+  o << "OUTPUT_PCA_EIGENVALUES\n";
+  PrintVector(gpme.m_PCAEigenvalues, o);
+  o << "OUTPUT_PVA_EIGENVECTORS\n";
+  PrintMatrix(gpme.m_PCAEigenvectors, o);
+  o << "SUBMODELS\t" << gpme.m_NumberPCAOutputs << "\n";
+  for ( unsigned int i = 0; i < gpme.m_NumberPCAOutputs; ++i ) {
+    serializeSubmodels(gpme.m_PCADecomposedModels[i],i,o);
+  }
+  o << "END_OF_FILE\n";
+  return o;
+}
   
 bool parseModelDataDirectoryStructure(
     GaussianProcessEmulator & gpme,
@@ -1540,6 +1561,13 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
         m_PCAEigenvectors * var_pca.asDiagonal() *
         m_PCAEigenvectors.transpose());
 
+  return true;
+}
+
+
+bool GaussianProcessEmulator::WritePCA( std::ostream & o ) const {
+  o.precision(17);
+  serializePCADecomposition(*this,o);
   return true;
 }
 
