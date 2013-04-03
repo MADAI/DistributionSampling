@@ -469,14 +469,6 @@ inline bool parseParameterAndOutputValues(
   return true;
 }
 
-template < typename TDerived >
-inline bool parseOutputValues(
-    const Eigen::MatrixBase< TDerived > & m_,
-    std::string ModelOutDir ) {
-  
-  return false;
-}
-
 bool parseSubmodels(
     GaussianProcessEmulator::SingleModel & m,
     int modelIndex,
@@ -580,20 +572,15 @@ bool parseModelDataDirectoryStructure(
     std::cerr << "parse Outputs error\n";
     return false;
   }
-  /*if ( !parseNumberOfModelRuns( 
+  if ( !parseNumberOfModelRuns( 
           gpme.m_NumberTrainingPoints, Model_Outs_Dir ) ) {
     std::cerr << "parse Integer error\n";
     return false;
-  }*/
+  }
   if ( !parseParameterAndOutputValues( 
           gpme.m_ParameterValues, gpme.m_OutputValues, Model_Outs_Dir, 
           gpme.m_NumberParameters, gpme.m_NumberOutputs, gpme.m_NumberTrainingPoints ) ) {
     std::cerr << "parse Parameter Values error\n";
-    return false;
-  }
-  if ( !parseOutputValues( 
-          gpme.m_OutputValues, Model_Outs_Dir ) ) {
-    std::cerr << "parse Output Values error\n";
     return false;
   }
   return true;
@@ -960,6 +947,26 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
 }
 
 
+bool GaussianProcessEmulator::Load(std::string TopDirectory) {
+  m_Status = UNINITIALIZED;
+  if ( !parseGaussianProcessEmulator(*this, TopDirectory, true) ) {
+    std::cerr << "Error parsing gaussian process emulator.\n";
+    return false;
+  }
+  // We are finished reading the input files.
+  if ( this->CheckStatus() != GaussianProcessEmulator::UNCACHED ) {
+    std::cerr << "Emulator already cached.\n";
+    std::cerr << stat(this->CheckStatus()) << "\n";
+    return false;
+  }
+  if ( !this->MakeCache() ) {
+    std::cerr << "Error while makeing cache.\n";
+    return false;
+  }
+  return true;
+}
+
+
 bool GaussianProcessEmulator::Load(std::istream & input)
 {
   m_Status = UNINITIALIZED;
@@ -1159,6 +1166,16 @@ bool GaussianProcessEmulator::LoadTrainingData(std::istream & input) {
   return (m_Status == UNTRAINED);
 }
 
+/**
+   This taken an empty GPEM and loads training data */
+bool GaussianProcessEmulator::LoadTrainingData(std::string TopDirectory) {
+  m_Status = UNINITIALIZED;
+  if ( !parseGaussianProcessEmulator(*this, TopDirectory, false) )
+    return false;
+  m_NumberPCAOutputs = 0;
+  this->CheckStatus();
+  return (m_Status == UNTRAINED);
+}
 
 /**
    This takes an GPEM and trains it. \returns true on sucess. */

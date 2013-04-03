@@ -72,9 +72,17 @@ public:
     \returns true on success. */
   bool Load(std::istream & input);
   /**
+    This loads a fully-ready-to-go GPEM
+    \returns true on success. */
+  bool Load(std::string TopDirectory);
+  /**
     This takes an empty GPEM and loads training data.
     \returns true on success. */
   bool LoadTrainingData(std::istream & input);
+  /**
+    This takes an empty GPEM and loads training data.
+    \returns true on success. */
+  bool LoadTrainingData(std::string TopDirectory);
 
   /**
     This takes an GPEM and sets default values for all of the
