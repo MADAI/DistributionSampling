@@ -241,7 +241,7 @@ bool parseParameters(
   std::ifstream input( PriorFileName.c_str() );
   if ( !input.good() ) return false;
   parameters.clear(); // Empty the output vector
-  while ( !input.eof() ) {
+  while ( input.good() ) {
     while ( input.peek() == '#' ) { // Disregard commented lines
       std::string s;
       std::getline( input, s );
@@ -249,7 +249,8 @@ bool parseParameters(
     std::string name;
     std::string type;
     double dist_vals[2];
-    input >> name >> type >> dist_vals[0] >> dist_vals[1];
+    if ( !(input >> name >> type >> dist_vals[0] >> dist_vals[1]) )
+      break;
     if ( type == "uniform" ) {
       madai::UniformDistribution priorDist;
       priorDist.SetMinimum(dist_vals[0]);
@@ -356,6 +357,9 @@ bool parseOutputs(
     input >> name;
     outputNames.push_back( name );
   }
+  if ( outputNames.back() == "" || outputNames.back() == " " ) {
+    outputNames.pop_back();
+  }
   numberOutputs = outputNames.size();
   assert( numberOutputs > 0 );
   
@@ -403,7 +407,7 @@ bool parseNumberOfModelRuns( int & x, std::string ModelOutDir ) {
   while ( !DFile.eof() ) {
     std::string dir_name;
     DFile >> dir_name;
-    char* temp;
+    char* temp = new char[3]();
     std::strncpy( temp, dir_name.c_str(), 3 );
     if ( std::strcmp( temp, "run" ) == 0 ) {
       run_counter++;
@@ -421,46 +425,78 @@ inline bool parseParameterAndOutputValues(
     const Eigen::MatrixBase< TDerived > & m_,
     const Eigen::MatrixBase< TDerived > & m2_,
     std::string ModelOutDir,
-    unsigned int numberParameters,
-    unsigned int numberOutputs,
-    unsigned int numberTrainingPoints ) {
+    unsigned int numberTrainingPoints,
+    std::vector< madai::Parameter > parameters,
+    std::vector< std::string > outputNames ) {
   // Get the list of directories in model_outputs/
   std::string command = "ls -1 "+ModelOutDir+" > dirlist";
   std::system( command.c_str() );
   std::string dirlist = "dirlist";
   std::ifstream DFile ( dirlist.c_str() );
+  int p = parameters.size();
+  int t = outputNames.size();
   // Copy m_
   Eigen::MatrixBase< TDerived > & m
   = const_cast< Eigen::MatrixBase< TDerived > & >(m_);
   // Copy m2_
   Eigen::MatrixBase< TDerived > & m2
   = const_cast< Eigen::MatrixBase< TDerived > & >(m2_);
-  m.derived().resize( numberTrainingPoints, numberParameters );
-  m2.derived().resize( numberTrainingPoints, numberOutputs );
+  m.derived().resize( numberTrainingPoints, p );
+  m2.derived().resize( numberTrainingPoints, t );
   unsigned int run_counter = 0;
   if ( !DFile.good() ) return false;
   while ( !DFile.eof() ) {
     std::string dir_name;
     DFile >> dir_name;
-    char* temp;
+    char* temp = new char[3]();
     std::strncpy( temp, dir_name.c_str(), 3 );
     if ( std::strcmp( temp, "run" ) == 0 ) {
       // Open the parameters.dat file
-      std::string par_file_name = dir_name+"/parameters.dat";
+      std::string par_file_name = ModelOutDir+dir_name+"/parameters.dat";
       std::ifstream parfile ( par_file_name.c_str() );
       if ( !parfile.good() ) return false;
-      for ( unsigned int i = 0; i < numberParameters; i++ ) {
+      while ( !parfile.eof() ) {
         std::string name;
-        parfile >> name >> m( run_counter, i );
+        parfile >> name;
+        for ( unsigned int i = 0; i < p; i++ )
+          if ( name == parameters[i].m_Name )
+            parfile >> m( run_counter, i);
       }
+      parfile.close();
       // Open the results.dat file
-      std::string results_file_name = dir_name+"/results.dat";
+      std::string results_file_name = ModelOutDir+dir_name+"/results.dat";
       std::ifstream results_file ( results_file_name.c_str() );
-      if ( !results_file.good() ) return false;
-      for ( unsigned int i = 0; i < numberOutputs; i++ ) {
-        std::string name;
-        results_file >> name >> m( run_counter, i );
+      // Check the style of the outputs
+      std::string line;
+      char* temp1 = new char[100]();
+      std::getline( results_file, line );
+      std::strncpy( temp1, line.c_str(), 100 );
+      char* token = strtok( temp1, " " );
+      int NVal = 0;
+      while ( true ) {
+        NVal++;
+        token = strtok( NULL, " " );
+        if ( token == NULL )
+          break;
       }
+      results_file.seekg( 0, results_file.beg);
+      if ( !results_file.good() ) return false;
+      while ( !results_file.eof() ) {
+        std::string name;
+        results_file >> name;
+        for ( unsigned int i = 0; i < t; i++ )
+          if ( name == outputNames[i] ) {
+            results_file >> m2( run_counter, i );
+            if ( NVal == 3 ) {
+              double ModelUnc;
+              results_file >> ModelUnc;
+            } else if ( NVal != 2 ) {
+              std::cerr << "Unknown output format error.\n";
+              return false;
+            }
+          }
+      }
+      results_file.close();
       run_counter++;
     }
   }
@@ -569,7 +605,7 @@ std::ostream & serializePCADecomposition(
   PrintVector(gpme.m_OutputUncertaintyScales, o);
   o << "OUTPUT_PCA_EIGENVALUES\n";
   PrintVector(gpme.m_PCAEigenvalues, o);
-  o << "OUTPUT_PVA_EIGENVECTORS\n";
+  o << "OUTPUT_PCA_EIGENVECTORS\n";
   PrintMatrix(gpme.m_PCAEigenvectors, o);
   o << "SUBMODELS\t" << gpme.m_NumberPCAOutputs << "\n";
   for ( unsigned int i = 0; i < gpme.m_NumberPCAOutputs; ++i ) {
@@ -600,8 +636,8 @@ bool parseModelDataDirectoryStructure(
   }
   if ( !parseParameterAndOutputValues( 
           gpme.m_ParameterValues, gpme.m_OutputValues, Model_Outs_Dir, 
-          gpme.m_NumberParameters, gpme.m_NumberOutputs, gpme.m_NumberTrainingPoints ) ) {
-    std::cerr << "parse Parameter Values error\n";
+          gpme.m_NumberTrainingPoints, gpme.m_Parameters, gpme.m_OutputNames ) ) {
+    std::cerr << "parse Parameter and Output Values error\n";
     return false;
   }
   return true;
@@ -665,7 +701,7 @@ bool parseGaussianProcessEmulator(
     GaussianProcessEmulator & gpme,
     std::string TopDirectory,
     bool LoadPCA ) {
-  std::string MOD = TopDirectory+"/model_outputs/";
+  std::string MOD = TopDirectory+"/model_output/";
   std::string SAD = TopDirectory+"/statistical_analysis/";
   if ( !parseModelDataDirectoryStructure( gpme, MOD, SAD ) ) {
     std::cerr << "parse directory structure error\n";
@@ -1566,7 +1602,7 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
 
 
 bool GaussianProcessEmulator::WritePCA( std::ostream & o ) const {
-  o.precision(17);
+  o.precision(15);
   serializePCADecomposition(*this,o);
   return true;
 }

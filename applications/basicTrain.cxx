@@ -37,10 +37,7 @@ const char useage [] =
   "Usage:\n"
   "    basicTrain InputModelFile [ModelSnapshotFile]\n"
   "\n"
-  "InputModelFile can be \"-\" to read from standard input.\n"
-  "\n"
-  "ModelSnapshotFile can be \"-\" or left unspecified to write to\n"
-  "standard output.\n";
+  "InputModelFile can be \"-\" to read from standard input.\n";
 
 #include <getopt.h>
 #include <iostream> // cout, cin
@@ -49,23 +46,19 @@ const char useage [] =
 #include "GaussianProcessEmulator.h"
 
 int main(int argc, char ** argv) {
-  char const * inputFile = NULL;
-  char const * outputFile = "-";
+  std::string TopDirectory;
   if (argc > 1) {
-    inputFile = argv[1];
-    if (argc > 2)
-      outputFile = argv[2];
+    TopDirectory = std::string(argv[1]);
   } else {
     std::cerr << useage << '\n';
     return EXIT_FAILURE;
   }
+  std::string outputFile = TopDirectory+"/statistical_analysis/PCADecomposition.dat";
 
   madai::GaussianProcessEmulator gpme;
-  if (0 == strcmp(inputFile, "-")) {
-    gpme.LoadTrainingData(std::cin);
-  } else {
-    std::ifstream is (inputFile);
-    gpme.LoadTrainingData(is);
+  if ( !gpme.LoadTrainingData(TopDirectory) ) {
+    std::cerr << "Error Loading Training Data.\n";
+    return EXIT_FAILURE;
   }
 
   double fractionResolvingPower = 0.95;
@@ -84,11 +77,8 @@ int main(int argc, char ** argv) {
           amplitude,
           scale))
     return EXIT_FAILURE;
-  if (0 == strcmp(outputFile, "-"))
-    gpme.Write(std::cout);
-  else {
-    std::ofstream os (outputFile);
-    gpme.Write(os);
-  }
+  std::ofstream os (outputFile.c_str());
+  gpme.WritePCA(os);
+  
   return EXIT_SUCCESS;
 }
