@@ -56,6 +56,24 @@ GaussianProcessEmulatedModel
 }
 
 /**
+ * Loads a configuration from a directory structure. The format of the file
+ * is defined by this function.
+ */
+Model::ErrorType
+GaussianProcessEmulatedModel
+::LoadConfiguration( const std::string TopDirectory )
+{
+  if ( !m_GPME.Load(TopDirectory) )
+    return Model::OTHER_ERROR;
+  if ( m_GPME.m_Status != GaussianProcessEmulator::READY )
+    return Model::OTHER_ERROR;
+  m_StateFlag = READY;
+  m_Parameters = m_GPME.m_Parameters;
+  m_ScalarOutputNames = m_GPME.m_OutputNames;
+  return Model::NO_ERROR;
+}
+
+/**
  * Get the scalar outputs from the model evaluated at x.  If an
  * error happens, the scalar output array will be left incomplete.
  */

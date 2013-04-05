@@ -707,12 +707,11 @@ bool parseGaussianProcessEmulator(
     std::cerr << "parse directory structure error\n";
     return false;
   }
-  std::string PCADecompFileName = SAD+"PCADecomposition.dat";
+  std::string PCADecompFileName = SAD+"/PCADecomposition.dat";
   if ( LoadPCA ) {
-    std::ifstream input( SAD.c_str() );
+    std::ifstream input( PCADecompFileName.c_str() );
     if ( input ) {
       // File exists, read in from it
-      std::ifstream input( SAD.c_str() );
       if ( !parsePCADecomposition( gpme, input ) ) {
         std::cerr << "parse saved PCA Decomposition error\n";
         return false;

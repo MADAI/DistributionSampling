@@ -32,24 +32,24 @@
  */
 int main(int argc, char ** argv) {
 
-  if (argc < 4) {
+  if (argc < 3) {
     std::cerr << "Useage:\n  "
-      "generateMCMCTrace emulatorFile observationsFile N\n\n";
+    "generateMCMCTrace TopDirectory N\n\n";
     return EXIT_FAILURE; //\fixme useage
   }
-  const char * emulatorFile = argv[1];
-  const char * observationsFile = argv[2];
-  int numberIter = atoi(argv[3]);
-
+  std::string TopDirectory(argv[1]);
+  std::string observationsFile = TopDirectory+"/experimental_results/results.dat";
+  int numberIter = atoi(argv[2]);
+  
   madai::GaussianProcessEmulatedModel gpem;
-  if (gpem.LoadConfigurationFile( emulatorFile ) != madai::Model::NO_ERROR) {
+  if (gpem.LoadConfiguration( TopDirectory ) != madai::Model::NO_ERROR) {
     std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfigurationFile\n";
     return EXIT_FAILURE;
   }
 
   gpem.SetUseModelCovarianceToCalulateLogLikelihood(false);
 
-  std::ifstream observations(observationsFile);
+  std::ifstream observations(observationsFile.c_str());
   if (madai::Model::NO_ERROR != gpem.LoadObservations(observations)) {
     std::cerr << "error loading observations.\n";
     return EXIT_FAILURE;
