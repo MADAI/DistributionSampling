@@ -35,9 +35,14 @@ USE:
 
 const char useage [] =
   "Usage:\n"
-  "    basicTrain InputModelFile [ModelSnapshotFile]\n"
+  "    basicTrain RootDirectory [OutputFileOption]\n"
   "\n"
-  "InputModelFile can be \"-\" to read from standard input.\n";
+  "RootDirectory is the top level directory in which the folders\n"
+  "model_output/ experimental_results/ and statistical_analysis are contained.\n"
+  "\n"
+  "[OutputFileOption] if this is set to \"FullSummary\" then the entire\n"
+  "data structure will be saved to the file ModelSnapshot.dat. Otherwise,\n"
+  "only the PCA Decomposition will be saved to PCADecomposition.dat.\n";
 
 #include <getopt.h>
 #include <iostream> // cout, cin
@@ -47,13 +52,23 @@ const char useage [] =
 
 int main(int argc, char ** argv) {
   std::string TopDirectory;
+  bool WriteFull = false;
   if (argc > 1) {
     TopDirectory = std::string(argv[1]);
+    if ( argc > 2 )
+      if ( std::string(argv[2]) == "FullSummary" ) {
+        WriteFull = true;
+      }
   } else {
     std::cerr << useage << '\n';
     return EXIT_FAILURE;
   }
-  std::string outputFile = TopDirectory+"/statistical_analysis/PCADecomposition.dat";
+  std::string outputFile;
+  if ( WriteFull ) {
+    outputFile = TopDirectory+"/statistical_analysis/ModelSnapshot.dat";
+  } else {
+    outputFile = TopDirectory+"/statistical_analysis/PCADecomposition.dat";
+  }
 
   madai::GaussianProcessEmulator gpme;
   if ( !gpme.LoadTrainingData(TopDirectory) ) {
@@ -78,7 +93,11 @@ int main(int argc, char ** argv) {
           scale))
     return EXIT_FAILURE;
   std::ofstream os (outputFile.c_str());
-  gpme.WritePCA(os);
+  if ( WriteFull ) {
+    gpme.Write(os);
+  } else {
+    gpme.WritePCA(os);
+  }
   
   return EXIT_SUCCESS;
 }
