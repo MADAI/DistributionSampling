@@ -1,0 +1,54 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH DistributionSampling 1 "2013"  "User Manuals"
+.SH NAME
+MADAI Distribution Sampling Library
+.SH SYNOPSIS
+.B basicTrain
+.R InputModelFile [ModelSnapshotFile].
+
+.B emulate
+.R [-q] ModelSnapshotFile
+
+.B printThetas
+.R ModelSnapshotFile
+
+.B generateLatinHypercube
+.R parameter_data_file number_samples
+
+.B trainEmulator
+.R --regression_order=... --covariance_fn=... \e
+      --pca_variance=... InputModelFile [ModelSnapshotFile]
+.br
+.SH DESCRIPTION
+.B the MADAI Distribution Sampling Library
+contains several executables for working with a Gaussian Process Emulator.
+The standard workflow would be to first use
+.B generateLatinHypercube
+to generate a set of sample points in parameter space.  After running
+the full model at each of those points, one has a complete set of
+traniing data.  One would then use
+.B basicTrain
+to create .... FIXME
+
+.SH OPTIONS
+\" .IP -q
+\" BE quiet
+FIXME
+.SH FILE FORMATS
+\" .I /etc/foo.conf
+\" .RS
+\" The system wide configuration file. See
+FIXME
+.SH RETURN VALUES
+Each executible returns EXIT_FAILURE if anything unexpected happens.
+.SH BUGS
+.B trainEmulator
+does not work.
+.SH AUTHOR
+Hal Canary
+.br
+Cory Quammen
+.br
+Chris Coleman-Smith
