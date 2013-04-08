@@ -82,6 +82,7 @@ bool parseCommandLineOptions(int argc, char** argv, struct cmdLineOpts & opts)
   // init with default values
   opts.quietFlag = false;
   opts.TopDirectory = NULL; // default to NULL
+  opts.ReadMethod = "Directory";
   int longIndex, opt;
   opt = getopt_long( argc, argv, optString, longOpts, &longIndex );
   while( opt != -1 ) {
