@@ -66,12 +66,10 @@ bool parseGaussianProcessMCMCConfig(
   
   std::string name, tstring;
   char opt;
-  std::vector< std::string > ParamNames;
   while ( input.good() ) {
     while ( input.peek() == '#' ) {
       std::string line;
       std::getline( input, line );
-      std::cerr << "Comments:\n";
       std::cerr << line << std::endl;
     }
     input >> name;
@@ -80,12 +78,13 @@ bool parseGaussianProcessMCMCConfig(
     } else if ( name == "BURN_IN" ) {
       opt = 'B';
     } else if ( name == "USE_EMULATED_ERROR" ) {
-      opt = 'U';
+      opt = 'E';
     } else if ( name == "STEP_SIZE" ) {
       opt = 'S';
     } else if ( name == "USE_MODEL_SNAPSHOT_FILE" ) {
-      opt = 'M';
+      opt = 'F';
     } else {
+      std::cerr << "Unknown parameter " << name << '\n';
       opt = NULL;
     }
     switch( opt ) {
@@ -109,14 +108,14 @@ bool parseGaussianProcessMCMCConfig(
         return false;
       }
       break;
-    case 'U':
+    case 'E':
       input >> tstring;
       if ( tstring == "false" ) {
         Opts.UseEmulatedCovariance = false;
       } else if ( tstring == "true" ) {
         Opts.UseEmulatedCovariance = true;
       } else {
-        std::cerr << "Error: USE_EMULATED_ERROR given incorrect argument: \""
+        std::cerr << "Error: USE_MODEL_ERROR given incorrect argument: \""
           << tstring << "\"\n";
         return false;
       }
@@ -131,7 +130,7 @@ bool parseGaussianProcessMCMCConfig(
         return false;
       }
       break;
-    case 'M':
+    case 'F':
       input >> tstring;
       if ( tstring == "false" ) {
         Opts.UseModelSnapshotFile = false;
@@ -142,6 +141,7 @@ bool parseGaussianProcessMCMCConfig(
           << tstring << "\"\n";
         return false;
       }
+      break;
     }
   }
   return true;
@@ -162,7 +162,7 @@ int main(int argc, char ** argv) {
   std::ifstream RPF ( RuntimeParametersFileName.c_str() );
   struct GaussianProcessMCMCRuntimeParameters Opts;
   if ( !parseGaussianProcessMCMCConfig( RPF, Opts ) ) {
-    std::cerr << "Error: Parsing configuration file for mcmc.\n";
+    std::cerr << "Error: Parsing configuration file for gaussian process mcmc.\n";
     return EXIT_FAILURE;
   }
   
