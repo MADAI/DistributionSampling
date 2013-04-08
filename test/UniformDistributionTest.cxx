@@ -92,7 +92,7 @@ int main( int argc, char* argv[] )
 
   double expectedDensity = 1.0 / ( newMaximum - newMinimum );
   double actualDensity = distribution.GetProbabilityDensity( 0.5 * ( newMinimum + newMaximum ) );
-  if ( expectedDensity != actualDensity ) {
+  if ( fabs( expectedDensity - actualDensity ) > 1e-5 ) {
     std::cerr << "UniformDistribution::GetProbabilityDensity() for value in range should "
         << "have been " << expectedDensity << ", got " << actualDensity
         << "instead." << std::endl;
@@ -102,7 +102,7 @@ int main( int argc, char* argv[] )
   double x = 0.32;
   double expectedPercentile = x * ( newMaximum - newMinimum ) + newMinimum;
   double actualPercentile = distribution.GetPercentile( x );
-  if ( expectedPercentile != actualPercentile ) {
+  if ( fabs( expectedPercentile - actualPercentile ) > 1e-5 ) {
     std::cerr << "UniformDistribution::GetPercentile() for value " << x << " should have "
         << "been " << expectedPercentile << ", got " << actualPercentile << std::endl;
     return EXIT_FAILURE;
