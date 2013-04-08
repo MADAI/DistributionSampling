@@ -27,22 +27,35 @@
 #include "GaussianProcessEmulatedModel.h"
 #include "Trace.h"
 
-
 /**
-   \fixme document
+generateMCMCtrace
+  Generate a trace of length N for a Gaussian Process Model Emulator
  */
 static const int DEFAULT_NUMBER_ITERATIONS = 100;
 static const int DEFAULT_BURN_IN = 0;
 static const double DEFAULT_STEP_SIZE = 0.1;
+const char useage [] =
+  "Usage:\n"
+  "    generateMCMCtrace TopDirectory OutputFileName\n"
+  "\n"
+  "TopDirectory is the directory containing model_output/ experimental_results/\n"
+  "and statistical_analysis/.\n"
+  "\n"
+  "OutputFileName is the name of the file the trace will be stored in. This file\n"
+  "will be located in the statistical_analysis/MCMCTrace/ directory.\n";
  
-struct MCMCRuntimeParameters{
+struct GaussianProcessMCMCRuntimeParameters
+{
   int numberIter;
   int numberBurnIn;
   bool UseEmulatedCovariance;
   double StepSize;
 };
 
-bool parseMCMCConfig( std::istream & input, struct MCMCRuntimeParameters & Opts ) {
+bool parseGaussianProcessMCMCConfig( 
+    std::istream & input, 
+    struct GaussianProcessMCMCRuntimeParameters & Opts ) 
+{
   // Initialize as defaults
   Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
   Opts.numberBurnIn = DEFAULT_BURN_IN;
@@ -114,11 +127,8 @@ bool parseMCMCConfig( std::istream & input, struct MCMCRuntimeParameters & Opts 
 int main(int argc, char ** argv) {
 
   if (argc < 3) {
-    std::cerr << "Useage:\n  "
-    "generateMCMCTrace TopDirectory OutputFileName\n"
-    "\n"
-    "All trace data will be saved to the statistical_analysis/MCMCTrace/ directory\n\n";
-    return EXIT_FAILURE; //\fixme useage
+    std::cerr << useage << "\n";
+    return EXIT_FAILURE;
   }
   std::string TopDirectory(argv[1]);
   std::string OutputFileName(argv[2]);
@@ -126,7 +136,7 @@ int main(int argc, char ** argv) {
   std::string RuntimeParametersFileName = TopDirectory+"/statistical_analysis/MCMC.param";
   
   std::ifstream RPF ( RuntimeParametersFileName.c_str() );
-  struct MCMCRuntimeParameters Opts;
+  struct GaussianProcessMCMCRuntimeParameters Opts;
   if ( !parseMCMCConfig( RPF, Opts ) ) {
     std::cerr << "Error: Parsing configuration file for mcmc.\n";
     return EXIT_FAILURE;
