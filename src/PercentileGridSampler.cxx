@@ -57,7 +57,12 @@ unsigned int
 PercentileGridSampler
 ::GetNumberSamples()
 {
-  return std::pow(m_SampleScale,m_Model->GetNumberOfParameters());
+  unsigned int result = 1;
+  for ( unsigned int i = 0; i < m_Model->GetNumberOfParameters(); ++i ) {
+    result *= m_SampleScale;
+  }
+
+  return result;
 }
 
 
