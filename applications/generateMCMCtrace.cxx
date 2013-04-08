@@ -49,6 +49,7 @@ struct GaussianProcessMCMCRuntimeParameters
   int numberIter;
   int numberBurnIn;
   bool UseEmulatedCovariance;
+  bool UseModelSnapshotFile;
   double StepSize;
 };
 
@@ -60,6 +61,7 @@ bool parseGaussianProcessMCMCConfig(
   Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
   Opts.numberBurnIn = DEFAULT_BURN_IN;
   Opts.UseEmulatedCovariance = false;
+  Opts.UseModelSnapshotFile = false;
   Opts.StepSize = DEFAULT_STEP_SIZE;
   
   std::string name, tstring;
@@ -74,6 +76,10 @@ bool parseGaussianProcessMCMCConfig(
       opt = 'U';
     } else if ( name == "STEP_SIZE" ) {
       opt = 'S';
+    } else if ( name == "USE_MODEL_SNAPSHOT_FILE" ) {
+      opt = 'M';
+    } else {
+      opt = NULL;
     }
     switch( opt ) {
     case 'N':
@@ -118,6 +124,17 @@ bool parseGaussianProcessMCMCConfig(
         return false;
       }
       break;
+    case 'M':
+      input >> tstring;
+      if ( tstring == "false" ) {
+        Opts.UseModelSnapshotFile = false;
+      } else if ( tstring == "true" ) {
+        Opts.UseModelSnapshotFile = true;
+      } else {
+        std::cerr << "Error: USE_MODEL_SNAPSHOT_FILE given incorrect argument:\""
+          << tstring << "\"\n";
+          return false;
+      }
     }
   }
   return true;
@@ -143,9 +160,17 @@ int main(int argc, char ** argv) {
   }
   
   madai::GaussianProcessEmulatedModel gpem;
-  if (gpem.LoadConfiguration( TopDirectory ) != madai::Model::NO_ERROR) {
-    std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
-    return EXIT_FAILURE;
+  if ( Opts.UseModelSnapshotFile ) {
+    std::string ModelSnapshotFile = TopDirectory+"/statistical_analysis/ModelSnapshot.dat";
+    if ( gpem.LoadConfigurationFile( ModelSnapshotFile ) != madai::Model::NO_ERROR ) {
+      std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfigurationFile\n";
+      return EXIT_FAILURE;
+    }
+  } else {
+    if (gpem.LoadConfiguration( TopDirectory ) != madai::Model::NO_ERROR) {
+      std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
+      return EXIT_FAILURE;
+    }
   }
 
   gpem.SetUseModelCovarianceToCalulateLogLikelihood(Opts.UseEmulatedCovariance);
