@@ -456,6 +456,10 @@ inline bool parseParameterAndOutputValues(
       std::ifstream parfile ( par_file_name.c_str() );
       if ( !parfile.good() ) return false;
       while ( !parfile.eof() ) {
+        while ( parfile.peek() == '#' ) {
+          std::string tline;
+          std::getline( parfile, tline );
+        }
         std::string name;
         parfile >> name;
         for ( unsigned int i = 0; i < p; i++ )
@@ -468,6 +472,8 @@ inline bool parseParameterAndOutputValues(
       std::ifstream results_file ( results_file_name.c_str() );
       // Check the style of the outputs
       std::string line;
+      while ( results_file.peek() == '#' ) // Disregard comments go to first output
+        std::getline( results_file, line );
       char* temp1 = new char[100]();
       std::getline( results_file, line );
       std::strncpy( temp1, line.c_str(), 100 );
@@ -482,6 +488,8 @@ inline bool parseParameterAndOutputValues(
       results_file.seekg( 0, results_file.beg);
       if ( !results_file.good() ) return false;
       while ( !results_file.eof() ) {
+        while ( results_file.peek() == '#' ) // Disregard comments, go to next output
+          std::getline( results_file, line );
         std::string name;
         results_file >> name;
         for ( unsigned int i = 0; i < t; i++ )
