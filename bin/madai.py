@@ -18,13 +18,25 @@
 ##
 ##=========================================================================
 
-import os, sys, random, signal
+"""
+This is the madai module, which contains classes and functions for use
+with the MADAI Distribution Sampling Library
+"""
+
+import os, sys, random, signal, glob, subprocess
 
 try:
     import scipy
 except ImportError:
     scipy = None
 
+# modify this variable if exe is somewhere else.
+GenerateTrainingPointsExecutable = 'generateTrainingPoints'
+
+def GenerateTrainingPoints(parameter_priors_file, directory, N):
+    subprocess.call(
+        [ GenerateTrainingPointsExecutable, '--format', 'directories',
+          parameter_priors_file, directory, str(N)])
 
 class Parameter(object):
     def __init__(self, name, distribution):
@@ -36,7 +48,22 @@ class Parameter(object):
         return '%s\t%s' % (self.Name,self.PriorDistribution)
 
 class Distribution(object):
-    pass
+    @staticmethod
+    def Generate(dtype, parameters):
+        dtype = dtype.lower()
+        if dtype == 'uniform':
+            assert len(parameters) == 2
+            dist = UniformDistribution()
+            dist.Minimum = float(parameters[0])
+            dist.Maximum = float(parameters[1])
+            return dist
+        elif dtype == 'gaussian':
+            assert len(parameters) == 2
+            dist = GaussianDistribution()
+            dist.Mean = float(parameters[0])
+            dist.StandardDeviation = float(parameters[1])
+            return dist
+        raise Exception('Unknown distribution type '+ dtype)
 
 class GaussianDistribution(Distribution):
     def __init__(self,Mean=0.0,StandardDeviation=1.0):
@@ -47,6 +74,8 @@ class GaussianDistribution(Distribution):
             self.Mean,self.StandardDeviation)
     def __str__(self):
         return 'GAUSSIAN\t%r\t%r' % (self.Mean,self.StandardDeviation)
+    def GetInfo(self):
+        return ('gaussian', '%r %r' % (self.Mean,self.StandardDeviation))
     def GetPercentile(self,percentile):
         if scipy is None:
             raise Exception("not implemented yet")
@@ -61,6 +90,8 @@ class UniformDistribution(Distribution):
         return 'UniformDistribution(%r,%r)' % (self.Minimum,self.Maximum)
     def __str__(self):
         return 'UNIFORM\t%r\t%r' % (self.Minimum,self.Maximum)
+    def GetInfo(self):
+        return ('UNIFORM', '%r %r' % (self.Minimum,self.Maximum))
     def GetPercentile(self,percentile):
         return (percentile * (self.Maximum - self.Minimum)) + self.Minimum
 
@@ -76,7 +107,7 @@ def PrintEmulatorFormat(o,X,Y,Parameters,OutputNames,
     p, t = len(X[0]), len(Y[0])
     assert all(len(x) == p for x in X) and all(len(y) == t for y in Y)
     assert (len(Parameters) == p) and (len(OutputNames) == t)
-    assert len(Parameters) == p and len(OutputNames) == t
+
     for comment in comments:
         print >>o, '# %s' % comment
     print >>o, 'VERSION 1\nPARAMETERS\n%d' % p
@@ -96,6 +127,140 @@ def PrintEmulatorFormat(o,X,Y,Parameters,OutputNames,
             print >>o, scale
     print >>o, 'END_OF_FILE'
 
+def ReadDirectoryModelFormat(directory):
+    def readFile(filename):
+        # ignore comments and empty lines
+        with open(filename,'r') as f:
+            for line in map(lambda s: s.strip(), f):
+                if len(line) > 0  and line[0] != '#':
+                    yield line
+    def makeParameter(s):
+        parts = s.strip().split()
+        name = parts[1]
+        dist = Distribution.Generate(parts[0], parts[2:4])
+        return Parameter(name,dist)
+
+    assert os.path.isdir(directory)
+    resultsd = os.path.join(directory,'experimental_results')
+    analysisd = os.path.join(directory,'statistical_analysis')
+    outputd = os.path.join(directory,'model_outputs')
+    parameter_priors = os.path.join(analysisd,'parameter_priors.dat')
+    observable_names = os.path.join(analysisd,'observable_names.dat')
+    experimental_results = os.path.join(resultsd,'results.dat')
+
+    OutputNames = [name for name in readFile(observable_names)]
+    Parameters = [makeParameter(x) for x in readFile(parameter_priors)]
+
+    UncertaintyScales = None
+    if os.path.isfile(experimental_results):
+        UncertaintyScales = [0.0 for output in OutputNames]
+        for line in readFile(experimental_results):
+            name, value, error = line.split()[:3]
+            try:
+                UncertaintyScales[OutputNames.index(name)] = float(error)
+            except ValueError:
+                pass # unused output (observable_names.dat)
+
+    X,Y = [],[]
+    def getParameterIndex(params,name):
+        results = [i for i,p in enumerate(params) if p.Name == name]
+        if len(results) == 0:
+            raise Exception('no parameter by that name')
+        return results[0]
+
+    for rund in sorted(glob.iglob(os.path.join(outputd,"run[0-9]*"))):
+        print >>sys.stderr, rund
+        pfile = os.path.join(rund,'parameters.dat')
+        rfile = os.path.join(rund,'results.dat')
+        assert os.path.isfile(pfile) and os.path.isfile(rfile)
+
+        x = [0.0 for p in Parameters]
+        for line in readFile(pfile):
+            name, value = line.split()
+            index = getParameterIndex(Parameters,name)
+            x[index] = float(value)
+        X.append(x)
+
+        y = [0.0 for p in OutputNames]
+        for line in readFile(rfile):
+            values = line.split()
+            if len(values) >= 2:
+                name, value = values[:2]
+            try:
+                y[OutputNames.index(name)] = float(value)
+            except ValueError:
+                pass # unused output (observable_names.dat)
+        Y.append(y)
+    return X,Y,UncertaintyScales,Parameters,OutputNames
+
+def PrintDirectoryModelFormat(
+    directory, parameters, outputNames,
+    observedValues, observedErrors, N,
+    getOutputsAndVariance, comments):
+    def mkdir(path):
+        try:
+            os.mkdir(path)
+        except OSError:
+            pass # path already exists
+    mkdir(directory)
+    mkdir(os.path.join(directory, 'statistical_analysis'))
+    mkdir(os.path.join(directory, 'model_outputs'))
+    mkdir(os.path.join(directory, 'experimental_results'))
+    resultsFile = os.path.join(directory, 'experimental_results', 'results.dat')
+    with open(resultsFile,'w') as o:
+        for value, error, name in zip(
+            observedValues, observedErrors, outputNames):
+            o.write('%s %r %r\n' % (name, value, error))
+
+    parameter_priors = os.path.join(
+        directory, 'statistical_analysis', 'parameter_priors.dat')
+    with open(parameter_priors,'w') as o:
+        #for comment in model.GetComments():
+        #   o.write("# %s\n" % comment)
+        for param in parameters:
+            dtype,dargs = param.PriorDistribution.GetInfo()
+            o.write('%s %s %s\n' % (dtype, param.Name, dargs))
+
+    observable_names = os.path.join(
+        directory, 'statistical_analysis', 'observable_names.dat')
+    with open(observable_names,'w') as o:
+        for comment in comments:
+            o.write("# %s\n" % comment)
+        for outputName in outputNames:
+            o.write('%s\n' % outputName)
+
+    GenerateTrainingPoints(parameter_priors, directory, N)
+
+    def getParameterDictionary(rundir):
+        parameter_dictionary = {}
+        with open(os.path.join(rundir,'parameters.dat'),'r') as f:
+            for line in f:
+                line = line.strip()
+                if (len(line) > 0) and (line[0] != '#'):
+                    name, value = line.split()
+                    parameter_dictionary[name] = float(value)
+        return parameter_dictionary
+
+    def writeResults(rundir, outputs, outputNames):
+        with open(os.path.join(rundir,'results.dat'),'w') as o:
+            for value, name in zip(outputs, outputNames):
+                o.write('%s %s\n' % (name, value))
+
+    X, Y = [], []
+    runDirGlob = os.path.join(directory, 'model_outputs', 'run*')
+    for rdir in glob.iglob(runDirGlob):
+        pd = getParameterDictionary(rdir)
+        for p in parameters:
+            if p.Name not in pd:
+                raise Exception('missing parameter '+p.Name)
+        x = [ pd[p.Name] for p in parameters]
+        outputs, errors = getOutputsAndVariance(x)
+        assert len(outputs) == len(outputNames)
+        writeResults(rdir, outputs, outputNames)
+        X.append(x)
+        Y.append(outputs)
+    return X, Y
+
 def LatinHypercube(parameters, N):
     def sample(param, N):
         samples = [param.PriorDistribution.GetPercentile((0.5 + i)/float(N))
@@ -104,16 +269,14 @@ def LatinHypercube(parameters, N):
         return samples
     return zip(*(sample(param,N) for param in parameters))
 
-
 def GenerateTraining(model, N, output=sys.stdout):
     X = LatinHypercube(model.GetParameters(), N)
     Y = [ model.GetScalarOutputsAndVariance(x)[0] for x in X]
     PrintEmulatorFormat(output,X,Y,
                         model.GetParameters(),
                         model.GetScalarOutputNames(),
-                        None,
+                        model.GetObservedScalarErrors(),
                         model.GetComments())
-
 
 def Interactive(Function, Parameters, OutputNames,
                 inp=sys.stdin, outp=sys.stdout, comments=[]):
