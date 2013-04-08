@@ -35,9 +35,10 @@ USE:
 
 const char useage [] =
   "Usage:\n"
-  "    printThetas ModelSnapshotFile\n"
+  "    printThetas TopDirectory\n"
   "\n"
-  "ModelSnapshotFile can be \"-\" or read from standard input.\n";
+  "TopDirectory is the directory containing the model_output/, experimental_results/\n"
+  "and statistical_analysis/directories. It can also be \"-\" to read from standard input.\n";
 
 #include <iostream> // cout, cin
 #include <fstream> // ifstream, ofstream
@@ -45,9 +46,9 @@ const char useage [] =
 #include "GaussianProcessEmulator.h"
 
 int main(int argc, char ** argv) {
-  char const * inputFile = NULL;
+  char const * TopDirectory = NULL;
   if (argc > 1) {
-    inputFile = argv[1];
+    TopDirectory = argv[1];
   } else {
     std::cerr << useage << '\n';
     return EXIT_FAILURE;
@@ -56,19 +57,20 @@ int main(int argc, char ** argv) {
   madai::GaussianProcessEmulator gpe;
   std::ostream & output = std::cout;
 
-  std::istream * input = & std::cin;
-  std::ifstream inputFileStream;
-
-  if (0 != strcmp(inputFile, "-")) {
-    inputFileStream.open(inputFile);
-    if (! inputFileStream.good())
-      std::cerr << "Error (1) loading file " << inputFile << '\n';
-    input = & inputFileStream;
+  if (0 == strcmp(TopDirectory, "-")) {
+    if (! gpe.Load( std::cin ) ){
+      std::cerr << "Error (2) loading emulator from cin\n";
+      return EXIT_FAILURE;
+    }
+  } else {
+    std::string PCAFile(TopDirectory);
+    PCAFile += "/statistical_analysis/PCADecomposition.dat";
+    if ( gpe.LoadConfiguration() != madai::Model::NO_ERROR) {
+      std::cerr << "Error (2) loading file " << PCAFile << '\n';
+      return EXIT_FAILURE;
+    }
   }
-  if (! gpe.Load(* input)) {
-    std::cerr << "Error (2) loading file " << inputFile << '\n';
-    return EXIT_FAILURE;
-  }
+  
   if (gpe.GetStatus() != madai::GaussianProcessEmulator::READY) {
     std::cerr << "Error (3) loading file " << inputFile << '\n';
     return EXIT_FAILURE;
