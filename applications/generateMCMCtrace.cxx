@@ -150,7 +150,7 @@ int main(int argc, char ** argv) {
   std::string TopDirectory(argv[1]);
   std::string OutputFileName(argv[2]);
   std::string observationsFile = TopDirectory+"/experimental_results/results.dat";
-  std::string RuntimeParametersFileName = TopDirectory+"/statistical_analysis/MCMC.param";
+  std::string RuntimeParametersFileName = TopDirectory+"/statistical_analysis/MCMC.dat";
   
   std::ifstream RPF ( RuntimeParametersFileName.c_str() );
   struct GaussianProcessMCMCRuntimeParameters Opts;
