@@ -56,7 +56,7 @@ static const char useage [] =
 
 struct cmdLineOpts{
   bool quietFlag;
-  const char * inputFile; /* first non-flag argument  */
+  const char * TopDirectory; /* first non-flag argument  */
 };
 
 /**
@@ -76,7 +76,7 @@ bool parseCommandLineOptions(int argc, char** argv, struct cmdLineOpts & opts)
 
   // init with default values
   opts.quietFlag = false;
-  opts.inputFile = NULL; // default to NULL
+  opts.TopDirectory = NULL; // default to NULL
   int longIndex, opt;
   opt = getopt_long( argc, argv, optString, longOpts, &longIndex );
   while( opt != -1 ) {
@@ -100,9 +100,9 @@ bool parseCommandLineOptions(int argc, char** argv, struct cmdLineOpts & opts)
 
   // set the remaining field
   if ((argc - optind) >= 1) {
-    opts.inputFile = argv[optind];
+    opts.TopDirectory = argv[optind];
   }
-  if (opts.inputFile == NULL) {
+  if (opts.TopDirectory == NULL) {
     std::cerr << useage << '\n';
     return false;
   }
@@ -205,9 +205,9 @@ int main(int argc, char ** argv) {
   struct cmdLineOpts options;
   if (!parseCommandLineOptions(argc, argv, options))
     return EXIT_FAILURE;
-  std::string inputFile(options.inputFile);
+  std::string TopDirectory(options.TopDirectory);
   madai::GaussianProcessEmulator gpme;
-  if (inputFile == "-")
+  if (TopDirectory == "-")
     /*
       Please note: if you use stdin to feed in the model, you should
       do it like this:
@@ -215,11 +215,8 @@ int main(int argc, char ** argv) {
     */
     gpme.Load(std::cin);
   else {
-    std::ifstream is (options.inputFile);
-    if (is.good()) {
-      gpme.Load(is);
-    } else {
-      std::cerr << "Error opening file " << options.inputFile << '\n';
+    if ( ! gpme.Load( TopDirectory ) ) {
+      std::cerr << "Error loading from the directory structure\n";
       return EXIT_FAILURE;
     }
   }

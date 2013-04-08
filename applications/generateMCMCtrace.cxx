@@ -137,7 +137,7 @@ int main(int argc, char ** argv) {
   
   std::ifstream RPF ( RuntimeParametersFileName.c_str() );
   struct GaussianProcessMCMCRuntimeParameters Opts;
-  if ( !parseMCMCConfig( RPF, Opts ) ) {
+  if ( !parseGaussianProcessMCMCConfig( RPF, Opts ) ) {
     std::cerr << "Error: Parsing configuration file for mcmc.\n";
     return EXIT_FAILURE;
   }

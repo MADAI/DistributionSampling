@@ -63,16 +63,14 @@ int main(int argc, char ** argv) {
       return EXIT_FAILURE;
     }
   } else {
-    std::string PCAFile(TopDirectory);
-    PCAFile += "/statistical_analysis/PCADecomposition.dat";
-    if ( gpe.LoadConfiguration() != madai::Model::NO_ERROR) {
-      std::cerr << "Error (2) loading file " << PCAFile << '\n';
+    if ( ! gpe.Load( std::string(TopDirectory) ) ) {
+      std::cerr << "Error (2) loading data in " << TopDirectory << '\n';
       return EXIT_FAILURE;
     }
   }
   
   if (gpe.GetStatus() != madai::GaussianProcessEmulator::READY) {
-    std::cerr << "Error (3) loading file " << inputFile << '\n';
+    std::cerr << "Error (3) loading data in " << TopDirectory << '\n';
     return EXIT_FAILURE;
   }
   if(! gpe.PrintThetas(output)) {
