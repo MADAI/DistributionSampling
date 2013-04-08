@@ -67,7 +67,14 @@ bool parseGaussianProcessMCMCConfig(
   std::string name, tstring;
   char opt;
   std::vector< std::string > ParamNames;
-  while ( input >> name ) {
+  while ( input.good() ) {
+    while ( input.peek() == '#' ) {
+      std::string line;
+      std::getline( input, line );
+      std::cerr << "Comments:\n";
+      std::cerr << line << std::endl;
+    }
+    input >> name;
     if ( name == "ITERATIONS" ) {
       opt = 'N';
     } else if ( name == "BURN_IN" ) {
@@ -133,7 +140,7 @@ bool parseGaussianProcessMCMCConfig(
       } else {
         std::cerr << "Error: USE_MODEL_SNAPSHOT_FILE given incorrect argument:\""
           << tstring << "\"\n";
-          return false;
+        return false;
       }
     }
   }
