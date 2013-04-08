@@ -509,9 +509,9 @@ inline int NumberThetas(
   case GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION:
     return numberParameters + 3;
   case GaussianProcessEmulator::MATERN_32_FUNCTION:
-    return 3;
+    return numberParameters + 2;
   case GaussianProcessEmulator::MATERN_52_FUNCTION:
-    return 3;
+    return numberParameters + 2;
   case GaussianProcessEmulator::UNKNOWN_FUNCTION:
     //fall through
   default:
@@ -575,121 +575,68 @@ namespace madai {
 double GaussianProcessEmulator::SingleModel::CovarianceCalc(
     const Eigen::VectorXd & v1, const Eigen::VectorXd & v2) const
 {
+  static const double EPSILON = 1e-10;
   int p = m_Parent->m_NumberParameters;
   int numberThetas = m_Thetas.size();
-  assert(numberThetas > 0);
+  int offset;
   switch(m_CovarianceFunction) {
   case POWER_EXPONENTIAL_FUNCTION:
-    {
-      assert(numberThetas == (p + 3));
-      assert ((m_Thetas(2) > 0.0) && (m_Thetas(2) <= 2.0));
-      // theta(0) == ln(amplitude)
-      // theta(1) == nugget
-      // theta(2) == power
-      double covariance = 0.0;
-      double exponent = 0.0;
-      for(int i = 0; i < p; i++){
-        double d = std::abs(v1(i) - v2(i));
-        exponent += (-0.5) * std::pow(
-            d / std::exp(std::abs(m_Thetas(i + 3))), m_Thetas(2));
-      }
-      covariance = exp(m_Thetas(0) + exponent);
-      if (exponent < 1e-5)
-        covariance += exp(m_Thetas(1));
-      return covariance;
-    }
+    offset = 3;
+    break;
   case SQUARE_EXPONENTIAL_FUNCTION:
-    {
-      assert(numberThetas == (p + 2));
-      int truecount  = 0;
-      double covariance = 0.0;
-      double exponent = 0.0;
-      // theta(0) == ln(amplitude)
-      // theta(1) == nugget
-      // theta(2+i) == scale[i]
-      for(int i = 0; i < p; i++){
-        double d = std::abs(v1(i) - v2(i));
-        exponent += (-0.5) * std::pow(d / std::exp(m_Thetas(i + 2)), 2);
-        if (d < 1e-10)
-          truecount++;
-      }
-      covariance = exp(m_Thetas(0)) * exp(exponent);
-      if(truecount == p) {
-        covariance += exp(m_Thetas(1));
-      }
-      return covariance;
-    }
   case MATERN_32_FUNCTION:
-    {
-      assert(numberThetas == 3);
-      static const double ROOT3 = 1.7320508075688772;
-      double distance = 0.0;
-      double covariance;
-      int truecount = 0;
-      // map the m_Thetas onto some local variables so the formula
-      // is more transparent
-      double amp = m_Thetas(0);
-      double nugget = m_Thetas(1);
-      double rho = std::exp(m_Thetas(2));
-      // calculate the euclidean distance between the two points;
-      for(int i = 0; i < p; i++) {
-        double d = std::pow(std::abs(v1(i) - v2(i)), 2);
-        distance += d;
-        if (d < 1e-16)
-          ++truecount;
-        // this is currently the distance squared
-      }
-      distance = std::sqrt(distance); // reduce back to the right dimensions
-      if (distance > 0.0)
-        covariance = amp * (1 + ROOT3 * (distance / rho))
-          * std::exp(-ROOT3 * (distance / rho));
-      else
-        covariance = amp;
-      if (truecount == p)
-        covariance += nugget;
-      return covariance;
-    }
   case MATERN_52_FUNCTION:
-    {
-      assert(numberThetas == 3);
-      int truecount = 0;
-      double distance = 0.0;
-      double covariance = 0.0;
-      // map the m_Thetas onto some local variables so the formula
-      // is more transparent
-      double amp = m_Thetas(0);
-      double nugget = m_Thetas(1);
-      double rho = std::exp(m_Thetas(2));
-      static const double ROOT5 = 2.23606797749979;
-      double d_over_r = 0.0;
-      // calculate the euclidean distance between the two points;
-      for (int i = 0; i < p; i++){
-        double d = std::abs(v1(i) - v2(i));
-        // this is currently the distance squared
-        distance += std::pow(d, 2.0);
-        if (d < 1e-16)
-          ++truecount;
-      }
-      // reduce back to the right dimensions
-      distance = std::sqrt(distance);
-      d_over_r = distance / rho;
-      if (distance > 0.0){
-        covariance
-          = amp * (1 + ROOT5 * d_over_r + (5.0 / 3.0) * d_over_r * d_over_r)
-          * std:: exp(- ROOT5 * d_over_r);
-      } else {
-        covariance = amp;
-      }
-      // this means we're on a diagonal term, golly but i write bad code :(
-      if (truecount == p){
-        covariance += nugget;
-      }
-      return covariance;
-    }
+    offset = 2;
+    break;
   default:
     assert(false);
   }
-  return 0.0;
+  assert(numberThetas == (p + offset));
+  const double & amplitude = m_Thetas(0);
+  const double & nugget = m_Thetas(1);
+  double nug = 0.0;
+
+  double distanceSquared = 0.0;
+  for (int i = 0; i < p; i++) {
+    double d = v1(i) - v2(i);
+    double l = m_Thetas(i + offset);
+    distanceSquared += std::pow( (d / l), 2);
+  }
+  if (distanceSquared < EPSILON) {
+    nug = nugget;
+  }
+
+  switch(m_CovarianceFunction) {
+  case POWER_EXPONENTIAL_FUNCTION:
+    {
+      const double & power = m_Thetas(2);
+      assert ((power > 0.0) && (power <= 2.0));
+      return nug + amplitude * std::exp(
+          -0.5 * std::pow(distanceSquared,0.5 * power));
+    }
+  case SQUARE_EXPONENTIAL_FUNCTION:
+    {
+      return nug + amplitude * std::exp( -0.5 * distanceSquared);
+    }
+  case MATERN_32_FUNCTION:
+    {
+      static const double ROOT3 = 1.7320508075688772;
+      double distance = std::sqrt(distanceSquared);
+      return nug + amplitude * (1 + ROOT3 * distance)
+        * std::exp(- ROOT3 * distance);
+    }
+  case MATERN_52_FUNCTION:
+    {
+      static const double ROOT5 = 2.23606797749979;
+      double distance = std::sqrt(distanceSquared);
+      return nug + amplitude *
+        (1 + (ROOT5 * distance) + ((5.0 / 3.0) * distanceSquared)) *
+        std:: exp(- ROOT5 * distance);
+    }
+  default:
+    assert(false);
+    return 0.0;
+  }
 }
 
 
@@ -980,54 +927,38 @@ bool GaussianProcessEmulator::SingleModel::BasicTraining(
   m_CovarianceFunction = covarianceFunction;
   m_RegressionOrder = regressionOrder;
   int p = m_Parent->m_NumberParameters;
-  m_Thetas.resize( NumberThetas(m_CovarianceFunction, p));
-  scale = std::abs(scale);
+  int numberOfThetas = NumberThetas(m_CovarianceFunction, p);
+  int offset = numberOfThetas - p;
+  m_Thetas.resize(numberOfThetas);
+
   switch(m_CovarianceFunction) {
-  case GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION:
-    m_Thetas.resize(2 + p);
-    m_Thetas(0) = amplitude;
-    m_Thetas(1) = defaultNugget;
-    for (int j = 0; j < p; ++j) {
-      madai::Parameter & param = m_Parent->m_Parameters[j];
-      madai::Distribution * priordist = param.m_PriorDistribution;
-      m_Thetas(2+j) = scale * std::abs(priordist->GetPercentile(0.75)
-                                     - priordist->GetPercentile(0.25));
-    }
+  case POWER_EXPONENTIAL_FUNCTION:
+    assert(offset == 3);
     break;
-  case GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION:
-    m_Thetas.resize(3 + p);
-    m_Thetas(0) = amplitude;
-    m_Thetas(1) = defaultNugget;
-    m_Thetas(2) = 2.0;
-    for (int j = 0; j < p; ++j) {
-      madai::Parameter & param = m_Parent->m_Parameters[j];
-      madai::Distribution * priordist = param.m_PriorDistribution;
-      m_Thetas(3+j) = scale * std::abs(priordist->GetPercentile(0.75)
-                                     - priordist->GetPercentile(0.25));
-    }
-    break;
-  case GaussianProcessEmulator::MATERN_32_FUNCTION:
-    // fall through
-  case GaussianProcessEmulator::MATERN_52_FUNCTION:
-    m_Thetas.resize(3);
-    m_Thetas(0) = amplitude;
-    m_Thetas(1) = defaultNugget;
-    {
-      double min = std::numeric_limits< double >::max();
-      for (int j = 0; j < p; ++j) {
-        madai::Parameter & param = m_Parent->m_Parameters[j];
-        madai::Distribution * priordist = param.m_PriorDistribution;
-        double d = std::abs(priordist->GetPercentile(0.75)
-                          - priordist->GetPercentile(0.25));
-        if (d < min)
-          min = d;
-      }
-      m_Thetas(2) = min * scale;
-    }
+  case SQUARE_EXPONENTIAL_FUNCTION:
+  case MATERN_32_FUNCTION:
+  case MATERN_52_FUNCTION:
+    assert(offset == 2);
     break;
   default:
+    assert(false);
     std::cerr << "Unknown covariance function.\n";
     return false;
+  }
+
+  m_Thetas(0) = amplitude;
+  m_Thetas(1) = defaultNugget;
+  scale = std::abs(scale);
+
+  if (m_CovarianceFunction ==
+      GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION)
+    m_Thetas(2) = 2.0; // default power.
+
+  for (int j = 0; j < p; ++j) {
+    const madai::Parameter & param = m_Parent->m_Parameters[j];
+    const madai::Distribution * priordist = param.GetPriorDistribution();
+    m_Thetas(offset + j) = scale * std::abs(priordist->GetPercentile(0.75)
+                                            - priordist->GetPercentile(0.25));
   }
   return true;
 }
