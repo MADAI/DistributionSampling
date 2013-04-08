@@ -37,8 +37,8 @@ const char useage [] =
   "Usage:\n"
   "    basicTrain RootDirectory [OutputFileOption]\n"
   "\n"
-  "RootDirectory is the top level directory in which the folders\n"
-  "model_output/ experimental_results/ and statistical_analysis are contained.\n"
+  "RootDirectory is the directory in which the folders model_output/ \n"
+  "experimental_results/ and statistical_analysis/ are contained.\n"
   "\n"
   "[OutputFileOption] if this is set to \"FullSummary\" then the entire\n"
   "data structure will be saved to the file ModelSnapshot.dat. Otherwise,\n"
@@ -71,9 +71,13 @@ int main(int argc, char ** argv) {
   }
 
   madai::GaussianProcessEmulator gpme;
-  if ( !gpme.LoadTrainingData(TopDirectory) ) {
-    std::cerr << "Error Loading Training Data.\n";
-    return EXIT_FAILURE;
+  if ( 0 == std::strcmp(TopDirectory.c_str(), "-") ) {
+    gpme.LoadTrainingData(std::cin);
+  } else {
+    if ( !gpme.LoadTrainingData(TopDirectory) ) {
+      std::cerr << "Error Loading Training Data.\n";
+      return EXIT_FAILURE;
+    }
   }
 
   double fractionResolvingPower = 0.95;

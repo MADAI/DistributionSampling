@@ -48,12 +48,15 @@ static const double DEFAULT_PCA_FRACTION = 0.99;
 
 static const char useage [] =
   "useage:\n"
-  "  trainEmulator [options] InputModelFile [ModelSnapshotFile]\n"
+  "  trainEmulator [options] RootDirectory [OutputFileOption]\n"
   "\n"
-  "InputModelFile can be \"-\" to read from standard input.\n"
+  "RootDirectory can be \"-\" to read from standard input. This is\n"
+  "the directory in which the folders model_output/ experimental_results/\n"
+  "and statistical_analysis/ are contained.\n"
   "\n"
-  "ModelSnapshotFile can be \"-\" or left unspecified to write to\n"
-  "standard output.\n"
+  "[OutputFileOption] if this is set to \"FullSummary\" then the entire\n"
+  "data structure will be saved to the file ModelSnapshot.dat. Otherwise,\n"
+  "only the PCA Decomposition will be saved to PCADecomposition.dat.\n"
   "\n"
   "Options:\n"
   "\n"
@@ -82,9 +85,9 @@ struct cmdLineOpts{
   int regressionOrder;
   madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction;
   bool quietFlag;
+  bool FullSummaryFlag;
   double pcaVariance;
-  const char * inputFile; /* first non-flag argument  */
-  const char * outputFile; /* second non-flag argument */
+  const char * RootDirectory; /* first non-flag argument  */
 };
 
 /**
@@ -110,9 +113,9 @@ bool parseCommandLineOptions(int argc, char** argv, struct cmdLineOpts & opts)
   opts.regressionOrder = DEFAULT_REGRESSION_ORDER;
   opts.covarianceFunction = DEFAULT_COVARIACE_FUNCTION;
   opts.quietFlag = 0;
+  opts.FullSummaryFlag = false;
   opts.pcaVariance = DEFAULT_PCA_FRACTION;
-  opts.inputFile = NULL; // default to stdin
-  opts.outputFile = "-"; // default to stdout
+  opts.RootDirectory = NULL; // default to stdin
 
   int longIndex, opt;
   opt = getopt_long( argc, argv, optString, longOpts, &longIndex );
@@ -168,12 +171,16 @@ bool parseCommandLineOptions(int argc, char** argv, struct cmdLineOpts & opts)
 
   // set the remaining fields
   if ((argc - optind) >= 2) {
-    opts.outputFile = argv[optind + 1];
+    if ( std::string(argv[optind+1]) == "FullSummary" ) {
+      opts.FullSummaryFlag = true;
+    } else {
+      opts.FullSummaryFlag = false;
+    }
   }
   if ((argc - optind) >= 1) {
-    opts.inputFile = argv[optind];
+    opts.RootDirectory = argv[optind];
   }
-  if (opts.inputFile == NULL) {
+  if (opts.RootDirectory == NULL) {
     std::cerr << useage << '\n';
     return false;
   }
@@ -185,11 +192,14 @@ int main(int argc, char ** argv) {
   if (! parseCommandLineOptions(argc, argv, options))
     return EXIT_FAILURE;
   madai::GaussianProcessEmulator gpme;
-  if (0 == std::strcmp(options.inputFile, "-")) {
+  if (0 == std::strcmp(options.RootDirectory, "-")) {
     gpme.LoadTrainingData(std::cin);
   } else {
-    std::ifstream is (options.inputFile);
-    gpme.LoadTrainingData(is);
+    std::string TopDirectory (options.RootDirectory);
+    if ( !gpme.LoadTrainingData(TopDirectory) ) {
+      std::cerr << "Error loading training data.\n";
+      return EXIT_FAILURE;
+    }
   }
   if (! gpme.Train(
           options.covarianceFunction,
@@ -197,11 +207,15 @@ int main(int argc, char ** argv) {
           options.pcaVariance)) {
     return EXIT_FAILURE;
   }
-  if (0 == std::strcmp(options.outputFile, "-")) {
-    gpme.Write(std::cout);
-  } else {
-    std::ofstream os(options.outputFile);
+  std::string OutputFile(options.RootDirectory);
+  if (options.FullSummaryFlag) {
+    OutputFile += "/statistical_analysis/ModelSnapshot.dat";
+    std::ofstream os( OutputFile.c_str() );
     gpme.Write(os);
+  } else {
+    OutputFile += "/statistical_analysis/PCADecomposition.dat";
+    std::ofstream os( OutputFile.c_str() );
+    gpme.WritePCA(os);
   }
   return EXIT_SUCCESS;
 }
