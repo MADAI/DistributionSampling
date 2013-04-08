@@ -46,3 +46,17 @@ add_executable(
 target_link_libraries(
   generateTrainingPoints
   DistributionSampling)
+
+add_executable(
+  generatePercentileGridTrace
+  generatePercentileGridTrace.cxx)
+target_link_libraries(
+  generatePercentileGridTrace
+  DistributionSampling)
+
+add_executable(
+  generatePercentileGridTraceExternal
+  generatePercentileGridTraceExternal.cxx)
+target_link_libraries(
+  generatePercentileGridTraceExternal
+  DistributionSampling)

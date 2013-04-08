@@ -15,6 +15,7 @@ set( SRC_FILES
   MetropolisHastingsSampler.cxx
   Trace.cxx
   UniformDistribution.cxx
+  PercentileGridSampler.cxx
 )
 
 add_library( DistributionSampling ${SRC_FILES} )
