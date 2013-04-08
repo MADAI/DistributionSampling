@@ -44,7 +44,7 @@ USE:
 
 static const char useage [] =
   "useage:\n"
-  "  emulate [options] MODEL_SNAPSHOT_FILE.dat\n"
+  "  emulate [options] TopDirectory ReadMethod\n"
   "\n"
   "Options:\n"
   "\n"
@@ -52,11 +52,16 @@ static const char useage [] =
   "  --quiet   Do not print a header before going into query mode.\n"
   "\n"
   "  -h -?     print this dialogue\n"
+  "\n"
+  "  Read method indicates the structure that the data is in. Can be:\n"
+  "  Directory\n"
+  "  SnapshotFile\n"
   "\n";
 
 struct cmdLineOpts{
   bool quietFlag;
   const char * TopDirectory; /* first non-flag argument  */
+  const char * ReadMethod; /* second non-flag argument */
 };
 
 /**
@@ -101,6 +106,9 @@ bool parseCommandLineOptions(int argc, char** argv, struct cmdLineOpts & opts)
   // set the remaining field
   if ((argc - optind) >= 1) {
     opts.TopDirectory = argv[optind];
+    if ((argc - optind) >= 2) {
+      opts.ReadMethod = argv[optind+1];
+    }
   }
   if (opts.TopDirectory == NULL) {
     std::cerr << useage << '\n';
@@ -206,6 +214,7 @@ int main(int argc, char ** argv) {
   if (!parseCommandLineOptions(argc, argv, options))
     return EXIT_FAILURE;
   std::string TopDirectory(options.TopDirectory);
+  std::string ReadMethod(options.ReadMethod);
   madai::GaussianProcessEmulator gpme;
   if (TopDirectory == "-")
     /*
@@ -215,8 +224,20 @@ int main(int argc, char ** argv) {
     */
     gpme.Load(std::cin);
   else {
-    if ( ! gpme.Load( TopDirectory ) ) {
-      std::cerr << "Error loading from the directory structure\n";
+    if ( ReadMethod == "Directory" ) {
+      if ( ! gpme.Load( TopDirectory ) ) {
+        std::cerr << "Error loading from the directory structure\n";
+        return EXIT_FAILURE;
+      }
+    } else if ( ReadMethod == "SnapshotFile" ) {
+      std::string ModelSnapshotFile = TopDirectory+"/statistical_analysis/ModelSnapshot.dat";
+      std::ifstream MSF(ModelSnapshotFile.c_str());
+      if ( ! gpme.Load( MSF ) ) {
+        std::cerr << "Error loading from the model snapshot file\n";
+        return EXIT_FAILURE;
+      }
+    } else {
+      std::cerr << "Unknown data structure: " << ReadMethod << '\n';
       return EXIT_FAILURE;
     }
   }
