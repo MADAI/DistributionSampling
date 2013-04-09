@@ -1,0 +1,3 @@
+p1 uniform 0.5 2
+p2 gaussian 3.3 0.73
+p3 uniform 0.22 1.07
