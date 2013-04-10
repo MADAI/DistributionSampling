@@ -52,6 +52,28 @@ GaussianProcessEmulatedModel
   // std::vector<T>::operator=(const std::vector<T>&)
   m_Parameters = m_GPME.m_Parameters;
   m_ScalarOutputNames = m_GPME.m_OutputNames;
+
+  int t = m_GPME.m_NumberOutputs;
+  std::vector< double > observedScalarValues(t, 0.0);
+  std::vector< double > observedUncertaintyScales(t, 0.0);
+  m_GPME.GetOutputObservedValues(observedScalarValues);
+  m_GPME.GetOutputUncertaintyScales(observedUncertaintyScales);
+  std::vector< double > observedScalarCovariance(t * t, 0.0);
+  for (int i = 0; i < t; ++i) {
+    observedScalarCovariance[i * (1 + t)]
+      = std::pow(observedUncertaintyScales[i],2);
+  }
+  Model::ErrorType error;
+  error = this->SetObservedScalarValues(observedScalarValues);
+  if (error != Model::NO_ERROR) {
+    std::cerr << "Error in Model::SetObservedScalarValues()";
+    return error;
+  }
+  error = this->SetObservedScalarCovariance(observedScalarCovariance);
+  if (error != Model::NO_ERROR) {
+    std::cerr << "Error in Model::SetObservedScalarCovariance()";
+    return error;
+  }
   return Model::NO_ERROR;
 }
 

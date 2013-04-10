@@ -401,6 +401,8 @@ std::ostream & serializeGaussianProcessEmulator(
   PrintVector(gpme.m_OutputMeans, o);
   o << "OUTPUT_UNCERTAINTY_SCALES\n";
   PrintVector(gpme.m_OutputUncertaintyScales, o);
+  o << "OUTPUT_OBSERVED_VALUES\n";
+  PrintVector(gpme.m_ObservedOutputValues, o);
   o << "OUTPUT_PCA_EIGENVALUES\n";
   PrintVector(gpme.m_PCAEigenvalues, o);
   o << "OUTPUT_PCA_EIGENVECTORS\n";
@@ -458,6 +460,11 @@ bool parseGaussianProcessEmulator(
       }
     } else if (word == "OUTPUT_UNCERTAINTY_SCALES") {
       if (! ReadVector(gpme.m_OutputUncertaintyScales, input)) {
+        std::cerr << "parse error\n"; // \todo error message
+        return false;
+      }
+    } else if (word == "OUTPUT_OBSERVED_VALUES") {
+      if (! ReadVector(gpme.m_ObservedOutputValues, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
@@ -694,6 +701,10 @@ GaussianProcessEmulator::CheckStatus() {
     m_OutputUncertaintyScales
       = Eigen::VectorXd::Constant(m_NumberOutputs,1.0);
   }
+  if(m_ObservedOutputValues.size() != m_NumberOutputs) {
+    m_ObservedOutputValues
+      = Eigen::VectorXd::Constant(m_NumberOutputs,0.0);
+  }
   m_Status = UNTRAINED;
   if(m_NumberPCAOutputs < 1)
     return m_Status;
@@ -746,6 +757,29 @@ GaussianProcessEmulator::CheckStatus() {
   return m_Status;
 }
 
+void GaussianProcessEmulator::GetOutputUncertaintyScales(
+    std::vector< double > & x)
+{
+  if(m_OutputUncertaintyScales.size() != m_NumberOutputs) {
+    x.assign(m_NumberOutputs,0.0);
+  } else {
+    x.resize(m_NumberOutputs);
+    for (int i = 0; i < m_NumberOutputs; ++i)
+      x[i] = m_OutputUncertaintyScales(i);
+  }
+}
+
+void GaussianProcessEmulator::GetOutputObservedValues(
+    std::vector< double > & x)
+{
+  if(m_ObservedOutputValues.size() != m_NumberOutputs) {
+    x.assign(m_NumberOutputs,0.0);
+  } else {
+    x.resize(m_NumberOutputs);
+    for (int i = 0; i < m_NumberOutputs; ++i)
+      x[i] = m_ObservedOutputValues(i);
+  }
+}
 
 /**
    Set default values to uninitialized values. */
@@ -1244,6 +1278,8 @@ bool GaussianProcessEmulator::PrintThetas(std::ostream & o) const {
   PrintVector(m_OutputMeans, o);
   o << "OUTPUT_UNCERTAINTY_SCALES\n";
   PrintVector(m_OutputUncertaintyScales, o);
+  o << "OUTPUT_OBSERVED_VALUES\n";
+  PrintVector(m_ObservedOutputValues, o);
   o << "OUTPUT_PCA_EIGENVALUES\n";
   PrintVector(m_PCAEigenvalues, o);
   o << "OUTPUT_PCA_EIGENVECTORS\n";

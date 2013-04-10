@@ -115,6 +115,13 @@ public:
      \returns m_Status */
   StatusType GetStatus() const;
 
+  //@{
+  /**
+     \todo document */
+  void GetOutputUncertaintyScales(std::vector< double > & x);
+  void GetOutputObservedValues(std::vector< double > & x);
+  //@}
+
 protected:
   /**
      Once Load(), Train(), or BasicTraining() finishes, calculate and
@@ -175,6 +182,12 @@ public:
   Eigen::VectorXd m_OutputMeans;
   Eigen::VectorXd m_OutputUncertaintyScales;
   //@}
+
+  /**
+     These values are not used by the emulator, but represent the
+     experimentally observed mean values of the output variables.
+   */
+  Eigen::VectorXd m_ObservedOutputValues;
 
   //@{
   /**
