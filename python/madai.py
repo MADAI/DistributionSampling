@@ -97,7 +97,8 @@ class UniformDistribution(Distribution):
 
 
 def PrintEmulatorFormat(o,X,Y,Parameters,OutputNames,
-                        UncertaintyScales=None, comments=[]):
+                        UncertaintyScales=None, ObservedOutputValues=None,
+                        comments=[]):
     def print_matrix(M):
         print >>o, '%d %d' % (len(M),len(M[0]))
         for row in M:
@@ -125,6 +126,10 @@ def PrintEmulatorFormat(o,X,Y,Parameters,OutputNames,
         print >>o, 'OUTPUT_UNCERTAINTY_SCALES\n%d' % len(UncertaintyScales)
         for scale in UncertaintyScales:
             print >>o, scale
+    if ObservedOutputValues is not None:
+        print >>o, 'OUTPUT_OBSERVED_VALUES\n%d' % len(ObservedOutputValues)
+        for value in ObservedOutputValues:
+            print >>o, value
     print >>o, 'END_OF_FILE'
 
 def ReadDirectoryModelFormat(directory):
@@ -153,11 +158,14 @@ def ReadDirectoryModelFormat(directory):
 
     UncertaintyScales = None
     if os.path.isfile(experimental_results):
+        ObservedOutputValues = [0.0 for output in OutputNames]
         UncertaintyScales = [0.0 for output in OutputNames]
         for line in readFile(experimental_results):
             name, value, error = line.split()[:3]
             try:
-                UncertaintyScales[OutputNames.index(name)] = float(error)
+                idx = OutputNames.index(name)
+                ObservedOutputValues[idx] = value
+                UncertaintyScales[idx] = float(error)
             except ValueError:
                 pass # unused output (observable_names.dat)
 
@@ -169,7 +177,7 @@ def ReadDirectoryModelFormat(directory):
         return results[0]
 
     for rund in sorted(glob.iglob(os.path.join(outputd,"run[0-9]*"))):
-        print >>sys.stderr, rund
+        #print >>sys.stderr, rund
         pfile = os.path.join(rund,'parameters.dat')
         rfile = os.path.join(rund,'results.dat')
         assert os.path.isfile(pfile) and os.path.isfile(rfile)
@@ -191,7 +199,13 @@ def ReadDirectoryModelFormat(directory):
             except ValueError:
                 pass # unused output (observable_names.dat)
         Y.append(y)
-    return X,Y,UncertaintyScales,Parameters,OutputNames
+    return {
+        'X':X,
+        'Y':Y,
+        'UncertaintyScales':UncertaintyScales,
+        'ObservedOutputValues':ObservedOutputValues,
+        'Parameters':Parameters,
+        'OutputNames':OutputNames }
 
 def PrintDirectoryModelFormat(
     directory, parameters, outputNames,

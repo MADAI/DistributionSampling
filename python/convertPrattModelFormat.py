@@ -37,10 +37,17 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print useage
         exit(1)
-    ( X, Y, UncertaintyScales, Parameters, OutputNames
-      ) = madai.ReadDirectoryModelFormat(sys.argv[1])
-    if len(X) == 0:
+    model = madai.ReadDirectoryModelFormat(sys.argv[1])
+
+    if len(model['X']) == 0:
         print 'some error'
         exit(1)
     madai.PrintEmulatorFormat(
-        sys.stdout,X,Y,Parameters,OutputNames,UncertaintyScales,[sys.argv[1]])
+        sys.stdout,
+        model['X'],
+        model['Y'],
+        model['Parameters'],
+        model['OutputNames'],
+        model['UncertaintyScales'],
+        model['ObservedOutputValues'],
+        [sys.argv[1]])
