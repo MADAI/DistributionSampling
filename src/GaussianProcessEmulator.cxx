@@ -30,8 +30,10 @@
 #include "GaussianProcessEmulator.h"
 #include "UniformDistribution.h"
 #include "GaussianDistribution.h"
+#include "Paths.h"
 
 #include "madaisys/Directory.hxx"
+
 
 namespace {
 using namespace madai;
@@ -240,7 +242,8 @@ bool parseParameters(
     int & numberParameters,
     std::string AnalysisDir ) {
   // First check to see if file exists
-  std::string PriorFileName = AnalysisDir+"/parameter_priors.dat";
+  std::string PriorFileName = AnalysisDir + Paths::SEPARATOR +
+    Paths::PARAMETER_PRIORS_FILE;
   std::ifstream input( PriorFileName.c_str() );
   if ( !input.good() ) return false;
   parameters.clear(); // Empty the output vector
@@ -347,7 +350,8 @@ bool parseOutputs(
     int & numberOutputs,
     std::string AnalysisDir ) {
   // First cehck to see if file exists
-  std::string ObservablesFileName = AnalysisDir+"/observable_names.dat";
+  std::string ObservablesFileName = AnalysisDir + Paths::SEPARATOR +
+    Paths::OBSERVABLE_NAMES_FILE;
   std::ifstream input ( ObservablesFileName.c_str() );
   if ( !input.good() ) return false;
   outputNames.clear(); // Empty the output vector
@@ -454,6 +458,7 @@ inline bool parseParameterAndOutputValues(
   unsigned int run_counter = 0;
 
   double* avgUnc = new double[t]();
+
   for ( unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i ) {
     std::string dir_name( directory.GetFile( i ) );
 
@@ -461,7 +466,8 @@ inline bool parseParameterAndOutputValues(
     std::strncpy( temp, dir_name.c_str(), 3 );
     if ( std::strcmp( temp, "run" ) == 0 ) {
       // Open the parameters.dat file
-      std::string par_file_name = ModelOutDir+dir_name+"/parameters.dat";
+      std::string par_file_name = ModelOutDir + dir_name + Paths::SEPARATOR +
+        Paths::PARAMETERS_FILE;
       std::ifstream parfile ( par_file_name.c_str() );
       if ( !parfile.good() ) return false;
       while ( !parfile.eof() ) {
@@ -477,7 +483,8 @@ inline bool parseParameterAndOutputValues(
       }
       parfile.close();
       // Open the results.dat file
-      std::string results_file_name = ModelOutDir+dir_name+"/results.dat";
+      std::string results_file_name = ModelOutDir + dir_name + Paths::SEPARATOR +
+        Paths::RESULTS_FILE;
       std::ifstream results_file ( results_file_name.c_str() );
       // Check the style of the outputs
       std::string line;
@@ -695,7 +702,9 @@ bool parsePCADecomposition(
 bool parseGaussianProcessEmulator(
     GaussianProcessEmulator & gpme,
     std::string TopDirectory) {
-  std::string EmulatorFile = TopDirectory+"/statistical_analysis/EmulatorState.dat";
+  std::string EmulatorFile = TopDirectory + Paths::SEPARATOR +
+    Paths::STATISTICAL_ANALYSIS_DIRECTORY +
+    Paths::SEPARATOR + Paths::EMULATOR_STATE_FILE;
   std::ifstream input( EmulatorFile.c_str() );
   parseComments(gpme.m_Comments,input);
   std::string word;
@@ -1008,7 +1017,9 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
 
 bool GaussianProcessEmulator::LoadPCA(std::string TopDirectory) {
   m_Status = UNINITIALIZED;
-  std::string PCAFile = TopDirectory+"/statistical_analysis/PCADecomposition.dat";
+  std::string PCAFile = TopDirectory + Paths::SEPARATOR +
+    Paths::STATISTICAL_ANALYSIS_DIRECTORY + Paths::SEPARATOR +
+    Paths::PCA_DECOMPOSITION_FILE;
   std::ifstream input( PCAFile.c_str() );
   if ( !parsePCADecomposition(*this, input) ) {
     std::cerr << "Error parsing PCA data.\n";
@@ -1243,8 +1254,10 @@ bool GaussianProcessEmulator::LoadTrainingData(std::istream & input) {
    This taken an empty GPEM and loads training data */
 bool GaussianProcessEmulator::LoadTrainingData(std::string TopDirectory) {
   m_Status = UNINITIALIZED;
-  std::string MOD = TopDirectory+"/model_output/";
-  std::string SAD = TopDirectory+"/statistical_analysis/";
+  std::string MOD = TopDirectory + Paths::SEPARATOR +
+    Paths::MODEL_OUTPUT_DIRECTORY + Paths::SEPARATOR;
+  std::string SAD = TopDirectory + Paths::SEPARATOR +
+    Paths::STATISTICAL_ANALYSIS_DIRECTORY + Paths::SEPARATOR;
   if ( !parseModelDataDirectoryStructure(*this, MOD, SAD ) )
     return false;
   m_NumberPCAOutputs = 0;

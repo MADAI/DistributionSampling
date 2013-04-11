@@ -9,6 +9,7 @@ set( SRC_FILES
   LatinHypercubeGenerator.cxx
   Model.cxx
   Sampler.cxx
+  Paths.cxx
   ProcessPipe.c
   RegularStepGradientAscentSampler.cxx
   Sample.cxx
