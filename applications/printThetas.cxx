@@ -35,12 +35,10 @@ USE:
 
 const char useage [] =
   "Usage:\n"
-  "    printThetas TopDirectory [ReadMethod]\n"
+  "    printThetas TopDirectory\n"
   "\n"
   "TopDirectory is the directory containing the model_output/, experimental_results/\n"
-  "and statistical_analysis/directories. It can also be \"-\" to read from standard input.\n"
-  "\n"
-  "[ReadMethod] indicates which type of structure is being read in (Directory or file)\n";
+  "and statistical_analysis/directories. It can also be \"-\" to read from standard input.\n";
 
 #include <iostream> // cout, cin
 #include <fstream> // ifstream, ofstream
@@ -49,12 +47,8 @@ const char useage [] =
 
 int main(int argc, char ** argv) {
   char const * TopDirectory = NULL;
-  std::string ReadMethod = "Directory";
   if (argc > 1) {
     TopDirectory = argv[1];
-    if ( argc > 2 ) {
-      ReadMethod = std::string(argv[2]);
-    }
   } else {
     std::cerr << useage << '\n';
     return EXIT_FAILURE;
@@ -69,21 +63,16 @@ int main(int argc, char ** argv) {
       return EXIT_FAILURE;
     }
   } else {
-    if ( ReadMethod == "Directory" ) {
-      if ( ! gpe.Load( std::string(TopDirectory) ) ) {
-        std::cerr << "Error (2) loading data in " << TopDirectory << '\n';
-        return EXIT_FAILURE;
-      }
-    } else if ( ReadMethod == "SnapshotFile" ) {
-      std::string ModelSnapshotFile(TopDirectory);
-      ModelSnapshotFile += "/statistical_analysis/ModelSnapshot.dat";
-      std::ifstream MSF(ModelSnapshotFile.c_str());
-      if ( ! gpe.Load( MSF ) ) {
-        std::cerr << "Error (2) loading file " << ModelSnapshotFile << '\n';
-        return EXIT_FAILURE;
-      }
-    } else {
-      std::cerr << "Unknown data structure: " << ReadMethod << '\n';
+    if ( !gpe.LoadTrainingData(TopDirectory) ) {
+      std::cerr << "Error loading data used to train the emulator.\n";
+      return EXIT_FAILURE;
+    }
+    if ( !gpe.LoadPCA(TopDirectory) ) {
+      std::cerr << "Error loading PCA data.\n";
+      return EXIT_FAILURE;
+    }
+    if ( !gpe.LoadEmulator(TopDirectory) ) {
+      std::cerr << "Error loading the emulator state data.\n";
       return EXIT_FAILURE;
     }
   }

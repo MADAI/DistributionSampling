@@ -89,7 +89,12 @@ public:
   /**
     This takes a GPEM and loads PCA data.
     \returns true on success. */
-  bool LoadPCA(std::istream & input);
+  bool LoadPCA(std::string TopDirectory);
+  /**
+    This takes a GPEM and loads the emulator specific
+    data (submodels with their thetas).
+    \returns true on success. */
+  bool LoadEmulator(std::string TopDirectory);
   
   /**
    This takes a GPEM with training data and decomposes
@@ -110,7 +115,7 @@ public:
     This takes an GPEM and trains it. \returns true on sucess. */
   bool Train(
     CovarianceFunctionType covarianceFunction,
-    int regressionOrder, double fractionResolvingPower);
+    int regressionOrder);
 
   /**
     Execute the model at an input point x.  Save a lot of time by not

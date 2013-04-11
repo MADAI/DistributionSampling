@@ -63,8 +63,22 @@ Model::ErrorType
 GaussianProcessEmulatedModel
 ::LoadConfiguration( const std::string TopDirectory )
 {
-  if ( !m_GPME.Load(TopDirectory) )
-    return Model::OTHER_ERROR;
+  if ( TopDirectory == "-" ) {
+    m_GPME.Load(std::cin);
+  } else {
+    if ( !m_GPME.LoadTrainingData( TopDirectory ) ) {
+      std::cerr << "Error loading from the directory structure.\n";
+      return Model::OTHER_ERROR;
+    }
+    if ( !m_GPME.LoadPCA( TopDirectory ) ) {
+      std::cerr << "Error loading the PCA decomposition data.\n";
+      return Model::OTHER_ERROR;
+    }
+    if ( !m_GPME.LoadEmulator( TopDirectory ) ) {
+      std::cerr << "Error loading Emulator data.\n";
+      return Model::OTHER_ERROR;
+    }
+  }
   if ( m_GPME.m_Status != GaussianProcessEmulator::READY )
     return Model::OTHER_ERROR;
   m_StateFlag = READY;

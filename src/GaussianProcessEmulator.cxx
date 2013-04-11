@@ -562,7 +562,7 @@ std::ostream & serializeSubmodels(
   return o;
 }
 
-std::ostream & serializeTrainingData(
+std::ostream & serializeEmulatorData(
     const GaussianProcessEmulator & gpme,
     std::ostream & o ) {
   o << "SUBMODELS\t" 
@@ -679,28 +679,36 @@ bool parsePCADecomposition(
 
 bool parseGaussianProcessEmulator(
     GaussianProcessEmulator & gpme,
-    std::string TopDirectory,
-    bool LoadPCA ) {
-  std::string MOD = TopDirectory+"/model_output/";
-  std::string SAD = TopDirectory+"/statistical_analysis/";
-  if ( !parseModelDataDirectoryStructure( gpme, MOD, SAD ) ) {
-    std::cerr << "parse directory structure error\n";
-    return false;
-  }
-  if ( LoadPCA ) {
-    std::string PCADecompFileName = SAD+"/PCADecomposition.dat";
-    std::ifstream input( PCADecompFileName.c_str() );
-    if ( input ) {
-      // File exists, read in from it
-      if ( !parsePCADecomposition( gpme, input ) ) {
-        std::cerr << "parse saved PCA Decomposition error\n";
+    std::string TopDirectory) {
+  std::string EmulatorFile = TopDirectory+"/statistical_analysis/EmulatorState.dat";
+  std::ifstream input( EmulatorFile.c_str() );
+  parseComments(gpme.m_Comments,input);
+  std::string word;
+  while (input.good()) {
+    if (! input.good()) return false;
+    input >> word;
+    if (word == "SUBMODELS") {
+      if (! parseInteger(gpme.m_NumberPCAOutputs, input)) {
+        std::cerr << "parse error\n"; // \todo error message
         return false;
       }
+      gpme.m_PCADecomposedModels.resize(gpme.m_NumberPCAOutputs);
+      for (int i = 0; i < gpme.m_NumberPCAOutputs; ++i) {
+        if (! parseSubmodels(gpme.m_PCADecomposedModels[i],i,input)) {
+          std::cerr << "parse error\n"; // \todo error message
+          return false;
+        }
+        gpme.m_PCADecomposedModels[i].m_Parent = &gpme;
+        gpme.m_PCADecomposedModels[i].m_ZValues = gpme.m_ZMatrix.col(i);
+      }
+    } else if (word == "END_OF_FILE") {
+      return true;
     } else {
-      std::cerr << "No saved PCA Decomposition.\n";
+      std::cerr << "Unexected keyword: \"" << word << "\"\n";
       return false;
     }
   }
+  
   return true;
 }
 
@@ -983,9 +991,10 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
 }
 
 
-bool GaussianProcessEmulator::LoadPCA(std::istream & input)
-{
+bool GaussianProcessEmulator::LoadPCA(std::string TopDirectory) {
   m_Status = UNINITIALIZED;
+  std::string PCAFile = TopDirectory+"/statistical_analysis/PCADecomposition.dat";
+  std::ifstream input( PCAFile.c_str() );
   if ( !parsePCADecomposition(*this, input) ) {
     std::cerr << "Error parsing PCA data.\n";
     return false;
@@ -996,9 +1005,9 @@ bool GaussianProcessEmulator::LoadPCA(std::istream & input)
 }
 
 
-bool GaussianProcessEmulator::Load(std::string TopDirectory) {
+bool GaussianProcessEmulator::LoadEmulator(std::string TopDirectory) {
   m_Status = UNINITIALIZED;
-  if ( !parseGaussianProcessEmulator(*this, TopDirectory, true) ) {
+  if ( !parseGaussianProcessEmulator(*this, TopDirectory) ) {
     std::cerr << "Error parsing gaussian process emulator.\n";
     return false;
   }
@@ -1219,7 +1228,9 @@ bool GaussianProcessEmulator::LoadTrainingData(std::istream & input) {
    This taken an empty GPEM and loads training data */
 bool GaussianProcessEmulator::LoadTrainingData(std::string TopDirectory) {
   m_Status = UNINITIALIZED;
-  if ( !parseGaussianProcessEmulator(*this, TopDirectory, false) )
+  std::string MOD = TopDirectory+"/model_output/";
+  std::string SAD = TopDirectory+"/statistical_analysis/";
+  if ( !parseModelDataDirectoryStructure(*this, MOD, SAD ) )
     return false;
   m_NumberPCAOutputs = 0;
   this->CheckStatus();
@@ -1255,15 +1266,18 @@ bool GaussianProcessEmulator::SingleModel::Train(
    This takes an GPEM and trains it. \returns true on sucess. */
 bool GaussianProcessEmulator::Train(
     GaussianProcessEmulator::CovarianceFunctionType covarianceFunction,
-    int regressionOrder,
-    double fractionResolvingPower)
+    int regressionOrder)
 {
   if (this->CheckStatus() == UNINITIALIZED)
     return false;
   m_Status = UNTRAINED;
-  if (! this->PrincipalComponentDecompose(fractionResolvingPower))
-    return false;
-  for (int i = 0; i < m_NumberPCAOutputs; ++i) {
+  int t = m_NumberPCAOutputs;
+  m_PCADecomposedModels.resize( t );
+  for (int i = 0; i < t; ++i) {
+    m_PCADecomposedModels[i].m_Parent = this;
+    m_PCADecomposedModels[i].m_ZValues = m_ZMatrix.col(i);
+  }
+  for (int i = 0; i < t; ++i) {
     if (! m_PCADecomposedModels[i].Train(covarianceFunction,regressionOrder))
       return false;
   }
@@ -1609,14 +1623,6 @@ bool GaussianProcessEmulator::PrintThetas(std::ostream & o) const {
   o.precision(17);
   serializeComments(m_Comments,o);
   o << "THETAS_FILE\n";
-  o << "OUTPUT_MEANS\n";
-  PrintVector(m_OutputMeans, o);
-  o << "OUTPUT_UNCERTAINTY_SCALES\n";
-  PrintVector(m_OutputUncertaintyScales, o);
-  o << "OUTPUT_PCA_EIGENVALUES\n";
-  PrintVector(m_PCAEigenvalues, o);
-  o << "OUTPUT_PCA_EIGENVECTORS\n";
-  PrintMatrix(m_PCAEigenvectors, o);
   o << "SUBMODELS\t"
     << m_NumberPCAOutputs << "\n\n";
   for (int i = 0; i < m_NumberPCAOutputs; ++i) {

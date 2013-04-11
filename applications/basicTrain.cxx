@@ -59,26 +59,19 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
   outputFile = TopDirectory+"/statistical_analysis/EmulatorState.dat";
-  PCAFile = TopDirectory+"/statistical_analysis/PCADecomposition.dat";
 
   madai::GaussianProcessEmulator gpme;
   if ( TopDirectory == "-" ) {
-    gpme.LoadTrainingData(std::cin);
+    gpme.Load(std::cin);
   } else {
     if ( !gpme.LoadTrainingData(TopDirectory) ) {
       std::cerr << "Error Loading Training Data.\n";
       return EXIT_FAILURE;
     }
-  }
-  std::ifstream PCAis( PCAFile.c_str() );
-  if ( PCAis ) {
-    if ( !gpme.LoadPCA(PCAis) ) {
+    if ( !gpme.LoadPCA(TopDirectory) ) {
       std::cerr << "Error Loading PCA Data.\n";
       return EXIT_FAILURE;
     }
-  } else {
-    std::cerr << "PCADecomposition.dat not found!\n";
-    return EXIT_FAILURE;
   }
 
   madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction

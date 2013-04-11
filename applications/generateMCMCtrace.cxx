@@ -81,8 +81,6 @@ bool parseGaussianProcessMCMCConfig(
       opt = 'E';
     } else if ( name == "STEP_SIZE" ) {
       opt = 'S';
-    } else if ( name == "USE_MODEL_SNAPSHOT_FILE" ) {
-      opt = 'F';
     } else {
       std::cerr << "Unknown parameter " << name << '\n';
       opt = NULL;
@@ -130,18 +128,6 @@ bool parseGaussianProcessMCMCConfig(
         return false;
       }
       break;
-    case 'F':
-      input >> tstring;
-      if ( tstring == "false" ) {
-        Opts.UseModelSnapshotFile = false;
-      } else if ( tstring == "true" ) {
-        Opts.UseModelSnapshotFile = true;
-      } else {
-        std::cerr << "Error: USE_MODEL_SNAPSHOT_FILE given incorrect argument:\""
-          << tstring << "\"\n";
-        return false;
-      }
-      break;
     }
   }
   return true;
@@ -167,17 +153,9 @@ int main(int argc, char ** argv) {
   }
   
   madai::GaussianProcessEmulatedModel gpem;
-  if ( Opts.UseModelSnapshotFile ) {
-    std::string ModelSnapshotFile = TopDirectory+"/statistical_analysis/ModelSnapshot.dat";
-    if ( gpem.LoadConfigurationFile( ModelSnapshotFile ) != madai::Model::NO_ERROR ) {
-      std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfigurationFile\n";
-      return EXIT_FAILURE;
-    }
-  } else {
-    if (gpem.LoadConfiguration( TopDirectory ) != madai::Model::NO_ERROR) {
-      std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
-      return EXIT_FAILURE;
-    }
+  if (gpem.LoadConfiguration( TopDirectory ) != madai::Model::NO_ERROR) {
+    std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
+    return EXIT_FAILURE;
   }
 
   gpem.SetUseModelCovarianceToCalulateLogLikelihood(Opts.UseEmulatedCovariance);

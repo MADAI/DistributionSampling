@@ -193,29 +193,28 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   madai::GaussianProcessEmulator gpme;
   if (0 == std::strcmp(options.RootDirectory, "-")) {
-    gpme.LoadTrainingData(std::cin);
+    gpme.Load(std::cin);
   } else {
     std::string TopDirectory (options.RootDirectory);
     if ( !gpme.LoadTrainingData(TopDirectory) ) {
       std::cerr << "Error loading training data.\n";
       return EXIT_FAILURE;
     }
+    if ( !gpme.LoadPCA(TopDirectory) ) {
+      std::cerr << "Error loading PCA data.\n";
+      return EXIT_FAILURE;
+    }
   }
+  
   if (! gpme.Train(
           options.covarianceFunction,
-          options.regressionOrder,
-          options.pcaVariance)) {
+          options.regressionOrder)) {
     return EXIT_FAILURE;
   }
   std::string OutputFile(options.RootDirectory);
-  if (options.FullSummaryFlag) {
-    OutputFile += "/statistical_analysis/ModelSnapshot.dat";
-    std::ofstream os( OutputFile.c_str() );
-    gpme.Write(os);
-  } else {
-    OutputFile += "/statistical_analysis/PCADecomposition.dat";
-    std::ofstream os( OutputFile.c_str() );
-    gpme.WritePCA(os);
-  }
+  OutputFile += "/statistical_analysis/EmulatorState.dat";
+  std::ofstream os( OutputFile.c_str() );
+  gpme.Write( os );
+  
   return EXIT_SUCCESS;
 }
