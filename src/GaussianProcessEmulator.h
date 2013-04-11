@@ -86,6 +86,10 @@ public:
     This takes an empty GPEM and loads training data.
     \returns true on success. */
   bool LoadTrainingData(std::string TopDirectory);
+  /**
+    This takes a GPEM and loads PCA data.
+    \returns true on success. */
+  bool LoadPCA(std::istream & input);
   
   /**
    This takes a GPEM with training data and decomposes
@@ -97,7 +101,6 @@ public:
     This takes an GPEM and sets default values for all of the
     hyperparameters. \returns true on success. */
   bool BasicTraining(
-    double fractionResolvingPower,
     CovarianceFunctionType covarianceFunction,
     int regressionOrder,
     double defaultNugget,
