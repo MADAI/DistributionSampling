@@ -76,8 +76,6 @@ int main(int argc, char ** argv) {
   }
   std::cerr << "\r" ;
 
-  std::sort(samples.begin(),samples.end());
-
   madai::Trace trace;
   for (std::vector< madai::Sample >::const_iterator it = samples.begin() ;
        it != samples.end(); ++it) {
