@@ -30,6 +30,9 @@
 #include "GaussianProcessEmulator.h"
 #include "UniformDistribution.h"
 #include "GaussianDistribution.h"
+
+#include "madaisys/Directory.hxx"
+
 namespace {
 using namespace madai;
 
@@ -269,7 +272,7 @@ bool parseParameters(
   }
   numberParameters = parameters.size();
   assert( numberParameters > 0 );
-  
+
   return true;
 }
 
@@ -362,7 +365,7 @@ bool parseOutputs(
   }
   numberOutputs = outputNames.size();
   assert( numberOutputs > 0 );
-  
+
   return true;
 }
 
@@ -397,26 +400,24 @@ bool parseInteger( int & x, std::istream & input ) {
 }
 
 bool parseNumberOfModelRuns( int & x, std::string ModelOutDir ) {
-  std::string command = "ls -1 "+ModelOutDir+" > dirlist";
-  std::system( command.c_str() );
-  
-  std::string dirlist = "dirlist";
-  std::ifstream DFile ( dirlist.c_str() );
-  if ( !DFile.good() ) return false;
+
+  madaisys::Directory directory;
+  if ( !directory.Load( ModelOutDir.c_str() ) ) {
+    return false;
+  }
+
   unsigned int run_counter = 0;
-  while ( !DFile.eof() ) {
-    std::string dir_name;
-    DFile >> dir_name;
-    char* temp = new char[3]();
-    std::strncpy( temp, dir_name.c_str(), 3 );
-    if ( std::strcmp( temp, "run" ) == 0 ) {
+
+  for ( unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i ) {
+    int dummy;
+    if ( sscanf( directory.GetFile( i ), "run%d", &dummy ) == 1 ) {
       run_counter++;
     }
   }
-  std::remove( dirlist.c_str() );
+
   x = run_counter;
   assert ( x > 0 );
-  
+
   return true;
 }
 
@@ -430,10 +431,12 @@ inline bool parseParameterAndOutputValues(
     std::vector< madai::Parameter > parameters,
     std::vector< std::string > outputNames ) {
   // Get the list of directories in model_outputs/
-  std::string command = "ls -1 "+ModelOutDir+" > dirlist";
-  std::system( command.c_str() );
-  std::string dirlist = "dirlist";
-  std::ifstream DFile ( dirlist.c_str() );
+
+  madaisys::Directory directory;
+  if ( !directory.Load( ModelOutDir.c_str() ) ) {
+    return false;
+  }
+
   int p = parameters.size();
   int t = outputNames.size();
   // Copy m_
@@ -449,11 +452,11 @@ inline bool parseParameterAndOutputValues(
   m2.derived().resize( numberTrainingPoints, t );
   m3.derived().resize( t, 1 );
   unsigned int run_counter = 0;
+
   double* avgUnc = new double[t]();
-  if ( !DFile.good() ) return false;
-  while ( !DFile.eof() ) {
-    std::string dir_name;
-    DFile >> dir_name;
+  for ( unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i ) {
+    std::string dir_name( directory.GetFile( i ) );
+
     char* temp = new char[3]();
     std::strncpy( temp, dir_name.c_str(), 3 );
     if ( std::strcmp( temp, "run" ) == 0 ) {
@@ -515,11 +518,11 @@ inline bool parseParameterAndOutputValues(
       run_counter++;
     }
   }
+
   for ( unsigned int i = 0; i < t; i++ ) {
     m3( i, 0 ) = avgUnc[i] / double( run_counter );
   }
-  std::remove( dirlist.c_str() );
-  
+
   return true;
 }
 
@@ -575,7 +578,7 @@ std::ostream & serializeSubmodels(
 std::ostream & serializeEmulatorData(
     const GaussianProcessEmulator & gpme,
     std::ostream & o ) {
-  o << "SUBMODELS\t" 
+  o << "SUBMODELS\t"
     << gpme.m_NumberPCAOutputs << "\n";
   for ( unsigned int i = 0; i < gpme.m_NumberPCAOutputs; i++ ) {
     serializeSubmodels( gpme.m_PCADecomposedModels[i], i, o );
@@ -613,22 +616,22 @@ std::ostream & serializePCADecomposition(
   o << "END_OF_FILE\n";
   return o;
 }
-  
+
 bool parseModelDataDirectoryStructure(
     GaussianProcessEmulator & gpme,
     std::string Model_Outs_Dir,
     std::string Stat_Anal_Dir) {
-  if ( !parseParameters( 
+  if ( !parseParameters(
           gpme.m_Parameters, gpme.m_NumberParameters, Stat_Anal_Dir ) ) {
     std::cerr << "parse Parameters error\n";
     return false;
   }
-  if ( !parseOutputs( 
+  if ( !parseOutputs(
           gpme.m_OutputNames, gpme.m_NumberOutputs, Stat_Anal_Dir ) ) {
     std::cerr << "parse Outputs error\n";
     return false;
   }
-  if ( !parseNumberOfModelRuns( 
+  if ( !parseNumberOfModelRuns(
           gpme.m_NumberTrainingPoints, Model_Outs_Dir ) ) {
     std::cerr << "parse Integer error\n";
     return false;
@@ -720,7 +723,7 @@ bool parseGaussianProcessEmulator(
       return false;
     }
   }
-  
+
   return true;
 }
 

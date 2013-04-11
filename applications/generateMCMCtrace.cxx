@@ -27,6 +27,8 @@
 #include "GaussianProcessEmulatedModel.h"
 #include "Trace.h"
 
+#include "madaisys/SystemTools.hxx"
+
 /**
 generateMCMCtrace
   Generate a trace of length N for a Gaussian Process Model Emulator
@@ -198,8 +200,8 @@ int main(int argc, char ** argv) {
        it != samples.end(); ++it) {
     trace.Add( *it );
   }
-  std::string command = "mkdir -p "+TopDirectory+"/statistical_analysis/MCMCTrace";
-  std::system(command.c_str());
+  std::string traceDirectory = TopDirectory + "/statistical_analysis/MCMCTrace";
+  madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
   std::string OutputFile = TopDirectory+"/statistical_analysis/MCMCTrace/"+OutputFileName;
   std::ofstream Out( OutputFile.c_str() );
   trace.WriteCSVOutput(
