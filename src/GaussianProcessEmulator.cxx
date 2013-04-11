@@ -424,6 +424,7 @@ template < typename TDerived >
 inline bool parseParameterAndOutputValues(
     const Eigen::MatrixBase< TDerived > & m_,
     const Eigen::MatrixBase< TDerived > & m2_,
+    const Eigen::MatrixBase< TDerived > & m3_,
     std::string ModelOutDir,
     unsigned int numberTrainingPoints,
     std::vector< madai::Parameter > parameters,
@@ -441,9 +442,14 @@ inline bool parseParameterAndOutputValues(
   // Copy m2_
   Eigen::MatrixBase< TDerived > & m2
   = const_cast< Eigen::MatrixBase< TDerived > & >(m2_);
+  // Copy m3_
+  Eigen::MatrixBase< TDerived > & m3
+  = const_cast< Eigen::MatrixBase< TDerived > & >(m3_);
   m.derived().resize( numberTrainingPoints, p );
   m2.derived().resize( numberTrainingPoints, t );
+  m3.derived().resize( t, 1 );
   unsigned int run_counter = 0;
+  double* avgUnc = new double[t]();
   if ( !DFile.good() ) return false;
   while ( !DFile.eof() ) {
     std::string dir_name;
@@ -498,6 +504,7 @@ inline bool parseParameterAndOutputValues(
             if ( NVal == 3 ) {
               double ModelUnc;
               results_file >> ModelUnc;
+              avgUnc[i] += ModelUnc;
             } else if ( NVal != 2 ) {
               std::cerr << "Unknown output format error.\n";
               return false;
@@ -507,6 +514,9 @@ inline bool parseParameterAndOutputValues(
       results_file.close();
       run_counter++;
     }
+  }
+  for ( unsigned int i = 0; i < t; i++ ) {
+    m3( i, 0 ) = avgUnc[i] / double( run_counter );
   }
   std::remove( dirlist.c_str() );
   
@@ -623,12 +633,14 @@ bool parseModelDataDirectoryStructure(
     std::cerr << "parse Integer error\n";
     return false;
   }
+  Eigen::MatrixXd TMat( gpme.m_NumberOutputs, 1 );
   if ( !parseParameterAndOutputValues( 
-          gpme.m_ParameterValues, gpme.m_OutputValues, Model_Outs_Dir, 
+          gpme.m_ParameterValues, gpme.m_OutputValues, TMat, Model_Outs_Dir,
           gpme.m_NumberTrainingPoints, gpme.m_Parameters, gpme.m_OutputNames ) ) {
     std::cerr << "parse Parameter and Output Values error\n";
     return false;
   }
+  gpme.m_OutputUncertaintyScales = TMat.col(0);
   return true;
 }
 
@@ -1396,11 +1408,10 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose(
   int t = m_NumberOutputs;
   int N = m_NumberTrainingPoints;
 
-  // FIND PCA DECOMPOSIRION OF m_OutputValues - m_OutputMeans
+  // FIND PCA DECOMPOSITION OF m_OutputValues - m_OutputMeans
   m_OutputMeans = m_OutputValues.colwise().mean();
   Eigen::MatrixXd Y_minus_means
     = m_OutputValues.rowwise() - (m_OutputValues.colwise().mean());
-
 
   Eigen::MatrixXd Y_standardized(N,t);
   for (int outputIndex = 0; outputIndex < t; ++outputIndex) {
