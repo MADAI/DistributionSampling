@@ -561,11 +561,21 @@ std::ostream & serializeSubmodels(
   o << "COVARIANCE_FUNCTION\t"
     << GetCovarianceFunctionString(m.m_CovarianceFunction) << '\n';
   o << "REGRESSION_ORDER\t" << m.m_RegressionOrder << '\n';
-  o << "Z_VALUES\n";
-  PrintVector(m.m_ZValues, o);
   o << "THETAS\n";
   PrintVector(m.m_Thetas, o);
   o << "END_OF_MODEL\n";
+  return o;
+}
+
+std::ostream & serializeTrainingData(
+    const GaussianProcessEmulator & gpme,
+    std::ostream & o ) {
+  o << "SUBMODELS\t" 
+    << gpme.m_NumberPCAOutputs << "\n";
+  for ( unsigned int i = 0; i < gpme.m_NumberPCAOutputs; i++ ) {
+    serializeSubmodels( gpme.m_PCADecomposedModels[i], i, o );
+  }
+  o << "END_OF_FILE\n";
   return o;
 }
 
@@ -606,7 +616,6 @@ std::ostream & serializePCADecomposition(
     const GaussianProcessEmulator & gpme,
     std::ostream & o ) {
   serializeComments(gpme.m_Comments,o);
-  o << "VERSION 1\n";
   o << "OUTPUT_MEANS\n";
   PrintVector(gpme.m_OutputMeans, o);
   o << "OUTPUT_UNCERTAINTY_SCALES\n";
@@ -615,10 +624,8 @@ std::ostream & serializePCADecomposition(
   PrintVector(gpme.m_PCAEigenvalues, o);
   o << "OUTPUT_PCA_EIGENVECTORS\n";
   PrintMatrix(gpme.m_PCAEigenvectors, o);
-  o << "SUBMODELS\t" << gpme.m_NumberPCAOutputs << "\n";
-  for ( unsigned int i = 0; i < gpme.m_NumberPCAOutputs; ++i ) {
-    serializeSubmodels(gpme.m_PCADecomposedModels[i],i,o);
-  }
+  o << "Z_MATRIX\n";
+  PrintMatrix(gpme.m_ZMatrix, o);
   o << "END_OF_FILE\n";
   return o;
 }
@@ -1435,13 +1442,13 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose(
   m_PCAEigenvalues = eigenSolver.eigenvalues().tail(r);
   m_PCAEigenvectors = eigenSolver.eigenvectors().rightCols(r);
 
-  Eigen::MatrixXd zMatrix = Y_standardized * m_PCAEigenvectors;
-  m_PCADecomposedModels.resize(r);
+  m_ZMatrix = Y_standardized * m_PCAEigenvectors;
+  /*m_PCADecomposedModels.resize(r);
   for (int i = 0; i < r; ++i) {
     SingleModel & m = m_PCADecomposedModels[i];
     m.m_Parent = this;
     m.m_ZValues = zMatrix.col(i);
-  }
+  }*/
   return true;
 }
 
@@ -1609,7 +1616,7 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
 
 
 bool GaussianProcessEmulator::WritePCA( std::ostream & o ) const {
-  o.precision(15);
+  o.precision(17);
   serializePCADecomposition(*this,o);
   return true;
 }

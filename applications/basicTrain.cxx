@@ -44,7 +44,6 @@ const char useage [] =
   "data structure will be saved to the file ModelSnapshot.dat. Otherwise,\n"
   "only the PCA Decomposition will be saved to PCADecomposition.dat.\n";
 
-#include <getopt.h>
 #include <iostream> // cout, cin
 #include <fstream> // ifstream, ofstream
 

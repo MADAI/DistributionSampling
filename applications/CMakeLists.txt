@@ -1,4 +1,11 @@
 add_executable(
+  PCADecompose
+  PCADecompose.cxx )
+target_link_libraries(
+  PCADecompose
+  DistributionSampling)
+
+add_executable(
   emulate
   emulate.cxx )
 target_link_libraries(

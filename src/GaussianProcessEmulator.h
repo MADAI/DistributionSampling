@@ -86,6 +86,12 @@ public:
     This takes an empty GPEM and loads training data.
     \returns true on success. */
   bool LoadTrainingData(std::string TopDirectory);
+  
+  /**
+   This takes a GPEM with training data and decomposes
+   it into the principal components.
+   \returns true on success. */
+  bool PrincipalComponentDecompose(double fractionResolvingPower);
 
   /**
     This takes an GPEM and sets default values for all of the
@@ -136,11 +142,6 @@ protected:
   /**
      Check status; make sure that the emulator is in a good state. */
   StatusType CheckStatus();
-
-  /**
-    Execute the model at an input point x.
-    The covariance returned will be a flattened matrix */
-  bool PrincipalComponentDecompose(double fractionResolvingPower);
 
 public:
   // FIELDS
@@ -198,6 +199,14 @@ public:
   Eigen::VectorXd m_PCAEigenvalues;
   Eigen::MatrixXd m_PCAEigenvectors;
   //@}
+  
+  //@{
+  /**
+     The z-matrix from the PCA decomposition of the outputValues.
+     It is of size numberTrainingPoints by numberPCAOutputs. */
+  Eigen::MatrixXd m_ZMatrix;
+  //@}
+  
   /**
      This represents one PCA-decomposed model */
   struct SingleModel {
