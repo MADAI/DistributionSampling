@@ -74,9 +74,13 @@ int main(int argc, char ** argv) {
   double defaultNugget = 1e-3;
   double amplitude = 1.0;
   double scale = 1e-2;
-
+  
+  if ( !gpe.PrincipalComponentDecompose(fractionResolvingPower) ) {
+    std::cerr << "Error in GaussianProcessEmulator::PrincipalComponentDecompose\n";
+    return EXIT_FAILURE;
+  }
+  
   if (! gpe.BasicTraining(
-          fractionResolvingPower,
           covarianceFunction,
           regressionOrder,
           defaultNugget,
@@ -90,10 +94,14 @@ int main(int argc, char ** argv) {
   out.close();
 
   madai::GaussianProcessEmulatedModel gpem;
-  if (gpem.LoadConfigurationFile( MODEL_FILE ) != madai::Model::NO_ERROR) {
-    std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfigurationFile";
+  if (gpem.SetGaussianProcessEmulator( gpe ) != madai::Model::NO_ERROR) {
+    std::cerr << "Error in GaussianProcessEmulatedModel::SetGaussianProcessEmulator\n";
     return EXIT_FAILURE;
   }
+  /*if (gpem.LoadConfigurationFile( MODEL_FILE ) != madai::Model::NO_ERROR) {
+    std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfigurationFile";
+    return EXIT_FAILURE;
+  }*/
 
   madai::MetropolisHastingsSampler mcmc;
   mcmc.SetModel( &gpem );

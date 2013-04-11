@@ -88,6 +88,23 @@ GaussianProcessEmulatedModel
 }
 
 /**
+ * Set the gaussian process emulator
+ */
+Model::ErrorType
+GaussianProcessEmulatedModel
+::SetGaussianProcessEmulator(
+  GaussianProcessEmulator & GPME )
+{
+  m_GPME = GPME;
+  if ( m_GPME.m_Status != GaussianProcessEmulator::READY )
+    return Model::OTHER_ERROR;
+  m_StateFlag = READY;
+  m_Parameters = m_GPME.m_Parameters;
+  m_ScalarOutputNames = m_GPME.m_OutputNames;
+  return Model::NO_ERROR;
+}
+
+/**
  * Get the scalar outputs from the model evaluated at x.  If an
  * error happens, the scalar output array will be left incomplete.
  */

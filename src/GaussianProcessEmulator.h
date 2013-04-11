@@ -68,6 +68,9 @@ public:
     Writes current state to file.  \returns true on sucess. */
   bool Write(std::ostream & output) const;
   /**
+    Writes the model data to a file. \returns true on sucess. */
+  bool WriteModelData( std::ostream & output ) const;
+  /**
     Writes current state of PCADecomposition to file. */
   bool WritePCA(std::ostream & output) const;
   /**
