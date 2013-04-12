@@ -49,6 +49,7 @@ const char useage [] =
 #include "GaussianProcessEmulator.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
+#include "GaussianProcessEmulatorSingleFileWriter.h"
 
 
 int main(int argc, char ** argv) {
@@ -95,7 +96,9 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   
   std::ofstream os (outputFile.c_str());
-  gpme.Write(os);
+
+  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
+  singleFileWriter.Write(&gpme,os);
   
   return EXIT_SUCCESS;
 }

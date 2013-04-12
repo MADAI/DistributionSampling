@@ -25,6 +25,7 @@
 #include "GaussianProcessEmulatorTestGenerator.h"
 #include "GaussianProcessEmulator.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
+#include "GaussianProcessEmulatorSingleFileWriter.h"
 
 
 const char TRAINING_FILE[] = "/tmp/GaussianProcessEmulatorTestTraining.dat";
@@ -86,7 +87,9 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
 
   out.open(MODEL_FILE);
-  gpe.Write(out);
+
+  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
+  singleFileWriter.Write(&gpe,out);
   out.close();
 
   std::cout.precision(17);
@@ -121,7 +124,7 @@ int main(int argc, char ** argv) {
   std::cout << "Maximum error over all space: " << error << '\n';
 
   out.open(THETAS_FILE);
-  if(! gpe.PrintThetas(out)) {
+  if(! singleFileWriter.PrintThetas(&gpe,out)) {
     std::cerr << "Error printing Thetas.\n";
     return EXIT_FAILURE;
   }

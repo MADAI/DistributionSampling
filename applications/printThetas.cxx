@@ -46,6 +46,7 @@ const char useage [] =
 #include "GaussianProcessEmulator.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
+#include "GaussianProcessEmulatorSingleFileWriter.h"
 
 
 int main(int argc, char ** argv) {
@@ -86,7 +87,8 @@ int main(int argc, char ** argv) {
     std::cerr << "Error (3) incomplete load from " << TopDirectory << '\n';
     return EXIT_FAILURE;
   }
-  if(! gpe.PrintThetas(output)) {
+  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
+  if(! singleFileWriter.PrintThetas(&gpe,output)) {
     std::cerr << "Error printing Thetas.\n";
     return EXIT_FAILURE;
   }

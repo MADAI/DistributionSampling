@@ -40,6 +40,7 @@ USE:
 #include "GaussianProcessEmulator.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
+#include "GaussianProcessEmulatorSingleFileWriter.h"
 
 
 #define starts_with(s1,s2) (std::strncmp((s1), (s2), std::strlen(s2)) == 0)
@@ -219,7 +220,9 @@ int main(int argc, char ** argv) {
   std::string OutputFile(options.RootDirectory);
   OutputFile += "/statistical_analysis/EmulatorState.dat";
   std::ofstream os( OutputFile.c_str() );
-  gpme.Write( os );
+
+  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
+  singleFileWriter.Write( &gpme, os );
   
   return EXIT_SUCCESS;
 }

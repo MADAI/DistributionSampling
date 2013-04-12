@@ -39,6 +39,7 @@ class GaussianProcessEmulator
 
 friend class GaussianProcessEmulatorDirectoryReader;
 friend class GaussianProcessEmulatorSingleFileReader;
+friend class GaussianProcessEmulatorSingleFileWriter;
 
 public:
   // ENUMERATIONS
@@ -67,16 +68,6 @@ public:
   /**
     Default constructor which makes an empty GPEM */
   GaussianProcessEmulator();
-
-  /**
-    Writes current state to file.  \returns true on sucess. */
-  bool Write(std::ostream & output) const;
-  /**
-    Writes the model data to a file. \returns true on sucess. */
-  bool WriteModelData( std::ostream & output ) const;
-  /**
-    Writes current state of PCADecomposition to file. */
-  bool WritePCA(std::ostream & output) const;
   
   /**
    This takes a GPEM with training data and decomposes
@@ -113,10 +104,6 @@ public:
     const std::vector< double > & x,
     std::vector< double > & y,
     std::vector< double > & ycov) const;
-
-  /**
-     Writes current state to file.  \returns true on sucess. */
-  bool PrintThetas(std::ostream & output) const;
 
   /**
      \returns m_Status */
