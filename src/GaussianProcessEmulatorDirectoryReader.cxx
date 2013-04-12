@@ -31,6 +31,19 @@
 
 namespace madai {
 
+GaussianProcessEmulatorDirectoryReader
+::GaussianProcessEmulatorDirectoryReader()
+{
+
+}
+
+
+GaussianProcessEmulatorDirectoryReader
+::~GaussianProcessEmulatorDirectoryReader()
+{
+
+}
+
 
 namespace {
 

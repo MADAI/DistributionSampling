@@ -969,42 +969,6 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
 }
 
 
-bool GaussianProcessEmulator::LoadPCA(std::string TopDirectory) {
-  m_Status = UNINITIALIZED;
-  std::string PCAFile = TopDirectory + Paths::SEPARATOR +
-    Paths::STATISTICAL_ANALYSIS_DIRECTORY + Paths::SEPARATOR +
-    Paths::PCA_DECOMPOSITION_FILE;
-  std::ifstream input( PCAFile.c_str() );
-  if ( !parsePCADecomposition(*this, input) ) {
-    std::cerr << "Error parsing PCA data.\n";
-    return false;
-  }
-  // We are finished reading the input files.
-  this->CheckStatus();
-  return (m_Status == UNTRAINED);
-}
-
-
-bool GaussianProcessEmulator::LoadEmulator(std::string TopDirectory) {
-  m_Status = UNINITIALIZED;
-  if ( !parseGaussianProcessEmulator(*this, TopDirectory) ) {
-    std::cerr << "Error parsing gaussian process emulator.\n";
-    return false;
-  }
-  // We are finished reading the input files.
-  if ( this->CheckStatus() != GaussianProcessEmulator::UNCACHED ) {
-    std::cerr << "Emulator already cached.\n";
-    std::cerr << stat(this->CheckStatus()) << "\n";
-    return false;
-  }
-  if ( !this->MakeCache() ) {
-    std::cerr << "Error while makeing cache.\n";
-    return false;
-  }
-  return true;
-}
-
-
 GaussianProcessEmulator::StatusType
 GaussianProcessEmulator::CheckStatus() {
   m_Status = UNINITIALIZED;
@@ -1200,21 +1164,6 @@ GaussianProcessEmulator::GaussianProcessEmulator() :
   m_NumberPCAOutputs(0)
 { }
 
-
-/**
-   This taken an empty GPEM and loads training data */
-bool GaussianProcessEmulator::LoadTrainingData(std::string TopDirectory) {
-  m_Status = UNINITIALIZED;
-  std::string MOD = TopDirectory + Paths::SEPARATOR +
-    Paths::MODEL_OUTPUT_DIRECTORY + Paths::SEPARATOR;
-  std::string SAD = TopDirectory + Paths::SEPARATOR +
-    Paths::STATISTICAL_ANALYSIS_DIRECTORY + Paths::SEPARATOR;
-  if ( !parseModelDataDirectoryStructure(*this, MOD, SAD ) )
-    return false;
-  m_NumberPCAOutputs = 0;
-  this->CheckStatus();
-  return (m_Status == UNTRAINED);
-}
 
 /**
    This takes an GPEM and trains it. \returns true on sucess. */

@@ -41,6 +41,7 @@ USE:
 #include "GaussianProcessEmulator.h"
 #include "UniformDistribution.h"
 #include "GaussianDistribution.h"
+#include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 
 static const char useage [] =
@@ -218,15 +219,16 @@ int main(int argc, char ** argv) {
     madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
     singleFileReader.Load(&gpme,std::cin);
   } else {
-    if ( !gpme.LoadTrainingData(TopDirectory) ) {
+    madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+    if ( !directoryReader.LoadTrainingData(&gpme,TopDirectory) ) {
       std::cerr << "Error loading data used to train the emulator.\n";
       return EXIT_FAILURE;
     }
-    if ( !gpme.LoadPCA(TopDirectory) ) {
+    if ( !directoryReader.LoadPCA(&gpme,TopDirectory) ) {
       std::cerr << "Error loading PCA data.\n";
       return EXIT_FAILURE;
     }
-    if ( !gpme.LoadEmulator(TopDirectory) ) {
+    if ( !directoryReader.LoadEmulator(&gpme,TopDirectory) ) {
       std::cerr << "Error loading the emulator state data.\n";
       return EXIT_FAILURE;
     }

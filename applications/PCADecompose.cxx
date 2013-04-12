@@ -25,6 +25,7 @@ PCADecompose
 
 #include "GaussianProcessEmulator.h"
 #include "Paths.h"
+#include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 
 
@@ -58,7 +59,8 @@ int main( int argc, char ** argv ) {
     madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
     singleFileReader.LoadTrainingData(&gpme, std::cin);
   } else {
-    if ( !gpme.LoadTrainingData(TopDirectory) ) {
+    madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+    if ( !directoryReader.LoadTrainingData(&gpme,TopDirectory) ) {
       std::cerr << "Error Loading Training Data.\n";
       return EXIT_FAILURE;
     }

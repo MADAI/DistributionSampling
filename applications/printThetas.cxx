@@ -44,6 +44,7 @@ const char useage [] =
 #include <fstream> // ifstream, ofstream
 
 #include "GaussianProcessEmulator.h"
+#include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 
 
@@ -66,15 +67,16 @@ int main(int argc, char ** argv) {
       return EXIT_FAILURE;
     }
   } else {
-    if ( !gpe.LoadTrainingData(TopDirectory) ) {
+    madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+    if ( !directoryReader.LoadTrainingData(&gpe,TopDirectory) ) {
       std::cerr << "Error loading data used to train the emulator.\n";
       return EXIT_FAILURE;
     }
-    if ( !gpe.LoadPCA(TopDirectory) ) {
+    if ( !directoryReader.LoadPCA(&gpe,TopDirectory) ) {
       std::cerr << "Error loading PCA data.\n";
       return EXIT_FAILURE;
     }
-    if ( !gpe.LoadEmulator(TopDirectory) ) {
+    if ( !directoryReader.LoadEmulator(&gpe, TopDirectory) ) {
       std::cerr << "Error loading the emulator state data.\n";
       return EXIT_FAILURE;
     }

@@ -77,21 +77,6 @@ public:
   /**
     Writes current state of PCADecomposition to file. */
   bool WritePCA(std::ostream & output) const;
-
-  /**
-    This takes an empty GPEM and loads training data.
-    \returns true on success. */
-  bool LoadTrainingData(std::string TopDirectory);
-
-  /**
-    This takes a GPEM and loads PCA data.
-    \returns true on success. */
-  bool LoadPCA(std::string TopDirectory);
-  /**
-    This takes a GPEM and loads the emulator specific
-    data (submodels with their thetas).
-    \returns true on success. */
-  bool LoadEmulator(std::string TopDirectory);
   
   /**
    This takes a GPEM with training data and decomposes

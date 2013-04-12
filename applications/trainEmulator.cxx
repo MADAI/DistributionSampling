@@ -38,6 +38,7 @@ USE:
 #include <fstream> // ifstream, ofstream
 #include <cstring> // strcmp, strlen
 #include "GaussianProcessEmulator.h"
+#include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 
 
@@ -199,11 +200,12 @@ int main(int argc, char ** argv) {
     singleFileReader.Load(&gpme,std::cin);
   } else {
     std::string TopDirectory (options.RootDirectory);
-    if ( !gpme.LoadTrainingData(TopDirectory) ) {
+    madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+    if ( !directoryReader.LoadTrainingData(&gpme,TopDirectory) ) {
       std::cerr << "Error loading training data.\n";
       return EXIT_FAILURE;
     }
-    if ( !gpme.LoadPCA(TopDirectory) ) {
+    if ( !directoryReader.LoadPCA(&gpme,TopDirectory) ) {
       std::cerr << "Error loading PCA data.\n";
       return EXIT_FAILURE;
     }

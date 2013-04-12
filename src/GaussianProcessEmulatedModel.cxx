@@ -18,6 +18,7 @@
 
 #include "GaussianProcessEmulatedModel.h"
 
+#include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 
 #include <fstream>
@@ -95,15 +96,16 @@ GaussianProcessEmulatedModel
     GaussianProcessEmulatorSingleFileReader singleFileReader;
     singleFileReader.Load(&m_GPME, std::cin);
   } else {
-    if ( !m_GPME.LoadTrainingData( TopDirectory ) ) {
+    GaussianProcessEmulatorDirectoryReader directoryReader;
+    if ( !directoryReader.LoadTrainingData( &m_GPME, TopDirectory ) ) {
       std::cerr << "Error loading from the directory structure.\n";
       return Model::OTHER_ERROR;
     }
-    if ( !m_GPME.LoadPCA( TopDirectory ) ) {
+    if ( !directoryReader.LoadPCA( &m_GPME, TopDirectory ) ) {
       std::cerr << "Error loading the PCA decomposition data.\n";
       return Model::OTHER_ERROR;
     }
-    if ( !m_GPME.LoadEmulator( TopDirectory ) ) {
+    if ( !directoryReader.LoadEmulator( &m_GPME, TopDirectory ) ) {
       std::cerr << "Error loading Emulator data.\n";
       return Model::OTHER_ERROR;
     }
