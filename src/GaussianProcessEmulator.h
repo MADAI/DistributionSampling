@@ -36,6 +36,9 @@ namespace madai {
    \fixme describe the useage of this class. */
 class GaussianProcessEmulator
 {
+
+friend class GaussianProcessEmulatorSingleFileReader;
+
 public:
   // ENUMERATIONS
   /**
