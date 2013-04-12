@@ -98,10 +98,6 @@ int main(int argc, char ** argv) {
     std::cerr << "Error in GaussianProcessEmulatedModel::SetGaussianProcessEmulator\n";
     return EXIT_FAILURE;
   }
-  /*if (gpem.LoadConfigurationFile( MODEL_FILE ) != madai::Model::NO_ERROR) {
-    std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfigurationFile";
-    return EXIT_FAILURE;
-  }*/
 
   madai::MetropolisHastingsSampler mcmc;
   mcmc.SetModel( &gpem );

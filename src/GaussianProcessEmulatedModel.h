@@ -54,11 +54,6 @@ class GaussianProcessEmulatedModel : public Model {
   virtual ErrorType LoadConfiguration( const std::string TopDirectory );
   
   /**
-   * Sets a preloaded gaussian process emulator
-   */
-  virtual ErrorType SetGaussianProcessEmulator( GaussianProcessEmulator & GPME );
-
-  /**
    * Get the scalar outputs from the model evaluated at point
    * \c parameters.
    */
