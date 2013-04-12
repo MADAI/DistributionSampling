@@ -68,6 +68,12 @@ public:
     Writes current state to file.  \returns true on sucess. */
   bool Write(std::ostream & output) const;
   /**
+    Writes the model data to a file. \returns true on sucess. */
+  bool WriteModelData( std::ostream & output ) const;
+  /**
+    Writes current state of PCADecomposition to file. */
+  bool WritePCA(std::ostream & output) const;
+  /**
     This loads a fully-ready-to-go GPEM
     \returns true on success. */
   bool Load(std::istream & input);
@@ -75,12 +81,30 @@ public:
     This takes an empty GPEM and loads training data.
     \returns true on success. */
   bool LoadTrainingData(std::istream & input);
+  /**
+    This takes an empty GPEM and loads training data.
+    \returns true on success. */
+  bool LoadTrainingData(std::string TopDirectory);
+  /**
+    This takes a GPEM and loads PCA data.
+    \returns true on success. */
+  bool LoadPCA(std::string TopDirectory);
+  /**
+    This takes a GPEM and loads the emulator specific
+    data (submodels with their thetas).
+    \returns true on success. */
+  bool LoadEmulator(std::string TopDirectory);
+  
+  /**
+   This takes a GPEM with training data and decomposes
+   it into the principal components.
+   \returns true on success. */
+  bool PrincipalComponentDecompose(double fractionResolvingPower);
 
   /**
     This takes an GPEM and sets default values for all of the
     hyperparameters. \returns true on success. */
   bool BasicTraining(
-    double fractionResolvingPower,
     CovarianceFunctionType covarianceFunction,
     int regressionOrder,
     double defaultNugget,
@@ -90,7 +114,7 @@ public:
     This takes an GPEM and trains it. \returns true on sucess. */
   bool Train(
     CovarianceFunctionType covarianceFunction,
-    int regressionOrder, double fractionResolvingPower);
+    int regressionOrder);
 
   /**
     Execute the model at an input point x.  Save a lot of time by not
@@ -132,11 +156,6 @@ protected:
   /**
      Check status; make sure that the emulator is in a good state. */
   StatusType CheckStatus();
-
-  /**
-    Execute the model at an input point x.
-    The covariance returned will be a flattened matrix */
-  bool PrincipalComponentDecompose(double fractionResolvingPower);
 
 public:
   // FIELDS
@@ -200,6 +219,14 @@ public:
   Eigen::VectorXd m_PCAEigenvalues;
   Eigen::MatrixXd m_PCAEigenvectors;
   //@}
+  
+  //@{
+  /**
+     The z-matrix from the PCA decomposition of the outputValues.
+     It is of size numberTrainingPoints by numberPCAOutputs. */
+  Eigen::MatrixXd m_ZMatrix;
+  //@}
+  
   /**
      This represents one PCA-decomposed model */
   struct SingleModel {

@@ -18,6 +18,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -26,30 +27,142 @@
 #include "GaussianProcessEmulatedModel.h"
 #include "Trace.h"
 
+#include "madaisys/SystemTools.hxx"
 
 /**
-   \fixme document
+generateMCMCtrace
+  Generate a trace of length N for a Gaussian Process Model Emulator
  */
+static const int DEFAULT_NUMBER_ITERATIONS = 100;
+static const int DEFAULT_BURN_IN = 0;
+static const double DEFAULT_STEP_SIZE = 0.1;
+const char useage [] =
+  "Usage:\n"
+  "    generateMCMCtrace TopDirectory OutputFileName\n"
+  "\n"
+  "TopDirectory is the directory containing model_output/ experimental_results/\n"
+  "and statistical_analysis/.\n"
+  "\n"
+  "OutputFileName is the name of the file the trace will be stored in. This file\n"
+  "will be located in the statistical_analysis/MCMCTrace/ directory.\n";
+ 
+struct GaussianProcessMCMCRuntimeParameters
+{
+  int numberIter;
+  int numberBurnIn;
+  bool UseEmulatedCovariance;
+  bool UseModelSnapshotFile;
+  double StepSize;
+};
+
+bool parseGaussianProcessMCMCConfig( 
+    std::istream & input, 
+    struct GaussianProcessMCMCRuntimeParameters & Opts ) 
+{
+  // Initialize as defaults
+  Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
+  Opts.numberBurnIn = DEFAULT_BURN_IN;
+  Opts.UseEmulatedCovariance = false;
+  Opts.UseModelSnapshotFile = false;
+  Opts.StepSize = DEFAULT_STEP_SIZE;
+  
+  std::string name, tstring;
+  char opt;
+  while ( input.good() ) {
+    while ( input.peek() == '#' ) {
+      std::string line;
+      std::getline( input, line );
+      std::cerr << line << std::endl;
+    }
+    input >> name;
+    if ( name == "ITERATIONS" ) {
+      opt = 'N';
+    } else if ( name == "BURN_IN" ) {
+      opt = 'B';
+    } else if ( name == "USE_EMULATED_ERROR" ) {
+      opt = 'E';
+    } else if ( name == "STEP_SIZE" ) {
+      opt = 'S';
+    } else {
+      std::cerr << "Unknown parameter " << name << '\n';
+      opt = NULL;
+    }
+    switch( opt ) {
+    case 'N':
+      int Niter;
+      input >> Niter;
+      Opts.numberIter = Niter;
+      if ( Opts.numberIter < 0 ) {
+        std::cerr << "Error: ITERATIONS given incorrect argument: \""
+          << Niter << "\"\n";
+        return false;
+      }
+      break;
+    case 'B':
+      int NBurn;
+      input >> NBurn;
+      Opts.numberBurnIn = NBurn;
+      if ( Opts.numberBurnIn < 0 ) {
+        std::cerr << "Error: BURN_IN given incorrect argument: \""
+          << NBurn << "\"\n";
+        return false;
+      }
+      break;
+    case 'E':
+      input >> tstring;
+      if ( tstring == "false" ) {
+        Opts.UseEmulatedCovariance = false;
+      } else if ( tstring == "true" ) {
+        Opts.UseEmulatedCovariance = true;
+      } else {
+        std::cerr << "Error: USE_MODEL_ERROR given incorrect argument: \""
+          << tstring << "\"\n";
+        return false;
+      }
+      break;
+    case 'S':
+      double SS;
+      input >> SS;
+      Opts.StepSize = SS;
+      if ( Opts.StepSize < 0 ) {
+        std::cerr << "Error: STEP_SIZE given incorrect argument: \""
+          << SS << "\"\n";
+        return false;
+      }
+      break;
+    }
+  }
+  return true;
+}
+ 
+ 
 int main(int argc, char ** argv) {
 
-  if (argc < 4) {
-    std::cerr << "Useage:\n  "
-      "generateMCMCTrace emulatorFile observationsFile N\n\n";
-    return EXIT_FAILURE; //\fixme useage
+  if (argc < 3) {
+    std::cerr << useage << "\n";
+    return EXIT_FAILURE;
   }
-  const char * emulatorFile = argv[1];
-  const char * observationsFile = argv[2];
-  int numberIter = atoi(argv[3]);
-
+  std::string TopDirectory(argv[1]);
+  std::string OutputFileName(argv[2]);
+  std::string observationsFile = TopDirectory+"/experimental_results/results.dat";
+  std::string RuntimeParametersFileName = TopDirectory+"/statistical_analysis/MCMC.dat";
+  
+  std::ifstream RPF ( RuntimeParametersFileName.c_str() );
+  struct GaussianProcessMCMCRuntimeParameters Opts;
+  if ( !parseGaussianProcessMCMCConfig( RPF, Opts ) ) {
+    std::cerr << "Error: Parsing configuration file for gaussian process mcmc.\n";
+    return EXIT_FAILURE;
+  }
+  
   madai::GaussianProcessEmulatedModel gpem;
-  if (gpem.LoadConfigurationFile( emulatorFile ) != madai::Model::NO_ERROR) {
-    std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfigurationFile\n";
+  if (gpem.LoadConfiguration( TopDirectory ) != madai::Model::NO_ERROR) {
+    std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
     return EXIT_FAILURE;
   }
 
-  gpem.SetUseModelCovarianceToCalulateLogLikelihood(false);
+  gpem.SetUseModelCovarianceToCalulateLogLikelihood(Opts.UseEmulatedCovariance);
 
-  std::ifstream observations(observationsFile);
+  std::ifstream observations(observationsFile.c_str());
   if (madai::Model::NO_ERROR != gpem.LoadObservations(observations)) {
     std::cerr << "error loading observations.\n";
     return EXIT_FAILURE;
@@ -58,20 +171,27 @@ int main(int argc, char ** argv) {
 
   madai::MetropolisHastingsSampler mcmc;
   mcmc.SetModel( &gpem );
-  mcmc.SetStepSize(0.1);
+  mcmc.SetStepSize(Opts.StepSize);
 
   std::vector< madai::Parameter > const & parameters
     = gpem.GetParameters();
 
   int t = gpem.GetNumberOfScalarOutputs();
 
-  int step = numberIter / 100, percent = 0;
+  int step = Opts.numberBurnIn / 100, percent = 0;
   if (step < 1)
     step = 1; // avoid div-by-zero error;
+  for ( int count = 0; count < Opts.numberBurnIn; count++ ) {
+    if ( count % step == 0 )
+      std::cerr << '\r' << "Burn in done: " << percent++ << "%";
+    mcmc.NextSample();
+  }
+  step = Opts.numberIter / 100, percent = 0;
+
   std::vector< madai::Sample> samples;
-  for (int count = 0; count < numberIter; count ++) {
+  for (int count = 0; count < Opts.numberIter; count ++) {
     if (count % step == 0)
-      std::cerr <<  '\r' << percent++ << "%";
+      std::cerr <<  '\r' << "MCMC percent done: " << percent++ << "%";
     samples.push_back(mcmc.NextSample());
   }
   std::cerr << "\r" ;
@@ -81,8 +201,12 @@ int main(int argc, char ** argv) {
        it != samples.end(); ++it) {
     trace.Add( *it );
   }
+  std::string traceDirectory = TopDirectory + "/statistical_analysis/MCMCTrace";
+  madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
+  std::string OutputFile = TopDirectory+"/statistical_analysis/MCMCTrace/"+OutputFileName;
+  std::ofstream Out( OutputFile.c_str() );
   trace.WriteCSVOutput(
-      std::cout,
+      Out,
       gpem.GetParameters(),
       gpem.GetScalarOutputNames() );
   return EXIT_SUCCESS;

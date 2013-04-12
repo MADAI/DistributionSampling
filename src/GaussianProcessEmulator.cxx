@@ -26,9 +26,15 @@
 
 #include <cmath>        // std::exp std::amp
 #include <limits>       // std::numeric_limits
+#include <fstream>      // std::ofstream std::ifstream
 #include "GaussianProcessEmulator.h"
 #include "UniformDistribution.h"
 #include "GaussianDistribution.h"
+#include "Paths.h"
+
+#include "madaisys/Directory.hxx"
+
+
 namespace {
 using namespace madai;
 
@@ -230,6 +236,50 @@ bool parseCovarianceFunction(
 }
 
 /**
+   Read the parameter_priors.dat file in statistical_analysis. */
+bool parseParameters(
+    std::vector< madai::Parameter > & parameters,
+    int & numberParameters,
+    std::string AnalysisDir ) {
+  // First check to see if file exists
+  std::string PriorFileName = AnalysisDir + Paths::SEPARATOR +
+    Paths::PARAMETER_PRIORS_FILE;
+  std::ifstream input( PriorFileName.c_str() );
+  if ( !input.good() ) return false;
+  parameters.clear(); // Empty the output vector
+  while ( input.good() ) {
+    while ( input.peek() == '#' ) { // Disregard commented lines
+      std::string s;
+      std::getline( input, s );
+    }
+    std::string name;
+    std::string type;
+    double dist_vals[2];
+    if ( !(input >> name >> type >> dist_vals[0] >> dist_vals[1]) )
+      break;
+    if ( type == "uniform" ) {
+      madai::UniformDistribution priorDist;
+      priorDist.SetMinimum(dist_vals[0]);
+      priorDist.SetMaximum(dist_vals[1]);
+      parameters.push_back(madai::Parameter( name, priorDist ) );
+    } else if ( type == "gaussian" ) {
+      madai::GaussianDistribution priorDist;
+      priorDist.SetMean(dist_vals[0]);
+      priorDist.SetStandardDeviation(dist_vals[1]);
+      parameters.push_back(madai::Parameter( name, priorDist ) );
+    } else {
+      std::cerr << "Expected uniform or gaussian, but got " <<
+        type << "\n";
+      return false;
+    }
+  }
+  numberParameters = parameters.size();
+  assert( numberParameters > 0 );
+
+  return true;
+}
+
+/**
    Read an integer from the input, followed by that number of
    parameters.  Populate the numberParameters vector. */
 bool parseParameters(
@@ -298,6 +348,34 @@ std::ostream & serializeParameters(
 bool parseOutputs(
     std::vector< std::string > & outputNames,
     int & numberOutputs,
+    std::string AnalysisDir ) {
+  // First cehck to see if file exists
+  std::string ObservablesFileName = AnalysisDir + Paths::SEPARATOR +
+    Paths::OBSERVABLE_NAMES_FILE;
+  std::ifstream input ( ObservablesFileName.c_str() );
+  if ( !input.good() ) return false;
+  outputNames.clear(); // Empty the output vector
+  while ( !input.eof() ) {
+    while ( input.peek() == '#' ) { // Disregard commented lines
+      std::string s;
+      std::getline( input, s );
+    }
+    std::string name;
+    input >> name;
+    outputNames.push_back( name );
+  }
+  if ( outputNames.back() == "" || outputNames.back() == " " ) {
+    outputNames.pop_back();
+  }
+  numberOutputs = outputNames.size();
+  assert( numberOutputs > 0 );
+
+  return true;
+}
+
+bool parseOutputs(
+    std::vector< std::string > & outputNames,
+    int & numberOutputs,
     std::istream & input) {
   if (! input.good()) return false;
   input >> numberOutputs;
@@ -325,6 +403,136 @@ bool parseInteger( int & x, std::istream & input ) {
   return true;
 }
 
+bool parseNumberOfModelRuns( int & x, std::string ModelOutDir ) {
+
+  madaisys::Directory directory;
+  if ( !directory.Load( ModelOutDir.c_str() ) ) {
+    return false;
+  }
+
+  unsigned int run_counter = 0;
+
+  for ( unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i ) {
+    int dummy;
+    if ( sscanf( directory.GetFile( i ), "run%d", &dummy ) == 1 ) {
+      run_counter++;
+    }
+  }
+
+  x = run_counter;
+  assert ( x > 0 );
+
+  return true;
+}
+
+template < typename TDerived >
+inline bool parseParameterAndOutputValues(
+    const Eigen::MatrixBase< TDerived > & m_,
+    const Eigen::MatrixBase< TDerived > & m2_,
+    const Eigen::MatrixBase< TDerived > & m3_,
+    std::string ModelOutDir,
+    unsigned int numberTrainingPoints,
+    std::vector< madai::Parameter > parameters,
+    std::vector< std::string > outputNames ) {
+  // Get the list of directories in model_outputs/
+
+  madaisys::Directory directory;
+  if ( !directory.Load( ModelOutDir.c_str() ) ) {
+    return false;
+  }
+
+  int p = parameters.size();
+  int t = outputNames.size();
+  // Copy m_
+  Eigen::MatrixBase< TDerived > & m
+  = const_cast< Eigen::MatrixBase< TDerived > & >(m_);
+  // Copy m2_
+  Eigen::MatrixBase< TDerived > & m2
+  = const_cast< Eigen::MatrixBase< TDerived > & >(m2_);
+  // Copy m3_
+  Eigen::MatrixBase< TDerived > & m3
+  = const_cast< Eigen::MatrixBase< TDerived > & >(m3_);
+  m.derived().resize( numberTrainingPoints, p );
+  m2.derived().resize( numberTrainingPoints, t );
+  m3.derived().resize( t, 1 );
+  unsigned int run_counter = 0;
+
+  double* avgUnc = new double[t]();
+
+  for ( unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i ) {
+    std::string dir_name( directory.GetFile( i ) );
+
+    char* temp = new char[3]();
+    std::strncpy( temp, dir_name.c_str(), 3 );
+    if ( std::strcmp( temp, "run" ) == 0 ) {
+      // Open the parameters.dat file
+      std::string par_file_name = ModelOutDir + dir_name + Paths::SEPARATOR +
+        Paths::PARAMETERS_FILE;
+      std::ifstream parfile ( par_file_name.c_str() );
+      if ( !parfile.good() ) return false;
+      while ( !parfile.eof() ) {
+        while ( parfile.peek() == '#' ) {
+          std::string tline;
+          std::getline( parfile, tline );
+        }
+        std::string name;
+        parfile >> name;
+        for ( unsigned int i = 0; i < p; i++ )
+          if ( name == parameters[i].m_Name )
+            parfile >> m( run_counter, i);
+      }
+      parfile.close();
+      // Open the results.dat file
+      std::string results_file_name = ModelOutDir + dir_name + Paths::SEPARATOR +
+        Paths::RESULTS_FILE;
+      std::ifstream results_file ( results_file_name.c_str() );
+      // Check the style of the outputs
+      std::string line;
+      while ( results_file.peek() == '#' ) // Disregard comments go to first output
+        std::getline( results_file, line );
+      char* temp1 = new char[100]();
+      std::getline( results_file, line );
+      std::strncpy( temp1, line.c_str(), 100 );
+      char* token = strtok( temp1, " " );
+      int NVal = 0;
+      while ( true ) {
+        NVal++;
+        token = strtok( NULL, " " );
+        if ( token == NULL )
+          break;
+      }
+      results_file.seekg( 0, results_file.beg);
+      if ( !results_file.good() ) return false;
+      while ( !results_file.eof() ) {
+        while ( results_file.peek() == '#' ) // Disregard comments, go to next output
+          std::getline( results_file, line );
+        std::string name;
+        results_file >> name;
+        for ( unsigned int i = 0; i < t; i++ )
+          if ( name == outputNames[i] ) {
+            results_file >> m2( run_counter, i );
+            if ( NVal == 3 ) {
+              double ModelUnc;
+              results_file >> ModelUnc;
+              avgUnc[i] += ModelUnc;
+            } else if ( NVal != 2 ) {
+              std::cerr << "Unknown output format error.\n";
+              return false;
+            }
+          }
+      }
+      results_file.close();
+      run_counter++;
+    }
+  }
+
+  for ( unsigned int i = 0; i < t; i++ ) {
+    m3( i, 0 ) = avgUnc[i] / double( run_counter );
+  }
+
+  return true;
+}
+
 bool parseSubmodels(
     GaussianProcessEmulator::SingleModel & m,
     int modelIndex,
@@ -337,11 +545,6 @@ bool parseSubmodels(
     input >> word;
     if (word == "COVARIANCE_FUNCTION") {
       if (!parseCovarianceFunction(m.m_CovarianceFunction,  input)) {
-        std::cerr << "parse error\n"; // \todo error message
-        return false;
-      }
-    } else if (word == "Z_VALUES") {
-      if (! ReadVector(m.m_ZValues, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
@@ -373,30 +576,40 @@ std::ostream & serializeSubmodels(
   o << "COVARIANCE_FUNCTION\t"
     << GetCovarianceFunctionString(m.m_CovarianceFunction) << '\n';
   o << "REGRESSION_ORDER\t" << m.m_RegressionOrder << '\n';
-  o << "Z_VALUES\n";
-  PrintVector(m.m_ZValues, o);
   o << "THETAS\n";
   PrintVector(m.m_Thetas, o);
   o << "END_OF_MODEL\n";
   return o;
 }
 
+std::ostream & serializeEmulatorData(
+    const GaussianProcessEmulator & gpme,
+    std::ostream & o ) {
+  o << "SUBMODELS\t"
+    << gpme.m_NumberPCAOutputs << "\n";
+  for ( unsigned int i = 0; i < gpme.m_NumberPCAOutputs; i++ ) {
+    serializeSubmodels( gpme.m_PCADecomposedModels[i], i, o );
+  }
+  o << "END_OF_FILE\n";
+  return o;
+}
+
 std::ostream & serializeGaussianProcessEmulator(
     const GaussianProcessEmulator & gpme,
     std::ostream & o) {
+  o << "SUBMODELS\t"
+    << gpme.m_NumberPCAOutputs << "\n";
+  for (int i = 0; i < gpme.m_NumberPCAOutputs; ++i) {
+    serializeSubmodels(gpme.m_PCADecomposedModels[i],i,o);
+  }
+  o << "END_OF_FILE\n";
+  return o;
+}
 
+std::ostream & serializePCADecomposition(
+    const GaussianProcessEmulator & gpme,
+    std::ostream & o ) {
   serializeComments(gpme.m_Comments,o);
-  o << "VERSION 1\n";
-  o << "PARAMETERS\n";
-  serializeParameters(gpme.m_Parameters,o);
-  o << "OUTPUTS\n";
-  serializeStringVector(gpme.m_OutputNames,o);
-  o << "NUMBER_OF_TRAINING_POINTS\t"
-    << gpme.m_NumberTrainingPoints << '\n';
-  o << "PARAMETER_VALUES\n";
-  PrintMatrix(gpme.m_ParameterValues, o);
-  o << "OUTPUT_VALUES\n";
-  PrintMatrix(gpme.m_OutputValues, o);
   o << "OUTPUT_MEANS\n";
   PrintVector(gpme.m_OutputMeans, o);
   o << "OUTPUT_UNCERTAINTY_SCALES\n";
@@ -407,13 +620,122 @@ std::ostream & serializeGaussianProcessEmulator(
   PrintVector(gpme.m_PCAEigenvalues, o);
   o << "OUTPUT_PCA_EIGENVECTORS\n";
   PrintMatrix(gpme.m_PCAEigenvectors, o);
-  o << "SUBMODELS\t"
-    << gpme.m_NumberPCAOutputs << "\n";
-  for (int i = 0; i < gpme.m_NumberPCAOutputs; ++i) {
-    serializeSubmodels(gpme.m_PCADecomposedModels[i],i,o);
-  }
+  o << "Z_MATRIX\n";
+  PrintMatrix(gpme.m_ZMatrix, o);
   o << "END_OF_FILE\n";
   return o;
+}
+
+bool parseModelDataDirectoryStructure(
+    GaussianProcessEmulator & gpme,
+    std::string Model_Outs_Dir,
+    std::string Stat_Anal_Dir) {
+  if ( !parseParameters(
+          gpme.m_Parameters, gpme.m_NumberParameters, Stat_Anal_Dir ) ) {
+    std::cerr << "parse Parameters error\n";
+    return false;
+  }
+  if ( !parseOutputs(
+          gpme.m_OutputNames, gpme.m_NumberOutputs, Stat_Anal_Dir ) ) {
+    std::cerr << "parse Outputs error\n";
+    return false;
+  }
+  if ( !parseNumberOfModelRuns(
+          gpme.m_NumberTrainingPoints, Model_Outs_Dir ) ) {
+    std::cerr << "parse Integer error\n";
+    return false;
+  }
+  Eigen::MatrixXd TMat( gpme.m_NumberOutputs, 1 );
+  if ( !parseParameterAndOutputValues( 
+          gpme.m_ParameterValues, gpme.m_OutputValues, TMat, Model_Outs_Dir,
+          gpme.m_NumberTrainingPoints, gpme.m_Parameters, gpme.m_OutputNames ) ) {
+    std::cerr << "parse Parameter and Output Values error\n";
+    return false;
+  }
+  gpme.m_OutputUncertaintyScales = TMat.col(0);
+  return true;
+}
+
+bool parsePCADecomposition(
+    GaussianProcessEmulator & gpme,
+    std::istream & input ) {
+  parseComments(gpme.m_Comments,input);
+  std::string word;
+  while (input.good()) {
+    if (! input.good()) return false;
+    input >> word;
+    if (word == "OUTPUT_MEANS") {
+      if (! ReadVector(gpme.m_OutputMeans, input)) {
+        std::cerr << "parse error\n"; // \todo error message
+        return false;
+      }
+    } else if (word == "OUTPUT_UNCERTAINTY_SCALES") {
+      if (! ReadVector(gpme.m_OutputUncertaintyScales, input)) {
+        std::cerr << "parse error\n"; // \todo error message
+        return false;
+      }
+    } else if (word == "OUTPUT_PCA_EIGENVALUES") {
+      if (! ReadVector(gpme.m_PCAEigenvalues, input)) {
+        std::cerr << "parse error\n"; // \todo error message
+        return false;
+      }
+      gpme.m_NumberPCAOutputs = gpme.m_PCAEigenvalues.size();
+    } else if (word == "OUTPUT_PCA_EIGENVECTORS") {
+      if (! ReadMatrix(gpme.m_PCAEigenvectors, input)) {
+        std::cerr << "parse error\n"; // \todo error message
+        return false;
+      }
+    } else if (word == "Z_MATRIX") {
+      if (! ReadMatrix(gpme.m_ZMatrix, input) ) {
+        std::cerr << "parse error\n"; // \todo error message
+        return false;
+      }
+    } else if (word == "END_OF_FILE") {
+      return true;
+    } else {
+      std::cerr << "Unexected keyword: \"" << word << "\"\n";
+      return false;
+    }
+  }
+  return false;
+}
+
+
+bool parseGaussianProcessEmulator(
+    GaussianProcessEmulator & gpme,
+    std::string TopDirectory) {
+  std::string EmulatorFile = TopDirectory + Paths::SEPARATOR +
+    Paths::STATISTICAL_ANALYSIS_DIRECTORY +
+    Paths::SEPARATOR + Paths::EMULATOR_STATE_FILE;
+  std::ifstream input( EmulatorFile.c_str() );
+  parseComments(gpme.m_Comments,input);
+  std::string word;
+  while (input.good()) {
+    if (! input.good()) return false;
+    input >> word;
+    if (word == "SUBMODELS") {
+      if (! parseInteger(gpme.m_NumberPCAOutputs, input)) {
+        std::cerr << "parse error\n"; // \todo error message
+        return false;
+      }
+      gpme.m_PCADecomposedModels.resize(gpme.m_NumberPCAOutputs);
+      for (int i = 0; i < gpme.m_NumberPCAOutputs; ++i) {
+        if (! parseSubmodels(gpme.m_PCADecomposedModels[i],i,input)) {
+          std::cerr << "parse error\n"; // \todo error message
+          return false;
+        }
+        gpme.m_PCADecomposedModels[i].m_Parent = &gpme;
+        gpme.m_PCADecomposedModels[i].m_ZValues = gpme.m_ZMatrix.col(i);
+      }
+    } else if (word == "END_OF_FILE") {
+      return true;
+    } else {
+      std::cerr << "Unexected keyword: \"" << word << "\"\n";
+      return false;
+    }
+  }
+
+  return true;
 }
 
 bool parseGaussianProcessEmulator(
@@ -647,6 +969,42 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
 }
 
 
+bool GaussianProcessEmulator::LoadPCA(std::string TopDirectory) {
+  m_Status = UNINITIALIZED;
+  std::string PCAFile = TopDirectory + Paths::SEPARATOR +
+    Paths::STATISTICAL_ANALYSIS_DIRECTORY + Paths::SEPARATOR +
+    Paths::PCA_DECOMPOSITION_FILE;
+  std::ifstream input( PCAFile.c_str() );
+  if ( !parsePCADecomposition(*this, input) ) {
+    std::cerr << "Error parsing PCA data.\n";
+    return false;
+  }
+  // We are finished reading the input files.
+  this->CheckStatus();
+  return (m_Status == UNTRAINED);
+}
+
+
+bool GaussianProcessEmulator::LoadEmulator(std::string TopDirectory) {
+  m_Status = UNINITIALIZED;
+  if ( !parseGaussianProcessEmulator(*this, TopDirectory) ) {
+    std::cerr << "Error parsing gaussian process emulator.\n";
+    return false;
+  }
+  // We are finished reading the input files.
+  if ( this->CheckStatus() != GaussianProcessEmulator::UNCACHED ) {
+    std::cerr << "Emulator already cached.\n";
+    std::cerr << stat(this->CheckStatus()) << "\n";
+    return false;
+  }
+  if ( !this->MakeCache() ) {
+    std::cerr << "Error while makeing cache.\n";
+    return false;
+  }
+  return true;
+}
+
+
 bool GaussianProcessEmulator::Load(std::istream & input)
 {
   m_Status = UNINITIALIZED;
@@ -873,6 +1231,20 @@ bool GaussianProcessEmulator::LoadTrainingData(std::istream & input) {
   return (m_Status == UNTRAINED);
 }
 
+/**
+   This taken an empty GPEM and loads training data */
+bool GaussianProcessEmulator::LoadTrainingData(std::string TopDirectory) {
+  m_Status = UNINITIALIZED;
+  std::string MOD = TopDirectory + Paths::SEPARATOR +
+    Paths::MODEL_OUTPUT_DIRECTORY + Paths::SEPARATOR;
+  std::string SAD = TopDirectory + Paths::SEPARATOR +
+    Paths::STATISTICAL_ANALYSIS_DIRECTORY + Paths::SEPARATOR;
+  if ( !parseModelDataDirectoryStructure(*this, MOD, SAD ) )
+    return false;
+  m_NumberPCAOutputs = 0;
+  this->CheckStatus();
+  return (m_Status == UNTRAINED);
+}
 
 /**
    This takes an GPEM and trains it. \returns true on sucess. */
@@ -903,15 +1275,18 @@ bool GaussianProcessEmulator::SingleModel::Train(
    This takes an GPEM and trains it. \returns true on sucess. */
 bool GaussianProcessEmulator::Train(
     GaussianProcessEmulator::CovarianceFunctionType covarianceFunction,
-    int regressionOrder,
-    double fractionResolvingPower)
+    int regressionOrder)
 {
   if (this->CheckStatus() == UNINITIALIZED)
     return false;
   m_Status = UNTRAINED;
-  if (! this->PrincipalComponentDecompose(fractionResolvingPower))
-    return false;
-  for (int i = 0; i < m_NumberPCAOutputs; ++i) {
+  int t = m_NumberPCAOutputs;
+  m_PCADecomposedModels.resize( t );
+  for (int i = 0; i < t; ++i) {
+    m_PCADecomposedModels[i].m_Parent = this;
+    m_PCADecomposedModels[i].m_ZValues = m_ZMatrix.col(i);
+  }
+  for (int i = 0; i < t; ++i) {
     if (! m_PCADecomposedModels[i].Train(covarianceFunction,regressionOrder))
       return false;
   }
@@ -925,7 +1300,6 @@ bool GaussianProcessEmulator::Train(
 /**
    This takes an GPEM and trains it. \returns true on sucess. */
 bool GaussianProcessEmulator::BasicTraining(
-    double fractionResolvingPower,
     CovarianceFunctionType covarianceFunction,
     int regressionOrder,
     double defaultNugget,
@@ -935,9 +1309,13 @@ bool GaussianProcessEmulator::BasicTraining(
   if (this->CheckStatus() == UNINITIALIZED)
     return false;
   m_Status = UNTRAINED;
-  if (! this->PrincipalComponentDecompose(fractionResolvingPower))
-    return false;
-  for (int i = 0; i < m_NumberPCAOutputs; ++i) {
+  int t = m_NumberPCAOutputs;
+  m_PCADecomposedModels.resize( t );
+  for (int i = 0; i < t; ++i) {
+    m_PCADecomposedModels[i].m_Parent = this;
+    m_PCADecomposedModels[i].m_ZValues = m_ZMatrix.col(i);
+  }
+  for (int i = 0; i < t; ++i) {
     if (! m_PCADecomposedModels[i].BasicTraining(covarianceFunction,
             regressionOrder, defaultNugget, amplitude, scale))
       return false;
@@ -1046,11 +1424,10 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose(
   int t = m_NumberOutputs;
   int N = m_NumberTrainingPoints;
 
-  // FIND PCA DECOMPOSIRION OF m_OutputValues - m_OutputMeans
+  // FIND PCA DECOMPOSITION OF m_OutputValues - m_OutputMeans
   m_OutputMeans = m_OutputValues.colwise().mean();
   Eigen::MatrixXd Y_minus_means
     = m_OutputValues.rowwise() - (m_OutputValues.colwise().mean());
-
 
   Eigen::MatrixXd Y_standardized(N,t);
   for (int outputIndex = 0; outputIndex < t; ++outputIndex) {
@@ -1087,13 +1464,7 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose(
   m_PCAEigenvalues = eigenSolver.eigenvalues().tail(r);
   m_PCAEigenvectors = eigenSolver.eigenvectors().rightCols(r);
 
-  Eigen::MatrixXd zMatrix = Y_standardized * m_PCAEigenvectors;
-  m_PCADecomposedModels.resize(r);
-  for (int i = 0; i < r; ++i) {
-    SingleModel & m = m_PCADecomposedModels[i];
-    m.m_Parent = this;
-    m.m_ZValues = zMatrix.col(i);
-  }
+  m_ZMatrix = Y_standardized * m_PCAEigenvectors;
   return true;
 }
 
@@ -1262,6 +1633,13 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
 }
 
 
+bool GaussianProcessEmulator::WritePCA( std::ostream & o ) const {
+  o.precision(17);
+  serializePCADecomposition(*this,o);
+  return true;
+}
+
+
 bool GaussianProcessEmulator::Write(std::ostream & o) const {
   o.precision(17);
   serializeGaussianProcessEmulator(*this, o);
@@ -1274,16 +1652,6 @@ bool GaussianProcessEmulator::PrintThetas(std::ostream & o) const {
   o.precision(17);
   serializeComments(m_Comments,o);
   o << "THETAS_FILE\n";
-  o << "OUTPUT_MEANS\n";
-  PrintVector(m_OutputMeans, o);
-  o << "OUTPUT_UNCERTAINTY_SCALES\n";
-  PrintVector(m_OutputUncertaintyScales, o);
-  o << "OUTPUT_OBSERVED_VALUES\n";
-  PrintVector(m_ObservedOutputValues, o);
-  o << "OUTPUT_PCA_EIGENVALUES\n";
-  PrintVector(m_PCAEigenvalues, o);
-  o << "OUTPUT_PCA_EIGENVECTORS\n";
-  PrintMatrix(m_PCAEigenvectors, o);
   o << "SUBMODELS\t"
     << m_NumberPCAOutputs << "\n\n";
   for (int i = 0; i < m_NumberPCAOutputs; ++i) {

@@ -49,6 +49,16 @@ class GaussianProcessEmulatedModel : public Model {
   virtual ErrorType LoadConfigurationFile( const std::string fileName );
 
   /**
+   * Loads a model emulator from a directory structure
+   */
+  virtual ErrorType LoadConfiguration( const std::string TopDirectory );
+
+  /**
+   * Set the gaussian process emulator
+   */
+  virtual ErrorType SetGaussianProcessEmulator( GaussianProcessEmulator & GPME );
+  
+  /**
    * Get the scalar outputs from the model evaluated at point
    * \c parameters.
    */

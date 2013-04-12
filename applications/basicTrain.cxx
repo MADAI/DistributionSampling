@@ -35,40 +35,45 @@ USE:
 
 const char useage [] =
   "Usage:\n"
-  "    basicTrain InputModelFile [ModelSnapshotFile]\n"
+  "    basicTrain RootDirectory\n"
   "\n"
-  "InputModelFile can be \"-\" to read from standard input.\n"
+  "RootDirectory is the directory in which the folders model_output/ \n"
+  "experimental_results/ and statistical_analysis/ are contained.\n"
   "\n"
-  "ModelSnapshotFile can be \"-\" or left unspecified to write to\n"
-  "standard output.\n";
+  "This loads the model data and PCA information in order to train\n"
+  "the emulator.\n";
 
-#include <getopt.h>
 #include <iostream> // cout, cin
 #include <fstream> // ifstream, ofstream
 
 #include "GaussianProcessEmulator.h"
 
 int main(int argc, char ** argv) {
-  char const * inputFile = NULL;
-  char const * outputFile = "-";
+  std::string TopDirectory;
+  std::string outputFile;
+  std::string PCAFile;
   if (argc > 1) {
-    inputFile = argv[1];
-    if (argc > 2)
-      outputFile = argv[2];
+    TopDirectory = std::string(argv[1]);
   } else {
     std::cerr << useage << '\n';
     return EXIT_FAILURE;
   }
+  outputFile = TopDirectory+"/statistical_analysis/EmulatorState.dat";
 
   madai::GaussianProcessEmulator gpme;
-  if (0 == strcmp(inputFile, "-")) {
-    gpme.LoadTrainingData(std::cin);
+  if ( TopDirectory == "-" ) {
+    gpme.Load(std::cin);
   } else {
-    std::ifstream is (inputFile);
-    gpme.LoadTrainingData(is);
+    if ( !gpme.LoadTrainingData(TopDirectory) ) {
+      std::cerr << "Error Loading Training Data.\n";
+      return EXIT_FAILURE;
+    }
+    if ( !gpme.LoadPCA(TopDirectory) ) {
+      std::cerr << "Error Loading PCA Data.\n";
+      return EXIT_FAILURE;
+    }
   }
 
-  double fractionResolvingPower = 0.95;
   madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction
     = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
   int regressionOrder = 1;
@@ -77,18 +82,15 @@ int main(int argc, char ** argv) {
   double scale = 1e-2;
 
   if (! gpme.BasicTraining(
-          fractionResolvingPower,
           covarianceFunction,
           regressionOrder,
           defaultNugget,
           amplitude,
           scale))
     return EXIT_FAILURE;
-  if (0 == strcmp(outputFile, "-"))
-    gpme.Write(std::cout);
-  else {
-    std::ofstream os (outputFile);
-    gpme.Write(os);
-  }
+  
+  std::ofstream os (outputFile.c_str());
+  gpme.Write(os);
+  
   return EXIT_SUCCESS;
 }

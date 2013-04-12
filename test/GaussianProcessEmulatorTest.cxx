@@ -70,9 +70,11 @@ int main(int argc, char ** argv) {
   double defaultNugget = 1e-3;
   double amplitude = 1.0;
   double scale = 1e-2;
+  
+  if (! gpe.PrincipalComponentDecompose(fractionResolvingPower) )
+    return EXIT_FAILURE;
 
   if (! gpe.BasicTraining(
-          fractionResolvingPower,
           covarianceFunction,
           regressionOrder,
           defaultNugget,
