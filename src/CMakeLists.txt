@@ -2,6 +2,7 @@ set( SRC_FILES
   Random.cxx
   GaussianProcessEmulator.cxx
   GaussianProcessEmulatedModel.cxx
+  GaussianProcessEmulatorDirectoryReader.cxx
   GaussianProcessEmulatorSingleFileReader.cxx
   Parameter.cxx
   Distribution.cxx

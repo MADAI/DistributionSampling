@@ -37,6 +37,7 @@ namespace madai {
 class GaussianProcessEmulator
 {
 
+friend class GaussianProcessEmulatorDirectoryReader;
 friend class GaussianProcessEmulatorSingleFileReader;
 
 public:

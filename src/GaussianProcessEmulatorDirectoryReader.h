@@ -16,10 +16,10 @@
  *
  *=========================================================================*/
 
-#ifndef madai_GaussianProcessEmulatorSingleFileReader_h_included
-#define madai_GaussianProcessEmulatorSingleFileReader_h_included
+#ifndef madai_GaussianProcessEmulatorDirectoryReader_h_included
+#define madai_GaussianProcessEmulatorDirectoryReader_h_included
 
-#include <istream>
+#include <string>
 
 
 namespace madai {
@@ -27,40 +27,32 @@ namespace madai {
 // Forward declarations
 class GaussianProcessEmulator;
 
-class GaussianProcessEmulatorSingleFileReader {
+class GaussianProcessEmulatorDirectoryReader {
 public:
-  GaussianProcessEmulatorSingleFileReader();
-  ~GaussianProcessEmulatorSingleFileReader();
-
-  /**
-    This loads a fully-ready-to-go GPEM
-    \returns true on success. */
-  bool Load(GaussianProcessEmulator * gpe, std::istream & input);
+  GaussianProcessEmulatorDirectoryReader();
+  ~GaussianProcessEmulatorDirectoryReader();
 
   /**
     This takes an empty GPEM and loads training data.
     \returns true on success. */
-  bool LoadTrainingData(GaussianProcessEmulator * gpe, std::istream & input);
-
-  /**
-    This takes an empty GPEM and loads training data.
-    \returns true on success. */
-  bool LoadTrainingData(GaussianProcessEmulator * gpe, std::string TopDirectory);
+  bool LoadTrainingData(GaussianProcessEmulator * gpe,
+                        std::string TopDirectory);
 
   /**
     This takes a GPEM and loads PCA data.
     \returns true on success. */
-  bool LoadPCA(GaussianProcessEmulator * gpe, std::string TopDirectory);
+  bool LoadPCA(GaussianProcessEmulator * gpe,
+               std::string TopDirectory);
 
   /**
     This takes a GPEM and loads the emulator specific
     data (submodels with their thetas).
     \returns true on success. */
-  bool LoadEmulator(GaussianProcessEmulator * gpe, std::string TopDirectory);
-  
+  bool LoadEmulator(GaussianProcessEmulator * gpe,
+                    std::string TopDirectory);
 
 };
 
 } // end namespace madai
 
-#endif // madai_GaussianProcessEmulatorSingleFileReader_h_included
+#endif // madai_GaussianProcessEmulatorDirectoryReader_h_included
