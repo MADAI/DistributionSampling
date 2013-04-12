@@ -44,6 +44,8 @@ const char useage [] =
 #include <fstream> // ifstream, ofstream
 
 #include "GaussianProcessEmulator.h"
+#include "GaussianProcessEmulatorSingleFileReader.h"
+
 
 int main(int argc, char ** argv) {
   char const * TopDirectory = NULL;
@@ -58,7 +60,8 @@ int main(int argc, char ** argv) {
   std::ostream & output = std::cout;
 
   if (0 == strcmp(TopDirectory, "-")) {
-    if (! gpe.Load( std::cin ) ){
+    madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
+    if ( !singleFileReader.Load(&gpe,std::cin)  ) {
       std::cerr << "Error (2) loading emulator from cin\n";
       return EXIT_FAILURE;
     }

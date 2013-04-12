@@ -24,6 +24,7 @@
 #include "GaussianProcessEmulatorTestGenerator.h"
 #include "MetropolisHastingsSampler.h"
 #include "GaussianProcessEmulatedModel.h"
+#include "GaussianProcessEmulatorSingleFileReader.h"
 #include "Trace.h"
 
 inline double LogisticFunction(double x) {
@@ -66,7 +67,8 @@ int main(int argc, char ** argv) {
 
   madai::GaussianProcessEmulator gpe;
   std::ifstream ifs(TRAINING_FILE);
-  gpe.LoadTrainingData(ifs);
+  madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
+  singleFileReader.LoadTrainingData(&gpe,ifs);
   double fractionResolvingPower = 0.999;
   madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction
     = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;

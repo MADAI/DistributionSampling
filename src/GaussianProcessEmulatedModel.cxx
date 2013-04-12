@@ -17,9 +17,14 @@
  *=========================================================================*/
 
 #include "GaussianProcessEmulatedModel.h"
+
+#include "GaussianProcessEmulatorSingleFileReader.h"
+
 #include <fstream>
 
+
 namespace madai {
+
 
 GaussianProcessEmulatedModel
 ::GaussianProcessEmulatedModel()
@@ -44,7 +49,8 @@ GaussianProcessEmulatedModel
   std::ifstream input(fileName.c_str());
   if (! input.good())
     return Model::FILE_NOT_FOUND_ERROR;
-  if (! m_GPME.Load(input))
+  GaussianProcessEmulatorSingleFileReader singleFileReader;
+  if (! singleFileReader.Load(&m_GPME, input))
     return Model::OTHER_ERROR;
   if (m_GPME.m_Status != GaussianProcessEmulator::READY)
     return Model::OTHER_ERROR;
@@ -86,7 +92,8 @@ GaussianProcessEmulatedModel
 ::LoadConfiguration( const std::string TopDirectory )
 {
   if ( TopDirectory == "-" ) {
-    m_GPME.Load(std::cin);
+    GaussianProcessEmulatorSingleFileReader singleFileReader;
+    singleFileReader.Load(&m_GPME, std::cin);
   } else {
     if ( !m_GPME.LoadTrainingData( TopDirectory ) ) {
       std::cerr << "Error loading from the directory structure.\n";

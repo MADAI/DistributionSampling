@@ -1005,26 +1005,6 @@ bool GaussianProcessEmulator::LoadEmulator(std::string TopDirectory) {
 }
 
 
-bool GaussianProcessEmulator::Load(std::istream & input)
-{
-  m_Status = UNINITIALIZED;
-  if (! parseGaussianProcessEmulator(*this, input)) {
-    std::cerr << "FIXME need error message\n";
-    return false;
-  }
-  // We are finished reading the input file.
-  if (this->CheckStatus() != GaussianProcessEmulator::UNCACHED) {
-    std::cerr << "FIXME status error\t" << stat(this->CheckStatus())
-    << '\n';
-    return false;
-  }
-  if (! this->MakeCache()) {
-    std::cerr << "FIXME need error message\n";
-    return false;
-  }
-  return true;
-}
-
 GaussianProcessEmulator::StatusType
 GaussianProcessEmulator::CheckStatus() {
   m_Status = UNINITIALIZED;
@@ -1220,16 +1200,6 @@ GaussianProcessEmulator::GaussianProcessEmulator() :
   m_NumberPCAOutputs(0)
 { }
 
-/**
-   This takes an empty GPEM and loads training data */
-bool GaussianProcessEmulator::LoadTrainingData(std::istream & input) {
-  m_Status = UNINITIALIZED;
-  if (! parseGaussianProcessEmulator(*this, input))
-    return false;
-  m_NumberPCAOutputs = 0;
-  this->CheckStatus();
-  return (m_Status == UNTRAINED);
-}
 
 /**
    This taken an empty GPEM and loads training data */

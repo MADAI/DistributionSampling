@@ -77,18 +77,12 @@ public:
   /**
     Writes current state of PCADecomposition to file. */
   bool WritePCA(std::ostream & output) const;
-  /**
-    This loads a fully-ready-to-go GPEM
-    \returns true on success. */
-  bool Load(std::istream & input);
-  /**
-    This takes an empty GPEM and loads training data.
-    \returns true on success. */
-  bool LoadTrainingData(std::istream & input);
+
   /**
     This takes an empty GPEM and loads training data.
     \returns true on success. */
   bool LoadTrainingData(std::string TopDirectory);
+
   /**
     This takes a GPEM and loads PCA data.
     \returns true on success. */

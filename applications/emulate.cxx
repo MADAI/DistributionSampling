@@ -41,6 +41,7 @@ USE:
 #include "GaussianProcessEmulator.h"
 #include "UniformDistribution.h"
 #include "GaussianDistribution.h"
+#include "GaussianProcessEmulatorSingleFileReader.h"
 
 static const char useage [] =
   "useage:\n"
@@ -208,14 +209,15 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   std::string TopDirectory(options.TopDirectory);
   madai::GaussianProcessEmulator gpme;
-  if (TopDirectory == "-")
+  if (TopDirectory == "-") {
     /*
       Please note: if you use stdin to feed in the model, you should
       do it like this:
       $ cat model_snapshot_file.dat query_points.dat | emulate
     */
-    gpme.Load(std::cin);
-  else {
+    madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
+    singleFileReader.Load(&gpme,std::cin);
+  } else {
     if ( !gpme.LoadTrainingData(TopDirectory) ) {
       std::cerr << "Error loading data used to train the emulator.\n";
       return EXIT_FAILURE;

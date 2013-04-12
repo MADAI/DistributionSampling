@@ -24,6 +24,8 @@
 #include <Eigen/Dense>
 #include "GaussianProcessEmulatorTestGenerator.h"
 #include "GaussianProcessEmulator.h"
+#include "GaussianProcessEmulatorSingleFileReader.h"
+
 
 const char TRAINING_FILE[] = "/tmp/GaussianProcessEmulatorTestTraining.dat";
 const char MODEL_FILE[] = "/tmp/GaussianProcessEmulatorTestModel.dat";
@@ -62,7 +64,8 @@ int main(int argc, char ** argv) {
 
   madai::GaussianProcessEmulator gpe;
   std::ifstream ifs(TRAINING_FILE);
-  gpe.LoadTrainingData(ifs);
+  madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
+  singleFileReader.LoadTrainingData(&gpe,ifs);
   double fractionResolvingPower = 0.999;
   madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction
     = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;

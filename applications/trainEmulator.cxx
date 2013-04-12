@@ -38,6 +38,8 @@ USE:
 #include <fstream> // ifstream, ofstream
 #include <cstring> // strcmp, strlen
 #include "GaussianProcessEmulator.h"
+#include "GaussianProcessEmulatorSingleFileReader.h"
+
 
 #define starts_with(s1,s2) (std::strncmp((s1), (s2), std::strlen(s2)) == 0)
 
@@ -193,7 +195,8 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   madai::GaussianProcessEmulator gpme;
   if (0 == std::strcmp(options.RootDirectory, "-")) {
-    gpme.Load(std::cin);
+    madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
+    singleFileReader.Load(&gpme,std::cin);
   } else {
     std::string TopDirectory (options.RootDirectory);
     if ( !gpme.LoadTrainingData(TopDirectory) ) {
