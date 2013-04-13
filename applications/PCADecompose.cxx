@@ -15,26 +15,16 @@
  *  limitations under the License.
  *
  *=========================================================================*/
- 
- /**
+
+/**
 PCADecompose
    Decompose the model data from a directory structure.
 */
-
-const char useage [] =
-  "Useage:\n"
-  "    PCADecompose RootDirectory [fractionResolvingPower]\n"
-  "\n"
-  "RootDirectory is the directory containing the folders model_output/\n"
-  "experimental_reults/ and statisical_analysis/ are contained\n"
-  "\n"
-  "[fractionResolvingPower is the faction of the power of the emulator\n"
-  "at resolving the data into different components. Default .95\n";
-
 #include <iostream>
 #include <fstream>
 
 #include "GaussianProcessEmulator.h"
+#include "Paths.h"
 
 int main( int argc, char ** argv ) {
   std::string TopDirectory;
@@ -44,6 +34,18 @@ int main( int argc, char ** argv ) {
     if ( argc > 2 ) {
       fractionResolvingPower = atof( argv[2] );
     }
+  } else {
+    std::cerr << "Usage:\n";
+    std::cerr << "    PCADecompose RootDirectory [fractionResolvingPower]\n";
+    std::cerr << "\n";
+    std::cerr << "RootDirectory is the directory containing the directories"
+              << madai::Paths::MODEL_OUTPUT_DIRECTORY << "/\n";
+    std::cerr << madai::Paths::EXPERIMENTAL_RESULTS << ", and "
+              << madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY << "/\n";
+    std::cerr << "\n";
+    std::cerr << "[fractionResolvingPower is the faction of the power of the emulator\n";
+    std::cerr << "at resolving the data into different components. Defaults to .95\n";
+    return EXIT_FAILURE;
   }
   std::string outputFileName = TopDirectory
       +"/statistical_analysis/PCADecomposition.dat";
