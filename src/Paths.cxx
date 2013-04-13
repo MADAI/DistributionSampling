@@ -28,6 +28,8 @@ const std::string Paths::SEPARATOR( "/" );
 
 const std::string Paths::MODEL_OUTPUT_DIRECTORY( "model_output" );
 
+const std::string Paths::EXPERIMENTAL_RESULTS( "experimental_results" );
+
 const std::string Paths::STATISTICAL_ANALYSIS_DIRECTORY( "statistical_analysis" );
 
 const std::string Paths::OBSERVABLE_NAMES_FILE( "observable_names.dat" );

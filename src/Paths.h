@@ -30,6 +30,8 @@ public:
 
   static const std::string MODEL_OUTPUT_DIRECTORY;
 
+  static const std::string EXPERIMENTAL_RESULTS;
+
   static const std::string STATISTICAL_ANALYSIS_DIRECTORY;
 
   static const std::string OBSERVABLE_NAMES_FILE;
