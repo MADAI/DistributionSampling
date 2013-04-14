@@ -30,7 +30,7 @@ int main( int argc, char ** argv ) {
   std::string TopDirectory;
   double fractionResolvingPower = 0.95;
   if ( argc > 1 ) {
-    TopDirectory = std::string(argv[1]);
+    TopDirectory = std::string( argv[1] );
     if ( argc > 2 ) {
       fractionResolvingPower = atof( argv[2] );
     }
@@ -61,10 +61,12 @@ int main( int argc, char ** argv ) {
     }
   }
   // get the PCA decomposition
-  if ( !gpme.PrincipalComponentDecompose( fractionResolvingPower ) )
+  if ( !gpme.PrincipalComponentDecompose( fractionResolvingPower ) ) {
     return EXIT_FAILURE;
+  }
   std::ofstream os( outputFileName.c_str() );
-  gpme.WritePCA(os);
+  gpme.WritePCA( os );
+
   return EXIT_SUCCESS;
 }
 
