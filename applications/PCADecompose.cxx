@@ -47,9 +47,10 @@ int main( int argc, char ** argv ) {
     std::cerr << "at resolving the data into different components. Defaults to .95\n";
     return EXIT_FAILURE;
   }
-  std::string outputFileName = TopDirectory
-      +"/statistical_analysis/PCADecomposition.dat";
-  
+  std::string outputFileName = TopDirectory + madai::Paths::SEPARATOR +
+    madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY + madai::Paths::SEPARATOR +
+    madai::Paths::PCA_DECOMPOSITION_FILE;
+
   madai::GaussianProcessEmulator gpme;
   if ( TopDirectory == "-" ) {
     gpme.LoadTrainingData(std::cin);
