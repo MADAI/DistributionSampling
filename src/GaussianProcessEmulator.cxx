@@ -555,6 +555,10 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose(
 
   Eigen::MatrixXd Y_standardized(N,t);
   for (int outputIndex = 0; outputIndex < t; ++outputIndex) {
+    if ( m_OutputUncertaintyScales(outputIndex) == 0.0 ) {
+      std::cerr << "Output uncertainty scale is 0.0" << std::endl;
+      return false;
+    }
     double oneOverUncertaintyScale
       = 1.0 / m_OutputUncertaintyScales(outputIndex);
     for (int pointIndex = 0; pointIndex < N; ++pointIndex) {
