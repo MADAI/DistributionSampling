@@ -25,6 +25,25 @@ list(APPEND DistributionSampling_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} )
 find_package( Boost REQUIRED )
 list(APPEND DistributionSampling_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} )
 
+## OpenMP
+option (USE_OPENMP "Compile with OpenMP support." OFF)
+if(USE_OPENMP)
+  find_package( OpenMP ) # not REQUIRED
+  if(OPENMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS
+      "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+  endif() # OPENMP_FOUND
+endif() # USE_OPENMP
+
+## gprof (default off)
+option (USE_GPROF "Compile with gprof profiler." OFF)
+if(USE_GPROF)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+endif() # USE_GPROF
+
 ## Compile time checks for the existence of required headers
 set( try_compile_directory ${DistributionSampling_BINARY_DIR}/TryCompiles )
 try_compile( HAS_POSIX_PIPES ${try_compile_directory}

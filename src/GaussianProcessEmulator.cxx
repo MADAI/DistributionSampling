@@ -646,7 +646,7 @@ bool parseModelDataDirectoryStructure(
     return false;
   }
   Eigen::MatrixXd TMat( gpme.m_NumberOutputs, 1 );
-  if ( !parseParameterAndOutputValues( 
+  if ( !parseParameterAndOutputValues(
           gpme.m_ParameterValues, gpme.m_OutputValues, TMat, Model_Outs_Dir,
           gpme.m_NumberTrainingPoints, gpme.m_Parameters, gpme.m_OutputNames ) ) {
     std::cerr << "parse Parameter and Output Values error\n";
@@ -1520,14 +1520,19 @@ bool GaussianProcessEmulator::GetEmulatorOutputs (
     return false;
   }
   Eigen::VectorXd mean_pca(m_NumberPCAOutputs);
+
+  bool errorflag = false;
+  #pragma omp parallel for
   for (int i = 0; i < m_NumberPCAOutputs; ++i) {
     double d;
     if(! m_PCADecomposedModels[i].GetEmulatorOutputs(x, d)) {
       std::cerr << "error in SingleModel::GetEmulatorOutputs()\n";
-      return false;
+      errorflag = true;
     }
     mean_pca(i) = d;
   }
+  if (errorflag)
+    return false;
   y.resize(m_NumberOutputs);
   Eigen::Map< Eigen::VectorXd > mean(&(y[0]),m_NumberOutputs);
   mean = m_OutputMeans +
