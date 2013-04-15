@@ -27,6 +27,8 @@
 #include <madaisys/SystemTools.hxx>
 
 #include <fstream>
+#include <iostream> // std::cerr
+#include <algorithm>  // std::find
 
 
 namespace madai {
@@ -109,6 +111,60 @@ bool parseInteger( int & x, std::istream & input ) {
   input >> x;
   return true;
 }
+
+inline bool getIndex(
+    const std::vector< std::string > & sv,
+    const std::string & s,
+    int & index)
+{
+  std::vector< std::string >::const_iterator x = std::find(sv.begin(), sv.end(), s);
+  if (x == sv.end()) {
+    index = -1;
+    return false;
+  } else {
+    index = x - sv.begin();
+    assert (index < sv.size());
+    return true;
+  }
+}
+
+/**
+   Read the parameter_priors.dat file in statistical_analysis. */
+bool parseExperimentalResults(
+    GaussianProcessEmulator & gpe,
+    std::string ExperimentalResultsDirectory ) {
+  const std::vector< std::string > & outputNames = gpe.m_OutputNames;
+  int numberOutputs = gpe.m_NumberOutputs;
+  if (numberOutputs != outputNames.size()) {
+    std::cerr << "numberOutputs != outputNames.size()";
+    return false;
+  }
+  std::string ExperimentalResultsFileName
+    = ExperimentalResultsDirectory + Paths::SEPARATOR + Paths::RESULTS_FILE;
+  std::ifstream results_file( ExperimentalResultsFileName.c_str() );
+  if ( !results_file.good() ) {
+    std::cerr << "Error opening " << ExperimentalResultsFileName << '\n';
+    return false;
+  }
+  // default values.
+  gpe.m_OutputUncertaintyScales = Eigen::VectorXd::Constant(numberOutputs, 1.0);
+  gpe.m_ObservedOutputValues = Eigen::VectorXd::Zero(numberOutputs);
+  while ( !results_file.eof() ) {
+    while ( results_file.peek() == '#' ) {// Disregard comments, go to next output
+      std::string temp;
+      std::getline( results_file, temp );
+    }
+    std::string name;
+    double value, error;
+    results_file >> name >> value >> error;
+    int index;
+    if (getIndex(outputNames, name, index)) {
+      gpe.m_ObservedOutputValues(index) = value;
+      gpe.m_OutputUncertaintyScales(index) = error;
+    }
+  }
+}
+
 
 /**
    Read the parameter_priors.dat file in statistical_analysis. */
@@ -390,7 +446,7 @@ bool parseModelDataDirectoryStructure(
     return false;
   }
   Eigen::MatrixXd TMat( gpme.m_NumberOutputs, 1 );
-  if ( !parseParameterAndOutputValues( 
+  if ( !parseParameterAndOutputValues(
           gpme.m_ParameterValues, gpme.m_OutputValues, TMat, Model_Outs_Dir,
           gpme.m_NumberTrainingPoints, gpme.m_Parameters, gpme.m_OutputNames,
           verbose ) ) {
@@ -619,6 +675,13 @@ GaussianProcessEmulatorDirectoryReader
     Paths::STATISTICAL_ANALYSIS_DIRECTORY + Paths::SEPARATOR;
   if ( !parseModelDataDirectoryStructure(*gpe, MOD, SAD, m_Verbose ) )
     return false;
+
+  std::string ExperimentalResultsDirectory
+    = TopDirectory + Paths::SEPARATOR + Paths::EXPERIMENTAL_RESULTS;
+  if (! parseExperimentalResults( *gpe, ExperimentalResultsDirectory )) {
+    std::cerr << "Error in parseExperimentalResults()\n";
+    return false;
+  }
 
   return (gpe->CheckStatus() == GaussianProcessEmulator::UNTRAINED);
 }
