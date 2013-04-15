@@ -23,12 +23,11 @@ PCADecompose
 #include <iostream>
 #include <fstream>
 
-#include "Paths.h"
 #include "GaussianProcessEmulator.h"
-#include "Paths.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
+#include "Paths.h"
 
 
 int main( int argc, char ** argv ) {
