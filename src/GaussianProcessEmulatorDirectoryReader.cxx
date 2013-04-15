@@ -23,8 +23,8 @@
 #include "Paths.h"
 #include "UniformDistribution.h"
 
-#include <madaisys/SystemTools.hxx>
 #include <madaisys/Directory.hxx>
+#include <madaisys/SystemTools.hxx>
 
 #include <fstream>
 
@@ -32,7 +32,8 @@
 namespace madai {
 
 GaussianProcessEmulatorDirectoryReader
-::GaussianProcessEmulatorDirectoryReader()
+::GaussianProcessEmulatorDirectoryReader() :
+  m_Verbose( false )
 {
 
 }
@@ -45,13 +46,29 @@ GaussianProcessEmulatorDirectoryReader
 }
 
 
+void
+GaussianProcessEmulatorDirectoryReader
+::SetVerbose( bool value )
+{
+  m_Verbose = value;
+}
+
+
+bool
+GaussianProcessEmulatorDirectoryReader
+::GetVerbose() const
+{
+  return m_Verbose;
+}
+
+
 namespace {
 
 /**
    Read a word from input.  If it equals the expected value, return
    true.  Else print error message to std::cerr and return false*/
 inline bool CheckWord(std::istream & input, const std::string & expected) {
-        std::string s;
+  std::string s;
   if (! input.good()) {
     std::cerr << "premature end of input.  (" << expected << ")\n";
     return false;
@@ -221,13 +238,24 @@ inline bool parseParameterAndOutputValues(
     std::string ModelOutDir,
     unsigned int numberTrainingPoints,
     std::vector< madai::Parameter > parameters,
-    std::vector< std::string > outputNames ) {
+    std::vector< std::string > outputNames,
+    bool verbose ) {
   // Get the list of directories in model_outputs/
 
   madaisys::Directory directory;
   if ( !directory.Load( ModelOutDir.c_str() ) ) {
     return false;
   }
+
+  std::vector< std::string > runDirectories;
+  for ( unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i ) {
+    std::string fileName( directory.GetFile( i ) );
+    std::string filePath( ModelOutDir + fileName );
+    if ( fileName.find_first_of( "run" ) == 0 ) {
+      runDirectories.push_back( fileName );
+    }
+  }
+  std::sort( runDirectories.begin(), runDirectories.end() );
 
   int p = parameters.size();
   int t = outputNames.size();
@@ -247,17 +275,21 @@ inline bool parseParameterAndOutputValues(
 
   double* avgUnc = new double[t]();
 
-  for ( unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i ) {
-    std::string dir_name( directory.GetFile( i ) );
+  for ( size_t i = 0; i < runDirectories.size(); ++i ) {
+    std::string dir_name( runDirectories[i] );
+    if ( verbose )
+      std::cout << "Run directory name: '" << dir_name << "'\n";
 
     char* temp = new char[3]();
     std::strncpy( temp, dir_name.c_str(), 3 );
     if ( std::strcmp( temp, "run" ) == 0 ) {
       // Open the parameters.dat file
-      std::string par_file_name = ModelOutDir + dir_name + Paths::SEPARATOR +
-        Paths::PARAMETERS_FILE;
+      std::string par_file_name = ModelOutDir + dir_name +
+        Paths::SEPARATOR + Paths::PARAMETERS_FILE;
       std::ifstream parfile ( par_file_name.c_str() );
       if ( !parfile.good() ) return false;
+      if ( verbose )
+        std::cout << "Opened file '" << par_file_name << "'\n";
       while ( !parfile.eof() ) {
         while ( parfile.peek() == '#' ) {
           std::string tline;
@@ -265,15 +297,25 @@ inline bool parseParameterAndOutputValues(
         }
         std::string name;
         parfile >> name;
-        for ( unsigned int i = 0; i < p; i++ )
-          if ( name == parameters[i].m_Name )
+        for ( unsigned int i = 0; i < p; i++ ) {
+          if ( name == parameters[i].m_Name ) {
             parfile >> m( run_counter, i);
+            if ( verbose )
+              std::cout << "Parsed parameter '" << name << "' with value "
+                        << m( run_counter, i ) << std::endl;
+            break;
+          }
+        }
       }
       parfile.close();
       // Open the results.dat file
-      std::string results_file_name = ModelOutDir + dir_name + Paths::SEPARATOR +
-        Paths::RESULTS_FILE;
+      std::string results_file_name = ModelOutDir + dir_name +
+        Paths::SEPARATOR + Paths::RESULTS_FILE;
       std::ifstream results_file ( results_file_name.c_str() );
+      if ( !results_file.good() ) return false;
+      if ( verbose )
+        std::cout << "Opened file " << results_file_name << "'\n";
+
       // Check the style of the outputs
       std::string line;
       while ( results_file.peek() == '#' ) // Disregard comments go to first output
@@ -299,10 +341,15 @@ inline bool parseParameterAndOutputValues(
         for ( unsigned int i = 0; i < t; i++ )
           if ( name == outputNames[i] ) {
             results_file >> m2( run_counter, i );
+            if ( verbose )
+              std::cout << "Parsed output '" << name << "' with value "
+                        << m2( run_counter, i ) << std::endl;
             if ( NVal == 3 ) {
               double ModelUnc;
               results_file >> ModelUnc;
               avgUnc[i] += ModelUnc;
+            } else if ( NVal == 2 ) {
+              avgUnc[i] += 1.0; // default model uncertainty is 1
             } else if ( NVal != 2 ) {
               std::cerr << "Unknown output format error.\n";
               return false;
@@ -325,7 +372,8 @@ inline bool parseParameterAndOutputValues(
 bool parseModelDataDirectoryStructure(
     GaussianProcessEmulator & gpme,
     std::string Model_Outs_Dir,
-    std::string Stat_Anal_Dir) {
+    std::string Stat_Anal_Dir,
+    bool verbose) {
   if ( !parseParameters(
           gpme.m_Parameters, gpme.m_NumberParameters, Stat_Anal_Dir ) ) {
     std::cerr << "parse Parameters error\n";
@@ -344,7 +392,8 @@ bool parseModelDataDirectoryStructure(
   Eigen::MatrixXd TMat( gpme.m_NumberOutputs, 1 );
   if ( !parseParameterAndOutputValues( 
           gpme.m_ParameterValues, gpme.m_OutputValues, TMat, Model_Outs_Dir,
-          gpme.m_NumberTrainingPoints, gpme.m_Parameters, gpme.m_OutputNames ) ) {
+          gpme.m_NumberTrainingPoints, gpme.m_Parameters, gpme.m_OutputNames,
+          verbose ) ) {
     std::cerr << "parse Parameter and Output Values error\n";
     return false;
   }
@@ -568,7 +617,7 @@ GaussianProcessEmulatorDirectoryReader
     Paths::MODEL_OUTPUT_DIRECTORY + Paths::SEPARATOR;
   std::string SAD = TopDirectory + Paths::SEPARATOR +
     Paths::STATISTICAL_ANALYSIS_DIRECTORY + Paths::SEPARATOR;
-  if ( !parseModelDataDirectoryStructure(*gpe, MOD, SAD ) )
+  if ( !parseModelDataDirectoryStructure(*gpe, MOD, SAD, m_Verbose ) )
     return false;
 
   return (gpe->CheckStatus() == GaussianProcessEmulator::UNTRAINED);

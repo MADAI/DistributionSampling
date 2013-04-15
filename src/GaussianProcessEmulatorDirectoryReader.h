@@ -33,6 +33,11 @@ public:
   ~GaussianProcessEmulatorDirectoryReader();
 
   /**
+   Enable verbose output when reading. */
+  void SetVerbose( bool value );
+  bool GetVerbose() const;
+
+  /**
     This takes an empty GPEM and loads training data.
     \returns true on success. */
   bool LoadTrainingData(GaussianProcessEmulator * gpe,
@@ -50,6 +55,9 @@ public:
     \returns true on success. */
   bool LoadEmulator(GaussianProcessEmulator * gpe,
                     std::string TopDirectory);
+
+protected:
+  bool m_Verbose;
 
 };
 
