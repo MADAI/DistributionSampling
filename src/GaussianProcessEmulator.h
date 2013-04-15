@@ -36,6 +36,11 @@ namespace madai {
    \fixme describe the useage of this class. */
 class GaussianProcessEmulator
 {
+
+friend class GaussianProcessEmulatorDirectoryReader;
+friend class GaussianProcessEmulatorSingleFileReader;
+friend class GaussianProcessEmulatorSingleFileWriter;
+
 public:
   // ENUMERATIONS
   /**
@@ -63,37 +68,6 @@ public:
   /**
     Default constructor which makes an empty GPEM */
   GaussianProcessEmulator();
-
-  /**
-    Writes current state to file.  \returns true on sucess. */
-  bool Write(std::ostream & output) const;
-  /**
-    Writes the model data to a file. \returns true on sucess. */
-  bool WriteModelData( std::ostream & output ) const;
-  /**
-    Writes current state of PCADecomposition to file. */
-  bool WritePCA(std::ostream & output) const;
-  /**
-    This loads a fully-ready-to-go GPEM
-    \returns true on success. */
-  bool Load(std::istream & input);
-  /**
-    This takes an empty GPEM and loads training data.
-    \returns true on success. */
-  bool LoadTrainingData(std::istream & input);
-  /**
-    This takes an empty GPEM and loads training data.
-    \returns true on success. */
-  bool LoadTrainingData(std::string TopDirectory);
-  /**
-    This takes a GPEM and loads PCA data.
-    \returns true on success. */
-  bool LoadPCA(std::string TopDirectory);
-  /**
-    This takes a GPEM and loads the emulator specific
-    data (submodels with their thetas).
-    \returns true on success. */
-  bool LoadEmulator(std::string TopDirectory);
 
   /**
    This takes a GPEM with training data and decomposes
@@ -130,10 +104,6 @@ public:
     const std::vector< double > & x,
     std::vector< double > & y,
     std::vector< double > & ycov) const;
-
-  /**
-     Writes current state to file.  \returns true on sucess. */
-  bool PrintThetas(std::ostream & output) const;
 
   /**
      \returns m_Status */

@@ -38,6 +38,10 @@ USE:
 #include <fstream> // ifstream, ofstream
 #include <cstring> // strcmp, strlen
 #include "GaussianProcessEmulator.h"
+#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulatorSingleFileReader.h"
+#include "GaussianProcessEmulatorSingleFileWriter.h"
+
 
 #define starts_with(s1,s2) (std::strncmp((s1), (s2), std::strlen(s2)) == 0)
 
@@ -193,14 +197,16 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   madai::GaussianProcessEmulator gpme;
   if (0 == std::strcmp(options.RootDirectory, "-")) {
-    gpme.Load(std::cin);
+    madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
+    singleFileReader.Load(&gpme,std::cin);
   } else {
     std::string TopDirectory (options.RootDirectory);
-    if ( !gpme.LoadTrainingData(TopDirectory) ) {
+    madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+    if ( !directoryReader.LoadTrainingData(&gpme,TopDirectory) ) {
       std::cerr << "Error loading training data.\n";
       return EXIT_FAILURE;
     }
-    if ( !gpme.LoadPCA(TopDirectory) ) {
+    if ( !directoryReader.LoadPCA(&gpme,TopDirectory) ) {
       std::cerr << "Error loading PCA data.\n";
       return EXIT_FAILURE;
     }
@@ -214,7 +220,9 @@ int main(int argc, char ** argv) {
   std::string OutputFile(options.RootDirectory);
   OutputFile += "/statistical_analysis/EmulatorState.dat";
   std::ofstream os( OutputFile.c_str() );
-  gpme.Write( os );
+
+  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
+  singleFileWriter.Write( &gpme, os );
   
   return EXIT_SUCCESS;
 }

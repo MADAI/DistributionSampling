@@ -24,6 +24,9 @@
 #include <Eigen/Dense>
 #include "GaussianProcessEmulatorTestGenerator.h"
 #include "GaussianProcessEmulator.h"
+#include "GaussianProcessEmulatorSingleFileReader.h"
+#include "GaussianProcessEmulatorSingleFileWriter.h"
+
 
 const char TRAINING_FILE[] = "/tmp/GaussianProcessEmulatorTestTraining.dat";
 const char MODEL_FILE[] = "/tmp/GaussianProcessEmulatorTestModel.dat";
@@ -62,7 +65,8 @@ int main(int argc, char ** argv) {
 
   madai::GaussianProcessEmulator gpe;
   std::ifstream ifs(TRAINING_FILE);
-  gpe.LoadTrainingData(ifs);
+  madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
+  singleFileReader.LoadTrainingData(&gpe,ifs);
   double fractionResolvingPower = 0.999;
   madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction
     = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
@@ -83,7 +87,9 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
 
   out.open(MODEL_FILE);
-  gpe.Write(out);
+
+  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
+  singleFileWriter.Write(&gpe,out);
   out.close();
 
   if (! gpe.MakeCache()) {
@@ -123,7 +129,7 @@ int main(int argc, char ** argv) {
   std::cout << "Maximum error over all space: " << error << '\n';
 
   out.open(THETAS_FILE);
-  if(! gpe.PrintThetas(out)) {
+  if(! singleFileWriter.PrintThetas(&gpe,out)) {
     std::cerr << "Error printing Thetas.\n";
     return EXIT_FAILURE;
   }

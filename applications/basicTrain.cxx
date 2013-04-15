@@ -47,6 +47,10 @@ const char useage [] =
 #include <fstream> // ifstream, ofstream
 
 #include "GaussianProcessEmulator.h"
+#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulatorSingleFileReader.h"
+#include "GaussianProcessEmulatorSingleFileWriter.h"
+
 
 int main(int argc, char ** argv) {
   std::string TopDirectory;
@@ -62,13 +66,15 @@ int main(int argc, char ** argv) {
 
   madai::GaussianProcessEmulator gpme;
   if ( TopDirectory == "-" ) {
-    gpme.Load(std::cin);
+    madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
+    singleFileReader.Load(&gpme,std::cin);
   } else {
-    if ( !gpme.LoadTrainingData(TopDirectory) ) {
+    madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+    if ( !directoryReader.LoadTrainingData(&gpme,TopDirectory) ) {
       std::cerr << "Error Loading Training Data.\n";
       return EXIT_FAILURE;
     }
-    if ( !gpme.LoadPCA(TopDirectory) ) {
+    if ( !directoryReader.LoadPCA(&gpme,TopDirectory) ) {
       std::cerr << "Error Loading PCA Data.\n";
       return EXIT_FAILURE;
     }
@@ -90,7 +96,9 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   
   std::ofstream os (outputFile.c_str());
-  gpme.Write(os);
+
+  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
+  singleFileWriter.Write(&gpme,os);
   
   return EXIT_SUCCESS;
 }
