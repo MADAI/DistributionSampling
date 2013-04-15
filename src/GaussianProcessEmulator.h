@@ -94,7 +94,7 @@ public:
     data (submodels with their thetas).
     \returns true on success. */
   bool LoadEmulator(std::string TopDirectory);
-  
+
   /**
    This takes a GPEM with training data and decomposes
    it into the principal components.
@@ -146,7 +146,6 @@ public:
   void GetOutputObservedValues(std::vector< double > & x);
   //@}
 
-protected:
   /**
      Once Load(), Train(), or BasicTraining() finishes, calculate and
      cache some data to make calling GetEmulatorOutputsAndCovariance()
@@ -157,7 +156,6 @@ protected:
      Check status; make sure that the emulator is in a good state. */
   StatusType CheckStatus();
 
-public:
   // FIELDS
   /**
      Current status of the GPME   */
@@ -219,14 +217,14 @@ public:
   Eigen::VectorXd m_PCAEigenvalues;
   Eigen::MatrixXd m_PCAEigenvectors;
   //@}
-  
+
   //@{
   /**
      The z-matrix from the PCA decomposition of the outputValues.
      It is of size numberTrainingPoints by numberPCAOutputs. */
   Eigen::MatrixXd m_ZMatrix;
   //@}
-  
+
   /**
      This represents one PCA-decomposed model */
   struct SingleModel {

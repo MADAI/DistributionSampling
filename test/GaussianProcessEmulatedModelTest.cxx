@@ -74,12 +74,12 @@ int main(int argc, char ** argv) {
   double defaultNugget = 1e-3;
   double amplitude = 1.0;
   double scale = 1e-2;
-  
+
   if ( !gpe.PrincipalComponentDecompose(fractionResolvingPower) ) {
     std::cerr << "Error in GaussianProcessEmulator::PrincipalComponentDecompose\n";
     return EXIT_FAILURE;
   }
-  
+
   if (! gpe.BasicTraining(
           covarianceFunction,
           regressionOrder,
@@ -92,6 +92,11 @@ int main(int argc, char ** argv) {
   out.open(MODEL_FILE);
   gpe.Write(out);
   out.close();
+
+  if (! gpe.MakeCache()) {
+    std::cerr << "Error in GaussianProcessEmulator::MakeCache().\n";
+    return EXIT_FAILURE;
+  }
 
   madai::GaussianProcessEmulatedModel gpem;
   if (gpem.SetGaussianProcessEmulator( gpe ) != madai::Model::NO_ERROR) {
