@@ -163,6 +163,8 @@ bool parseExperimentalResults(
       gpe.m_OutputUncertaintyScales(index) = error;
     }
   }
+
+  return true;
 }
 
 
