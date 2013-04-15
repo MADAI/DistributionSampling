@@ -188,8 +188,6 @@ std::ostream & serializePCADecomposition(
   PrintVector(gpme.m_OutputMeans, o);
   o << "OUTPUT_UNCERTAINTY_SCALES\n";
   PrintVector(gpme.m_OutputUncertaintyScales, o);
-  o << "OUTPUT_OBSERVED_VALUES\n";
-  PrintVector(gpme.m_ObservedOutputValues, o);
   o << "OUTPUT_PCA_EIGENVALUES\n";
   PrintVector(gpme.m_PCAEigenvalues, o);
   o << "OUTPUT_PCA_EIGENVECTORS\n";
