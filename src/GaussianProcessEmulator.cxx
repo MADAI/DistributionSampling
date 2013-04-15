@@ -1321,10 +1321,10 @@ bool GaussianProcessEmulator::BasicTraining(
       return false;
   }
   m_Status = UNCACHED;
-  if (! this->MakeCache()) {
-    std::cerr << "FIXME need error message\n";
-    return false;
-  }
+  // if (! this->MakeCache()) {
+  //   std::cerr << "FIXME need error message\n";
+  //   return false;
+  // }
   return true;
 }
 /**
