@@ -16,6 +16,7 @@ set( SRC_FILES
   Paths.cxx
   ProcessPipe.c
   RegularStepGradientAscentSampler.cxx
+  RuntimeParameterFileReader.cxx
   Sample.cxx
   MetropolisHastingsSampler.cxx
   Trace.cxx
