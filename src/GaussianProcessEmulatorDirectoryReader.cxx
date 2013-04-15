@@ -188,8 +188,9 @@ bool parseParameters(
     std::string name;
     std::string type;
     double dist_vals[2];
-    if ( !(input >> name >> type >> dist_vals[0] >> dist_vals[1]) )
+    if ( !(input >> type >> name >> dist_vals[0] >> dist_vals[1]) )
       break;
+    std::transform( type.begin(), type.end(), type.begin(), ::tolower );
     if ( type == "uniform" ) {
       madai::UniformDistribution priorDist;
       priorDist.SetMinimum(dist_vals[0]);
