@@ -117,6 +117,11 @@ public:
   //@}
 
   /**
+   Use m_OutputUncertaintyScales, m_OutputValues, m_OutputMeans, and
+   m_PCAEigenvectors to determine m_PCADecomposedModels[i].m_ZValues; */
+  bool BuildZVectors();
+
+  /**
      Once Load(), Train(), or BasicTraining() finishes, calculate and
      cache some data to make calling GetEmulatorOutputsAndCovariance()
      faster. */
@@ -186,13 +191,6 @@ public:
      numberPCAOutputs-by-numberOutputs. */
   Eigen::VectorXd m_PCAEigenvalues;
   Eigen::MatrixXd m_PCAEigenvectors;
-  //@}
-
-  //@{
-  /**
-     The z-matrix from the PCA decomposition of the outputValues.
-     It is of size numberTrainingPoints by numberPCAOutputs. */
-  Eigen::MatrixXd m_ZMatrix;
   //@}
 
   /**
