@@ -298,6 +298,33 @@ GaussianProcessEmulator::SingleModel::SingleModel() :
 
 
 /**
+   Use m_OutputUncertaintyScales, m_OutputValues, m_OutputMeans, and
+   m_PCAEigenvectors to determine m_PCADecomposedModels[i].m_ZValues; */
+bool GaussianProcessEmulator::BuildZVectors() {
+  if (m_PCADecomposedModels.size() != m_NumberPCAOutputs) {
+    std::cout << "Error [m_PCADecomposedModels.size() == "
+              << m_PCADecomposedModels.size() << " != m_NumberPCAOutputs == "
+              << m_NumberPCAOutputs << "]\n";
+    return false;
+  }
+  Eigen::MatrixXd Y_standardized(m_NumberTrainingPoints, m_NumberOutputs);
+  for (int i = 0; i < m_NumberOutputs; ++i) {
+    double scale = 1.0 / m_OutputUncertaintyScales(i);
+    for (int j = 0; j < m_NumberTrainingPoints; ++j) {
+      Y_standardized(j, i)
+        = scale * (m_OutputValues(j,i) - m_OutputMeans(i));
+    }
+  }
+  Eigen::MatrixXd zMatrix = Y_standardized * m_PCAEigenvectors;
+  for (int i = 0; i < m_NumberPCAOutputs; ++i) {
+    GaussianProcessEmulator::SingleModel & m = m_PCADecomposedModels[i];
+    m.m_ZValues = zMatrix.col(i);
+  }
+  return true;
+}
+
+
+/**
    Once Load(), Train(), or BasicTraining() finishes, calculate and
    cache some data to make calling GetEmulatorOutputsAndCovariance()
    faster. */
@@ -408,7 +435,6 @@ bool GaussianProcessEmulator::Train(
   m_PCADecomposedModels.resize( t );
   for (int i = 0; i < t; ++i) {
     m_PCADecomposedModels[i].m_Parent = this;
-    m_PCADecomposedModels[i].m_ZValues = m_ZMatrix.col(i);
   }
   for (int i = 0; i < t; ++i) {
     if (! m_PCADecomposedModels[i].Train(covarianceFunction,regressionOrder))
@@ -437,7 +463,6 @@ bool GaussianProcessEmulator::BasicTraining(
   m_PCADecomposedModels.resize( t );
   for (int i = 0; i < t; ++i) {
     m_PCADecomposedModels[i].m_Parent = this;
-    m_PCADecomposedModels[i].m_ZValues = m_ZMatrix.col(i);
   }
   for (int i = 0; i < t; ++i) {
     if (! m_PCADecomposedModels[i].BasicTraining(covarianceFunction,
@@ -587,12 +612,17 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose(
     }
   }
 
+  m_PCADecomposedModels.resize( m_NumberPCAOutputs );
+
   int r = m_NumberPCAOutputs;
   assert((r > 0) && (r <= t));
   m_PCAEigenvalues = eigenSolver.eigenvalues().tail(r);
   m_PCAEigenvectors = eigenSolver.eigenvectors().rightCols(r);
 
-  m_ZMatrix = Y_standardized * m_PCAEigenvectors;
+  if ( !this->BuildZVectors() ) {
+    return false;
+  }
+
   return true;
 }
 

@@ -592,23 +592,24 @@ bool parsePCADecomposition(
         return false;
       }
       gpme.m_NumberPCAOutputs = gpme.m_PCAEigenvalues.size();
+      gpme.m_PCADecomposedModels.resize( gpme.m_NumberPCAOutputs );
     } else if (word == "OUTPUT_PCA_EIGENVECTORS") {
       if (! ReadMatrix(gpme.m_PCAEigenvectors, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
-    } else if (word == "Z_MATRIX") {
-      if (! ReadMatrix(gpme.m_ZMatrix, input) ) {
-        std::cerr << "parse error\n"; // \todo error message
-        return false;
-      }
     } else if (word == "END_OF_FILE") {
+
+      // Now that we have the PCA data read in, build the Z vectors
+      gpme.BuildZVectors();
+
       return true;
     } else {
       std::cerr << "Unexected keyword: \"" << word << "\"\n";
       return false;
     }
   }
+
   return false;
 }
 
@@ -637,7 +638,6 @@ bool parseGaussianProcessEmulator(
           return false;
         }
         gpme.m_PCADecomposedModels[i].m_Parent = &gpme;
-        gpme.m_PCADecomposedModels[i].m_ZValues = gpme.m_ZMatrix.col(i);
       }
     } else if (word == "END_OF_FILE") {
       return true;
@@ -705,6 +705,7 @@ GaussianProcessEmulatorDirectoryReader
     std::cerr << "Error parsing PCA data.\n";
     return false;
   }
+
   // We are finished reading the input files.
   return (gpe->CheckStatus() == GaussianProcessEmulator::UNTRAINED);
 }

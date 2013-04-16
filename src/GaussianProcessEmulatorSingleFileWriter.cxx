@@ -192,8 +192,6 @@ std::ostream & serializePCADecomposition(
   PrintVector(gpme.m_PCAEigenvalues, o);
   o << "OUTPUT_PCA_EIGENVECTORS\n";
   PrintMatrix(gpme.m_PCAEigenvectors, o);
-  o << "Z_MATRIX\n";
-  PrintMatrix(gpme.m_ZMatrix, o);
   o << "END_OF_FILE\n";
   return o;
 }
