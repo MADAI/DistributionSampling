@@ -46,10 +46,68 @@ const char useage [] =
 #include <iostream> // cout, cin
 #include <fstream> // ifstream, ofstream
 
+#include "RuntimeParameterFileReader.h"
 #include "GaussianProcessEmulator.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
+#include "Paths.h"
+
+struct RuntimeOptions 
+{
+  madai::GaussianProcessEmulator::CovarianceFunctionType covFunct;
+  int regressionOrder;
+  double Nugget;
+  double amplitude;
+  double scale;
+};
+
+bool parseRuntimeOptions( int argc, char* argv[], struct RuntimeOptions & options)
+{
+  options.covFunct = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
+  options.regressionOrder = 1;
+  options.Nugget = 1e-3;
+  options.amplitude = 1.0;
+  options.scale = 1e-2;
+  
+  for ( unsigned int i = 0; i < argc; i++ ) {
+    std::string argString( argv[i] );
+    
+    if ( argString == "COVARIANCE_FUNCTION" ) {
+      std::string CovType( argv[i+1] );
+      if ( CovType == "POWER_EXPONENTIAL_FUNCTION" ) {
+        options.covFunct = madai::GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
+      } else if ( CovType == "SQUARE_EXPONENTIAL_FUNCTION" ) {
+        options.covFunct = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
+      } else if ( CovType == "MATERN_32_FUNCTION" ) {
+        options.covFunct = madai::GaussianProcessEmulator::MATERN_32_FUNCTION;
+      } else if ( CovType == "MATERN_52_FUNCTION" ) {
+        options.covFunct = madai::GaussianProcessEmulator::MATERN_52_FUNCTION;
+      } else {
+        std::cerr << "Unrecognized  covariance function: " << CovType << "\n";
+        return false;
+      }
+      i++;
+    } else if ( argString == "REGRESSION_ORDER" ) {
+      options.regressionOrder = atoi(argv[i+1]);
+      std::cerr << "Using regression order = " << options.regressionOrder << "\n";
+      i++;
+    } else if ( argString == "NUGGET" ) {
+      options.Nugget = atof(argv[i+1]);
+      std::cerr << "Using nugget = " << options.Nugget << "\n";
+      i++;
+    } else if ( argString == "AMPLITUDE" ) {
+      options.amplitude = atof(argv[i+1]);
+      std::cerr << "Using amplitude = " << options.amplitude << "\n";
+      i++;
+    } else if ( argString == "SCALE" ) {
+      options.scale = atof(argv[i+1]);
+      std::cerr << "Using scale = " << options.scale << "\n";
+      i++;
+    }
+  }
+  return true;
+}
 
 
 int main(int argc, char ** argv) {
@@ -60,6 +118,15 @@ int main(int argc, char ** argv) {
     TopDirectory = std::string(argv[1]);
   } else {
     std::cerr << useage << '\n';
+    return EXIT_FAILURE;
+  }
+  madai::RuntimeParameterFileReader RPFR;
+  RPFR.ParseFile( TopDirectory+madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY+"/MCMC.dat" );
+  char** Args = RPFR.m_Arguments;
+  int NArgs = RPFR.m_NumArguments;
+  struct RuntimeOptions options;
+  if ( !parseRuntimeOptions( NArgs, Args, options ) ) {
+    std::cerr << "Error parsing runtim options\n";
     return EXIT_FAILURE;
   }
   outputFile = TopDirectory+"/statistical_analysis/EmulatorState.dat";
@@ -80,19 +147,12 @@ int main(int argc, char ** argv) {
     }
   }
 
-  madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction
-    = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
-  int regressionOrder = 1;
-  double defaultNugget = 1e-3;
-  double amplitude = 1.0;
-  double scale = 1e-2;
-
   if (! gpme.BasicTraining(
-          covarianceFunction,
-          regressionOrder,
-          defaultNugget,
-          amplitude,
-          scale))
+          options.covFunct,
+          options.regressionOrder,
+          options.Nugget,
+          options.amplitude,
+          options.scale))
     return EXIT_FAILURE;
   
   std::ofstream os (outputFile.c_str());

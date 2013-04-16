@@ -27,6 +27,7 @@ PCADecompose
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
+#include "RuntimeParameterFileReader.h"
 #include "Paths.h"
 
 
@@ -35,9 +36,6 @@ int main( int argc, char ** argv ) {
   double fractionResolvingPower = 0.95;
   if ( argc > 1 ) {
     TopDirectory = std::string( argv[1] );
-    if ( argc > 2 ) {
-      fractionResolvingPower = atof( argv[2] );
-    }
   } else {
     std::cerr << "Usage:\n";
     std::cerr << "    PCADecompose RootDirectory [fractionResolvingPower]\n";
@@ -46,11 +44,28 @@ int main( int argc, char ** argv ) {
               << madai::Paths::MODEL_OUTPUT_DIRECTORY << "/\n";
     std::cerr << madai::Paths::EXPERIMENTAL_RESULTS << ", and "
               << madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY << "/\n";
-    std::cerr << "\n";
-    std::cerr << "[fractionResolvingPower is the faction of the power of the emulator\n";
-    std::cerr << "at resolving the data into different components. Defaults to .95\n";
     return EXIT_FAILURE;
   }
+  madai::RuntimeParameterFileReader RPFR;
+  RPFR.ParseFile( TopDirectory+madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY+"/MCMC.dat" );
+  char** Args = RPFR.m_Arguments;
+  int NArgs = RPFR.m_NumArguments;
+  for ( unsigned int i = 0; i < NArgs; i++ ) {
+    std::string argString(Args[i]);
+    if ( argString == "PCA_FRACTION_RESOLVING_POWER" ) {
+      fractionResolvingPower = atof( Args[i+1] );
+      if ( fractionResolvingPower < 0 || fractionResolvingPower > 1 ) {
+        std::cerr << "Resolving Power is out of range : "
+                  << fractionResolvingPower << "\n";
+        return EXIT_FAILURE;
+      }
+      std::cerr << "Using fractional resolving power = " 
+                << fractionResolvingPower << "\n";
+    } else {
+      // Skip other elements since I'm using a single configuration file
+    }
+  }
+  
   std::string outputFileName = TopDirectory + madai::Paths::SEPARATOR +
     madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY + madai::Paths::SEPARATOR +
     madai::Paths::PCA_DECOMPOSITION_FILE;

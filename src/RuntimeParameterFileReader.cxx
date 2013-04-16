@@ -18,6 +18,10 @@
 
 #include "RuntimeParameterFileReader.h"
 
+#include <cstring>
+#include <vector>
+
+
 namespace madai {
 
 RuntimeParameterFileReader
@@ -30,17 +34,33 @@ RuntimeParameterFileReader
 {
 }
 
-char*
+void
 RuntimeParameterFileReader
 ::ParseFile( const std::string fileName )
 {
   std::ifstream inFile( fileName.c_str() );
-  std::string element;
-  std::string arg_list;
-  while ( inFile >> element ) { arg_list += element + " "; }
-  char* Arguments = new char[std::strlen(arg_list.c_str())+1]();
-  std::strcpy( Arguments, arg_list.c_str() );
-  return Arguments;
+  if ( inFile ) {
+    std::string element;
+    std::vector<std::string> arg_list;
+    m_NumArguments = 0;
+    while ( inFile.good() ) { 
+      while ( inFile.peek() == '#' ) {
+        std::string line;
+        std::getline( inFile, line );
+      }
+      if ( !(inFile >> element) ) break;
+      arg_list.push_back(element); 
+    }
+    m_NumArguments = arg_list.size();
+    m_Arguments = new char*[m_NumArguments]();
+    for ( unsigned int i = 0; i < m_NumArguments; i++ ) {
+      m_Arguments[i] = new char[std::strlen(arg_list[i].c_str())+1];
+      std::strcpy( m_Arguments[i], arg_list[i].c_str() );
+    }
+  } else {
+    std::cerr << "Couldn't find input file\n";
+    exit(1);
+  }
 }
 
 } // end namespace madai

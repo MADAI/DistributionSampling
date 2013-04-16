@@ -35,7 +35,10 @@ public:
   // Destructor
   ~RuntimeParameterFileReader();
   // Read a file and output its contents as a character string
-  char* ParseFile( const std::string fileName );
+  void ParseFile( const std::string fileName );
+  
+  char** m_Arguments;
+  int    m_NumArguments;
 }; // end class RuntimeParameterFileReader
 
 }; // end namespace madai
