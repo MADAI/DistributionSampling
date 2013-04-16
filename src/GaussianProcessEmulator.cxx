@@ -332,10 +332,14 @@ bool GaussianProcessEmulator::MakeCache() {
   if ((m_Status != READY) && (m_Status != UNCACHED))
     return false;
   assert(m_NumberPCAOutputs == static_cast<int>(m_PCADecomposedModels.size()));
+  bool errorflag = false;
+  #pragma omp parallel for
   for (int i = 0; i < m_NumberPCAOutputs; ++i) {
     if (! m_PCADecomposedModels[i].MakeCache())
-      return false;
+      errorflag = true;
   }
+  if (errorflag)
+    return false;
   m_Status = READY;
   return true;
 }
