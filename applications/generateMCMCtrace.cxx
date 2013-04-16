@@ -25,6 +25,8 @@
 
 #include "MetropolisHastingsSampler.h"
 #include "GaussianProcessEmulatedModel.h"
+#include "RuntimeParameterFileReader.h"
+#include "Paths.h"
 #include "Trace.h"
 
 #include "madaisys/SystemTools.hxx"
@@ -51,85 +53,43 @@ struct GaussianProcessMCMCRuntimeParameters
   int numberIter;
   int numberBurnIn;
   bool UseEmulatedCovariance;
-  bool UseModelSnapshotFile;
   double StepSize;
 };
 
-bool parseGaussianProcessMCMCConfig( 
-    std::istream & input, 
+bool parseMCMCRuntimeParameters( 
+    int argc, char** argv, 
     struct GaussianProcessMCMCRuntimeParameters & Opts ) 
 {
   // Initialize as defaults
   Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
   Opts.numberBurnIn = DEFAULT_BURN_IN;
   Opts.UseEmulatedCovariance = false;
-  Opts.UseModelSnapshotFile = false;
   Opts.StepSize = DEFAULT_STEP_SIZE;
   
-  std::string name, tstring;
-  char opt;
-  while ( input.good() ) {
-    while ( input.peek() == '#' ) {
-      std::string line;
-      std::getline( input, line );
-      std::cerr << line << std::endl;
-    }
-    input >> name;
-    if ( name == "ITERATIONS" ) {
-      opt = 'N';
-    } else if ( name == "BURN_IN" ) {
-      opt = 'B';
-    } else if ( name == "USE_EMULATED_ERROR" ) {
-      opt = 'E';
-    } else if ( name == "STEP_SIZE" ) {
-      opt = 'S';
-    } else {
-      std::cerr << "Unknown parameter " << name << '\n';
-      opt = NULL;
-    }
-    switch( opt ) {
-    case 'N':
-      int Niter;
-      input >> Niter;
-      Opts.numberIter = Niter;
-      if ( Opts.numberIter < 0 ) {
-        std::cerr << "Error: ITERATIONS given incorrect argument: \""
-          << Niter << "\"\n";
-        return false;
-      }
-      break;
-    case 'B':
-      int NBurn;
-      input >> NBurn;
-      Opts.numberBurnIn = NBurn;
-      if ( Opts.numberBurnIn < 0 ) {
-        std::cerr << "Error: BURN_IN given incorrect argument: \""
-          << NBurn << "\"\n";
-        return false;
-      }
-      break;
-    case 'E':
-      input >> tstring;
-      if ( tstring == "false" ) {
+  for ( unsigned int i = 0; i < argc; i++ ) {
+    std::string argString( argv[i] );
+    
+    if ( argString == "MCMC_NUMBER_ITERATIONS" ) {
+      Opts.numberIter = atoi(argv[i+1]);
+      i++;
+    } else if ( argString == "MCMC_NUMBER_BURN_IN" ) {
+      Opts.numberBurnIn = atoi(argv[i+1]);
+      i++;
+    } else if ( argString == "MCMC_USE_EMULATOR_COVARIANCE" ) {
+      std::string tstring(argv[i+1]);
+      if ( tstring == "false" || tstring == "0" ) {
         Opts.UseEmulatedCovariance = false;
-      } else if ( tstring == "true" ) {
+      } else if ( tstring == "true" || tstring == "1" ) {
         Opts.UseEmulatedCovariance = true;
       } else {
-        std::cerr << "Error: USE_MODEL_ERROR given incorrect argument: \""
-          << tstring << "\"\n";
-        return false;
+        std::cerr << "MCMC_USE_EMULATOR_COVARIANCE: " << tstring << " is invalid\n"
+                  << "Setting to false\n";
+        Opts.UseEmulatedCovariance = false;
       }
-      break;
-    case 'S':
-      double SS;
-      input >> SS;
-      Opts.StepSize = SS;
-      if ( Opts.StepSize < 0 ) {
-        std::cerr << "Error: STEP_SIZE given incorrect argument: \""
-          << SS << "\"\n";
-        return false;
-      }
-      break;
+      i++;
+    } else if ( argString == "MCMC_STEP_SIZE" ) {
+      Opts.StepSize = atof(argv[i+1]);
+      i++;
     }
   }
   return true;
@@ -144,12 +104,13 @@ int main(int argc, char ** argv) {
   }
   std::string TopDirectory(argv[1]);
   std::string OutputFileName(argv[2]);
+  madai::RuntimeParameterFileReader RPFR;
+  RPFR.ParseFile( TopDirectory+madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY+"/MCMC.dat" );
+  char** Args = RPFR.m_Arguments;
+  int NArgs = RPFR.m_NumArguments;
   std::string observationsFile = TopDirectory+"/experimental_results/results.dat";
-  std::string RuntimeParametersFileName = TopDirectory+"/statistical_analysis/MCMC.dat";
-  
-  std::ifstream RPF ( RuntimeParametersFileName.c_str() );
   struct GaussianProcessMCMCRuntimeParameters Opts;
-  if ( !parseGaussianProcessMCMCConfig( RPF, Opts ) ) {
+  if ( !parseMCMCRuntimeParameters( NArgs, Args, Opts ) ) {
     std::cerr << "Error: Parsing configuration file for gaussian process mcmc.\n";
     return EXIT_FAILURE;
   }

@@ -59,7 +59,6 @@ static const char useage [] =
 struct cmdLineOpts{
   bool quietFlag;
   const char * TopDirectory; /* first non-flag argument  */
-  const char * ReadMethod; /* second non-flag argument */
 };
 
 /**
