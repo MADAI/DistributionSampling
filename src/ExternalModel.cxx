@@ -125,6 +125,7 @@ static bool discard_comments( std::istream & i, char comment_character ) {
     std::getline( i, s );
     c = i.peek();
   }
+  return true;
 }
 
 

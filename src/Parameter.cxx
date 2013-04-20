@@ -72,6 +72,7 @@ Parameter & Parameter::operator=( const Parameter & other)
   if ( m_PriorDistribution != NULL )
     delete m_PriorDistribution;
   m_PriorDistribution = other.m_PriorDistribution->Clone();
+  return *this;
 }
 
 

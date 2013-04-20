@@ -133,6 +133,7 @@ Gaussian2DModel
 ::SetObservedScalarValues( const std::vector< double > & observedScalarValues )
 {
   // Do nothing. The values are set internally.
+  return NO_ERROR;
 }
 
 
@@ -141,6 +142,7 @@ Gaussian2DModel
 ::SetObservedScalarCovariance( const std::vector< double > & observedScalarCovariance)
 {
   // Do nothing. The values are set internally.
+  return NO_ERROR;
 }
 
 

@@ -332,7 +332,7 @@ inline bool parseParameterAndOutputValues(
   m3.derived().resize( t, 1 );
   unsigned int run_counter = 0;
 
-  double* avgUnc = new double[t]();
+  double* avgUnc = new double[t];
 
   for ( size_t i = 0; i < runDirectories.size(); ++i ) {
     std::string dir_name( runDirectories[i] );

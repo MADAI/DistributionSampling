@@ -95,6 +95,7 @@ Model
         ++iter ) {
     parameterNames.push_back( iter->m_Name );
   }
+  return parameterNames;
 }
 
 
