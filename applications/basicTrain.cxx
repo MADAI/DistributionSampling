@@ -123,7 +123,8 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
   madai::RuntimeParameterFileReader RPFR;
-  RPFR.ParseFile( TopDirectory+madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY+"/MCMC.dat" );
+  RPFR.ParseFile( TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
+                  madai::Paths::SEPARATOR + "MCMC.dat" );
   char** Args = RPFR.m_Arguments;
   int NArgs = RPFR.m_NumArguments;
   struct RuntimeOptions options;
@@ -131,7 +132,8 @@ int main(int argc, char ** argv) {
     std::cerr << "Error parsing runtim options\n";
     return EXIT_FAILURE;
   }
-  outputFile = TopDirectory+"/statistical_analysis/EmulatorState.dat";
+  outputFile = TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
+    madai::Paths::SEPARATOR + madai::Paths::EMULATOR_STATE_FILE;
 
   madai::GaussianProcessEmulator gpme;
   if ( TopDirectory == "-" ) {

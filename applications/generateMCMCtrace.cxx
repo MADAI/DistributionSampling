@@ -48,7 +48,7 @@ const char useage [] =
   "\n"
   "OutputFileName is the name of the file the trace will be stored in. This file\n"
   "will be located in the statistical_analysis/MCMCTrace/ directory.\n";
- 
+
 struct GaussianProcessMCMCRuntimeParameters
 {
   int numberIter;
@@ -57,19 +57,19 @@ struct GaussianProcessMCMCRuntimeParameters
   double StepSize;
 };
 
-bool parseMCMCRuntimeParameters( 
-    int argc, char** argv, 
-    struct GaussianProcessMCMCRuntimeParameters & Opts ) 
+bool parseMCMCRuntimeParameters(
+    int argc, char** argv,
+    struct GaussianProcessMCMCRuntimeParameters & Opts )
 {
   // Initialize as defaults
   Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
   Opts.numberBurnIn = DEFAULT_BURN_IN;
   Opts.UseEmulatedCovariance = false;
   Opts.StepSize = DEFAULT_STEP_SIZE;
-  
+
   for ( unsigned int i = 0; i < argc; i++ ) {
     std::string argString( argv[i] );
-    
+
     if ( argString == "MCMC_NUMBER_ITERATIONS" ) {
       Opts.numberIter = atoi(argv[i+1]);
       i++;
@@ -95,8 +95,8 @@ bool parseMCMCRuntimeParameters(
   }
   return true;
 }
- 
- 
+
+
 int main(int argc, char ** argv) {
 
   if (argc < 3) {
@@ -107,7 +107,8 @@ int main(int argc, char ** argv) {
   madai::EnsurePathSeparatorAtEnd( TopDirectory );
   std::string OutputFileName(argv[2]);
   madai::RuntimeParameterFileReader RPFR;
-  RPFR.ParseFile( TopDirectory+madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY+"/MCMC.dat" );
+  RPFR.ParseFile( TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
+                  madai::Paths::SEPARATOR + "MCMC.dat" );
   char** Args = RPFR.m_Arguments;
   int NArgs = RPFR.m_NumArguments;
   std::string observationsFile = TopDirectory+"/experimental_results/results.dat";
@@ -116,7 +117,7 @@ int main(int argc, char ** argv) {
     std::cerr << "Error: Parsing configuration file for gaussian process mcmc.\n";
     return EXIT_FAILURE;
   }
-  
+
   madai::GaussianProcessEmulatedModel gpem;
   if (gpem.LoadConfiguration( TopDirectory ) != madai::Model::NO_ERROR) {
     std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";

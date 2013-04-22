@@ -49,7 +49,8 @@ int main( int argc, char ** argv ) {
     return EXIT_FAILURE;
   }
   madai::RuntimeParameterFileReader RPFR;
-  RPFR.ParseFile( TopDirectory+madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY+"/MCMC.dat" );
+  RPFR.ParseFile( TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
+                  madai::Paths::SEPARATOR + "MCMC.dat" );
   char** Args = RPFR.m_Arguments;
   int NArgs = RPFR.m_NumArguments;
   for ( unsigned int i = 0; i < NArgs; i++ ) {
@@ -68,9 +69,8 @@ int main( int argc, char ** argv ) {
     }
   }
   
-  std::string outputFileName = TopDirectory + madai::Paths::SEPARATOR +
-    madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY + madai::Paths::SEPARATOR +
-    madai::Paths::PCA_DECOMPOSITION_FILE;
+  std::string outputFileName = TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
+    madai::Paths::SEPARATOR + madai::Paths::PCA_DECOMPOSITION_FILE;
 
   madai::GaussianProcessEmulator gpme;
   if ( TopDirectory == "-" ) {

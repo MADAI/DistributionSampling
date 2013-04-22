@@ -43,6 +43,7 @@ USE:
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
+#include "Paths.h"
 
 
 #define starts_with(s1,s2) (std::strncmp((s1), (s2), std::strlen(s2)) == 0)
@@ -221,7 +222,8 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
   std::string OutputFile(options.RootDirectory);
-  OutputFile += "/statistical_analysis/EmulatorState.dat";
+  OutputFile += madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY + madai::Paths::SEPARATOR +
+    madai::Paths::EMULATOR_STATE_FILE;
   std::ofstream os( OutputFile.c_str() );
 
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
