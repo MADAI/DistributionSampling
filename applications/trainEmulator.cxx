@@ -37,6 +37,8 @@ USE:
 #include <iostream> // cout, cin
 #include <fstream> // ifstream, ofstream
 #include <cstring> // strcmp, strlen
+
+#include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
@@ -91,7 +93,7 @@ struct cmdLineOpts{
   bool quietFlag;
   bool FullSummaryFlag;
   double pcaVariance;
-  const char * RootDirectory; /* first non-flag argument  */
+  char * RootDirectory; /* first non-flag argument  */
 };
 
 /**
@@ -201,6 +203,7 @@ int main(int argc, char ** argv) {
     singleFileReader.Load(&gpme,std::cin);
   } else {
     std::string TopDirectory (options.RootDirectory);
+    madai::EnsurePathSeparatorAtEnd( TopDirectory );
     madai::GaussianProcessEmulatorDirectoryReader directoryReader;
     if ( !directoryReader.LoadTrainingData(&gpme,TopDirectory) ) {
       std::cerr << "Error loading training data.\n";

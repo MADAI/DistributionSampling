@@ -38,11 +38,13 @@ USE:
 #include <fstream>
 #include <cassert>
 #include <cstdlib>
+
+#include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
-#include "UniformDistribution.h"
 #include "GaussianDistribution.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
+#include "UniformDistribution.h"
 
 static const char useage [] =
   "useage:\n"
@@ -208,6 +210,7 @@ int main(int argc, char ** argv) {
   if (!parseCommandLineOptions(argc, argv, options))
     return EXIT_FAILURE;
   std::string TopDirectory(options.TopDirectory);
+  madai::EnsurePathSeparatorAtEnd( TopDirectory );
   madai::GaussianProcessEmulator gpme;
   if (TopDirectory == "-") {
     /*

@@ -46,6 +46,7 @@ const char useage [] =
 #include <iostream> // cout, cin
 #include <fstream> // ifstream, ofstream
 
+#include "ApplicationUtilities.h"
 #include "RuntimeParameterFileReader.h"
 #include "GaussianProcessEmulator.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
@@ -116,6 +117,7 @@ int main(int argc, char ** argv) {
   std::string PCAFile;
   if (argc > 1) {
     TopDirectory = std::string(argv[1]);
+    madai::EnsurePathSeparatorAtEnd( TopDirectory );
   } else {
     std::cerr << useage << '\n';
     return EXIT_FAILURE;

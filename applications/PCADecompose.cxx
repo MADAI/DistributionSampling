@@ -23,6 +23,7 @@ PCADecompose
 #include <iostream>
 #include <fstream>
 
+#include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
@@ -36,6 +37,7 @@ int main( int argc, char ** argv ) {
   double fractionResolvingPower = 0.95;
   if ( argc > 1 ) {
     TopDirectory = std::string( argv[1] );
+    madai::EnsurePathSeparatorAtEnd( TopDirectory );
   } else {
     std::cerr << "Usage:\n";
     std::cerr << "    PCADecompose RootDirectory [fractionResolvingPower]\n";

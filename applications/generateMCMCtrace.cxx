@@ -23,6 +23,7 @@
 #include <vector>
 #include <algorithm>
 
+#include "ApplicationUtilities.h"
 #include "MetropolisHastingsSampler.h"
 #include "GaussianProcessEmulatedModel.h"
 #include "RuntimeParameterFileReader.h"
@@ -103,6 +104,7 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
   std::string TopDirectory(argv[1]);
+  madai::EnsurePathSeparatorAtEnd( TopDirectory );
   std::string OutputFileName(argv[2]);
   madai::RuntimeParameterFileReader RPFR;
   RPFR.ParseFile( TopDirectory+madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY+"/MCMC.dat" );

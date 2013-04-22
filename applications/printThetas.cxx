@@ -43,6 +43,7 @@ const char useage [] =
 #include <iostream> // cout, cin
 #include <fstream> // ifstream, ofstream
 
+#include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
@@ -50,9 +51,10 @@ const char useage [] =
 
 
 int main(int argc, char ** argv) {
-  char const * TopDirectory = NULL;
+  std::string TopDirectory;
   if (argc > 1) {
     TopDirectory = argv[1];
+    madai::EnsurePathSeparatorAtEnd( TopDirectory );
   } else {
     std::cerr << useage << '\n';
     return EXIT_FAILURE;
@@ -61,7 +63,7 @@ int main(int argc, char ** argv) {
   madai::GaussianProcessEmulator gpe;
   std::ostream & output = std::cout;
 
-  if (0 == strcmp(TopDirectory, "-")) {
+  if ( TopDirectory == "-" ) {
     madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
     if ( !singleFileReader.Load(&gpe,std::cin)  ) {
       std::cerr << "Error (2) loading emulator from cin\n";
@@ -69,15 +71,15 @@ int main(int argc, char ** argv) {
     }
   } else {
     madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-    if ( !directoryReader.LoadTrainingData(&gpe,TopDirectory) ) {
+    if ( !directoryReader.LoadTrainingData(&gpe,TopDirectory.c_str()) ) {
       std::cerr << "Error loading data used to train the emulator.\n";
       return EXIT_FAILURE;
     }
-    if ( !directoryReader.LoadPCA(&gpe,TopDirectory) ) {
+    if ( !directoryReader.LoadPCA(&gpe,TopDirectory.c_str()) ) {
       std::cerr << "Error loading PCA data.\n";
       return EXIT_FAILURE;
     }
-    if ( !directoryReader.LoadEmulator(&gpe, TopDirectory) ) {
+    if ( !directoryReader.LoadEmulator(&gpe, TopDirectory.c_str()) ) {
       std::cerr << "Error loading the emulator state data.\n";
       return EXIT_FAILURE;
     }
