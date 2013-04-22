@@ -74,9 +74,9 @@ bool parseRuntimeOptions( int argc, char* argv[], struct RuntimeOptions & option
   for ( unsigned int i = 0; i < argc; i++ ) {
     std::string argString( argv[i] );
     
-    if ( argString == "COVARIANCE_FUNCTION" ) {
+    if ( argString == "EMULATOR_COVARIANCE_FUNCTION" ) {
       std::string CovType( argv[i+1] );
-      if ( CovType == "POWER_EXPONENTIAL_FUNCTION" ) {
+      if ( CovType == "EMULATOR_POWER_EXPONENTIAL_FUNCTION" ) {
         options.covFunct = madai::GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
       } else if ( CovType == "SQUARE_EXPONENTIAL_FUNCTION" ) {
         options.covFunct = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
@@ -89,19 +89,19 @@ bool parseRuntimeOptions( int argc, char* argv[], struct RuntimeOptions & option
         return false;
       }
       i++;
-    } else if ( argString == "REGRESSION_ORDER" ) {
+    } else if ( argString == "EMULATOR_REGRESSION_ORDER" ) {
       options.regressionOrder = atoi(argv[i+1]);
       std::cerr << "Using regression order = " << options.regressionOrder << "\n";
       i++;
-    } else if ( argString == "NUGGET" ) {
+    } else if ( argString == "EMULATOR_NUGGET" ) {
       options.Nugget = atof(argv[i+1]);
       std::cerr << "Using nugget = " << options.Nugget << "\n";
       i++;
-    } else if ( argString == "AMPLITUDE" ) {
+    } else if ( argString == "EMULATOR_AMPLITUDE" ) {
       options.amplitude = atof(argv[i+1]);
       std::cerr << "Using amplitude = " << options.amplitude << "\n";
       i++;
-    } else if ( argString == "SCALE" ) {
+    } else if ( argString == "EMULATOR_SCALE" ) {
       options.scale = atof(argv[i+1]);
       std::cerr << "Using scale = " << options.scale << "\n";
       i++;
