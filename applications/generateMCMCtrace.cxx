@@ -111,7 +111,9 @@ int main(int argc, char ** argv) {
                   madai::Paths::SEPARATOR + "MCMC.dat" );
   char** Args = RPFR.m_Arguments;
   int NArgs = RPFR.m_NumArguments;
-  std::string observationsFile = TopDirectory+"/experimental_results/results.dat";
+  std::string observationsFile = TopDirectory + madai::Paths::SEPARATOR +
+    madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY + madai::Paths::SEPARATOR +
+    madai::Paths::RESULTS_FILE;
   struct GaussianProcessMCMCRuntimeParameters Opts;
   if ( !parseMCMCRuntimeParameters( NArgs, Args, Opts ) ) {
     std::cerr << "Error: Parsing configuration file for gaussian process mcmc.\n";
