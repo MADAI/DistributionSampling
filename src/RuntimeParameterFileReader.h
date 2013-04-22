@@ -38,11 +38,17 @@ public:
 
   // Read a file and output its contents as a character string
   bool ParseFile( const std::string fileName );
-  
+
+  // Get number of arguments
+  int GetNumberOfArguments();
+
+  // Get arguments themselves
+  char ** GetArguments();
+
+private:
   int    m_NumberOfArguments;
   char** m_Arguments;
 
-private:
   void FreeMemory();
 }; // end class RuntimeParameterFileReader
 

@@ -51,8 +51,8 @@ int main( int argc, char ** argv ) {
   madai::RuntimeParameterFileReader RPFR;
   RPFR.ParseFile( TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
                   madai::Paths::SEPARATOR + "MCMC.dat" );
-  char** Args = RPFR.m_Arguments;
-  int NArgs = RPFR.m_NumberOfArguments;
+  char** Args = RPFR.GetArguments();
+  int NArgs = RPFR.GetNumberOfArguments();
   for ( unsigned int i = 0; i < NArgs; i++ ) {
     std::string argString(Args[i]);
     if ( argString == "PCA_FRACTION_RESOLVING_POWER" ) {

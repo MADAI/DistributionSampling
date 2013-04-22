@@ -125,8 +125,8 @@ int main(int argc, char ** argv) {
   madai::RuntimeParameterFileReader RPFR;
   RPFR.ParseFile( TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
                   madai::Paths::SEPARATOR + "MCMC.dat" );
-  char** Args = RPFR.m_Arguments;
-  int NArgs = RPFR.m_NumberOfArguments;
+  char** Args = RPFR.GetArguments();
+  int NArgs = RPFR.GetNumberOfArguments();
   struct RuntimeOptions options;
   if ( !parseRuntimeOptions( NArgs, Args, options ) ) {
     std::cerr << "Error parsing runtime options\n";

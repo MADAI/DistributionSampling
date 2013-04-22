@@ -70,6 +70,20 @@ RuntimeParameterFileReader
   return true;
 }
 
+int
+RuntimeParameterFileReader
+::GetNumberOfArguments()
+{
+  return m_NumberOfArguments;
+}
+
+char **
+RuntimeParameterFileReader
+::GetArguments()
+{
+  return m_Arguments;
+}
+
 void
 RuntimeParameterFileReader
 ::FreeMemory()

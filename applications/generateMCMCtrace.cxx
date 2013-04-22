@@ -109,8 +109,8 @@ int main(int argc, char ** argv) {
   madai::RuntimeParameterFileReader RPFR;
   RPFR.ParseFile( TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
                   madai::Paths::SEPARATOR + "MCMC.dat" );
-  char** Args = RPFR.m_Arguments;
-  int NArgs = RPFR.m_NumberOfArguments;
+  char** Args = RPFR.GetArguments();
+  int NArgs = RPFR.GetNumberOfArguments();
   std::string observationsFile = TopDirectory + madai::Paths::SEPARATOR +
     madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY + madai::Paths::SEPARATOR +
     madai::Paths::RESULTS_FILE;
