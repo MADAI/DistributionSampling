@@ -39,8 +39,11 @@ public:
   // Read a file and output its contents as a character string
   bool ParseFile( const std::string fileName );
   
+  int    m_NumberOfArguments;
   char** m_Arguments;
-  int    m_NumArguments;
+
+private:
+  void FreeMemory();
 }; // end class RuntimeParameterFileReader
 
 }; // end namespace madai

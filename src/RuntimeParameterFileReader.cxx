@@ -25,24 +25,29 @@
 namespace madai {
 
 RuntimeParameterFileReader
-::RuntimeParameterFileReader()
+::RuntimeParameterFileReader() :
+  m_NumberOfArguments( 0 ),
+  m_Arguments( NULL )
 {
 }
 
 RuntimeParameterFileReader
 ::~RuntimeParameterFileReader()
 {
+  this->FreeMemory();
 }
 
 bool
 RuntimeParameterFileReader
 ::ParseFile( const std::string fileName )
 {
+  this->FreeMemory();
+
   std::ifstream inFile( fileName.c_str() );
   if ( inFile ) {
     std::string element;
     std::vector<std::string> arg_list;
-    m_NumArguments = 0;
+    m_NumberOfArguments = 0;
     while ( inFile.good() ) { 
       while ( inFile.peek() == '#' ) {
         std::string line;
@@ -51,9 +56,9 @@ RuntimeParameterFileReader
       if ( !(inFile >> element) ) break;
       arg_list.push_back(element); 
     }
-    m_NumArguments = arg_list.size();
-    m_Arguments = new char*[m_NumArguments]();
-    for ( unsigned int i = 0; i < m_NumArguments; i++ ) {
+    m_NumberOfArguments = arg_list.size();
+    m_Arguments = new char*[m_NumberOfArguments]();
+    for ( unsigned int i = 0; i < m_NumberOfArguments; i++ ) {
       m_Arguments[i] = new char[std::strlen(arg_list[i].c_str())+1];
       std::strcpy( m_Arguments[i], arg_list[i].c_str() );
     }
@@ -63,6 +68,18 @@ RuntimeParameterFileReader
   }
 
   return true;
+}
+
+void
+RuntimeParameterFileReader
+::FreeMemory()
+{
+  for ( unsigned int i = 0; i < m_NumberOfArguments; i++ ) {
+    delete[] m_Arguments[i];
+  }
+  delete[] m_Arguments;
+
+  m_Arguments = NULL;
 }
 
 } // end namespace madai

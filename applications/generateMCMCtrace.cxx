@@ -110,7 +110,7 @@ int main(int argc, char ** argv) {
   RPFR.ParseFile( TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
                   madai::Paths::SEPARATOR + "MCMC.dat" );
   char** Args = RPFR.m_Arguments;
-  int NArgs = RPFR.m_NumArguments;
+  int NArgs = RPFR.m_NumberOfArguments;
   std::string observationsFile = TopDirectory + madai::Paths::SEPARATOR +
     madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY + madai::Paths::SEPARATOR +
     madai::Paths::RESULTS_FILE;

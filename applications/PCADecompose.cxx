@@ -52,7 +52,7 @@ int main( int argc, char ** argv ) {
   RPFR.ParseFile( TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
                   madai::Paths::SEPARATOR + "MCMC.dat" );
   char** Args = RPFR.m_Arguments;
-  int NArgs = RPFR.m_NumArguments;
+  int NArgs = RPFR.m_NumberOfArguments;
   for ( unsigned int i = 0; i < NArgs; i++ ) {
     std::string argString(Args[i]);
     if ( argString == "PCA_FRACTION_RESOLVING_POWER" ) {
