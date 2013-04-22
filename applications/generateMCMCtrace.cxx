@@ -40,14 +40,31 @@ static const int DEFAULT_NUMBER_ITERATIONS = 100;
 static const int DEFAULT_BURN_IN = 0;
 static const double DEFAULT_STEP_SIZE = 0.1;
 const char useage [] =
-  "Usage:\n"
-  "    generateMCMCtrace TopDirectory OutputFileName\n"
+  "Useage:\n"
+  "    generateMCMCtrace StatisticsDirectory OutputFileName\n"
   "\n"
-  "TopDirectory is the directory containing model_output/ experimental_results/\n"
-  "and statistical_analysis/.\n"
+  "StatisticsDirectory is the directory in which all statistical data will\n"
+  "be stored. Contains the parameter file stat_params.dat.\n"
   "\n"
   "OutputFileName is the name of the file the trace will be stored in. This file\n"
-  "will be located in the statistical_analysis/MCMCTrace/ directory.\n";
+  "will be located in the StatisticsDirectory/trace/ directory.\n"
+  "\n"
+  "Format of stat_params.dat\n"
+  "MODEL_OUTPUT_DIRECTORY <value>\n"
+  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
+  "MCMC_NUMBER_ITERATIONS <value>\n"
+  "MCMC_NUMBER_BURN_IN <value>\n"
+  "MCMC_USE_EMULATOR_COVARIANCE <value>\n"
+  "MCMC_STEP_SIZE <value>\n"
+  "\n"
+  "Default values (if not specified) in order of listed:\n"
+  "model_output\n"
+  "experimental_results\n"
+  "100\n"
+  "0\n"
+  "false\n"
+  "0.1\n"
+  "\n";
 
 struct GaussianProcessMCMCRuntimeParameters
 {
@@ -55,6 +72,8 @@ struct GaussianProcessMCMCRuntimeParameters
   int numberBurnIn;
   bool UseEmulatedCovariance;
   double StepSize;
+  std::string ModelOutputDirectory;
+  std::string ExperimentalResultsDirectory;
 };
 
 bool parseMCMCRuntimeParameters(
@@ -62,6 +81,8 @@ bool parseMCMCRuntimeParameters(
     struct GaussianProcessMCMCRuntimeParameters & Opts )
 {
   // Initialize as defaults
+  Opts.ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
+  Opts.ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
   Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
   Opts.numberBurnIn = DEFAULT_BURN_IN;
   Opts.UseEmulatedCovariance = false;
@@ -72,6 +93,12 @@ bool parseMCMCRuntimeParameters(
 
     if ( argString == "MCMC_NUMBER_ITERATIONS" ) {
       Opts.numberIter = atoi(argv[i+1]);
+      i++;
+    } else if ( argString == "MODEL_OUTPUT_DIRECTORY" ) {
+      Opts.ModelOutputDirectory = std::string( argv[i+1] );
+      i++;
+    } else if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) { 
+      Opts.ExperimentalResultsDirectory = std::string( argv[i+1] );
       i++;
     } else if ( argString == "MCMC_NUMBER_BURN_IN" ) {
       Opts.numberBurnIn = atoi(argv[i+1]);
@@ -103,25 +130,26 @@ int main(int argc, char ** argv) {
     std::cerr << useage << "\n";
     return EXIT_FAILURE;
   }
-  std::string TopDirectory(argv[1]);
-  madai::EnsurePathSeparatorAtEnd( TopDirectory );
-  std::string OutputFileName(argv[2]);
+  std::string StatisticsDirectory( argv[1] );
+  std::string OutputFileName( argv[2] );
+  
+  madai::EnsurePathSeparatorAtEnd( StatisticsDirectory );
   madai::RuntimeParameterFileReader RPFR;
-  RPFR.ParseFile( TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
-                  madai::Paths::SEPARATOR + "MCMC.dat" );
+  RPFR.ParseFile( StatisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE );
   char** Args = RPFR.GetArguments();
   int NArgs = RPFR.GetNumberOfArguments();
-  std::string observationsFile = TopDirectory + madai::Paths::SEPARATOR +
-    madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY + madai::Paths::SEPARATOR +
-    madai::Paths::RESULTS_FILE;
   struct GaussianProcessMCMCRuntimeParameters Opts;
   if ( !parseMCMCRuntimeParameters( NArgs, Args, Opts ) ) {
     std::cerr << "Error: Parsing configuration file for gaussian process mcmc.\n";
     return EXIT_FAILURE;
   }
-
+  std::string observationsFile = Opts.ExperimentalResultsDirectory +
+    madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
+  
   madai::GaussianProcessEmulatedModel gpem;
-  if (gpem.LoadConfiguration( TopDirectory ) != madai::Model::NO_ERROR) {
+  std::string MOD = StatisticsDirectory + Opts.ModelOutputDirectory;
+  std::string ERD = StatisticsDirectory + Opts.ExperimentalResultsDirectory;
+  if ( gpem.LoadConfiguration( StatisticsDirectory, MOD, ERD ) != madai::Model::NO_ERROR ) {
     std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
     return EXIT_FAILURE;
   }
@@ -167,9 +195,9 @@ int main(int argc, char ** argv) {
        it != samples.end(); ++it) {
     trace.Add( *it );
   }
-  std::string traceDirectory = TopDirectory + "/statistical_analysis/MCMCTrace";
+  std::string traceDirectory = StatisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
-  std::string OutputFile = TopDirectory+"/statistical_analysis/MCMCTrace/"+OutputFileName;
+  std::string OutputFile = traceDirectory+OutputFileName;
   std::ofstream Out( OutputFile.c_str() );
   trace.WriteCSVOutput(
       Out,

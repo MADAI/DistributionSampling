@@ -43,6 +43,7 @@ USE:
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
+#include "RuntimeParameterFileReader.h"
 #include "Paths.h"
 
 
@@ -51,179 +52,147 @@ USE:
 static const madai::GaussianProcessEmulator::CovarianceFunctionType DEFAULT_COVARIACE_FUNCTION
   = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
 static const int DEFAULT_REGRESSION_ORDER = 1;
-static const double DEFAULT_PCA_FRACTION = 0.99;
 
 static const char useage [] =
   "useage:\n"
-  "  trainEmulator [options] RootDirectory [OutputFileOption]\n"
+  "  trainEmulator StatisticsDirectory\n"
   "\n"
-  "RootDirectory can be \"-\" to read from standard input. This is\n"
-  "the directory in which the folders model_output/ experimental_results/\n"
-  "and statistical_analysis/ are contained.\n"
+  "StatisticsDirectory is the directory in which all statistical data will\n"
+  "be stored. Contains the parameter file stat_params.dat\n"
   "\n"
-  "[OutputFileOption] if this is set to \"FullSummary\" then the entire\n"
-  "data structure will be saved to the file ModelSnapshot.dat. Otherwise,\n"
-  "only the PCA Decomposition will be saved to PCADecomposition.dat.\n"
+  "Format of and parameters which can be set in stat_params.dat\n"
+  "MODEL_OUTPUT_DIRECTORY <value>\n"
+  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
+  "EMULATOR_REGRESSION_ORDER <value>\n"
+  "EMULATOR_COVARIANCE_FUNCTION <value>\n"
+  "EMULATOR_TRAINING_QUIET_FLAG <value>\n"
   "\n"
-  "Options:\n"
-  "\n"
-  "  --regression_order=0  (constant)\n"
-  "  --regression_order=1  (linear, default)\n"
-  "  --regression_order=2  (quadratic)\n"
-  "  --regression_order=3  (cubic)\n"
-  "\n"
-  "  --covariance_fn=POWER_EXPONENTIAL (POWER EXPONENTIAL)\n"
-  "  --covariance_fn=SQUARE_EXPONENTIAL (SQUARED EXPONENTIAL, default)\n"
-  "  --covariance_fn=MATERN_32  (MATERN 3/2)\n"
-  "  --covariance_fn=MATERN_52  (MATERN 5/2)\n"
-  "\n"
-  "  -v=FRAC\n"
-  "  --pca_variance=FRAC\n"
-  "            sets the pca decomp to keep cpts up to variance fraction frac\n"
-  "\n"
-  "  -q\n"
-  "  --quiet   run without any extraneous output on standard error.\n"
-  "\n"
-  "  -h -?     print this dialogue\n"
-  "\n";
+  "Defaults and possible values\n"
+  "MODEL_OUTPUT_DIRECTORY model_output\n"
+  "EXPERIMENTAL_RESULTS_DIRECTORY experimental_results\n"
+  "EMULATOR_REGRESSION_ORDER 1 (can be 0, 1, 2, or 3)\n"
+  "EMULATOR_COVARIANCE_FUNCTION POWER_EXPONENTIAL_FUNCTION\n"
+  "(other values are SQUARE_EXPONENTIAL_FUNCTION, MATERN_32_FUNCTION,\n"
+  " and MATERN_52_FUNCTION)\n"
+  "EMULATOR_TRAINING_QUIET_FLAG false (can be false or 0, and true or 1)\n";
 
 
-struct cmdLineOpts{
+struct EmulatorTrainingRuntimeOpts{
+  std::string ModelOutputDirectory;
+  std::string ExperimentalResultsDirectory;
   int regressionOrder;
   madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction;
   bool quietFlag;
-  bool FullSummaryFlag;
-  double pcaVariance;
-  char * RootDirectory; /* first non-flag argument  */
 };
 
 /**
  * option parsing using getoptlong.  If it fails, returns false.
  */
-bool parseCommandLineOptions(int argc, char** argv, struct cmdLineOpts & opts)
+bool parseEmulatorTrainingRuntimeOptions(
+    int argc, char** argv,
+    struct EmulatorTrainingRuntimeOpts & opts)
 {
-  /* note: flags followed with a colon come with an argument */
-  static const char optString[] = "r:c:qh?";
-
-  // should add a variance option for the pca_decomp
-  // and a flag to do return output in pca space
-  static const struct option longOpts[] = {
-    { "regression_order", required_argument , NULL, 'r'},
-    { "covariance_fn", required_argument , NULL, 'c'},
-    { "pca_variance", required_argument, NULL , 'v'},
-    { "quiet", no_argument , NULL, 'q'},
-    { "help", no_argument , NULL, 'h'},
-    { NULL, no_argument, NULL, 0}
-  };
-
   // init with default values
   opts.regressionOrder = DEFAULT_REGRESSION_ORDER;
   opts.covarianceFunction = DEFAULT_COVARIACE_FUNCTION;
   opts.quietFlag = 0;
-  opts.FullSummaryFlag = false;
-  opts.pcaVariance = DEFAULT_PCA_FRACTION;
-  opts.RootDirectory = NULL; // default to stdin
+  opts.ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
+  opts.ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
 
-  int longIndex, opt;
-  opt = getopt_long( argc, argv, optString, longOpts, &longIndex );
-  while( opt != -1 ) {
-    switch( opt ) {
-    case 'r':
-      opts.regressionOrder = atoi(optarg);
-      if (((opts.regressionOrder) < 0) || ((opts.regressionOrder) > 3)) {
-        std::cerr << "Error: regression_order given incorrect argument: \""
-          << optarg <<"\"\n";
-        return false;
-      }
-      break;
-    case 'c':
-      if (starts_with(optarg, "POWER_EXPONENTIAL")) {
+  for ( unsigned int i = 0; i < argc; i++ ) {
+    std::string argString( argv[i] );
+    
+    if ( argString == "MODEL_OUTPUT_DIRECTORY" ) {
+      opts.ModelOutputDirectory = std::string( argv[i+1] );
+      i++;
+    } else if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) {
+      opts.ExperimentalResultsDirectory = std::string( argv[i+1] );
+      i++;
+    } else if ( argString == "EMULATOR_COVARIANCE_FUNCTION" ) {
+      std::string CovType( argv[i+1] );
+      if ( CovType == "POWER_EXPONENTIAL_FUNCTION" ) {
         opts.covarianceFunction = madai::GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
-      } else if (starts_with(optarg, "SQUARE_EXPONENTIAL")) {
+      } else if ( CovType == "SQUARE_EXPONENTIAL_FUNCTION" ) {
         opts.covarianceFunction = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
-      } else if (starts_with(optarg, "MATERN_32")) {
+      } else if ( CovType == "MATERN_32_FUNCTION" ) {
         opts.covarianceFunction = madai::GaussianProcessEmulator::MATERN_32_FUNCTION;
-      } else if (starts_with(optarg, "MATERN_52")) {
+      } else if ( CovType == "MATERN_52_FUNCTION" ) {
         opts.covarianceFunction = madai::GaussianProcessEmulator::MATERN_52_FUNCTION;
       } else {
-        std::cerr << "Error: covariance_fn given incorrect argument: "
-          << optarg << "\n";
+        std::cerr << "Unrecognized covariance function: " << CovType << "\n";
         return false;
       }
-      break;
-    case 'v':
-      opts.pcaVariance = atof(optarg);
-      /* expect the var to be a float in range [0,1] */
-      if(opts.pcaVariance < 0.0 || opts.pcaVariance > 1.0){
-        std::cerr << "Error: pca_variance given incorrect value: "
-                    << optarg <<"\n";
+      i++;
+    } else if ( argString == "EMULATOR_REGRESSION_ORDER" ) {
+      opts.regressionOrder = atoi( argv[i+1] );
+      if ( opts.regressionOrder < 0 || opts.regressionOrder > 3 ) {
+        std::cerr << "Error: EMULATOR_REGRESSION_ORDER given incorrect argument: \""
+          << argv[i+1] << "\"\n";
           return false;
       }
-      break;
-    case 'q':
-      opts.quietFlag = 1;
-      break;
-    case 'h':
-      /* fall-through is intentional */
-    case '?':
-      std::cerr << useage << '\n';
-      return false;
-    default:
-      /* You won't actually get here. */
-      assert(false && "1152677029");
-      return false;
+      i++;
+    } else if ( argString == "EMULATOR_TRAINING_QUIET_FLAG" ) {
+      std::string tstring( argv[i+1] );
+      if ( tstring == "0" || tstring == "false" ) {
+        opts.quietFlag = false;
+      } else if ( tstring == "1" || tstring == "true" ) {
+        opts.quietFlag = true;
+      } else {
+        std::cerr << "Error: EMULATOR_TRAINING_QUIET_FLAG given incorrect argument: \""
+          << tstring << "\"\n";
+          return false;
+      }
+      i++;
     }
-    opt = getopt_long(argc, argv, optString, longOpts, &longIndex);
-  }
-
-  // set the remaining fields
-  if ((argc - optind) >= 2) {
-    if ( std::string(argv[optind+1]) == "FullSummary" ) {
-      opts.FullSummaryFlag = true;
-    } else {
-      opts.FullSummaryFlag = false;
-    }
-  }
-  if ((argc - optind) >= 1) {
-    opts.RootDirectory = argv[optind];
-  }
-  if (opts.RootDirectory == NULL) {
-    std::cerr << useage << '\n';
-    return false;
   }
   return true;
 }
 
 int main(int argc, char ** argv) {
-  struct cmdLineOpts options;
-  if (! parseCommandLineOptions(argc, argv, options))
-    return EXIT_FAILURE;
-  madai::GaussianProcessEmulator gpme;
-  if (0 == std::strcmp(options.RootDirectory, "-")) {
-    madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
-    singleFileReader.Load(&gpme,std::cin);
+  std::string StatisticsDirectory;
+  if ( argc > 1 ) {
+    StatisticsDirectory = std::string(argv[1]);
   } else {
-    std::string TopDirectory (options.RootDirectory);
-    madai::EnsurePathSeparatorAtEnd( TopDirectory );
+    std::cerr << useage << '\n';
+    return EXIT_FAILURE;
+  }
+  std::string OutputFile = StatisticsDirectory;
+  madai::GaussianProcessEmulator gpme;
+  struct EmulatorTrainingRuntimeOpts Opts;
+  if ( StatisticsDirectory == "-" ) {
+    madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
+    singleFileReader.LoadTrainingData( &gpme, std::cin);
+  } else {
+    madai::EnsurePathSeparatorAtEnd( StatisticsDirectory );
+    madai::RuntimeParameterFileReader RPFR;
+    RPFR.ParseFile( StatisticsDirectory + 
+                    madai::Paths::RUNTIME_PARAMETER_FILE );
+    char** Args = RPFR.GetArguments();
+    int NArgs = RPFR.GetNumberOfArguments();
+    if ( !parseEmulatorTrainingRuntimeOptions( NArgs, Args, Opts ) ) {
+      std::cerr << "Error parsing runtime options\n";
+      return EXIT_FAILURE;
+    }
     madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-    if ( !directoryReader.LoadTrainingData(&gpme,TopDirectory) ) {
+    std::string MOD = StatisticsDirectory + Opts.ModelOutputDirectory;
+    std::string ERD = StatisticsDirectory + Opts.ExperimentalResultsDirectory;
+    if ( !directoryReader.LoadTrainingData(&gpme, MOD, StatisticsDirectory, ERD) ) {
       std::cerr << "Error loading training data.\n";
       return EXIT_FAILURE;
     }
-    if ( !directoryReader.LoadPCA(&gpme,TopDirectory) ) {
+    if ( !directoryReader.LoadPCA(&gpme, StatisticsDirectory) ) {
       std::cerr << "Error loading PCA data.\n";
       return EXIT_FAILURE;
     }
+    OutputFile = StatisticsDirectory + madai::Paths::EMULATOR_STATE_FILE;
   }
   
   if (! gpme.Train(
-          options.covarianceFunction,
-          options.regressionOrder)) {
+          Opts.covarianceFunction,
+          Opts.regressionOrder)) {
     return EXIT_FAILURE;
   }
-  std::string OutputFile(options.RootDirectory);
-  OutputFile += madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY + madai::Paths::SEPARATOR +
-    madai::Paths::EMULATOR_STATE_FILE;
+  
   std::ofstream os( OutputFile.c_str() );
 
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;

@@ -35,10 +35,14 @@ USE:
 
 const char useage [] =
   "Usage:\n"
-  "    printThetas TopDirectory\n"
+  "    printThetas StatisticsDirectory\n"
   "\n"
-  "TopDirectory is the directory containing the model_output/, experimental_results/\n"
-  "and statistical_analysis/directories. It can also be \"-\" to read from standard input.\n";
+  "StatisticsDirectory is the directory in which all statistics data will\n"
+  "be stored. Contains the parameter file stat_params.dat\n"
+  "\n"
+  "Format of stat_params.dat\n"
+  "MODEL_OUTPUT_DIRECTORY <value>\n"
+  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n";
 
 #include <iostream> // cout, cin
 #include <fstream> // ifstream, ofstream
@@ -48,45 +52,65 @@ const char useage [] =
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
+#include "RuntimeParameterFileReader.h"
+#include "Paths.h"
 
 
 int main(int argc, char ** argv) {
-  std::string TopDirectory;
+  std::string StatisticsDirectory;
+  std::string ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
+  std::string ExperimentalResultsDirectory = 
+    madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
   if (argc > 1) {
-    TopDirectory = argv[1];
-    madai::EnsurePathSeparatorAtEnd( TopDirectory );
+    StatisticsDirectory = std::string( argv[1] );
   } else {
     std::cerr << useage << '\n';
     return EXIT_FAILURE;
   }
-
   madai::GaussianProcessEmulator gpe;
   std::ostream & output = std::cout;
-
-  if ( TopDirectory == "-" ) {
+  
+  if ( StatisticsDirectory == "-" ) {
     madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
-    if ( !singleFileReader.Load(&gpe,std::cin)  ) {
+    if ( !singleFileReader.Load(&gpe, std::cin) ) {
       std::cerr << "Error (2) loading emulator from cin\n";
       return EXIT_FAILURE;
     }
   } else {
+    madai::EnsurePathSeparatorAtEnd( StatisticsDirectory );
+    madai::RuntimeParameterFileReader RPFR;
+    RPFR.ParseFile( StatisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE );
+    char** Args = RPFR.GetArguments();
+    int NArgs = RPFR.GetNumberOfArguments();
+    for ( unsigned int i = 0; i < NArgs; i++ ) {
+      std::string argString( Args[i] );
+      
+      if ( argString == "MODEL_OUTPUT_DIRECTORY" ) {
+        ModelOutputDirectory = StatisticsDirectory + std::string( Args[i+1] );
+        i++;
+      } else if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) {
+        ExperimentalResultsDirectory = StatisticsDirectory + std::string( Args[i+1] );
+        i++;
+      }
+    }
     madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-    if ( !directoryReader.LoadTrainingData(&gpe,TopDirectory.c_str()) ) {
-      std::cerr << "Error loading data used to train the emulator.\n";
+    if ( !directoryReader.LoadTrainingData(&gpe, ModelOutputDirectory, StatisticsDirectory,
+                                           ExperimentalResultsDirectory) ) {
+      std::cerr << "Error loading training data.\n";
       return EXIT_FAILURE;
     }
-    if ( !directoryReader.LoadPCA(&gpe,TopDirectory.c_str()) ) {
+    if ( !directoryReader.LoadPCA(&gpe, StatisticsDirectory) ) {
       std::cerr << "Error loading PCA data.\n";
       return EXIT_FAILURE;
     }
-    if ( !directoryReader.LoadEmulator(&gpe, TopDirectory.c_str()) ) {
-      std::cerr << "Error loading the emulator state data.\n";
+    if ( !directoryReader.LoadEmulator(&gpe, StatisticsDirectory) ) {
+      std::cerr << "Error loading emulator data.\n";
       return EXIT_FAILURE;
     }
   }
   
   if (gpe.GetStatus() != madai::GaussianProcessEmulator::READY) {
-    std::cerr << "Error (3) incomplete load from " << TopDirectory << '\n';
+    std::cerr << "Error (3) incomplete load from " << StatisticsDirectory << '\n';
     return EXIT_FAILURE;
   }
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;

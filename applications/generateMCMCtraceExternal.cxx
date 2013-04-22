@@ -41,13 +41,27 @@ static const int DEFAULT_BURN_IN = 0;
 static const double DEFAULT_STEP_SIZE = 0.1;
 const char useage [] =
   "Usage:\n"
-  "    generateMCMCtraceExternal TopDirectory OutputFileName\n"
+  "    generateMCMCtraceExternal StatisticsDirectory OutputFileName\n"
   "\n"
-  "TopDirectory is the directory containing model_output/ experimental_results/\n"
-  "and statistical_analysis/.\n"
+  "StatisticsDirectory is the directory in which all statistical data will\n"
+  "be stored. Contains the parameter file stat_params.dat\n"
   "\n"
   "OutputFileName is the nameof the file the trace will be storedin. This file\n"
-  "will be located in the statistical_analsis/MCMCTrace/ directory.\n";
+  "will be located in the StatisticsDirectory/trace/ directory.\n"
+  "\n"
+  "Format of stat_params.dat\n"
+  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
+  "MCMC_NUMBER_ITERATIONS <value\n"
+  "MCMC_NUMBER_BURN_IN <value>\n"
+  "MCMC_USE_MODEL_ERROR <value>\n"
+  "MCMC_STEP_SIZE <value>\n"
+  "EXTERNAL_MODEL_ARGUMENTS\n"
+  "<Argument1>\n"
+  "<Argument2>\n"
+  "...\n"
+  "<LastArgument>\n"
+  "ARGUMENTS_DONE\n"
+  "\n";
 
 struct ExternalModelMCMCRuntimeParameters
 {
@@ -55,6 +69,8 @@ struct ExternalModelMCMCRuntimeParameters
   int numberBurnIn;
   bool UseModelError;
   double StepSize;
+  std::string ModelOutputDirectory;
+  std::string ExperimentalResultsDirectory;
   std::string executable;
   std::vector< std::string > arguments;
 };
@@ -75,6 +91,9 @@ bool parseEMMCMCRuntimeParameters(
     if ( argString == "MCMC_NUMBER_ITERATIONS" ) {
       Opts.numberIter = atoi(argv[i+1]);
       i++;
+    } else if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) {
+      Opts.ExperimentalResultsDirectory = std::string( argv[i+1] );
+      i++;
     } else if ( argString == "MCMC_NUMBER_BURN_IN" ) {
       Opts.numberBurnIn = atoi(argv[i+1]);
       i++;
@@ -85,7 +104,7 @@ bool parseEMMCMCRuntimeParameters(
       } else if ( tstring == "true" || tstring == "1" ) {
         Opts.UseModelError = true;
       } else {
-        std::cerr << "MCMC_USE_MODEL_COVARIANCE: " << tstring << " is invalid\n"
+        std::cerr << "MCMC_USE_MODEL_ERROR: " << tstring << " is invalid\n"
         << "Setting to false\n";
         Opts.UseModelError = false;
       }
@@ -93,13 +112,20 @@ bool parseEMMCMCRuntimeParameters(
     } else if ( argString == "MCMC_STEP_SIZE" ) {
       Opts.StepSize = atof(argv[i+1]);
       i++;
-    } else if ( argString == "EM_ARGUMENTS" ) {
+    } else if ( argString == "EXTERNAL_MODEL_ARGUMENTS" ) {
       bool Done = false;
       while ( !Done ) {
+        if ( i == (argc - 1) ) {
+          std::cerr << "Reached end of runtime parameter list without reaching\n"
+                    << "the end of the arguments for the external model\n";
+          return false;
+        }
         std::string tstring( argv[i+1] );
-        if ( tstring == "ARGS_DONE" ) break;
+        if ( tstring == "ARGUMENTS_DONE" ) break;
         Opts.arguments.push_back( tstring );
+        i++;
       }
+      i++;
     }
   }
   return true;
@@ -111,19 +137,16 @@ int main(int argc, char ** argv) {
      std::cerr << useage << '\n';
      return EXIT_FAILURE;
   }
-  std::string TopDirectory(argv[1]);
-  madai::EnsurePathSeparatorAtEnd( TopDirectory );
+  std::string StatisticsDirectory(argv[1]);
+  madai::EnsurePathSeparatorAtEnd( StatisticsDirectory );
   std::string OutputFileName(argv[2]);
   madai::RuntimeParameterFileReader RPFR;
-  RPFR.ParseFile( TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
-                  madai::Paths::SEPARATOR + "MCMC.dat" );
+  RPFR.ParseFile( StatisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE );
   char** Args = RPFR.GetArguments();
   int NArgs = RPFR.GetNumberOfArguments();
-  std::string observationsFile = TopDirectory + madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY +
-    madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
   struct ExternalModelMCMCRuntimeParameters Opts;
   if ( !parseEMMCMCRuntimeParameters( NArgs, Args, Opts ) ) {
-    std::cerr << "Error: Parsing configuration file for external model mcmc.\n";
+    std::cerr << "Error parsing configuration file for external model mcmc.\n";
     return EXIT_FAILURE;
   }
 
@@ -135,7 +158,9 @@ int main(int argc, char ** argv) {
   }
 
   em.SetUseModelCovarianceToCalulateLogLikelihood(Opts.UseModelError);
-
+  
+  std::string observationsFile = StatisticsDirectory + Opts.ExperimentalResultsDirectory +
+    madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
   std::ifstream observations(observationsFile.c_str());
   if (madai::Model::NO_ERROR != em.LoadObservations(observations)) {
     std::cerr << "error loading observations.\n";
@@ -173,11 +198,9 @@ int main(int argc, char ** argv) {
     trace.Add( *it );
   }
 
-  std::string traceDirectory = TopDirectory + "/statistical_analysis/MCMCTrace";
+  std::string traceDirectory = StatisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
-  std::string OutputFile =
-    TopDirectory+"/statistical_analysis/MCMCTrace/"+OutputFileName;
-
+  std::string OutputFile = traceDirectory + madai::Paths::SEPARATOR + OutputFileName;
   std::ofstream Out( OutputFile.c_str() );
   trace.WriteCSVOutput(
       Out,
