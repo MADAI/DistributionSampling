@@ -32,10 +32,12 @@ class RuntimeParameterFileReader {
 public:
   // Constructor
   RuntimeParameterFileReader();
+
   // Destructor
   ~RuntimeParameterFileReader();
+
   // Read a file and output its contents as a character string
-  void ParseFile( const std::string fileName );
+  bool ParseFile( const std::string fileName );
   
   char** m_Arguments;
   int    m_NumArguments;

@@ -34,7 +34,7 @@ RuntimeParameterFileReader
 {
 }
 
-void
+bool
 RuntimeParameterFileReader
 ::ParseFile( const std::string fileName )
 {
@@ -59,8 +59,10 @@ RuntimeParameterFileReader
     }
   } else {
     std::cerr << "Couldn't find input file\n";
-    exit(1);
+    return false;
   }
+
+  return true;
 }
 
 } // end namespace madai
