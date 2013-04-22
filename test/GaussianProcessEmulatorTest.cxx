@@ -75,7 +75,10 @@ int main(int argc, char ** argv) {
   double amplitude = 1.0;
   double scale = 1e-2;
 
-  if (! gpe.PrincipalComponentDecompose(fractionResolvingPower) )
+  if (! gpe.PrincipalComponentDecompose() )
+    return EXIT_FAILURE;
+
+  if (! gpe.RetainPrincipalComponents( fractionResolvingPower ) )
     return EXIT_FAILURE;
 
   if (! gpe.BasicTraining(

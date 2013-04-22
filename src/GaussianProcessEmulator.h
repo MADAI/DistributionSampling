@@ -73,7 +73,16 @@ public:
    This takes a GPEM with training data and decomposes
    it into the principal components.
    \returns true on success. */
-  bool PrincipalComponentDecompose(double fractionResolvingPower);
+  bool PrincipalComponentDecompose();
+
+  /**
+   * Retains only the eigenvectors and eigenvalues necessary for the
+   * desired fraction resolving power.
+   *
+   * \parameter fractionResolvingPower Valid range is [0, 1].
+   * \return true on success
+   */
+  bool RetainPrincipalComponents(double fractionResolvingPower);
 
   /**
     This takes an GPEM and sets default values for all of the
@@ -189,6 +198,8 @@ public:
      numberPCAOutputs and PCAEigenvectors is a matrix of size
 
      numberPCAOutputs-by-numberOutputs. */
+  Eigen::VectorXd m_RetainedPCAEigenvalues;
+  Eigen::MatrixXd m_RetainedPCAEigenvectors;
   Eigen::VectorXd m_PCAEigenvalues;
   Eigen::MatrixXd m_PCAEigenvectors;
   //@}

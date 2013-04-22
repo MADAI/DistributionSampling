@@ -84,9 +84,16 @@ int main( int argc, char ** argv ) {
     }
   }
   // get the PCA decomposition
-  if ( !gpme.PrincipalComponentDecompose( fractionResolvingPower ) ) {
+  if ( !gpme.PrincipalComponentDecompose() ) {
     return EXIT_FAILURE;
   }
+
+  // retain only the PCA components necessary for the desired
+  // resolving power
+  if ( !gpme.RetainPrincipalComponents( fractionResolvingPower ) ) {
+    return EXIT_FAILURE;
+  }
+
   std::ofstream os( outputFileName.c_str() );
 
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;

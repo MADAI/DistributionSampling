@@ -597,10 +597,6 @@ bool parsePCADecomposition(
         return false;
       }
     } else if (word == "END_OF_FILE") {
-
-      // Now that we have the PCA data read in, build the Z vectors
-      gpme.BuildZVectors();
-
       return true;
     } else {
       std::cerr << "Unexected keyword: \"" << word << "\"\n";

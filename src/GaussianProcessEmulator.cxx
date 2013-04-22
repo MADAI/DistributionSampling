@@ -217,11 +217,17 @@ GaussianProcessEmulator::CheckStatus() {
     return m_Status;
   if(m_OutputMeans.size() != m_NumberOutputs)
     return m_Status;
-  if(m_PCAEigenvalues.size() != m_NumberPCAOutputs)
+  if(m_PCAEigenvalues.size() != m_NumberOutputs)
     return m_Status;
   if(m_PCAEigenvectors.rows() != m_NumberOutputs)
     return m_Status;
   if(m_PCAEigenvectors.cols() != m_NumberPCAOutputs)
+    return m_Status;
+  if(m_RetainedPCAEigenvalues.size() != m_NumberPCAOutputs)
+    return m_Status;
+  if(m_RetainedPCAEigenvectors.rows() != m_NumberOutputs)
+    return m_Status;
+  if(m_RetainedPCAEigenvectors.cols() != m_NumberPCAOutputs)
     return m_Status;
   if (static_cast<int>(m_PCADecomposedModels.size()) != m_NumberPCAOutputs)
     return m_Status;
@@ -299,7 +305,7 @@ GaussianProcessEmulator::SingleModel::SingleModel() :
 
 /**
    Use m_OutputUncertaintyScales, m_OutputValues, m_OutputMeans, and
-   m_PCAEigenvectors to determine m_PCADecomposedModels[i].m_ZValues; */
+   m_RetainedPCAEigenvectors to determine m_PCADecomposedModels[i].m_ZValues; */
 bool GaussianProcessEmulator::BuildZVectors() {
   if (m_PCADecomposedModels.size() != m_NumberPCAOutputs) {
     std::cout << "Error [m_PCADecomposedModels.size() == "
@@ -315,7 +321,7 @@ bool GaussianProcessEmulator::BuildZVectors() {
         = scale * (m_OutputValues(j,i) - m_OutputMeans(i));
     }
   }
-  Eigen::MatrixXd zMatrix = Y_standardized * m_PCAEigenvectors;
+  Eigen::MatrixXd zMatrix = Y_standardized * m_RetainedPCAEigenvectors;
   for (int i = 0; i < m_NumberPCAOutputs; ++i) {
     GaussianProcessEmulator::SingleModel & m = m_PCADecomposedModels[i];
     m.m_ZValues = zMatrix.col(i);
@@ -563,8 +569,8 @@ bool GaussianProcessEmulator::SingleModel::BasicTraining(
   return true;
 }
 
-bool GaussianProcessEmulator::PrincipalComponentDecompose(
-    double fractionResolvingPower)
+bool GaussianProcessEmulator::RetainPrincipalComponents(
+  double fractionResolvingPower )
 {
   if (fractionResolvingPower <= 0.0) {
     /* \todo error message to stderr */
@@ -574,6 +580,39 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose(
     /* \todo error message to stderr */
     return false;
   }
+
+  int t = m_NumberOutputs;
+
+  double resolving_power = 1.0;
+  for (int i = t-1; i >= 0; --i)
+    resolving_power *= std::sqrt(1.0 + m_PCAEigenvalues(i));
+  double target_resolving_power = resolving_power * fractionResolvingPower;
+
+  resolving_power = 1.0;
+  for (int i = t-1; i >= 0; --i) {
+    resolving_power *= std::sqrt(1.0 + m_PCAEigenvalues(i));
+    if (resolving_power >= target_resolving_power) {
+      m_NumberPCAOutputs = t - i;
+      break;
+    }
+  }
+
+  int r = m_NumberPCAOutputs;
+  assert((r > 0) && (r <= t));
+  m_RetainedPCAEigenvalues = m_PCAEigenvalues.tail(r);
+  m_RetainedPCAEigenvectors = m_PCAEigenvectors.rightCols(r);
+
+  m_PCADecomposedModels.resize( m_NumberPCAOutputs );
+
+  if ( !this->BuildZVectors() ) {
+    return false;
+  }
+
+  return true;
+}
+
+bool GaussianProcessEmulator::PrincipalComponentDecompose()
+{
   int t = m_NumberOutputs;
   int N = m_NumberTrainingPoints;
 
@@ -601,31 +640,8 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose(
 
   Eigen::SelfAdjointEigenSolver< Eigen::MatrixXd > eigenSolver(Ycov);
 
-
-  double resolving_power = 1.0;
-  for (int i = t-1; i >= 0; --i)
-    resolving_power *= std::sqrt(1.0 + eigenSolver.eigenvalues()(i));
-  double target_resolving_power = resolving_power * fractionResolvingPower;
-
-  resolving_power = 1.0;
-  for (int i = t-1; i >= 0; --i) {
-    resolving_power *= std::sqrt(1.0 + eigenSolver.eigenvalues()(i));
-    if (resolving_power >= target_resolving_power) {
-      m_NumberPCAOutputs = t - i;
-      break;
-    }
-  }
-
-  m_PCADecomposedModels.resize( m_NumberPCAOutputs );
-
-  int r = m_NumberPCAOutputs;
-  assert((r > 0) && (r <= t));
-  m_PCAEigenvalues = eigenSolver.eigenvalues().tail(r);
-  m_PCAEigenvectors = eigenSolver.eigenvectors().rightCols(r);
-
-  if ( !this->BuildZVectors() ) {
-    return false;
-  }
+  m_PCAEigenvalues = eigenSolver.eigenvalues();
+  m_PCAEigenvectors = eigenSolver.eigenvectors();
 
   return true;
 }
@@ -698,7 +714,7 @@ bool GaussianProcessEmulator::GetEmulatorOutputs (
   y.resize(m_NumberOutputs);
   Eigen::Map< Eigen::VectorXd > mean(&(y[0]),m_NumberOutputs);
   mean = m_OutputMeans +
-    m_OutputUncertaintyScales.cwiseProduct(m_PCAEigenvectors * mean_pca);
+    m_OutputUncertaintyScales.cwiseProduct(m_RetainedPCAEigenvectors * mean_pca);
   return true;
 }
 
@@ -784,17 +800,14 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
   Eigen::Map< Eigen::VectorXd > mean(&(y[0]), t);
   Eigen::Map< Eigen::MatrixXd > covariance(&(ycov[0]), t, t);
   mean = m_OutputMeans +
-    m_OutputUncertaintyScales.cwiseProduct(m_PCAEigenvectors * mean_pca);
-
-  // var_pca = m_PCAEigenvalues.cwiseProduct(var_pca);
-  // help!
+    m_OutputUncertaintyScales.cwiseProduct(m_RetainedPCAEigenvectors * mean_pca);
 
   Eigen::MatrixXd uncertaintyScales
     = m_OutputUncertaintyScales * m_OutputUncertaintyScales.transpose();
   covariance
     = uncertaintyScales.cwiseProduct(
-        m_PCAEigenvectors * var_pca.asDiagonal() *
-        m_PCAEigenvectors.transpose());
+        m_RetainedPCAEigenvectors * var_pca.asDiagonal() *
+        m_RetainedPCAEigenvectors.transpose());
 
   return true;
 }
