@@ -680,7 +680,7 @@ GaussianProcessEmulatorDirectoryReader
     return false;
 
   std::string ExperimentalResultsDirectory
-    = TopDirectory + Paths::SEPARATOR + Paths::EXPERIMENTAL_RESULTS;
+    = TopDirectory + Paths::SEPARATOR + Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
   if (! parseExperimentalResults( *gpe, ExperimentalResultsDirectory )) {
     std::cerr << "Error in parseExperimentalResults()\n";
     return false;

@@ -119,7 +119,7 @@ int main(int argc, char ** argv) {
                   madai::Paths::SEPARATOR + "MCMC.dat" );
   char** Args = RPFR.m_Arguments;
   int NArgs = RPFR.m_NumArguments;
-  std::string observationsFile = TopDirectory + madai::Paths::EXPERIMENTAL_RESULTS +
+  std::string observationsFile = TopDirectory + madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY +
     madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
   struct ExternalModelMCMCRuntimeParameters Opts;
   if ( !parseEMMCMCRuntimeParameters( NArgs, Args, Opts ) ) {

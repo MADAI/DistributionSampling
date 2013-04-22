@@ -44,7 +44,7 @@ int main( int argc, char ** argv ) {
     std::cerr << "\n";
     std::cerr << "RootDirectory is the directory containing the directories"
               << madai::Paths::MODEL_OUTPUT_DIRECTORY << "/\n";
-    std::cerr << madai::Paths::EXPERIMENTAL_RESULTS << ", and "
+    std::cerr << madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY << ", and "
               << madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY << "/\n";
     return EXIT_FAILURE;
   }

@@ -28,7 +28,7 @@ const char Paths::SEPARATOR = '/';
 
 const std::string Paths::MODEL_OUTPUT_DIRECTORY( "model_output" );
 
-const std::string Paths::EXPERIMENTAL_RESULTS( "experimental_results" );
+const std::string Paths::EXPERIMENTAL_RESULTS_DIRECTORY( "experimental_results" );
 
 const std::string Paths::STATISTICAL_ANALYSIS_DIRECTORY( "statistical_analysis" );
 
