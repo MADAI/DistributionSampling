@@ -27,6 +27,7 @@
 #include "LatinHypercubeGenerator.h"
 #include "Parameter.h"
 #include "UniformDistribution.h"
+#include "Paths.h"
 
 #include "madaisys/SystemTools.hxx"
 
@@ -321,9 +322,12 @@ bool WriteDirectoriesFormat( const struct CommandLineOptions & options,
   }
 
   std::string directory( options.outputDirectory );
-  std::string experimental_results( directory + "/experimental_results" );
-  std::string model_outputs( directory + "/model_outputs" );
-  std::string statistical_analysis( directory + "/statistical_analysis" );
+  std::string experimental_results(
+      directory + "/" + madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY );
+  std::string model_outputs(
+      directory + "/" + madai::Paths::MODEL_OUTPUT_DIRECTORY );
+  std::string statistical_analysis(
+      directory + "/" + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY );
 
   directoryCreated = directoryCreated &&
     madaisys::SystemTools::MakeDirectory( experimental_results.c_str() );
@@ -337,7 +341,7 @@ bool WriteDirectoriesFormat( const struct CommandLineOptions & options,
     const madai::Sample & sample = samples[i];
 
     std::ostringstream buffer;
-    buffer << directory << "/model_outputs/run"
+    buffer << model_outputs << "/run"
            << std::setw( 7 ) << std::setfill( '0' ) << i;
     std::string runDirectory(buffer.str());
 
