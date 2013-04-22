@@ -21,9 +21,9 @@
 namespace madai {
 
 #ifdef WIN32
-const std::string Paths::SEPARATOR( "\\" );
+const char Paths::SEPARATOR = '\\';
 #else
-const std::string Paths::SEPARATOR( "/" );
+const char Paths::SEPARATOR = '/';
 #endif
 
 const std::string Paths::MODEL_OUTPUT_DIRECTORY( "model_output" );

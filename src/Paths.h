@@ -26,7 +26,7 @@ namespace madai {
 class Paths {
 public:
 
-  static const std::string SEPARATOR;
+  static const char SEPARATOR;
 
   static const std::string MODEL_OUTPUT_DIRECTORY;
 
