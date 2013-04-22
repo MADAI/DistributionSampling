@@ -91,19 +91,19 @@ bool parseRuntimeOptions( int argc, char* argv[], struct RuntimeOptions & option
       i++;
     } else if ( argString == "EMULATOR_REGRESSION_ORDER" ) {
       options.regressionOrder = atoi(argv[i+1]);
-      std::cerr << "Using regression order = " << options.regressionOrder << "\n";
+      std::cout << "Using regression order = " << options.regressionOrder << "\n";
       i++;
     } else if ( argString == "EMULATOR_NUGGET" ) {
       options.Nugget = atof(argv[i+1]);
-      std::cerr << "Using nugget = " << options.Nugget << "\n";
+      std::cout << "Using nugget = " << options.Nugget << "\n";
       i++;
     } else if ( argString == "EMULATOR_AMPLITUDE" ) {
       options.amplitude = atof(argv[i+1]);
-      std::cerr << "Using amplitude = " << options.amplitude << "\n";
+      std::cout << "Using amplitude = " << options.amplitude << "\n";
       i++;
     } else if ( argString == "EMULATOR_SCALE" ) {
       options.scale = atof(argv[i+1]);
-      std::cerr << "Using scale = " << options.scale << "\n";
+      std::cout << "Using scale = " << options.scale << "\n";
       i++;
     }
   }
@@ -129,7 +129,7 @@ int main(int argc, char ** argv) {
   int NArgs = RPFR.m_NumArguments;
   struct RuntimeOptions options;
   if ( !parseRuntimeOptions( NArgs, Args, options ) ) {
-    std::cerr << "Error parsing runtim options\n";
+    std::cerr << "Error parsing runtime options\n";
     return EXIT_FAILURE;
   }
   outputFile = TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
