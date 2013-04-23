@@ -62,6 +62,20 @@ RuntimeParameterFileReader
       m_Arguments[i] = new char[std::strlen(arg_list[i].c_str())+1];
       std::strcpy( m_Arguments[i], arg_list[i].c_str() );
     }
+
+    inFile.seekg(0, std::ios::beg);
+    while ( inFile.good() ) {
+      std::string line;
+      while ( inFile.peek() == '#' ) {
+        std::getline( inFile, line );
+      }
+      std::getline( inFile, line );
+      size_t index = line.find(' ');
+      if (index != std::string::npos) {
+        std::string key = line.substr(0,index);
+        m_Options[key] = line.substr(index + 1);
+      }
+    }
   } else {
     std::cerr << "Couldn't find input file\n";
     return false;
@@ -69,6 +83,26 @@ RuntimeParameterFileReader
 
   return true;
 }
+
+bool
+RuntimeParameterFileReader
+::HasOption(const std::string & key)
+{
+  return (m_Options.count(key) > 0);
+}
+
+const std::string &
+RuntimeParameterFileReader
+::GetOption(const std::string & key)
+{
+  static const std::string empty("");
+  if (this->HasOption(key))
+    return m_Options[key];
+  else
+    return empty;
+}
+
+
 
 int
 RuntimeParameterFileReader

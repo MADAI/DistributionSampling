@@ -22,6 +22,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <map>
 
 namespace madai {
 
@@ -45,7 +47,16 @@ public:
   // Get arguments themselves
   char ** GetArguments();
 
+  /**
+   Get an option value */
+  const std::string & GetOption(const std::string & key);
+  /**
+   Check to see if an option is specified. */
+  bool HasOption(const std::string & key);
+
 private:
+  std::map<std::string, std::string> m_Options;
+
   int    m_NumberOfArguments;
   char** m_Arguments;
 
