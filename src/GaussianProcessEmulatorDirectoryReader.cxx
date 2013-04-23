@@ -339,9 +339,7 @@ inline bool parseParameterAndOutputValues(
     if ( verbose )
       std::cout << "Run directory name: '" << dir_name << "'\n";
 
-    char* temp = new char[3]();
-    std::strncpy( temp, dir_name.c_str(), 3 );
-    if ( std::strcmp( temp, "run" ) == 0 ) {
+    if ( dir_name.find_first_of( "run" ) == 0 ) {
       // Open the parameters.dat file
       std::string par_file_name = ModelOutDir + dir_name +
         Paths::SEPARATOR + Paths::PARAMETERS_FILE;
