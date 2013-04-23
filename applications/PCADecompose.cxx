@@ -40,7 +40,7 @@ int main( int argc, char ** argv ) {
     madai::EnsurePathSeparatorAtEnd( TopDirectory );
   } else {
     std::cerr << "Usage:\n";
-    std::cerr << "    PCADecompose RootDirectory [fractionResolvingPower]\n";
+    std::cerr << "    PCADecompose RootDirectory\n";
     std::cerr << "\n";
     std::cerr << "RootDirectory is the directory containing the directories"
               << madai::Paths::MODEL_OUTPUT_DIRECTORY << "/\n";
@@ -48,28 +48,9 @@ int main( int argc, char ** argv ) {
               << madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY << "/\n";
     return EXIT_FAILURE;
   }
-  madai::RuntimeParameterFileReader RPFR;
-  RPFR.ParseFile( TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
-                  madai::Paths::SEPARATOR + "MCMC.dat" );
-  char** Args = RPFR.GetArguments();
-  int NArgs = RPFR.GetNumberOfArguments();
-  for ( unsigned int i = 0; i < NArgs; i++ ) {
-    std::string argString(Args[i]);
-    if ( argString == "PCA_FRACTION_RESOLVING_POWER" ) {
-      fractionResolvingPower = atof( Args[i+1] );
-      if ( fractionResolvingPower < 0 || fractionResolvingPower > 1 ) {
-        std::cerr << "Resolving Power is out of range : "
-                  << fractionResolvingPower << "\n";
-        return EXIT_FAILURE;
-      }
-      std::cerr << "Using fractional resolving power = " 
-                << fractionResolvingPower << "\n";
-    } else {
-      // Skip other elements since I'm using a single configuration file
-    }
-  }
   
-  std::string outputFileName = TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
+  std::string outputFileName = TopDirectory +
+    madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
     madai::Paths::SEPARATOR + madai::Paths::PCA_DECOMPOSITION_FILE;
 
   madai::GaussianProcessEmulator gpme;
