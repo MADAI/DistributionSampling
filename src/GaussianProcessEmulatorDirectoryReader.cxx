@@ -570,6 +570,12 @@ bool parsePCADecomposition(
     GaussianProcessEmulator & gpme,
     std::istream & input ) {
   parseComments(gpme.m_Comments,input);
+
+  bool outputMeansRead             = false;
+  bool outputUncertaintyScalesRead = false;
+  bool outputPCAEigenvaluesRead    = false;
+  bool outputPCAEigenvectorsRead   = false;
+
   std::string word;
   while (input.good()) {
     if (! input.good()) return false;
@@ -579,32 +585,40 @@ bool parsePCADecomposition(
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
+      outputMeansRead = true;
     } else if (word == "OUTPUT_UNCERTAINTY_SCALES") {
       if (! ReadVector(gpme.m_OutputUncertaintyScales, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
+      outputUncertaintyScalesRead = true;
     } else if (word == "OUTPUT_PCA_EIGENVALUES") {
       if (! ReadVector(gpme.m_PCAEigenvalues, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
-      gpme.m_NumberPCAOutputs = gpme.m_PCAEigenvalues.size();
-      gpme.m_PCADecomposedModels.resize( gpme.m_NumberPCAOutputs );
+      outputPCAEigenvaluesRead = true;
     } else if (word == "OUTPUT_PCA_EIGENVECTORS") {
       if (! ReadMatrix(gpme.m_PCAEigenvectors, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
+      outputPCAEigenvectorsRead = true;
     } else if (word == "END_OF_FILE") {
-      return true;
+      break;
     } else {
       std::cerr << "Unexected keyword: \"" << word << "\"\n";
       return false;
     }
   }
 
-  return false;
+  if ( !( outputMeansRead && outputUncertaintyScalesRead &&
+          outputPCAEigenvaluesRead && outputPCAEigenvectorsRead ) ) {
+    std::cerr << "Not all required PCA components read.\n";
+    return false;
+  }
+
+  return true;
 }
 
 
@@ -699,6 +713,10 @@ GaussianProcessEmulatorDirectoryReader
     std::cerr << "Error parsing PCA data.\n";
     return false;
   }
+
+  // Initialize the retained principal components
+  gpe->RetainPrincipalComponents( 0.95 ); // \todo - read fractional
+                                          // resolving power from somewhere
 
   // We are finished reading the input files.
   return (gpe->CheckStatus() == GaussianProcessEmulator::UNTRAINED);
