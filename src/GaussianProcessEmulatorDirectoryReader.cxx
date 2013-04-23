@@ -21,6 +21,7 @@
 #include "GaussianDistribution.h"
 #include "GaussianProcessEmulator.h"
 #include "Paths.h"
+#include "RuntimeParameterFileReader.h"
 #include "UniformDistribution.h"
 
 #include <madaisys/Directory.hxx>
@@ -715,8 +716,28 @@ GaussianProcessEmulatorDirectoryReader
   }
 
   // Initialize the retained principal components
-  gpe->RetainPrincipalComponents( 0.95 ); // \todo - read fractional
-                                          // resolving power from somewhere
+  std::string runtimeParameterFile = TopDirectory + Paths::SEPARATOR +
+    Paths::STATISTICAL_ANALYSIS_DIRECTORY + Paths::SEPARATOR + "MCMC.dat";
+  RuntimeParameterFileReader runtimeParameterReader;
+  if ( !runtimeParameterReader.ParseFile( runtimeParameterFile ) ) {
+    std::cerr << "Error parsing runtime parameters.\n" << std::endl;
+  }
+
+  double fractionalResolvingPower = 0.95;
+  int runtimeParameters = runtimeParameterReader.GetNumberOfArguments();
+  char ** runtimeArguments = runtimeParameterReader.GetArguments();
+  for ( int i = 0; i < runtimeParameters; ++i ) {
+    std::string argument( runtimeArguments[i] );
+    if ( argument == "PCA_FRACTION_RESOLVING_POWER" ) {
+      fractionalResolvingPower = atof( runtimeArguments[i+1] );
+      break;
+    } else {
+      // Skip the argument
+      i++;
+    }
+  }
+
+  gpe->RetainPrincipalComponents( fractionalResolvingPower );
 
   // We are finished reading the input files.
   return (gpe->CheckStatus() == GaussianProcessEmulator::UNTRAINED);
