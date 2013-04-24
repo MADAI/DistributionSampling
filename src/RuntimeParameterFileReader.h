@@ -61,6 +61,10 @@ private:
   char** m_Arguments;
 
   void FreeMemory();
+
+  // Converts line to format "<name> <value1> <value1> ...\n"
+  std::string RegularizeLine( std::string line );
+
 }; // end class RuntimeParameterFileReader
 
 }; // end namespace madai
