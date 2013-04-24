@@ -63,8 +63,7 @@ const char useage [] =
   "100\n"
   "0\n"
   "false\n"
-  "0.1\n"
-  "\n";
+  "0.1\n";
 
 struct GaussianProcessMCMCRuntimeParameters
 {
