@@ -38,7 +38,7 @@ const std::string Paths::PARAMETERS_FILE( "parameters.dat" );
 
 const std::string Paths::RESULTS_FILE( "results.dat" );
 
-const std::string Paths::RUNTIME_PARAMETER_FILE( "stat_params.dat" );
+const std::string Paths::RUNTIME_PARAMETER_FILE( "settings.dat" );
 
 const std::string Paths::EMULATOR_STATE_FILE( "emulator_state.dat" );
 
