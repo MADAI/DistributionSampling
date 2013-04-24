@@ -96,8 +96,8 @@ bool parseEmulatorTrainingRuntimeOptions(
   opts.regressionOrder = DEFAULT_REGRESSION_ORDER;
   opts.covarianceFunction = DEFAULT_COVARIACE_FUNCTION;
   opts.quietFlag = 0;
-  opts.ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
-  opts.ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
+  opts.ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+  opts.ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
 
   for ( unsigned int i = 0; i < argc; i++ ) {
     std::string argString( argv[i] );

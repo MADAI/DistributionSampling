@@ -80,8 +80,8 @@ bool parseMCMCRuntimeParameters(
     struct GaussianProcessMCMCRuntimeParameters & Opts )
 {
   // Initialize as defaults
-  Opts.ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
-  Opts.ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
+  Opts.ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+  Opts.ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
   Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
   Opts.numberBurnIn = DEFAULT_BURN_IN;
   Opts.UseEmulatedCovariance = false;

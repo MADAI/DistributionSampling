@@ -64,7 +64,7 @@ bool parseEMPGRuntimeParameters(
 {
   // Initialize as defaults
   Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
-  Opts.ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
+  Opts.ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
   
   for ( unsigned int i = 0; i < argc; i++ ) {
     std::string argString( argv[i] );

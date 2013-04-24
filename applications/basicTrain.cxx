@@ -86,8 +86,8 @@ struct RuntimeOptions
 bool parseRuntimeOptions( int argc, char* argv[], struct RuntimeOptions & options)
 {
   options.covFunct = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
-  options.ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
-  options.ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
+  options.ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+  options.ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
   options.regressionOrder = 1;
   options.Nugget = 1e-3;
   options.amplitude = 1.0;

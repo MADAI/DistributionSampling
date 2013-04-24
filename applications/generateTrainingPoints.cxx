@@ -323,9 +323,9 @@ bool WriteDirectoriesFormat( const struct CommandLineOptions & options,
 
   std::string directory( options.outputDirectory );
   std::string experimental_results(
-    directory + madai::Paths::SEPARATOR + madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY );
+    directory + madai::Paths::SEPARATOR + madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY );
   std::string model_outputs(
-    directory + madai::Paths::SEPARATOR + madai::Paths::MODEL_OUTPUT_DIRECTORY );
+    directory + madai::Paths::SEPARATOR + madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY );
   std::string statistical_analysis(
     directory + madai::Paths::SEPARATOR + "statistical_analysis" );
 

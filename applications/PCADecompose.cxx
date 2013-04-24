@@ -34,8 +34,8 @@ PCADecompose
 
 int main( int argc, char ** argv ) {
   std::string StatisticsDirectory;
-  std::string ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
-  std::string ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
+  std::string ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+  std::string ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
   double fractionResolvingPower = 0.95;
   if ( argc > 1 ) {
     StatisticsDirectory = std::string( argv[1] );

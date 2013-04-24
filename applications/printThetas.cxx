@@ -58,9 +58,9 @@ const char useage [] =
 
 int main(int argc, char ** argv) {
   std::string StatisticsDirectory;
-  std::string ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
+  std::string ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
   std::string ExperimentalResultsDirectory = 
-    madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
+    madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
   if (argc > 1) {
     StatisticsDirectory = std::string( argv[1] );
   } else {

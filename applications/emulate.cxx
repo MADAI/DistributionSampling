@@ -76,8 +76,8 @@ struct RuntimeOpts{
 bool parseRuntimeOptions(int argc, char** argv, struct RuntimeOpts & opts)
 {
   // init with default values
-  opts.ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
-  opts.ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
+  opts.ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+  opts.ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
   opts.quietFlag = false;
   
   for ( unsigned int i = 0; i < argc; i++ ) {

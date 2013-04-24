@@ -115,8 +115,8 @@ bool parsePGRuntimeParameters(
     struct PercentileGridRuntimeParameters & Opts )
 {
   // Initialize as defaults
-  Opts.ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
-  Opts.ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
+  Opts.ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+  Opts.ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
   Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
   
   for ( unsigned int i = 0; i < argc; i++ ) {
