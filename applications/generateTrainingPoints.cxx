@@ -33,6 +33,8 @@
 
 #include "madaisys/SystemTools.hxx"
 
+using namespace madai::Paths;
+
 
 static const char useage[] =
   "Useage:\n"
@@ -296,7 +298,8 @@ bool WriteDirectories( const std::string ModelOutputDirectory,
       madaisys::SystemTools::MakeDirectory( runDirectory.c_str() );
       
     // Write the parameters to parameters.dat file
-    std::string parametersFile( runDirectory + "/parameters.dat" );
+    std::string parametersFile( runDirectory + Paths::SEPARATOR +
+                                Paths::PARAMETERS_FILE );
     std::ofstream outfile( parametersFile.c_str() );
     if ( !outfile ) {
       std::cerr << "Could not open file '" << parametersFile << "'\n";
