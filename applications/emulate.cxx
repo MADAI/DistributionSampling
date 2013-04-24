@@ -47,23 +47,7 @@ USE:
 #include "UniformDistribution.h"
 #include "Paths.h"
 
-static const char useage [] =
-  "useage:\n"
-  "  emulate StatisticsDirectory\n"
-  "\n"
-  "StatisticsDirectory is the directory containing all statistical analysis data.\n"
-  "Contains parameter file stat_params.dat\n"
-  "\n"
-  "Structure of stat_params:\n"
-  "MODEL_OUTPUT_DIRECTORY <value>\n"
-  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
-  "EMULATE_QUIET <value>\n"
-  "\n"
-  "Defaults (if not specified) in order listed:\n"
-  "model_output\n"
-  "experimental_results\n"
-  "false\n"
-  "\n";
+using madai::Paths;
 
 struct RuntimeOpts{
   bool quietFlag;
@@ -203,7 +187,23 @@ int main(int argc, char ** argv) {
   if ( argc > 1 ) {
     StatisticsDirectory = std::string( argv[1] );
   } else {
-    std::cerr << useage << '\n';
+    std::cerr << "Usage:\n"
+              << "    emulate <StatisticsDirectory>\n"
+              << "\n"
+              << "This program provides a pipe interface to a trained \n"
+              << "emulator. \n"
+              << "\n"
+              << "<StatisticsDirectory> is the directory in which all \n"
+              << "statistics data are stored. It contains the parameter file "
+              << Paths::RUNTIME_PARAMETER_FILE << "\n"
+              << "\n"
+              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+              << ":\n\n"
+              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
+              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "EMULATE_QUIET <value> (false)\n";
     return EXIT_FAILURE;
   }
   madai::GaussianProcessEmulator gpme;
