@@ -45,7 +45,7 @@ RuntimeParameterFileReader
   this->FreeMemory();
 
   std::ifstream inFile( fileName.c_str() );
-  if ( inFile ) {
+  if ( inFile.is_open() ) {
     std::string line;
     std::string element;
     std::vector< std::string > arg_list;
@@ -70,18 +70,19 @@ RuntimeParameterFileReader
         // Push rest of tokens onto the arg_list
         while ( firstSpace != std::string::npos ) {
           size_t nextSpace = line.find_first_of( ' ', firstSpace+1 );
-          arg_list.push_back( line.substr( firstSpace+1,
-                                           (nextSpace - firstSpace) ) );
+          std::string token = line.substr( firstSpace+1,
+                                           (nextSpace - firstSpace - 1) );
+          arg_list.push_back( token );
           firstSpace = nextSpace;
         }
       }
+    }
 
-      m_NumberOfArguments = arg_list.size();
-      m_Arguments = new char*[m_NumberOfArguments]();
-      for ( unsigned int i = 0; i < m_NumberOfArguments; i++ ) {
-        m_Arguments[i] = new char[std::strlen(arg_list[i].c_str())+1];
-        std::strcpy( m_Arguments[i], arg_list[i].c_str() );
-      }
+    m_NumberOfArguments = arg_list.size();
+    m_Arguments = new char*[m_NumberOfArguments]();
+    for ( unsigned int i = 0; i < m_NumberOfArguments; i++ ) {
+      m_Arguments[i] = new char[arg_list[i].size()+1];
+      std::strcpy( m_Arguments[i], arg_list[i].c_str() );
     }
   } else {
     std::cerr << "RuntimeParameterFileReader couldn't find input file'" << fileName << "'\n";
