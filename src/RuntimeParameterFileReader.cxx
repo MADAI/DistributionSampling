@@ -18,6 +18,7 @@
 
 #include "RuntimeParameterFileReader.h"
 
+#include <cctype>
 #include <cstring>
 #include <vector>
 
@@ -45,35 +46,41 @@ RuntimeParameterFileReader
 
   std::ifstream inFile( fileName.c_str() );
   if ( inFile ) {
+    std::string line;
     std::string element;
-    std::vector<std::string> arg_list;
+    std::vector< std::string > arg_list;
     m_NumberOfArguments = 0;
-    while ( inFile.good() ) { 
-      while ( inFile.peek() == '#' ) {
-        std::string line;
-        std::getline( inFile, line );
-      }
-      if ( !(inFile >> element) ) break;
-      arg_list.push_back(element); 
-    }
-    m_NumberOfArguments = arg_list.size();
-    m_Arguments = new char*[m_NumberOfArguments]();
-    for ( unsigned int i = 0; i < m_NumberOfArguments; i++ ) {
-      m_Arguments[i] = new char[std::strlen(arg_list[i].c_str())+1];
-      std::strcpy( m_Arguments[i], arg_list[i].c_str() );
-    }
-
-    inFile.seekg(0, std::ios::beg);
     while ( inFile.good() ) {
-      std::string line;
-      while ( inFile.peek() == '#' ) {
-        std::getline( inFile, line );
-      }
       std::getline( inFile, line );
-      size_t index = line.find(' ');
-      if (index != std::string::npos) {
-        std::string key = line.substr(0,index);
-        m_Options[key] = line.substr(index + 1);
+
+      line = this->RegularizeLine( line );
+
+      // Split the regularized string by the first space
+      size_t firstSpace = line.find_first_of( ' ' );
+      std::string name = line.substr( 0, firstSpace );
+      if ( name.size() > 0 ) {
+        if ( firstSpace != std::string::npos ) {
+          std::string value = line.substr( firstSpace+1 );
+          m_Options[ name ] = value;
+        } else {
+          m_Options[ name ] = std::string();
+        }
+        arg_list.push_back( name );
+
+        // Push rest of tokens onto the arg_list
+        while ( firstSpace != std::string::npos ) {
+          size_t nextSpace = line.find_first_of( ' ', firstSpace+1 );
+          arg_list.push_back( line.substr( firstSpace+1,
+                                           (nextSpace - firstSpace) ) );
+          firstSpace = nextSpace;
+        }
+      }
+
+      m_NumberOfArguments = arg_list.size();
+      m_Arguments = new char*[m_NumberOfArguments]();
+      for ( unsigned int i = 0; i < m_NumberOfArguments; i++ ) {
+        m_Arguments[i] = new char[std::strlen(arg_list[i].c_str())+1];
+        std::strcpy( m_Arguments[i], arg_list[i].c_str() );
       }
     }
   } else {
@@ -102,8 +109,6 @@ RuntimeParameterFileReader
     return empty;
 }
 
-
-
 int
 RuntimeParameterFileReader
 ::GetNumberOfArguments()
@@ -128,6 +133,61 @@ RuntimeParameterFileReader
   delete[] m_Arguments;
 
   m_Arguments = NULL;
+}
+
+std::string
+RuntimeParameterFileReader
+::RegularizeLine( std::string line )
+{
+  // Chop off anything after comment character
+  size_t commentPosition = line.find_first_of( '#' );
+  line = line.substr( 0, commentPosition );
+
+  // Trim left whitespace
+  size_t left;
+  for ( left = 0; left < line.size(); ++left ) {
+    if ( line[left] != ' ' || line[left] != '\t' ) {
+      break;
+    }
+  }
+
+  // Trim right whitespace
+  size_t right;
+  for ( right = line.size()-1; right > 0; --right ) {
+    if ( line[right] != ' ' || line[right] != '\t' ) {
+      break;
+    }
+  }
+
+  line = line.substr( left, (right - left + 1) );
+
+  // Convert contiguous white space in line to a single space
+  bool inWhiteSpace = std::isspace( line[0] );
+  std::string newLine;
+  for ( size_t i = 0; i < line.size(); ++i ) {
+    char character = line[i];
+    if ( inWhiteSpace ) {
+      if ( std::isspace( character ) ) {
+        // Skip
+      } else {
+        inWhiteSpace = false;
+        newLine.push_back( character );
+      }
+    } else {
+      if ( std::isspace( character ) ) {
+        inWhiteSpace = true;
+        newLine.push_back( ' ' );
+      } else {
+        newLine.push_back( character );
+      }
+    }
+  }
+
+  if ( *(newLine.end()-1) == ' ' ) {
+    newLine.erase( newLine.end() - 1 );
+  }
+
+  return newLine;
 }
 
 } // end namespace madai
