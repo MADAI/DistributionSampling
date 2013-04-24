@@ -41,20 +41,22 @@ public:
     This takes an empty GPEM and loads training data.
     \returns true on success. */
   bool LoadTrainingData(GaussianProcessEmulator * gpe,
-                        std::string TopDirectory);
+                        std::string ModelOutputDirectory,
+                        std::string StatisticalAnalysisDirectory,
+                        std::string ExperimentalResultsDirectory);
 
   /**
     This takes a GPEM and loads PCA data.
     \returns true on success. */
   bool LoadPCA(GaussianProcessEmulator * gpe,
-               std::string TopDirectory);
+               std::string StatisticsDirectory);
 
   /**
     This takes a GPEM and loads the emulator specific
     data (submodels with their thetas).
     \returns true on success. */
   bool LoadEmulator(GaussianProcessEmulator * gpe,
-                    std::string TopDirectory);
+                    std::string StatisticsDirectory);
 
 protected:
   bool m_Verbose;

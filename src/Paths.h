@@ -31,12 +31,14 @@ public:
   static const std::string MODEL_OUTPUT_DIRECTORY;
 
   static const std::string EXPERIMENTAL_RESULTS_DIRECTORY;
-
-  static const std::string STATISTICAL_ANALYSIS_DIRECTORY;
+  
+  static const std::string TRACE_DIRECTORY;
 
   static const std::string OBSERVABLE_NAMES_FILE;
 
   static const std::string PARAMETERS_FILE;
+  
+  static const std::string RUNTIME_PARAMETER_FILE;
 
   static const std::string RESULTS_FILE;
 

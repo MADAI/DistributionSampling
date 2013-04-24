@@ -24,7 +24,75 @@
 
 #include "PercentileGridSampler.h"
 #include "ExternalModel.h"
+#include "RuntimeParameterFileReader.h"
+#include "ApplicationUtilities.h"
+#include "Paths.h"
 #include "Trace.h"
+
+#include "madaisys/SystemTools.hxx"
+
+const int DEFAULT_NUMBER_ITERATIONS = 100;
+const char useage [] =
+  "Useage:\n"
+  "    generatePercentileGridTraceExternal StatisticsDirectory OutputFileName\n"
+  "\n"
+  "StatisticsDirectory is the directory in which all statistical data will\n"
+  "be stored. Contains the parameter file stat_params.dat:\n"
+  "\n"
+  "Format of and parameters which can be set in stat_params.dat:\n"
+  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
+  "PERCENTILE_GRID_NUMBER_ITERATIONS <value>\n"
+  "EXTERNAL_MODEL_ARGUMENTS\n"
+  "<Argument1>\n"
+  "<Argument2>\n"
+  "...\n"
+  "<LastAgument>\n"
+  "ARGUMENTS_DONE\n"
+  "\n";
+
+struct EMPercentileGridRuntimeParameters
+{
+  int numberIter;
+  std::string ExperimentalResultsDirectory;
+  std::string executable;
+  std::vector< std::string > arguments;
+};
+
+bool parseEMPGRuntimeParameters(
+    int argc, char** argv,
+    struct EMPercentileGridRuntimeParameters & Opts )
+{
+  // Initialize as defaults
+  Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
+  Opts.ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
+  
+  for ( unsigned int i = 0; i < argc; i++ ) {
+    std::string argString( argv[i] );
+    
+    if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) {
+      Opts.ExperimentalResultsDirectory = std::string( argv[i+1] );
+      i++;
+    } else if ( argString == "EXTERNAL_MODEL_ARGUMENTS" ) {
+      bool Done = false;
+      while ( !Done ) {
+        if ( i == (argc - 1) ) {
+          std::cerr << "Reached end of runtime parameter list without reaching\n"
+          << "the end of the arguments for the external model\n";
+          return false;
+        }
+        std::string tstring( argv[i+1] );
+        if ( tstring == "ARGUMENTS_DONE" ) break;
+        Opts.arguments.push_back( tstring );
+        i++;
+      }
+      i++;
+    } else if ( argString == "EXTERNAL_MODEL_EXECUTABLE" ) {
+      Opts.executable = std::string( argv[i+1] );
+      i++;
+    }
+  }
+  return true;
+}
 
 template<class S, class T>
 int findIndex(const S & v, const T & s)
@@ -87,20 +155,25 @@ LoadObservations(Model * model, std::istream & i)
  */
 int main(int argc, char ** argv) {
 
-  if (argc < 4) {
-    std::cerr << "Useage:\n  "
-      "generateMCMCTraceExternal observationsFile N ExternalARGS....\n\n";
-    return EXIT_FAILURE; //\fixme useage
+  if (argc < 3) {
+    std::cerr << useage;
+    return EXIT_FAILURE;
   }
-  const char * observationsFile = argv[1];
-  int numberIter = atoi(argv[2]);
-  std::string executable( argv[3] );
-  std::vector< std::string > arguments;
-  for (int i = 4 ; i < argc; ++i)
-    arguments.push_back(argv[i]);
+  std::string StatisticsDirectory( argv[1] );
+  madai::EnsurePathSeparatorAtEnd( StatisticsDirectory );
+  std::string OutputFileName( argv[2] );
+  madai::RuntimeParameterFileReader RPFR;
+  RPFR.ParseFile( StatisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE );
+  char** Args = RPFR.GetArguments();
+  int NArgs = RPFR.GetNumberOfArguments();
+  struct EMPercentileGridRuntimeParameters Opts;
+  if ( !parseEMPGRuntimeParameters( NArgs, Args, Opts ) ) {
+    std::cerr << "error parsing configuration file for external model mcmc.\n";
+    return EXIT_FAILURE;
+  }
 
   madai::ExternalModel em;
-  em.StartProcess( executable, arguments );
+  em.StartProcess( Opts.executable, Opts.arguments );
   if (! em.IsReady()) {
     std::cerr << "Something is wrong with the external model\n";
     return EXIT_FAILURE;
@@ -108,8 +181,10 @@ int main(int argc, char ** argv) {
 
   em.SetUseModelCovarianceToCalulateLogLikelihood(false);
 
-  std::ifstream observations(observationsFile);
-  //if (madai::Model::NO_ERROR != em.LoadObservations(observations)) {
+  std::string observationsFile = StatisticsDirectory + 
+    Opts.ExperimentalResultsDirectory + madai::Paths::SEPARATOR + 
+    madai::Paths::RESULTS_FILE;
+  std::ifstream observations(observationsFile.c_str());
   if (madai::Model::NO_ERROR != LoadObservations(&em, observations)) {
     std::cerr << "error loading observations.\n";
     em.StopProcess();
@@ -119,8 +194,8 @@ int main(int argc, char ** argv) {
 
   madai::PercentileGridSampler sampler;
   sampler.SetModel( &em );
-  sampler.SetNumberSamples(numberIter);
-  numberIter = sampler.GetNumberSamples();
+  sampler.SetNumberSamples(Opts.numberIter);
+  int numberIter = sampler.GetNumberSamples();
 
   std::vector< madai::Parameter > const & parameters
     = em.GetParameters();
@@ -135,8 +210,12 @@ int main(int argc, char ** argv) {
   }
   std::cerr << "\r" ;
 
+  std::string traceDirectory = StatisticsDirectory + madai::Paths::TRACE_DIRECTORY;
+  madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
+  std::string OutputFile = traceDirectory + madai::Paths::SEPARATOR + OutputFileName;
+  std::ofstream Out( OutputFile.c_str() );
   trace.WriteCSVOutput(
-      std::cout,
+      Out,
       em.GetParameters(),
       em.GetScalarOutputNames() );
   return EXIT_SUCCESS;

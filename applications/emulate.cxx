@@ -33,7 +33,6 @@ USE:
     $ man 1 emulate
 */
 
-#include <getopt.h>
 #include <iostream>
 #include <fstream>
 #include <cassert>
@@ -44,71 +43,65 @@ USE:
 #include "GaussianDistribution.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
+#include "RuntimeParameterFileReader.h"
 #include "UniformDistribution.h"
+#include "Paths.h"
 
 static const char useage [] =
   "useage:\n"
-  "  emulate [options] TopDirectory\n"
+  "  emulate StatisticsDirectory\n"
   "\n"
-  "Options:\n"
+  "StatisticsDirectory is the directory containing all statistical analysis data.\n"
+  "Contains parameter file stat_params.dat\n"
   "\n"
-  "  -q\n"
-  "  --quiet   Do not print a header before going into query mode.\n"
+  "Structure of stat_params:\n"
+  "MODEL_OUTPUT_DIRECTORY <value>\n"
+  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
+  "EMULATE_QUIET <value>\n"
   "\n"
-  "  -h -?     print this dialogue\n"
+  "Defaults (if not specified) in order listed:\n"
+  "model_output\n"
+  "experimental_results\n"
+  "false\n"
   "\n";
 
-struct cmdLineOpts{
+struct RuntimeOpts{
   bool quietFlag;
-  const char * TopDirectory; /* first non-flag argument  */
+  std::string ModelOutputDirectory;
+  std::string ExperimentalResultsDirectory;
 };
 
 /**
    Option parsing using getoptlong.  If it fails, returns false. */
-bool parseCommandLineOptions(int argc, char** argv, struct cmdLineOpts & opts)
+bool parseRuntimeOptions(int argc, char** argv, struct RuntimeOpts & opts)
 {
-  /* note: flags followed with a colon come with an argument */
-  static const char optString[] = "qh?";
-
-  // should add a variance option for the pca_decomp
-  // and a flag to do return output in pca space
-  static const struct option longOpts[] = {
-    { "quiet", no_argument , NULL, 'q'},
-    { "help", no_argument , NULL, 'h'},
-    { NULL, no_argument, NULL, 0}
-  };
-
   // init with default values
+  opts.ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
+  opts.ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
   opts.quietFlag = false;
-  opts.TopDirectory = NULL; // default to NULL
-  int longIndex, opt;
-  opt = getopt_long( argc, argv, optString, longOpts, &longIndex );
-  while( opt != -1 ) {
-    switch( opt ) {
-    case 'q':
-      opts.quietFlag = true;
-      break;
-    case 'h':
-      /* fall-through is intentional */
-    case '?':
-      std::cerr << useage << '\n';
-      return false;
-      break;
-    default:
-      /* You won't actually get here. */
-      assert(false && "1152677029");
-      break;
+  
+  for ( unsigned int i = 0; i < argc; i++ ) {
+    std::string argString( argv[i] );
+    
+    if ( argString == "MODEL_OUTPUT_DIRECTORY" ) {
+      opts.ModelOutputDirectory = std::string( argv[i+1] );
+      i++;
+    } else if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) {
+      opts.ExperimentalResultsDirectory = std::string( argv[i+1] );
+      i++;
+    } else if ( argString == "EMULTE_QUIET" ) {
+      std::string tstring( argv[i+1] );
+      if ( tstring == "true" || tstring == "1" ) {
+        opts.quietFlag = true;
+      } else if ( tstring == "false" || tstring == "0" ) {
+        opts.quietFlag = false;
+      } else {
+        std::cerr << "Unrecognized value for parameter EMULATE_QUIET: "
+                  << tstring << "\n";
+        return false;
+      }
+      i++;
     }
-    opt = getopt_long( argc, argv, optString, longOpts, &longIndex );
-  }
-
-  // set the remaining field
-  if ((argc - optind) >= 1) {
-    opts.TopDirectory = argv[optind];
-  }
-  if (opts.TopDirectory == NULL) {
-    std::cerr << useage << '\n';
-    return false;
   }
   return true;
 }
@@ -206,31 +199,41 @@ bool Interact(
 }
 
 int main(int argc, char ** argv) {
-  struct cmdLineOpts options;
-  if (!parseCommandLineOptions(argc, argv, options))
-    return EXIT_FAILURE;
-  std::string TopDirectory(options.TopDirectory);
-  madai::EnsurePathSeparatorAtEnd( TopDirectory );
-  madai::GaussianProcessEmulator gpme;
-  if (TopDirectory == "-") {
-    /*
-      Please note: if you use stdin to feed in the model, you should
-      do it like this:
-      $ cat model_snapshot_file.dat query_points.dat | emulate
-    */
-    madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
-    singleFileReader.Load(&gpme,std::cin);
+  std::string StatisticsDirectory;
+  if ( argc > 1 ) {
+    StatisticsDirectory = std::string( argv[1] );
   } else {
-    madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-    if ( !directoryReader.LoadTrainingData(&gpme,TopDirectory) ) {
-      std::cerr << "Error loading data used to train the emulator.\n";
+    std::cerr << useage << '\n';
+    return EXIT_FAILURE;
+  }
+  madai::GaussianProcessEmulator gpme;
+  struct RuntimeOpts options;
+  if ( StatisticsDirectory == "-" ) {
+    madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
+    singleFileReader.LoadTrainingData( &gpme, std::cin );
+  } else {
+    madai::EnsurePathSeparatorAtEnd( StatisticsDirectory );
+    madai::RuntimeParameterFileReader RPFR;
+    RPFR.ParseFile( StatisticsDirectory +
+                    madai::Paths::RUNTIME_PARAMETER_FILE );
+    char** Args = RPFR.GetArguments();
+    int NArgs = RPFR.GetNumberOfArguments();
+    if ( !parseRuntimeOptions( NArgs, Args, options ) ) {
+      std::cerr << "Error parsing runtime options.\n";
       return EXIT_FAILURE;
     }
-    if ( !directoryReader.LoadPCA(&gpme,TopDirectory) ) {
+    std::string MOD = StatisticsDirectory + options.ModelOutputDirectory;
+    std::string ERD = StatisticsDirectory + options.ExperimentalResultsDirectory;
+    madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+    if ( !directoryReader.LoadTrainingData(&gpme, MOD, StatisticsDirectory, ERD) ) {
+      std::cerr << "Error loading training data.\n";
+      return EXIT_FAILURE;
+    }
+    if ( !directoryReader.LoadPCA(&gpme, StatisticsDirectory) ) {
       std::cerr << "Error loading PCA data.\n";
       return EXIT_FAILURE;
     }
-    if ( !directoryReader.LoadEmulator(&gpme,TopDirectory) ) {
+    if ( !directoryReader.LoadEmulator(&gpme, StatisticsDirectory) ) {
       std::cerr << "Error loading the emulator state data.\n";
       return EXIT_FAILURE;
     }

@@ -33,45 +33,65 @@ PCADecompose
 
 
 int main( int argc, char ** argv ) {
-  std::string TopDirectory;
+  std::string StatisticsDirectory;
+  std::string ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
+  std::string ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
   double fractionResolvingPower = 0.95;
   if ( argc > 1 ) {
-    TopDirectory = std::string( argv[1] );
-    madai::EnsurePathSeparatorAtEnd( TopDirectory );
+    StatisticsDirectory = std::string( argv[1] );
   } else {
-    std::cerr << "Usage:\n";
-    std::cerr << "    PCADecompose RootDirectory\n";
-    std::cerr << "\n";
-    std::cerr << "RootDirectory is the directory containing the directories"
-              << madai::Paths::MODEL_OUTPUT_DIRECTORY << "/\n";
-    std::cerr << madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY << ", and "
-              << madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY << "/\n";
+    std::cerr << "Usage:\n"
+              << "    PCADecompose StatisticsDirectory\n"
+              << "\n"
+              << "StatisticsDirectory is the directory in which all statistics data\n"
+              << "is stored. Contains the parameter file stat_params.dat\n"
+              << "\n"
+              << "Format of stat_params.dat:\n"
+              << "MODEL_OUTPUT_DIRECTORY <value>\n"
+              << "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
+              << "\n"
+              << "Default values (if not specified) in order of listed:\n"
+              << "model_output\n"
+              << "experimental_results\n";
     return EXIT_FAILURE;
   }
-  
-  std::string outputFileName = TopDirectory +
-    madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
-    madai::Paths::SEPARATOR + madai::Paths::PCA_DECOMPOSITION_FILE;
-
   madai::GaussianProcessEmulator gpme;
-  if ( TopDirectory == "-" ) {
+  if ( StatisticsDirectory == "-" ) { // Check to see if read from cin
     madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
     singleFileReader.LoadTrainingData(&gpme, std::cin);
-  } else {
+  } else { // Reads from directory structure
+    madai::EnsurePathSeparatorAtEnd( StatisticsDirectory );
+    madai::RuntimeParameterFileReader RPFR;
+    RPFR.ParseFile( StatisticsDirectory + 
+                    madai::Paths::RUNTIME_PARAMETER_FILE ); // Read in runtime parameters
+    char** Args = RPFR.GetArguments();
+    int NArgs = RPFR.GetNumberOfArguments();
+    for ( unsigned int i = 0; i < NArgs; i++ ) {
+      std::string argString(Args[i]);
+      if ( argString == "MODEL_OUTPUT_DIRECTORY" ) {
+        ModelOutputDirectory = std::string( Args[i+1] );
+        i++;
+      } else if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) {
+        ExperimentalResultsDirectory = std::string( Args[i+1] );
+        i++;
+      } else {
+        // Skip other elements since I'm using a single configuration file
+      }
+    }
+    // Read in the training data
+    std::string MOD = StatisticsDirectory + ModelOutputDirectory;
+    std::string ERD = StatisticsDirectory + ExperimentalResultsDirectory;
     madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-    if ( !directoryReader.LoadTrainingData(&gpme,TopDirectory) ) {
+    if ( !directoryReader.LoadTrainingData(&gpme, MOD, StatisticsDirectory, ERD ) ) {
       std::cerr << "Error Loading Training Data.\n";
       return EXIT_FAILURE;
     }
   }
+  
+  std::string outputFileName = StatisticsDirectory + madai::Paths::PCA_DECOMPOSITION_FILE;
+
   // get the PCA decomposition
   if ( !gpme.PrincipalComponentDecompose() ) {
-    return EXIT_FAILURE;
-  }
-
-  // retain only the PCA components necessary for the desired
-  // resolving power
-  if ( !gpme.RetainPrincipalComponents( fractionResolvingPower ) ) {
     return EXIT_FAILURE;
   }
 

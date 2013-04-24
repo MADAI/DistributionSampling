@@ -342,7 +342,7 @@ inline bool parseParameterAndOutputValues(
 
     if ( dir_name.find_first_of( "run" ) == 0 ) {
       // Open the parameters.dat file
-      std::string par_file_name = ModelOutDir + dir_name +
+      std::string par_file_name = ModelOutDir + Paths::SEPARATOR + dir_name +
         Paths::SEPARATOR + Paths::PARAMETERS_FILE;
       std::ifstream parfile ( par_file_name.c_str() );
       if ( !parfile.good() ) return false;
@@ -367,8 +367,8 @@ inline bool parseParameterAndOutputValues(
       }
       parfile.close();
       // Open the results.dat file
-      std::string results_file_name = ModelOutDir + dir_name +
-        Paths::SEPARATOR + Paths::RESULTS_FILE;
+      std::string results_file_name = ModelOutDir + Paths::SEPARATOR +
+        dir_name + Paths::SEPARATOR + Paths::RESULTS_FILE;
       std::ifstream results_file ( results_file_name.c_str() );
       if ( !results_file.good() ) return false;
       if ( verbose )
@@ -625,10 +625,9 @@ bool parsePCADecomposition(
 
 bool parseGaussianProcessEmulator(
     GaussianProcessEmulator & gpme,
-    std::string TopDirectory) {
-  std::string EmulatorFile = TopDirectory + Paths::SEPARATOR +
-    Paths::STATISTICAL_ANALYSIS_DIRECTORY +
-    Paths::SEPARATOR + Paths::EMULATOR_STATE_FILE;
+    std::string StatisticsDirectory) {
+  std::string EmulatorFile = StatisticsDirectory + Paths::SEPARATOR + 
+    Paths::EMULATOR_STATE_FILE;
   std::ifstream input( EmulatorFile.c_str() );
   parseComments(gpme.m_Comments,input);
   std::string word;
@@ -679,22 +678,21 @@ const char * stat(GaussianProcessEmulator::StatusType s) {
   \returns true on success. */
 bool
 GaussianProcessEmulatorDirectoryReader
-::LoadTrainingData(GaussianProcessEmulator * gpe, std::string TopDirectory)
+::LoadTrainingData(GaussianProcessEmulator * gpe,
+                    std::string ModelOutputDirectory,
+                    std::string StatisticalAnalysisDirectory,
+                    std::string ExperimentalResultsDirectory)
 {
-  std::string MOD = TopDirectory + Paths::SEPARATOR +
-    Paths::MODEL_OUTPUT_DIRECTORY + Paths::SEPARATOR;
-  std::string SAD = TopDirectory + Paths::SEPARATOR +
-    Paths::STATISTICAL_ANALYSIS_DIRECTORY + Paths::SEPARATOR;
-  if ( !parseModelDataDirectoryStructure(*gpe, MOD, SAD, m_Verbose ) )
+  if ( !parseModelDataDirectoryStructure(*gpe, ModelOutputDirectory,
+                                         StatisticalAnalysisDirectory,
+                                         m_Verbose ) )
     return false;
-
-  std::string ExperimentalResultsDirectory
-    = TopDirectory + Paths::SEPARATOR + Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
+  
   if (! parseExperimentalResults( *gpe, ExperimentalResultsDirectory )) {
     std::cerr << "Error in parseExperimentalResults()\n";
     return false;
   }
-
+  
   return (gpe->CheckStatus() == GaussianProcessEmulator::UNTRAINED);
 }
 
@@ -704,10 +702,9 @@ GaussianProcessEmulatorDirectoryReader
   \returns true on success. */
 bool
 GaussianProcessEmulatorDirectoryReader
-::LoadPCA(GaussianProcessEmulator * gpe, std::string TopDirectory)
+::LoadPCA(GaussianProcessEmulator * gpe, std::string StatisticsDirectory)
 {
-  std::string PCAFile = TopDirectory + Paths::SEPARATOR +
-    Paths::STATISTICAL_ANALYSIS_DIRECTORY + Paths::SEPARATOR +
+  std::string PCAFile = StatisticsDirectory + Paths::SEPARATOR +
     Paths::PCA_DECOMPOSITION_FILE;
   std::ifstream input( PCAFile.c_str() );
   if ( !parsePCADecomposition(*gpe, input) ) {
@@ -750,9 +747,9 @@ GaussianProcessEmulatorDirectoryReader
   \returns true on success. */
 bool
 GaussianProcessEmulatorDirectoryReader
-::LoadEmulator(GaussianProcessEmulator * gpe, std::string TopDirectory)
+::LoadEmulator(GaussianProcessEmulator * gpe, std::string StatisticsDirectory)
 {
-  if ( !parseGaussianProcessEmulator(*gpe, TopDirectory) ) {
+  if ( !parseGaussianProcessEmulator(*gpe, StatisticsDirectory) ) {
     std::cerr << "Error parsing gaussian process emulator.\n";
     return false;
   }

@@ -35,10 +35,28 @@ USE:
 
 const char useage [] =
   "Usage:\n"
-  "    basicTrain RootDirectory\n"
+  "    basicTrain StatisticsDirectory\n"
   "\n"
-  "RootDirectory is the directory in which the folders model_output/ \n"
-  "experimental_results/ and statistical_analysis/ are contained.\n"
+  "StatisticsDirectory is the directory in which all statistical data will\n"
+  "be stored. Contains the parameter file stat_params.dat\n"
+  "\n"
+  "Format of stat_params.dat\n"
+  "MODEL_OUTPUT_DIRECTORY <value>\n"
+  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
+  "EMULATOR_COVARIANCE_FUNCTION <value>\n"
+  "EMULATOR_REGRESSION_ORDER <value>\n"
+  "EMULATOR_NUGGET <value>\n"
+  "EMULATOR_AMPLITUDE <value>\n"
+  "EMULATOR_SCALE <value>\n"
+  "\n"
+  "Default values (if not specified) in order of listed:\n"
+  "model_output"
+  "experimental_results"
+  "SQUARE_EXPONENTIAL_FUNCTION\n"
+  "1\n"
+  "1e-3\n"
+  "1.0\n"
+  "1e-2\n"
   "\n"
   "This loads the model data and PCA information in order to train\n"
   "the emulator.\n";
@@ -56,6 +74,8 @@ const char useage [] =
 
 struct RuntimeOptions 
 {
+  std::string ModelOutputDirectory;
+  std::string ExperimentalResultsDirectory;
   madai::GaussianProcessEmulator::CovarianceFunctionType covFunct;
   int regressionOrder;
   double Nugget;
@@ -66,6 +86,8 @@ struct RuntimeOptions
 bool parseRuntimeOptions( int argc, char* argv[], struct RuntimeOptions & options)
 {
   options.covFunct = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
+  options.ModelOutputDirectory = madai::Paths::MODEL_OUTPUT_DIRECTORY;
+  options.ExperimentalResultsDirectory = madai::Paths::EXPERIMENTAL_RESULTS_DIRECTORY;
   options.regressionOrder = 1;
   options.Nugget = 1e-3;
   options.amplitude = 1.0;
@@ -76,7 +98,7 @@ bool parseRuntimeOptions( int argc, char* argv[], struct RuntimeOptions & option
     
     if ( argString == "EMULATOR_COVARIANCE_FUNCTION" ) {
       std::string CovType( argv[i+1] );
-      if ( CovType == "EMULATOR_POWER_EXPONENTIAL_FUNCTION" ) {
+      if ( CovType == "POWER_EXPONENTIAL_FUNCTION" ) {
         options.covFunct = madai::GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
       } else if ( CovType == "SQUARE_EXPONENTIAL_FUNCTION" ) {
         options.covFunct = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
@@ -88,6 +110,12 @@ bool parseRuntimeOptions( int argc, char* argv[], struct RuntimeOptions & option
         std::cerr << "Unrecognized  covariance function: " << CovType << "\n";
         return false;
       }
+      i++;
+    } else if ( argString == "MODEL_OUTPUT_DIRECTORY" ) {
+      options.ModelOutputDirectory = std::string( argv[i+1] );
+      i++;
+    } else if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) {
+      options.ExperimentalResultsDirectory = std::string( argv[i+1] );
       i++;
     } else if ( argString == "EMULATOR_REGRESSION_ORDER" ) {
       options.regressionOrder = atoi(argv[i+1]);
@@ -112,44 +140,46 @@ bool parseRuntimeOptions( int argc, char* argv[], struct RuntimeOptions & option
 
 
 int main(int argc, char ** argv) {
-  std::string TopDirectory;
+  std::string StatisticsDirectory;
+  std::string ModelOutputDirectory;
   std::string outputFile;
   std::string PCAFile;
   if (argc > 1) {
-    TopDirectory = std::string(argv[1]);
-    madai::EnsurePathSeparatorAtEnd( TopDirectory );
+    StatisticsDirectory = std::string(argv[1]);
   } else {
     std::cerr << useage << '\n';
     return EXIT_FAILURE;
   }
-  madai::RuntimeParameterFileReader RPFR;
-  RPFR.ParseFile( TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
-                  madai::Paths::SEPARATOR + "MCMC.dat" );
-  char** Args = RPFR.GetArguments();
-  int NArgs = RPFR.GetNumberOfArguments();
-  struct RuntimeOptions options;
-  if ( !parseRuntimeOptions( NArgs, Args, options ) ) {
-    std::cerr << "Error parsing runtime options\n";
-    return EXIT_FAILURE;
-  }
-  outputFile = TopDirectory + madai::Paths::STATISTICAL_ANALYSIS_DIRECTORY +
-    madai::Paths::SEPARATOR + madai::Paths::EMULATOR_STATE_FILE;
-
   madai::GaussianProcessEmulator gpme;
-  if ( TopDirectory == "-" ) {
+  struct RuntimeOptions options;
+  if ( StatisticsDirectory == "-" ) {
     madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
-    singleFileReader.Load(&gpme,std::cin);
+    singleFileReader.LoadTrainingData( &gpme, std::cin);
   } else {
+    madai::EnsurePathSeparatorAtEnd( StatisticsDirectory );
+    madai::RuntimeParameterFileReader RPFR;
+    RPFR.ParseFile( StatisticsDirectory + 
+                    madai::Paths::RUNTIME_PARAMETER_FILE );
+    char** Args = RPFR.GetArguments();
+    int NArgs = RPFR.GetNumberOfArguments();
+    if ( !parseRuntimeOptions( NArgs, Args, options ) ) {
+      std::cerr << "Error parsing runtime options\n";
+      return EXIT_FAILURE;
+    }
+    std::string MOD = StatisticsDirectory+options.ModelOutputDirectory;
+    std::string ERD = StatisticsDirectory+options.ExperimentalResultsDirectory;
     madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-    if ( !directoryReader.LoadTrainingData(&gpme,TopDirectory) ) {
+    if ( !directoryReader.LoadTrainingData(&gpme, MOD, StatisticsDirectory, ERD) ) {
       std::cerr << "Error Loading Training Data.\n";
       return EXIT_FAILURE;
     }
-    if ( !directoryReader.LoadPCA(&gpme,TopDirectory) ) {
+    if ( !directoryReader.LoadPCA(&gpme, StatisticsDirectory) ) {
       std::cerr << "Error Loading PCA Data.\n";
       return EXIT_FAILURE;
     }
   }
+  
+  outputFile = StatisticsDirectory + madai::Paths::EMULATOR_STATE_FILE;
 
   if (! gpme.BasicTraining(
           options.covFunct,
