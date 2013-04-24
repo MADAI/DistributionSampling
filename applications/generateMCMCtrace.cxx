@@ -32,38 +32,16 @@
 
 #include "madaisys/SystemTools.hxx"
 
+using madai::Paths;
+
 /**
 generateMCMCtrace
   Generate a trace of length N for a Gaussian Process Model Emulator
  */
 static const int DEFAULT_NUMBER_ITERATIONS = 100;
 static const int DEFAULT_BURN_IN = 0;
+static const bool DEFAULT_USE_EMULATOR_COVARIANCE = false;
 static const double DEFAULT_STEP_SIZE = 0.1;
-const char useage [] =
-  "Useage:\n"
-  "    generateMCMCtrace StatisticsDirectory OutputFileName\n"
-  "\n"
-  "StatisticsDirectory is the directory in which all statistical data will\n"
-  "be stored. Contains the parameter file stat_params.dat.\n"
-  "\n"
-  "OutputFileName is the name of the file the trace will be stored in. This file\n"
-  "will be located in the StatisticsDirectory/trace/ directory.\n"
-  "\n"
-  "Format of stat_params.dat\n"
-  "MODEL_OUTPUT_DIRECTORY <value>\n"
-  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
-  "MCMC_NUMBER_ITERATIONS <value>\n"
-  "MCMC_NUMBER_BURN_IN <value>\n"
-  "MCMC_USE_EMULATOR_COVARIANCE <value>\n"
-  "MCMC_STEP_SIZE <value>\n"
-  "\n"
-  "Default values (if not specified) in order of listed:\n"
-  "model_output\n"
-  "experimental_results\n"
-  "100\n"
-  "0\n"
-  "false\n"
-  "0.1\n";
 
 struct GaussianProcessMCMCRuntimeParameters
 {
@@ -126,7 +104,39 @@ bool parseMCMCRuntimeParameters(
 int main(int argc, char ** argv) {
 
   if (argc < 3) {
-    std::cerr << useage << "\n";
+    std::cerr << "Useage:\n"
+              << "    generateMCMCtrace <StatisticsDirectory> <OutputFileName>\n"
+              << "\n"
+              << "This program produces a Markov Chain Monte Carlo trace from \n"
+              << "a trained emulator. The programs PCADecompose and basicTrain \n"
+              << "must have been run on <StatisticsDirectory> prior to running \n"
+              << "this program."
+              << "\n"
+              << "<StatisticsDirectory>" << Paths::SEPARATOR
+              << Paths::PCA_DECOMPOSITION_FILE << "\n"
+              << "\n"
+              << "<StatisticsDirectory> is the directory in which all \n"
+              << "statistics data are stored. It contains the parameter file "
+              << Paths::RUNTIME_PARAMETER_FILE << "\n"
+              << "\n"
+              << "<OutputFileName> is the name of the file the trace will be \n"
+              << "stored in. This file will be written in the\n"
+              << "directory <StatisticsDirectory>/trace/.\n"
+              << "\n"
+              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+              << ":\n\n"
+              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
+              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "MCMC_NUMBER_ITERATIONS <value> (default: "
+              << DEFAULT_NUMBER_ITERATIONS << ")\n"
+              << "MCMC_NUMBER_BURN_IN <value> (default: "
+              << DEFAULT_BURN_IN << ")\n"
+              << "MCMC_USE_EMULATOR_COVARIANCE <value> (default: "
+              << DEFAULT_USE_EMULATOR_COVARIANCE << ")\n"
+              << "MCMC_STEP_SIZE <value> (default: "
+              << DEFAULT_STEP_SIZE << ")\n";
     return EXIT_FAILURE;
   }
   std::string StatisticsDirectory( argv[1] );
