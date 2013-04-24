@@ -40,9 +40,9 @@ const std::string Paths::RESULTS_FILE( "results.dat" );
 
 const std::string Paths::RUNTIME_PARAMETER_FILE( "stat_params.dat" );
 
-const std::string Paths::EMULATOR_STATE_FILE( "EmulatorState.dat" );
+const std::string Paths::EMULATOR_STATE_FILE( "emulator_state.dat" );
 
-const std::string Paths::PCA_DECOMPOSITION_FILE( "PCADecomposition.dat" );
+const std::string Paths::PCA_DECOMPOSITION_FILE( "pca_decomposition.dat" );
 
 const std::string Paths::PARAMETER_PRIORS_FILE( "parameter_priors.dat" );
 

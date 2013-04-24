@@ -271,6 +271,7 @@ bool parseNumberOfModelRuns( int & x, std::string ModelOutDir ) {
 
   madaisys::Directory directory;
   if ( !directory.Load( ModelOutDir.c_str() ) ) {
+    std::cerr << "Couldn't read directory '" << ModelOutDir << "'\n";
     return false;
   }
 
@@ -434,17 +435,17 @@ bool parseModelDataDirectoryStructure(
     bool verbose) {
   if ( !parseParameters(
           gpme.m_Parameters, gpme.m_NumberParameters, Stat_Anal_Dir ) ) {
-    std::cerr << "parse Parameters error\n";
+    std::cerr << "Couldn't parse parameters\n";
     return false;
   }
   if ( !parseOutputs(
           gpme.m_OutputNames, gpme.m_NumberOutputs, Stat_Anal_Dir ) ) {
-    std::cerr << "parse Outputs error\n";
+    std::cerr << "Couldn't parse outputs\n";
     return false;
   }
   if ( !parseNumberOfModelRuns(
-          gpme.m_NumberTrainingPoints, Model_Outs_Dir ) ) {
-    std::cerr << "parse Integer error\n";
+                               gpme.m_NumberTrainingPoints, Model_Outs_Dir ) ) {
+    std::cerr << "Couldn't parse number of model runs.\n";
     return false;
   }
   Eigen::MatrixXd TMat( gpme.m_NumberOutputs, 1 );
@@ -713,8 +714,8 @@ GaussianProcessEmulatorDirectoryReader
   }
 
   // Initialize the retained principal components
-  std::string runtimeParameterFile = TopDirectory + Paths::SEPARATOR +
-    Paths::STATISTICAL_ANALYSIS_DIRECTORY + Paths::SEPARATOR + "MCMC.dat";
+  std::string runtimeParameterFile = StatisticsDirectory + Paths::SEPARATOR +
+    Paths::RUNTIME_PARAMETER_FILE;
   RuntimeParameterFileReader runtimeParameterReader;
   if ( !runtimeParameterReader.ParseFile( runtimeParameterFile ) ) {
     std::cerr << "Error parsing runtime parameters.\n" << std::endl;

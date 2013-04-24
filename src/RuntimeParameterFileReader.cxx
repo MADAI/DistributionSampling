@@ -77,7 +77,7 @@ RuntimeParameterFileReader
       }
     }
   } else {
-    std::cerr << "Couldn't find input file\n";
+    std::cerr << "RuntimeParameterFileReader couldn't find input file'" << fileName << "'\n";
     return false;
   }
 
