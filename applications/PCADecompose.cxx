@@ -31,28 +31,35 @@ PCADecompose
 #include "RuntimeParameterFileReader.h"
 #include "Paths.h"
 
+using madai::Paths;
+
 
 int main( int argc, char ** argv ) {
   std::string StatisticsDirectory;
-  std::string ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
-  std::string ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
+  std::string ModelOutputDirectory = Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+  std::string ExperimentalResultsDirectory = Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
   double fractionResolvingPower = 0.95;
   if ( argc > 1 ) {
     StatisticsDirectory = std::string( argv[1] );
   } else {
     std::cerr << "Usage:\n"
-              << "    PCADecompose StatisticsDirectory\n"
+              << "    PCADecompose <StatisticsDirectory>\n"
               << "\n"
-              << "StatisticsDirectory is the directory in which all statistics data\n"
-              << "is stored. Contains the parameter file stat_params.dat\n"
+              << "This program performs a principal components analysis on \n"
+              << "experimental data. It stores the results in \n"
+              << "<StatisticsDirectory>" << Paths::SEPARATOR
+              << Paths::PCA_DECOMPOSITION_FILE << "\n"
               << "\n"
-              << "Format of stat_params.dat:\n"
-              << "MODEL_OUTPUT_DIRECTORY <value>\n"
-              << "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
+              << "<StatisticsDirectory> is the directory in which all \n"
+              << "statistics data are stored. It contains the parameter file "
+              << Paths::RUNTIME_PARAMETER_FILE << "\n"
               << "\n"
-              << "Default values (if not specified) in order of listed:\n"
-              << "model_output\n"
-              << "experimental_results\n";
+              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+              << ":\n\n"
+              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
+              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n";
     return EXIT_FAILURE;
   }
   madai::GaussianProcessEmulator gpme;
