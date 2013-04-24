@@ -112,6 +112,9 @@ bool parseEMMCMCRuntimeParameters(
     } else if ( argString == "MCMC_STEP_SIZE" ) {
       Opts.StepSize = atof(argv[i+1]);
       i++;
+    } else if ( argString == "EXTERNAL_MODEL_EXECUTABLE" ) {
+      Opts.executable = std::string( argv[i+1] );
+      i++;
     } else if ( argString == "EXTERNAL_MODEL_ARGUMENTS" ) {
       bool Done = false;
       while ( !Done ) {
