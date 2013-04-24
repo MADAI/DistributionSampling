@@ -33,34 +33,6 @@ USE:
     $ man 1 basicTrain
 */
 
-const char useage [] =
-  "Usage:\n"
-  "    basicTrain StatisticsDirectory\n"
-  "\n"
-  "StatisticsDirectory is the directory in which all statistical data will\n"
-  "be stored. Contains the parameter file stat_params.dat\n"
-  "\n"
-  "Format of stat_params.dat\n"
-  "MODEL_OUTPUT_DIRECTORY <value>\n"
-  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
-  "EMULATOR_COVARIANCE_FUNCTION <value>\n"
-  "EMULATOR_REGRESSION_ORDER <value>\n"
-  "EMULATOR_NUGGET <value>\n"
-  "EMULATOR_AMPLITUDE <value>\n"
-  "EMULATOR_SCALE <value>\n"
-  "\n"
-  "Default values (if not specified) in order of listed:\n"
-  "model_output\n"
-  "experimental_results\n"
-  "SQUARE_EXPONENTIAL_FUNCTION\n"
-  "1\n"
-  "1e-3\n"
-  "1.0\n"
-  "1e-2\n"
-  "\n"
-  "This loads the model data and PCA information in order to train\n"
-  "the emulator.\n";
-
 #include <iostream> // cout, cin
 #include <fstream> // ifstream, ofstream
 
@@ -71,6 +43,9 @@ const char useage [] =
 #include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "Paths.h"
+
+using madai::Paths;
+
 
 struct RuntimeOptions 
 {
@@ -147,7 +122,30 @@ int main(int argc, char ** argv) {
   if (argc > 1) {
     StatisticsDirectory = std::string(argv[1]);
   } else {
-    std::cerr << useage << '\n';
+    std::cerr << "Usage:\n"
+              << "    basicTrain <StatisticsDirectory>\n"
+              << "\n"
+              << "This loads the model data and PCA information computed with \n"
+              << "PCADecompose and trains the emulator. It stores the results \n"
+              << "in <StatisticsDirectory>" << Paths::SEPARATOR
+              << Paths::EMULATOR_STATE_FILE << "\n"
+              << "\n"
+              << "<StatisticsDirectory> is the directory in which all \n"
+              << "statistics data are stored. It contains the parameter file "
+              << Paths::RUNTIME_PARAMETER_FILE << "\n"
+              << "\n"
+              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+              << ":\n\n"
+              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
+              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "EMULATOR_COVARIANCE_FUNCTION <value> (default: SQUARE_EXPONENTIAL_FUNCTION)\n"
+              << "EMULATOR_REGRESSION_ORDER <value> (default: 1)\n"
+              << "EMULATOR_NUGGET <value> (default: 1e-3)\n"
+              << "EMULATOR_AMPLITUDE <value> (default: 1.0)\n"
+              << "EMULATOR_SCALE <value> (default: 1e-2)\n";
+
     return EXIT_FAILURE;
   }
   madai::GaussianProcessEmulator gpme;
