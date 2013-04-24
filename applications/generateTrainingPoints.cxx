@@ -33,7 +33,7 @@
 
 #include "madaisys/SystemTools.hxx"
 
-using namespace madai::Paths;
+using madai::Paths;
 
 
 static const char useage[] =
