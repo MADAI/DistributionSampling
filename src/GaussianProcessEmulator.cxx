@@ -221,7 +221,7 @@ GaussianProcessEmulator::CheckStatus() {
     return m_Status;
   if(m_PCAEigenvectors.rows() != m_NumberOutputs)
     return m_Status;
-  if(m_PCAEigenvectors.cols() != m_NumberPCAOutputs)
+  if(m_PCAEigenvectors.cols() != m_NumberOutputs)
     return m_Status;
   if(m_RetainedPCAEigenvalues.size() != m_NumberPCAOutputs)
     return m_Status;
