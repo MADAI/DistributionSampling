@@ -31,24 +31,9 @@
 
 #include "madaisys/SystemTools.hxx"
 
-const int DEFAULT_NUMBER_ITERATIONS = 100;
-const char useage [] =
-  "Useage:\n"
-  "    generatePercentileGridTraceExternal StatisticsDirectory OutputFileName\n"
-  "\n"
-  "StatisticsDirectory is the directory in which all statistical data will\n"
-  "be stored. Contains the parameter file stat_params.dat:\n"
-  "\n"
-  "Format of and parameters which can be set in stat_params.dat:\n"
-  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
-  "PERCENTILE_GRID_NUMBER_ITERATIONS <value>\n"
-  "EXTERNAL_MODEL_ARGUMENTS\n"
-  "<Argument1>\n"
-  "<Argument2>\n"
-  "...\n"
-  "<LastAgument>\n"
-  "ARGUMENTS_DONE\n"
-  "\n";
+using madai::Paths;
+
+const int DEFAULT_PERCENTILE_GRID_SAMPLES = 100;
 
 struct EMPercentileGridRuntimeParameters
 {
@@ -63,7 +48,7 @@ bool parseEMPGRuntimeParameters(
     struct EMPercentileGridRuntimeParameters & Opts )
 {
   // Initialize as defaults
-  Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
+  Opts.numberIter = DEFAULT_PERCENTILE_GRID_SAMPLES;
   Opts.ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
   
   for ( unsigned int i = 0; i < argc; i++ ) {
@@ -156,7 +141,33 @@ LoadObservations(Model * model, std::istream & i)
 int main(int argc, char ** argv) {
 
   if (argc < 3) {
-    std::cerr << useage;
+    std::cerr << "Usage:\n"
+              << "    generatePercentileGridTraceExternal <StatisticsDirectory> <OutputFileName>\n"
+              << "\n"
+              << "This file generates a sampling of an external model on a\n"
+              << "regular lattice of sample points.\n"
+              << "\n"
+              << "<StatisticsDirectory> is the directory in which all \n"
+              << "statistics data are stored. It contains the parameter file "
+              << Paths::RUNTIME_PARAMETER_FILE << "\n"
+              << "\n"
+              << "<OutputFileName> is the name of the comma-separated value-format \n"
+              << "file in which the trace will be written. This file will be \n"
+              << "written in the directory <StatisticsDirectory>/trace/.\n"
+              << "\n"
+              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+              << ":\n\n"
+              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "PERCENTILE_GRID_SAMPLES <value> (default: "
+              << DEFAULT_PERCENTILE_GRID_SAMPLES << ")\n"
+              << "EXTERNAL_MODEL_EXECUTABLE <value> (default: none)\n"
+              << "EXTERNAL_MODEL_ARGUMENTS\n"
+              << "<Argument1>\n"
+              << "<Argument2>\n"
+              << "...\n"
+              << "<LastAgument>\n"
+              << "ARGUMENTS_DONE\n";
     return EXIT_FAILURE;
   }
   std::string StatisticsDirectory( argv[1] );

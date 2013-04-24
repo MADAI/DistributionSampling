@@ -32,36 +32,16 @@
 
 #include "madaisys/SystemTools.hxx"
 
+using madai::Paths;
+
 /**
 generateMCMCtraceExternal
   Generate a trace of length N for an External Process
  */
 static const int DEFAULT_NUMBER_ITERATIONS = 100;
 static const int DEFAULT_BURN_IN = 0;
+static const bool DEFAULT_USE_MODEL_ERROR = false;
 static const double DEFAULT_STEP_SIZE = 0.1;
-const char useage [] =
-  "Usage:\n"
-  "    generateMCMCtraceExternal StatisticsDirectory OutputFileName\n"
-  "\n"
-  "StatisticsDirectory is the directory in which all statistical data will\n"
-  "be stored. Contains the parameter file stat_params.dat\n"
-  "\n"
-  "OutputFileName is the nameof the file the trace will be storedin. This file\n"
-  "will be located in the StatisticsDirectory/trace/ directory.\n"
-  "\n"
-  "Format of stat_params.dat\n"
-  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
-  "MCMC_NUMBER_ITERATIONS <value\n"
-  "MCMC_NUMBER_BURN_IN <value>\n"
-  "MCMC_USE_MODEL_ERROR <value>\n"
-  "MCMC_STEP_SIZE <value>\n"
-  "EXTERNAL_MODEL_ARGUMENTS\n"
-  "<Argument1>\n"
-  "<Argument2>\n"
-  "...\n"
-  "<LastArgument>\n"
-  "ARGUMENTS_DONE\n"
-  "\n";
 
 struct ExternalModelMCMCRuntimeParameters
 {
@@ -82,7 +62,7 @@ bool parseEMMCMCRuntimeParameters(
   // Initialize as defaults
   Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
   Opts.numberBurnIn = DEFAULT_BURN_IN;
-  Opts.UseModelError = false;
+  Opts.UseModelError = DEFAULT_USE_MODEL_ERROR;
   Opts.StepSize = DEFAULT_STEP_SIZE;
 
   for ( unsigned int i = 0; i < argc; i++ ) {
@@ -137,7 +117,41 @@ bool parseEMMCMCRuntimeParameters(
 int main(int argc, char ** argv) {
 
   if ( argc < 3 ) {
-     std::cerr << useage << '\n';
+    std::cerr << "Usage:\n"
+              << "    generateMCMCtraceExternal <StatisticsDirectory> <OutputFileName>\n"
+              << "\n"
+              << "This program produces a Markov Chain Monte Carlo trace from \n"
+              << "by evaluating an model defined in an external process. \n"
+              << "\n"
+              << "<StatisticsDirectory> is the directory in which all \n"
+              << "statistics data are stored. It contains the parameter file "
+              << Paths::RUNTIME_PARAMETER_FILE << "\n"
+              << "\n"
+              << "<OutputFileName> is the name of the comma-separated value-format \n"
+              << "file in which the trace will be written. This file will be \n"
+              << "written in the directory <StatisticsDirectory>/trace/.\n"
+              << "\n"
+              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+              << ":\n\n"
+              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
+              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "MCMC_NUMBER_ITERATIONS <value> (default: "
+              << DEFAULT_NUMBER_ITERATIONS << ")\n"
+              << "MCMC_NUMBER_BURN_IN <value> (default: "
+              << DEFAULT_BURN_IN << ")\n"
+              << "MCMC_USE_MODEL_ERROR <value> (default: "
+              << DEFAULT_USE_MODEL_ERROR << ")\n"
+              << "MCMC_STEP_SIZE <value> (default: "
+              << DEFAULT_STEP_SIZE << ")\n"
+              << "EXTERNAL_MODEL_EXECUTABLE <value> (default: none)\n"
+              << "EXTERNAL_MODEL_ARGUMENTS\n"
+              << "<Argument1>\n"
+              << "<Argument2>\n"
+              << "...\n"
+              << "<LastArgument>\n"
+              << "ARGUMENTS_DONE\n";
      return EXIT_FAILURE;
   }
   std::string StatisticsDirectory(argv[1]);

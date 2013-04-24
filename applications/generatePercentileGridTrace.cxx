@@ -32,23 +32,9 @@
 #include "madaisys/SystemTools.hxx"
 
 using madai::Model;
-const int DEFAULT_NUMBER_ITERATIONS = 100;
-const char useage [] =
-  "Useage:\n"
-  "    generatePercentileGridTrace StatisticsDirectory OutputFileName\n"
-  "\n"
-  "StatisticsDirectory is the directory in which all statistical data will\n"
-  "be stored. Contains the parameter file stat_params.dat.\n"
-  "\n"
-  "Format of and parameters which can be set in stat_params.dat:\n"
-  "MODEL_OUTPUT_DIRECTORY <value>\n"
-  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
-  "PERCENTILE_GRID_ITERATIONS <value>\n"
-  "\n"
-  "Defaults:\n"
-  "MODEL_OUTPUT_DIRECTORY = model_output\n"
-  "EXPERIMENTAL_RESULTS_DIRECTORY = experimental_results\n"
-  "PERCENTILE_GRID_NUMBER_ITERATIONS = 100\n";
+using madai::Paths;
+
+const int DEFAULT_PERCENTILE_GRID_SAMPLES = 100;
 
 template<class S, class T>
 int findIndex(const S & v, const T & s)
@@ -117,7 +103,7 @@ bool parsePGRuntimeParameters(
   // Initialize as defaults
   Opts.ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
   Opts.ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
-  Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
+  Opts.numberIter = DEFAULT_PERCENTILE_GRID_SAMPLES;
   
   for ( unsigned int i = 0; i < argc; i++ ) {
     std::string argString( argv[i] );
@@ -128,10 +114,10 @@ bool parsePGRuntimeParameters(
     } else if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) {
       Opts.ExperimentalResultsDirectory = std::string( argv[i+1] );
       i++;
-    } else if ( argString == "PERCENTILE_GRID_NUMBER_ITERATIONS" ) {
+    } else if ( argString == "PERCENTILE_GRID_SAMPLES" ) {
       Opts.numberIter = atoi( argv[i+1] );
       if ( Opts.numberIter <= 0 ) {
-        std::cerr << "Error: PERCENTILE_GRID_NUMBER_ITERATIONS given incorrect argument \""
+        std::cerr << "Error: PERCENTILE_GRID_SAMPLES given incorrect argument \""
           << Opts.numberIter << "\"\n";
       }
       i++;
@@ -146,7 +132,28 @@ bool parsePGRuntimeParameters(
 int main(int argc, char ** argv) {
 
   if (argc < 3) {
-    std::cerr << useage << "\n";
+    std::cerr << "Useage:\n"
+              << "    generatePercentileGridTrace <StatisticsDirectory> <OutputFileName>\n"
+              << "\n"
+              << "This file generates a sampling of an emulated model on a\n"
+              << "regular lattice of sample points.\n"
+              << "\n"
+              << "<StatisticsDirectory> is the directory in which all \n"
+              << "statistics data are stored. It contains the parameter file "
+              << Paths::RUNTIME_PARAMETER_FILE << "\n"
+              << "\n"
+              << "<OutputFileName> is the name of the comma-separated value-format \n"
+              << "file in which the trace will be written. This file will be \n"
+              << "written in the directory <StatisticsDirectory>/trace/.\n"
+              << "\n"
+              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+              << ":\n\n"
+              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
+              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "PERCENTILE_GRID_SAMPLES <value> (default: "
+              << DEFAULT_PERCENTILE_GRID_SAMPLES << ")\n";
     return EXIT_FAILURE;
   }
   std::string StatisticsDirectory( argv[1] );

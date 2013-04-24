@@ -46,36 +46,12 @@ USE:
 #include "RuntimeParameterFileReader.h"
 #include "Paths.h"
 
+using madai::Paths;
 
-#define starts_with(s1,s2) (std::strncmp((s1), (s2), std::strlen(s2)) == 0)
 
 static const madai::GaussianProcessEmulator::CovarianceFunctionType DEFAULT_COVARIACE_FUNCTION
   = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
 static const int DEFAULT_REGRESSION_ORDER = 1;
-
-static const char useage [] =
-  "useage:\n"
-  "  trainEmulator StatisticsDirectory\n"
-  "\n"
-  "StatisticsDirectory is the directory in which all statistical data will\n"
-  "be stored. Contains the parameter file stat_params.dat\n"
-  "\n"
-  "Format of and parameters which can be set in stat_params.dat\n"
-  "MODEL_OUTPUT_DIRECTORY <value>\n"
-  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
-  "EMULATOR_REGRESSION_ORDER <value>\n"
-  "EMULATOR_COVARIANCE_FUNCTION <value>\n"
-  "EMULATOR_TRAINING_QUIET_FLAG <value>\n"
-  "\n"
-  "Defaults and possible values\n"
-  "MODEL_OUTPUT_DIRECTORY model_output\n"
-  "EXPERIMENTAL_RESULTS_DIRECTORY experimental_results\n"
-  "EMULATOR_REGRESSION_ORDER 1 (can be 0, 1, 2, or 3)\n"
-  "EMULATOR_COVARIANCE_FUNCTION POWER_EXPONENTIAL_FUNCTION\n"
-  "(other values are SQUARE_EXPONENTIAL_FUNCTION, MATERN_32_FUNCTION,\n"
-  " and MATERN_52_FUNCTION)\n"
-  "EMULATOR_TRAINING_QUIET_FLAG false (can be false or 0, and true or 1)\n";
-
 
 struct EmulatorTrainingRuntimeOpts{
   std::string ModelOutputDirectory;
@@ -153,7 +129,23 @@ int main(int argc, char ** argv) {
   if ( argc > 1 ) {
     StatisticsDirectory = std::string(argv[1]);
   } else {
-    std::cerr << useage << '\n';
+    std::cerr << "Usage:\n"
+              << "  trainEmulator <StatisticsDirectory>\n"
+              << "\n"
+              << "<StatisticsDirectory> is the directory in which all \n"
+              << "statistics data are stored. It contains the parameter file "
+              << Paths::RUNTIME_PARAMETER_FILE << "\n"
+              << "\n"
+              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+               << ":\n\n"
+              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
+              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "EMULATOR_COVARIANCE_FUNCTION <value> (default: "
+              << "SQUARE_EXPONENTIAL_FUNCTION)\n"
+              << "EMULATOR_REGRESSION_ORDER <value> (default: 1)\n"
+              << "EMULATOR_TRAINING_QUIET_FLAG <value> (default: false)\n";
     return EXIT_FAILURE;
   }
   std::string OutputFile = StatisticsDirectory;
