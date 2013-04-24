@@ -141,9 +141,9 @@ ExternalModel
   argv[0] = new char[processPath.size()+1];
   strcpy( argv[0], processPath.c_str() );
 
-  for ( size_t i = 1; i <= arguments.size(); ++i ) {
-    argv[i] = new char[arguments[i].size()+1];
-    strcpy( argv[i], arguments[i].c_str() );
+  for ( size_t i = 0; i < arguments.size(); ++i ) {
+    argv[i+1] = new char[arguments[i].size()+1];
+    strcpy( argv[i+1], arguments[i].c_str() );
   }
   argv[arguments.size()+1] = NULL; // NULL-terminated array
 
