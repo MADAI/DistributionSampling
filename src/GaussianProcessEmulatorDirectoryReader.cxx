@@ -237,6 +237,11 @@ bool parseCovarianceFunction(
   return true;
 }
 
+static void inline discardWhitespace(std::istream & input) {
+  while (std::isspace(input.peek())) {
+    input.get();
+  }
+}
 
 bool parseOutputs(
     std::vector< std::string > & outputNames,
@@ -249,21 +254,20 @@ bool parseOutputs(
   if ( !input.good() ) return false;
   outputNames.clear(); // Empty the output vector
   while ( !input.eof() ) {
+    discardWhitespace(input);
     while ( input.peek() == '#' ) { // Disregard commented lines
       std::string s;
       std::getline( input, s );
     }
-    std::string name;
-    input >> name;
-    outputNames.push_back( name );
-  }
-  if ( outputNames.back() == "" || outputNames.back() == " " ) {
-    outputNames.pop_back();
+    discardWhitespace(input); // at beginning of line
+    if ( !input.eof() ) {
+      std::string name;
+      input >> name;
+      outputNames.push_back( name );
+    }
   }
   numberOutputs = outputNames.size();
-  assert( numberOutputs > 0 );
-
-  return true;
+  return (numberOutputs > 0);
 }
 
 
@@ -627,7 +631,7 @@ bool parsePCADecomposition(
 bool parseGaussianProcessEmulator(
     GaussianProcessEmulator & gpme,
     std::string StatisticsDirectory) {
-  std::string EmulatorFile = StatisticsDirectory + Paths::SEPARATOR + 
+  std::string EmulatorFile = StatisticsDirectory + Paths::SEPARATOR +
     Paths::EMULATOR_STATE_FILE;
   std::ifstream input( EmulatorFile.c_str() );
   parseComments(gpme.m_Comments,input);
@@ -688,12 +692,12 @@ GaussianProcessEmulatorDirectoryReader
                                          StatisticalAnalysisDirectory,
                                          m_Verbose ) )
     return false;
-  
+
   if (! parseExperimentalResults( *gpe, ExperimentalResultsDirectory )) {
     std::cerr << "Error in parseExperimentalResults()\n";
     return false;
   }
-  
+
   return (gpe->CheckStatus() == GaussianProcessEmulator::UNTRAINED);
 }
 
