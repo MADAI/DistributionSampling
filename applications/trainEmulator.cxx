@@ -38,8 +38,8 @@ ACKNOWLEDGMENTS:
 
 using madai::Paths;
 
-const std::string DEFAULT_EMULATOR_COVARIANCE_FUNCTION( "SQUARE_EXPONENTIAL_FUNCTION" );
-const int         DEFAULT_EMULATOR_REGRESSION_ORDER = 1;
+static const std::string DEFAULT_EMULATOR_COVARIANCE_FUNCTION( "SQUARE_EXPONENTIAL_FUNCTION" );
+static const int         DEFAULT_EMULATOR_REGRESSION_ORDER = 1;
 
 
 int main(int argc, char ** argv) {

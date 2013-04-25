@@ -34,9 +34,9 @@
 
 using madai::Paths;
 
-double DEFAULT_GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS     = 3.0;
-bool   DEFAULT_GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE = true;
-int    DEFAULT_GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS        = 100;
+static const double DEFAULT_GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS     = 3.0;
+static const bool   DEFAULT_GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE = true;
+static const int    DEFAULT_GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS        = 100;
 
 static void discard_comments( std::istream & i, char comment_character ) {
   int c;

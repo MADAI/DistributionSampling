@@ -36,11 +36,11 @@ ACKNOWLEDGMENTS:
 
 using madai::Paths;
 
-const std::string DEFAULT_EMULATOR_COVARIANCE_FUNCTION( "SQUARE_EXPONENTIAL_FUNCTION" );
-const int         DEFAULT_EMULATOR_REGRESSION_ORDER = 1;
-const double      DEFAULT_EMULATOR_NUGGET           = 1.0e-3;
-const double      DEFAULT_EMULATOR_AMPLITUDE        = 1.0;
-const double      DEFAULT_EMULATOR_SCALE            = 1.0e-2;
+static const std::string DEFAULT_EMULATOR_COVARIANCE_FUNCTION( "SQUARE_EXPONENTIAL_FUNCTION" );
+static const int         DEFAULT_EMULATOR_REGRESSION_ORDER = 1;
+static const double      DEFAULT_EMULATOR_NUGGET           = 1.0e-3;
+static const double      DEFAULT_EMULATOR_AMPLITUDE        = 1.0;
+static const double      DEFAULT_EMULATOR_SCALE            = 1.0e-2;
 
 
 int main(int argc, char ** argv) {
