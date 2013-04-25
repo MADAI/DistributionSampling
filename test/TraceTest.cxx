@@ -23,7 +23,7 @@
 #include "VectorUtilities.h"
 
 
-int main( int argc, char* argv[] )
+int main( int, char *[] )
 {
   // Create an example Trace
   madai::Trace trace;

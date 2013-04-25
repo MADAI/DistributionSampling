@@ -67,5 +67,5 @@ private:
 
 }; // end class RuntimeParameterFileReader
 
-}; // end namespace madai
+} // end namespace madai
 #endif

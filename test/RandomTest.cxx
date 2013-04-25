@@ -29,7 +29,7 @@ void test(madai::Random & r){
   return;
 }
 
-int main(int argc, char ** argv) {
+int main( int, char *[] ) {
   cout << "\n";
 
   madai::Random r1;

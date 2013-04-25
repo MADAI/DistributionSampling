@@ -36,20 +36,20 @@ public:
 
   virtual ~TestModel() {}
 
-  virtual Model::ErrorType LoadConfigurationFile( const std::string fileName )
+  virtual Model::ErrorType LoadConfigurationFile( const std::string )
   {
     return Model::NO_ERROR;
   }
 
-  virtual Model::ErrorType GetScalarOutputs( const std::vector< double > & parameters,
-                                             std::vector< double > & scalars ) const
+  virtual Model::ErrorType GetScalarOutputs( const std::vector< double > &,
+                                             std::vector< double > & ) const
   {
     return Model::NO_ERROR;
   }
 
-  virtual ErrorType GetLikeAndPrior( const std::vector< double > & parameters,
-                                     double & LikeNew,
-                                     double & PriorNew) const
+  virtual ErrorType GetLikeAndPrior( const std::vector< double > &,
+                                     double &,
+                                     double &) const
   {
     return Model::NO_ERROR;
   }
@@ -57,7 +57,7 @@ public:
 }; // end TestModel
 
 
-int main( int argc, char *argv[])
+int main( int, char *[] )
 {
 
   TestModel * model = new TestModel();

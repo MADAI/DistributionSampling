@@ -25,7 +25,7 @@
 #include "Trace.h"
 
 
-int main(int argc, char *arg[])
+int main( int, char *[] )
 {
   madai::Gaussian2DModel model;
 

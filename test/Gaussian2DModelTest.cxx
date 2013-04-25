@@ -22,7 +22,7 @@
 #include "Gaussian2DModel.h"
 
 
-int main(int argc, char *argv[])
+int main( int, char *[] )
 {
   madai::Gaussian2DModel *model = new madai::Gaussian2DModel();
 

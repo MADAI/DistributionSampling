@@ -54,7 +54,7 @@ Model
 
 Model::ErrorType
 Model
-::LoadConfigurationFile( const std::string fileName )
+::LoadConfigurationFile( const std::string )
 {
   return METHOD_NOT_IMPLEMENTED;
 }

@@ -24,7 +24,7 @@
 #include "UniformDistribution.h"
 
 
-int main( int argc, char* argv[] )
+int main( int, char *[] )
 {
   madai::UniformDistribution distribution;
   if ( distribution.GetMinimum() != 0.0 ) {

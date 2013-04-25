@@ -48,7 +48,7 @@ void model(const std::vector< double > & params, std::vector< double > & out) {
 }
 
 
-int main(int argc, char ** argv) {
+int main( int, char *[] ) {
   static const int N = 100;
 
   madai::Parameter param0( "param_0", -1, 1 );

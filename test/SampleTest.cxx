@@ -21,7 +21,7 @@
 
 #include "Sample.h"
 
-int main( int argc, char* argv[] ) {
+int main( int, char *[] ) {
 
   // By default, Samples should be invalide
   madai::Sample sample;

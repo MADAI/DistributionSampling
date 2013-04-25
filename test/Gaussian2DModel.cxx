@@ -57,7 +57,7 @@ Gaussian2DModel
 
 Model::ErrorType
 Gaussian2DModel
-::LoadConfigurationFile( const std::string fileName )
+::LoadConfigurationFile( const std::string )
 {
   // Member variables should be set from values ready from a file.
 
@@ -129,7 +129,7 @@ Gaussian2DModel
 
 Model::ErrorType
 Gaussian2DModel
-::SetObservedScalarValues( const std::vector< double > & observedScalarValues )
+::SetObservedScalarValues( const std::vector< double > & )
 {
   // Do nothing. The values are set internally.
   return NO_ERROR;
@@ -138,7 +138,7 @@ Gaussian2DModel
 
 Model::ErrorType
 Gaussian2DModel
-::SetObservedScalarCovariance( const std::vector< double > & observedScalarCovariance)
+::SetObservedScalarCovariance( const std::vector< double > & )
 {
   // Do nothing. The values are set internally.
   return NO_ERROR;

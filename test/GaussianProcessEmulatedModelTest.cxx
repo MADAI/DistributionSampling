@@ -47,7 +47,7 @@ void model(const std::vector< double > & params, std::vector< double > & out) {
  * Test case for madai::GaussianProcessEmulatedModel and
  * madai::MetropolisHastingsSampler classes.
  */
-int main(int argc, char ** argv) {
+int main( int, char *[] ) {
 
   const char TRAINING_FILE[] = "/tmp/GaussianProcessEmulatorTestTraining.dat";
   const char MODEL_FILE[] = "/tmp/GaussianProcessEmulatorTestModel.dat";
