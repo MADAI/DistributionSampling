@@ -26,3 +26,6 @@ set( SRC_FILES
 
 add_library( DistributionSampling ${SRC_FILES} )
 target_link_libraries( DistributionSampling madaisys )
+set_target_properties( DistributionSampling
+  PROPERTIES VERSION ${DistributionSamplingLibrary_VERSION_STRING}
+)
