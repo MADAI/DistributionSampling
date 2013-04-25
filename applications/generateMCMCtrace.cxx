@@ -34,71 +34,10 @@
 
 using madai::Paths;
 
-/**
-generateMCMCtrace
-  Generate a trace of length N for a Gaussian Process Model Emulator
- */
-static const int DEFAULT_NUMBER_ITERATIONS = 100;
-static const int DEFAULT_BURN_IN = 0;
-static const bool DEFAULT_USE_EMULATOR_COVARIANCE = false;
-static const double DEFAULT_STEP_SIZE = 0.1;
-
-struct GaussianProcessMCMCRuntimeParameters
-{
-  int numberIter;
-  int numberBurnIn;
-  bool UseEmulatedCovariance;
-  double StepSize;
-  std::string ModelOutputDirectory;
-  std::string ExperimentalResultsDirectory;
-};
-
-bool parseMCMCRuntimeParameters(
-    int argc, char** argv,
-    struct GaussianProcessMCMCRuntimeParameters & Opts )
-{
-  // Initialize as defaults
-  Opts.ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
-  Opts.ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
-  Opts.numberIter = DEFAULT_NUMBER_ITERATIONS;
-  Opts.numberBurnIn = DEFAULT_BURN_IN;
-  Opts.UseEmulatedCovariance = false;
-  Opts.StepSize = DEFAULT_STEP_SIZE;
-
-  for ( unsigned int i = 0; i < argc; i++ ) {
-    std::string argString( argv[i] );
-
-    if ( argString == "MCMC_NUMBER_ITERATIONS" ) {
-      Opts.numberIter = atoi(argv[i+1]);
-      i++;
-    } else if ( argString == "MODEL_OUTPUT_DIRECTORY" ) {
-      Opts.ModelOutputDirectory = std::string( argv[i+1] );
-      i++;
-    } else if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) { 
-      Opts.ExperimentalResultsDirectory = std::string( argv[i+1] );
-      i++;
-    } else if ( argString == "MCMC_NUMBER_BURN_IN" ) {
-      Opts.numberBurnIn = atoi(argv[i+1]);
-      i++;
-    } else if ( argString == "MCMC_USE_EMULATOR_COVARIANCE" ) {
-      std::string tstring(argv[i+1]);
-      if ( tstring == "false" || tstring == "0" ) {
-        Opts.UseEmulatedCovariance = false;
-      } else if ( tstring == "true" || tstring == "1" ) {
-        Opts.UseEmulatedCovariance = true;
-      } else {
-        std::cerr << "MCMC_USE_EMULATOR_COVARIANCE: " << tstring << " is invalid\n"
-                  << "Setting to false\n";
-        Opts.UseEmulatedCovariance = false;
-      }
-      i++;
-    } else if ( argString == "MCMC_STEP_SIZE" ) {
-      Opts.StepSize = atof(argv[i+1]);
-      i++;
-    }
-  }
-  return true;
-}
+static const int    DEFAULT_MCMC_NUMBER_OF_SAMPLES         = 100;
+static const int    DEFAULT_MCMC_NUMBER_OF_BURN_IN_SAMPLES = 0;
+static const bool   DEFAULT_MCMC_USE_EMULATOR_COVARIANCE   = false;
+static const double DEFAULT_MCMC_STEP_SIZE                 = 0.1;
 
 
 int main(int argc, char ** argv) {
@@ -126,88 +65,112 @@ int main(int argc, char ** argv) {
               << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
               << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
               << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
-              << "MCMC_NUMBER_ITERATIONS <value> (default: "
-              << DEFAULT_NUMBER_ITERATIONS << ")\n"
-              << "MCMC_NUMBER_BURN_IN <value> (default: "
-              << DEFAULT_BURN_IN << ")\n"
+              << "MCMC_NUMBER_OF_SAMPLES <value> (default: "
+              << DEFAULT_MCMC_NUMBER_OF_SAMPLES << ")\n"
+              << "MCMC_NUMBER_OF_BURN_IN_SAMPLES <value> (default: "
+              << DEFAULT_MCMC_NUMBER_OF_BURN_IN_SAMPLES << ")\n"
               << "MCMC_USE_EMULATOR_COVARIANCE <value> (default: "
-              << DEFAULT_USE_EMULATOR_COVARIANCE << ")\n"
+              << DEFAULT_MCMC_USE_EMULATOR_COVARIANCE << ")\n"
               << "MCMC_STEP_SIZE <value> (default: "
-              << DEFAULT_STEP_SIZE << ")\n";
+              << DEFAULT_MCMC_STEP_SIZE << ")\n";
+
     return EXIT_FAILURE;
   }
-  std::string StatisticsDirectory( argv[1] );
-  std::string OutputFileName( argv[2] );
-  
-  madai::EnsurePathSeparatorAtEnd( StatisticsDirectory );
-  madai::RuntimeParameterFileReader RPFR;
-  RPFR.ParseFile( StatisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE );
-  char** Args = RPFR.GetArguments();
-  int NArgs = RPFR.GetNumberOfArguments();
-  struct GaussianProcessMCMCRuntimeParameters Opts;
-  if ( !parseMCMCRuntimeParameters( NArgs, Args, Opts ) ) {
-    std::cerr << "Error: Parsing configuration file for gaussian process mcmc.\n";
+  std::string statisticsDirectory( argv[1] );
+  madai::EnsurePathSeparatorAtEnd( statisticsDirectory );
+
+  madai::RuntimeParameterFileReader settings;
+  std::string settingsFile = statisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE;
+  if ( !settings.ParseFile( settingsFile ) ) {
+    std::cerr << "Could not open runtime parameter file '" << settingsFile << "'\n";
     return EXIT_FAILURE;
   }
-  std::string observationsFile = Opts.ExperimentalResultsDirectory +
+
+  std::string modelOutputDirectory =
+    madai::GetModelOutputDirectory( statisticsDirectory, settings );
+  std::string experimentalResultsDirectory =
+    madai::GetExperimentalResultsDirectory( statisticsDirectory, settings );
+
+  int numberOfSamples = DEFAULT_MCMC_NUMBER_OF_SAMPLES;
+  if ( settings.HasOption( "MCMC_NUMBER_OF_SAMPLES" ) ) {
+    numberOfSamples = atoi( settings.GetOption( "MCMC_NUMBER_OF_SAMPLES" ).c_str() );
+  }
+  int numberOfBurnInSamples = DEFAULT_MCMC_NUMBER_OF_BURN_IN_SAMPLES;
+  if ( settings.HasOption( "MCMC_NUMBER_OF_BURN_IN_SAMPLES" ) ) {
+    numberOfBurnInSamples =
+      atoi( settings.GetOption( "MCMC_NUMBER_OF_BURN_IN_SAMPLES" ).c_str() );
+  }
+  bool useEmulatorCovariance = DEFAULT_MCMC_USE_EMULATOR_COVARIANCE;
+  if ( settings.HasOption( "MCMC_USE_EMULATOR_COVARIANCE" ) ) {
+    useEmulatorCovariance = ( settings.GetOption( "MCMC_USE_EMULATOR_COVARIANCE" ) == "true" );
+  }
+  double stepSize = DEFAULT_MCMC_STEP_SIZE;
+  if ( settings.HasOption( "MCMC_STEP_SIZE" ) ) {
+    stepSize = atof( settings.GetOption( "MCMC_STEP_SIZE" ).c_str() );
+  }
+
+  std::string outputFileName( argv[2] );
+  std::string observationsFile = experimentalResultsDirectory +
     madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
   
   madai::GaussianProcessEmulatedModel gpem;
-  std::string MOD = StatisticsDirectory + Opts.ModelOutputDirectory;
-  std::string ERD = StatisticsDirectory + Opts.ExperimentalResultsDirectory;
-  if ( gpem.LoadConfiguration( StatisticsDirectory, MOD, ERD ) != madai::Model::NO_ERROR ) {
+  if ( gpem.LoadConfiguration( statisticsDirectory,
+                               modelOutputDirectory,
+                               experimentalResultsDirectory ) != madai::Model::NO_ERROR ) {
     std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
     return EXIT_FAILURE;
   }
 
-  gpem.SetUseModelCovarianceToCalulateLogLikelihood(Opts.UseEmulatedCovariance);
+  gpem.SetUseModelCovarianceToCalulateLogLikelihood( useEmulatorCovariance );
 
-  std::ifstream observations(observationsFile.c_str());
-  if (madai::Model::NO_ERROR != gpem.LoadObservations(observations)) {
-    std::cerr << "error loading observations.\n";
+  std::ifstream observations( observationsFile.c_str() );
+  if ( madai::Model::NO_ERROR != gpem.LoadObservations( observations ) ) {
+    std::cerr << "Error loading observations.\n";
     return EXIT_FAILURE;
   }
   observations.close();
 
   madai::MetropolisHastingsSampler mcmc;
   mcmc.SetModel( &gpem );
-  mcmc.SetStepSize(Opts.StepSize);
+  mcmc.SetStepSize( stepSize );
 
-  std::vector< madai::Parameter > const & parameters
-    = gpem.GetParameters();
+  std::vector< madai::Parameter > const & parameters = gpem.GetParameters();
 
   int t = gpem.GetNumberOfScalarOutputs();
 
-  int step = Opts.numberBurnIn / 100, percent = 0;
-  if (step < 1)
-    step = 1; // avoid div-by-zero error;
-  for ( int count = 0; count < Opts.numberBurnIn; count++ ) {
-    if ( count % step == 0 )
-      std::cerr << '\r' << "Burn in done: " << percent++ << "%";
+  int step = numberOfBurnInSamples / 100, percent = 0;
+  if ( step < 1 ) {
+    step = 1; // avoid div-by-zero error
+  }
+
+  for ( int count = 0; count < numberOfBurnInSamples; count++ ) {
+    if ( count % step == 0 ) {
+      std::cout << '\r' << "Burn in percent done: " << percent++ << "%";
+    }
+
+    // Discard samples in the burn-in phase
     mcmc.NextSample();
   }
-  step = Opts.numberIter / 100, percent = 0;
-
-  std::vector< madai::Sample> samples;
-  for (int count = 0; count < Opts.numberIter; count ++) {
-    if (count % step == 0)
-      std::cerr <<  '\r' << "MCMC percent done: " << percent++ << "%";
-    samples.push_back(mcmc.NextSample());
+  step = numberOfSamples / 100, percent = 0;
+  if ( step < 1 ) {
+    step = 1; // avoid div-by-zero error
   }
-  std::cerr << "\r" ;
 
   madai::Trace trace;
-  for (std::vector< madai::Sample >::const_iterator it = samples.begin() ;
-       it != samples.end(); ++it) {
-    trace.Add( *it );
+  for (int count = 0; count < numberOfSamples; count ++) {
+    if (count % step == 0)
+      std::cout <<  '\r' << "MCMC percent done: " << percent++ << "%";
+    trace.Add( mcmc.NextSample() );
   }
-  std::string traceDirectory = StatisticsDirectory + madai::Paths::TRACE_DIRECTORY;
+  std::cout << "\r" ;
+
+  std::string traceDirectory = statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
-  std::string OutputFile = traceDirectory+OutputFileName;
-  std::ofstream Out( OutputFile.c_str() );
-  trace.WriteCSVOutput(
-      Out,
-      gpem.GetParameters(),
-      gpem.GetScalarOutputNames() );
+  std::string outputFilePath = traceDirectory + Paths::SEPARATOR + outputFileName;
+  std::ofstream out( outputFilePath.c_str() );
+  trace.WriteCSVOutput( out,
+                        gpem.GetParameters(),
+                        gpem.GetScalarOutputNames() );
+
   return EXIT_SUCCESS;
 }
