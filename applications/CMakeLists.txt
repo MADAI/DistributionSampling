@@ -36,14 +36,6 @@ target_link_libraries( basicTrain
 )
 
 add_executable(
-  printThetas
-  printThetas.cxx)
-target_link_libraries( printThetas
-  DistributionSampling
-  ApplicationUtilities
-)
-
-add_executable(
   generateMCMCtrace
   generateMCMCtrace.cxx)
 target_link_libraries( generateMCMCtrace
