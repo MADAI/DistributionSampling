@@ -21,11 +21,21 @@
 
 #include <string>
 
+#include "Paths.h"
+#include "RuntimeParameterFileReader.h"
+
+
 namespace madai {
 
 void EnsurePathSeparatorAtEnd( std::string & path );
 
-}
+std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
+                                     const RuntimeParameterFileReader & settings );
+
+std::string GetExperimentalResultsDirectory( const std::string & statisticsDirectory,
+                                             const RuntimeParameterFileReader & settings );
+
+} // end namespace madai
 
 
 #endif // madai_ApplicationUtilities_h_included

@@ -28,4 +28,32 @@ void EnsurePathSeparatorAtEnd( std::string & path )
   }
 }
 
+std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
+                                     const RuntimeParameterFileReader & settings )
+{
+  std::string modelOutputDirectory = Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+  if ( settings.HasOption( "MODEL_OUTPUT_DIRECTORY" ) ) {
+    modelOutputDirectory = settings.GetOption( "MODEL_OUTPUT_DIRECTORY" );
+  }
+  if ( modelOutputDirectory[0] != Paths::SEPARATOR ) {
+    modelOutputDirectory.insert( 0, statisticsDirectory );
+  }
+
+  return modelOutputDirectory;
 }
+
+std::string GetExperimentalResultsDirectory( const std::string & statisticsDirectory,
+                                             const RuntimeParameterFileReader & settings )
+{
+  std::string experimentalResultsDirectory = Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
+  if ( settings.HasOption( "EXPERIMENTAL_RESULTS_DIRECTORY" ) ) {
+    experimentalResultsDirectory = settings.GetOption( "EXPERIMENTAL_RESULTS_DIRECTORY" );
+  }
+  if ( experimentalResultsDirectory[0] != Paths::SEPARATOR ) {
+    experimentalResultsDirectory.insert( 0, statisticsDirectory );
+  }
+
+  return experimentalResultsDirectory;
+}
+
+} // end namespace madai
