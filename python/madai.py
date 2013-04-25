@@ -8,7 +8,7 @@
 ##  Licensed under the MADAI Software License. You may obtain a copy of
 ##  this license at
 ##
-##         https://madai-public.cs.unc.edu/software/license/
+##         https://madai-public.cs.unc.edu/visualization/software-license/
 ##
 ##  Unless required by applicable law or agreed to in writing, software
 ##  distributed under the License is distributed on an "AS IS" BASIS,

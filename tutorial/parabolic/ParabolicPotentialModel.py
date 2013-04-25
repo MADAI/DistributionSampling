@@ -9,7 +9,7 @@ Copyright 2012-2013, Michigan State University.
 The software was written in 2013 by Jeffrey Wyka
 while working for the MADAI project <http://madai.us/>
 
-See <https://madai-public.cs.unc.edu/software/license/> for license
+See <https://madai-public.cs.unc.edu/visualization/software-license/> for license
 information.
 
 This is inteded as an example of:
@@ -48,7 +48,7 @@ class ParabolicPotentialModel(object):
         The software was written in 2013 by Jeffrey Wyka
         while working for the MADAI project <http://madai.us/>
 
-        See <https://madai-public.cs.unc.edu/software/license/> for license
+        See <https://madai-public.cs.unc.edu/visualization/software-license/> for license
         information.
 
         This is inteded as an example of:

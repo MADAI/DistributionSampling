@@ -7,7 +7,7 @@ Copyright 2012-2013, The University of North Carolina at Chapel Hill.
 This software was written in 2012 by Hal Canary <cs.unc.edu/~hal/>
 while working for the MADAI project <http://madai.us/>.
 
-See <https://madai-public.cs.unc.edu/software/license/> for license
+See <https://madai-public.cs.unc.edu/visualization/software-license/> for license
 information.
 
 This is intended as an example of:
