@@ -17,152 +17,26 @@
  *=========================================================================*/
 
 #include <iostream> // std::cerr
-#include <algorithm> // std::transform
 #include <fstream> // std::ifstream, std::ofstream
 #include <string> // std::string
 #include <vector> // std::vector
 #include <sstream> // std::ostringstream
 
+#include "ApplicationUtilities.h"
 #include "GaussianDistribution.h"
 #include "LatinHypercubeGenerator.h"
-#include "RuntimeParameterFileReader.h"
-#include "ApplicationUtilities.h"
 #include "Parameter.h"
-#include "UniformDistribution.h"
 #include "Paths.h"
+#include "RuntimeParameterFileReader.h"
+#include "UniformDistribution.h"
 
 #include "madaisys/SystemTools.hxx"
 
 using madai::Paths;
 
-
-static const char useage[] =
-  "Useage:\n"
-  "  generateTrainingPoints StatisticsDirectory\n"
-  "\n"
-  "StatisticsDirectory is the directory in which all statistical data will\n"
-  "be stored. Contains the paameter file stat_params.dat\n"
-  "\n"
-  "Format of and parameters which can be set in stat_params.dat:\n"
-  "MODEL_OUTPUT_DIRECTORY <value>\n"
-  "EXPERIMENTAL_RESULTS_DIRECTORY <value>\n"
-  "NUMBER_TRAINING_POINTS <values>\n"
-  "GENERATE_TRAINING_POINTS_VERBOSE <value>\n"
-  "GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION <value>\n"
-  "GENERATE_TRAINING_POINTS_NUMBER_STDDEV <value>\n"
-  "\n"
-  "Default values (if not specified):\n"
-  "MODEL_OUTPUT_DIRECTORY = model_output\n"
-  "EXPERIMENTAL_RESULTS_DIRECTORY = experimental_results\n"
-  "NUMBER_TRAINING_POINTS = 100\n"
-  "GENERATE_TRAINING_POINTS_VERBOSE = false\n"
-  "GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION = false\n"
-  "GENERATE_TRAINING_POINTS_NUMBER_STDDEV = 3\n"
-  "\n"
-  "This reads from StatisticsDirectory/parameter_priors.dat in order to\n"
-  "use LHS to generate a series of parameter files on which to run a model.\n"
-  "\n"
-  "parameter_priors.dat entry formats:\n"
-  "uniform name min max\n"
-  "gaussian name mean std_dev\n"
-  "\n"
-  "Only uniform and gaussian distributions are available\n"
-  "\n";
-
-struct RuntimeOptions {
-  bool verbose;
-  bool partitionSpaceByPercentile;
-  std::string ModelOutputDirectory;
-  std::string ExperimentalResultsDirectory;
-  double standardDeviations;
-  int numberOfTrainingPoints;
-};
-
-
-std::string LowerCase( char * buffer )
-{
-  std::string outBuffer( buffer );
-
-  std::transform( outBuffer.begin(), outBuffer.end(),
-                  outBuffer.begin(), ::tolower );
-
-  return outBuffer;
-}
-
-void LowerCase( std::string & s )
-{
-  std::transform( s.begin(), s.end(),
-                  s.begin(), ::tolower );
-}
-
-
-bool ParseRuntimeOptions( int argc, char* argv[], struct RuntimeOptions & options)
-{
-  // Default values for command-line options
-  options.verbose = false;
-  options.ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
-  options.ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
-  options.partitionSpaceByPercentile = false;
-  options.standardDeviations = 3.0;
-  options.numberOfTrainingPoints = 100;
-
-  // Parse options
-  for ( unsigned int argIndex = 0; argIndex < argc; ++argIndex ) {
-    std::string argString( argv[ argIndex ] );
-
-    if ( argString == "GENERATE_TRAINING_POINTS_VERBOSE" ) {
-      std::string tstring( argv[ argIndex + 1 ] );
-      if ( tstring == "false" || tstring == "0" ) {
-        options.verbose = false;
-      } else if ( tstring == "true" || tstring == "1" ) {
-        options.verbose = true;
-      } else {
-        std::cerr << "GENERATE_TRAINING_POINTS_VERBOSE given invalid argument \""
-          << tstring << "\"\n";
-        return false;
-      }
-      argIndex++;
-    } else if ( argString == "GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION" ) {
-      std::string tstring( argv[ argIndex + 1 ] );
-      if ( tstring == "false" || tstring == "0" ) {
-        options.partitionSpaceByPercentile = false;
-      } else if ( tstring == "true" || tstring == "1" ) {
-        options.partitionSpaceByPercentile = true;
-      } else {
-        std::cerr << "GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION given invalid argument \""
-          << tstring << "\"\n";
-        return false;
-      }
-      argIndex++;
-    } else if ( argString == "GENERATE_TRAINING_POINTS_NUMBER_STDDEV" ) {
-      std::string tstring( argv[ argIndex + 1 ] );
-      options.standardDeviations = atof( tstring.c_str() );
-      if ( options.standardDeviations <= 0.0 ) {
-        std::cerr << "GENERATE_TRAINING_POINTS_NUMBER_STDDEV given invalid argument \""
-          << tstring << "\"\n";
-        return false;
-      }
-    } else if ( argString == "MODEL_OUTPUT_DIRECTORY" ) {
-      options.ModelOutputDirectory = std::string( argv[ argIndex + 1 ] );
-      argIndex++;
-    } else if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) {
-      options.ExperimentalResultsDirectory = std::string( argv[ argIndex + 1 ] );
-      argIndex++;
-    } else if ( argString == "NUMBER_TRAINING_POINTS" ) {
-      std::string tstring( argv[ argIndex + 1 ] );
-      options.numberOfTrainingPoints = atoi( tstring.c_str() );
-      if ( options.numberOfTrainingPoints <= 0 ) {
-        std::cerr << "NUMBER_TRAINING_POINTS given invalid argument \""
-          << tstring << "\"\n";
-        return false;
-      }
-      argIndex++;
-    }
-  }
-
-  // Everything went well
-  return true;
-}
+double DEFAULT_GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS     = 3.0;
+bool   DEFAULT_GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE = true;
+int    DEFAULT_GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS        = 100;
 
 static void discard_comments( std::istream & i, char comment_character ) {
   int c;
@@ -204,7 +78,7 @@ bool ReadParameters( std::string parametersFile,
       parameterFile.close();
       break;
     }
-    LowerCase(distributionType);
+    distributionType = madai::LowerCase(distributionType);
     if ( verbose ) {
       std::cout << "Read parameter '" << parameterName << "' "
                 << "which is of type '" << distributionType << "' ";
@@ -263,116 +137,143 @@ bool ReadParameters( std::string parametersFile,
 }
 
 
-bool WriteDirectories( const std::string ModelOutputDirectory,
-                       const std::string ExperimentalResultsDirectory,
+bool WriteDirectories( const std::string modelOutputDirectory,
                        const std::vector< madai::Parameter > & parameters,
                        const std::vector< madai::Sample > & samples,
                        const bool verbose ) {
   // Create the directory structure
-  bool directoryCreated = madaisys::SystemTools::MakeDirectory( ModelOutputDirectory.c_str() );
+  bool directoryCreated = madaisys::SystemTools::MakeDirectory( modelOutputDirectory.c_str() );
   if ( !directoryCreated ) {
-    std::cerr << "Could not create directory '" << ModelOutputDirectory << "'\n";
+    std::cerr << "Could not create directory '" << modelOutputDirectory << "'\n";
     return false;
   }
-  
-  directoryCreated = madaisys::SystemTools::MakeDirectory( ExperimentalResultsDirectory.c_str() );
-  if ( !directoryCreated ) {
-    std::cerr << "Could not create directory '" << ExperimentalResultsDirectory << "'\n";
-    return false;
-  }
-  
+
   // Now create the run directories
   for ( size_t i = 0; i < samples.size(); ++i ) {
     const madai::Sample & sample = samples[i];
-    
+
     std::ostringstream buffer;
-    buffer << ModelOutputDirectory << "/run"
-    << std::setw( 7 ) << std::setfill( '0' ) << i;
+    buffer << modelOutputDirectory << "/run"
+    << std::setw( 4 ) << std::setfill( '0' ) << i;
     std::string runDirectory(buffer.str());
-    
+
     if ( verbose ) {
       std::cout << runDirectory << "\n";
     }
-    
-    directoryCreated = directoryCreated &&
-      madaisys::SystemTools::MakeDirectory( runDirectory.c_str() );
-      
+
+    directoryCreated = madaisys::SystemTools::MakeDirectory( runDirectory.c_str() );
+    if ( !directoryCreated ) {
+      std::cerr << "Could not create directory '" << runDirectory << "\n";
+      return false;
+    }
+
     // Write the parameters to parameters.dat file
-    std::string parametersFile( runDirectory + Paths::SEPARATOR +
-                                Paths::PARAMETERS_FILE );
+    std::string parametersFile( runDirectory + Paths::SEPARATOR + Paths::PARAMETERS_FILE );
     std::ofstream outfile( parametersFile.c_str() );
     if ( !outfile ) {
       std::cerr << "Could not open file '" << parametersFile << "'\n";
       return false;
     }
-    
+
     assert( parameters.size() == sample.m_ParameterValues.size() );
     for ( size_t j = 0; j < parameters.size(); ++j ) {
       outfile << parameters[ j ].m_Name << ' '
               << sample.m_ParameterValues[ j ] << '\n';
     }
-    
+
     outfile.close();
   }
-  
+
   return true;
 }
 
 
 int main( int argc, char * argv[] ) {
-  std::string StatisticsDirectory;
-  std::string ModelOutputDirectory;
-  std::string ExperimentalResultsDirectory;
-  if ( argc > 1 ) {
-    StatisticsDirectory = std::string( argv[1] );
-    madai::EnsurePathSeparatorAtEnd( StatisticsDirectory );
-  } else {
-    std::cerr << useage << '\n';
-    return EXIT_FAILURE;
-  }
-  madai::RuntimeParameterFileReader RPFR;
-  RPFR.ParseFile( StatisticsDirectory +
-                  madai::Paths::RUNTIME_PARAMETER_FILE );
-  char** Args = RPFR.GetArguments();
-  int NArgs = RPFR.GetNumberOfArguments();
-  struct RuntimeOptions options;
-  if ( !ParseRuntimeOptions( NArgs, Args, options ) ) {
+  if ( argc < 2 ) {
+    std::cerr << "Useage:\n"
+              << "    generateTrainingPoints <StatisticsDirectory>\n"
+              << "\n"
+              << "This program reads from <StatisticsDirectory>/"
+              << Paths::PARAMETER_PRIORS_FILE << " in\n"
+              << "and uses the parameter prior distribution to generate a series of\n"
+              << "parameter files on which to run a model according to a latin hypercube\n"
+              << "sampling pattern.\n"
+              << "\n"
+              << "The format of the " << Paths::PARAMETER_PRIORS_FILE << " file is:\n"
+              << "uniform name min max\n"
+              << "gaussian name mean std_dev\n"
+              << "\n"
+              << "Only uniform and gaussian distributions are available.\n"
+              << "\n"
+              << "<StatisticsDirectory> is the directory in which all \n"
+              << "statistics data are stored. It contains the parameter file "
+              << Paths::RUNTIME_PARAMETER_FILE << "\n"
+              << "\n"
+              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+              << ":\n\n"
+              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
+              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
+              << "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS <values> (default: "
+              << DEFAULT_GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS << ")\n"
+              << "GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION <value> (default: "
+              << DEFAULT_GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE << ")\n"
+              << "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS <value> (default: "
+              << DEFAULT_GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS << ")\n";
+
     return EXIT_FAILURE;
   }
 
-  ModelOutputDirectory = StatisticsDirectory + options.ModelOutputDirectory;
-  ExperimentalResultsDirectory = StatisticsDirectory + options.ExperimentalResultsDirectory;
-  if ( options.verbose ) {
-    std::cout << "Options: \n";
-    std::cout << "  VERBOSE: " << options.verbose << "\n";
-    std::cout << "  PERCENTILE_PARTITION: " << options.partitionSpaceByPercentile << "\n";
-    std::cout << "  STANDARD_DEVIATIONS: " << options.standardDeviations << "\n";
-    std::cout << "  NUMBER_TRAINING_POINTS: " << options.numberOfTrainingPoints << "\n";
-    std::cout << "  MODEL_OUTPUT_DIRECTORY: " << ModelOutputDirectory << "\n";
-    std::cout << "  EXPERIMENTAL_RESULTS_DIRECTORY: " << ExperimentalResultsDirectory << "\n";
+  std::string statisticsDirectory( argv[1] );
+  madai::EnsurePathSeparatorAtEnd( statisticsDirectory );
+
+  madai::RuntimeParameterFileReader settings;
+  std::string settingsFile = statisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE;
+  if ( !settings.ParseFile( settingsFile ) ) {
+    std::cerr << "Could not open runtime parameter file '" << settingsFile << "'\n";
+    return EXIT_FAILURE;
   }
+
+  std::string modelOutputDirectory =
+    madai::GetModelOutputDirectory( statisticsDirectory, settings );
 
   // Read in parameter priors
   std::vector< madai::Parameter > parameters;
-  std::string parametersFile =  StatisticsDirectory +
-    madai::Paths::PARAMETER_PRIORS_FILE;
-  bool parametersRead = ReadParameters( parametersFile, parameters, options.verbose );
+  std::string parametersFile = statisticsDirectory + madai::Paths::PARAMETER_PRIORS_FILE;
+  bool parametersRead = ReadParameters( parametersFile, parameters, false );
   if ( !parametersRead ) {
     std::cerr << "Could not read parameters from prior file '"
               << parametersFile << "'" << std::endl;
     return EXIT_FAILURE;
   }
 
+  double standardDeviations = DEFAULT_GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS;
+  if ( settings.HasOption( "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS" ) ) {
+    standardDeviations =
+      atof( settings.GetOption( "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS" ).c_str() );
+  }
+  bool partitionByPercentile = DEFAULT_GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE;
+  if ( settings.HasOption( "GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE" ) ) {
+    partitionByPercentile =
+      ( settings.GetOption( "GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE" ) == "true" );
+  }
+  int numberOfTrainingPoints = DEFAULT_GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS;
+  if ( settings.HasOption( "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS" ) ) {
+    numberOfTrainingPoints =
+      atoi( settings.GetOption( "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS" ).c_str() );
+  }
+
   // Create the Latin hypercube sampling
   madai::LatinHypercubeGenerator sampleGenerator;
-  sampleGenerator.SetStandardDeviations( options.standardDeviations );
-  sampleGenerator.SetPartitionSpaceByPercentile( options.partitionSpaceByPercentile );
+  sampleGenerator.SetStandardDeviations( standardDeviations );
+  sampleGenerator.SetPartitionSpaceByPercentile( partitionByPercentile );
 
   std::vector< madai::Sample > samples =
-    sampleGenerator.Generate( options.numberOfTrainingPoints, parameters );
+    sampleGenerator.Generate( numberOfTrainingPoints, parameters );
 
-  WriteDirectories( ModelOutputDirectory, ExperimentalResultsDirectory, parameters,
-                    samples, options.verbose );
+  if ( !WriteDirectories( modelOutputDirectory, parameters, samples, false ) ) {
+    std::cerr << "Could not write model output directory\n";
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }
