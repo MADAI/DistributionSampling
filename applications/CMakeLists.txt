@@ -12,7 +12,6 @@ set( APPLICATIONS
   generatePercentileGridTrace
   generatePercentileGridTraceExternal
   generateTrainingPoints
-  printThetas
   trainEmulator
 )
 
