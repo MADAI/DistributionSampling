@@ -6,6 +6,8 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMake")
 set( DistributionSamplingLibrary_VERSION_MAJOR 0 )
 set( DistributionSamplingLibrary_VERSION_MINOR 1 )
 set( DistributionSamplingLibrary_VERSION_REVISION 0 )
+set( DistributionSamplingLibrary_VERSION_STRING
+  "${DistributionSamplingLibrary_VERSION_MAJOR}.${DistributionSamplingLibrary_VERSION_MINOR}.${DistributionSamplingLibrary_VERSION_REVISION}" )
 
 set( DistributionSampling_INCLUDE_DIRS ${DistributionSampling_SOURCE_DIR}/src )
 set( DistributionSampling_LIBRARY_DIRS ${DistributionSampling_BINARY_DIR}/lib )
