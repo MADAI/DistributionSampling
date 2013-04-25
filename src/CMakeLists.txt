@@ -29,3 +29,13 @@ target_link_libraries( DistributionSampling madaisys )
 set_target_properties( DistributionSampling
   PROPERTIES VERSION ${DistributionSamplingLibrary_VERSION_STRING}
 )
+
+install( TARGETS DistributionSampling
+  LIBRARY DESTINATION lib/madai
+  ARCHIVE DESTINATION lib/madai
+)
+
+install( DIRECTORY .
+  DESTINATION include/madai/DistributionSampling
+  FILES_MATCHING PATTERN *.h
+)
