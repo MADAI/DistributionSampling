@@ -74,5 +74,22 @@ std::string LowerCase( std::string & s )
   return copy;
 }
 
+std::vector< std::string > SplitString( const std::string & input, char separator )
+{
+  std::vector< std::string > tokens;
+  size_t firstSeparator = input.find_first_of( separator );
+  std::string token = input.substr( 0, firstSeparator );
+  tokens.push_back( token );
+  while ( firstSeparator != std::string::npos ) {
+    size_t nextSeparator = input.find_first_of( ' ', firstSeparator+1 );
+    token = input.substr( firstSeparator+1,
+                          (nextSeparator - firstSeparator - 1) );
+    tokens.push_back( token );
+    firstSeparator = nextSeparator;
+  }
+
+  return tokens;
+}
+
 
 } // end namespace madai

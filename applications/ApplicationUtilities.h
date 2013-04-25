@@ -20,6 +20,7 @@
 #define madai_ApplicationUtilities_h_included
 
 #include <string>
+#include <vector>
 
 #include "Paths.h"
 #include "RuntimeParameterFileReader.h"
@@ -38,6 +39,8 @@ std::string GetExperimentalResultsDirectory( const std::string & statisticsDirec
 std::string LowerCase( char * buffer );
 
 std::string LowerCase( std::string & s );
+
+std::vector< std::string > SplitString( const std::string & input, char separator );
 
 } // end namespace madai
 
