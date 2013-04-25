@@ -94,32 +94,34 @@ RuntimeParameterFileReader
 
 bool
 RuntimeParameterFileReader
-::HasOption(const std::string & key)
+::HasOption(const std::string & key) const
 {
   return (m_Options.count(key) > 0);
 }
 
 const std::string &
 RuntimeParameterFileReader
-::GetOption(const std::string & key)
+::GetOption(const std::string & key) const
 {
   static const std::string empty("");
-  if (this->HasOption(key))
-    return m_Options[key];
-  else
+  if (this->HasOption(key)) {
+    //return m_Options[key]; doesn't work because operator [] isn't const
+    return m_Options.find( key )->second;
+  } else {
     return empty;
+  }
 }
 
 int
 RuntimeParameterFileReader
-::GetNumberOfArguments()
+::GetNumberOfArguments() const
 {
   return m_NumberOfArguments;
 }
 
 char **
 RuntimeParameterFileReader
-::GetArguments()
+::GetArguments() const
 {
   return m_Arguments;
 }

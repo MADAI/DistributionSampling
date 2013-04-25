@@ -42,17 +42,17 @@ public:
   bool ParseFile( const std::string fileName );
 
   // Get number of arguments
-  int GetNumberOfArguments();
+  int GetNumberOfArguments() const;
 
   // Get arguments themselves
-  char ** GetArguments();
+  char ** GetArguments() const;
 
   /**
    Get an option value */
-  const std::string & GetOption(const std::string & key);
+  const std::string & GetOption(const std::string & key) const;
   /**
    Check to see if an option is specified. */
-  bool HasOption(const std::string & key);
+  bool HasOption(const std::string & key) const;
 
 private:
   std::map<std::string, std::string> m_Options;
