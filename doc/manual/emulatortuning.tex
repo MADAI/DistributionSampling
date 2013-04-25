@@ -1,0 +1,58 @@
+% !TEX root =  manual.tex
+\section{Emulator Tuning}
+
+As part of training the emulator, \path{basicTrain} determines the hyper-parameters ($\Theta_k$ in Eq. \eqref{eq:hyperform}) to be used by the emulator. In many cases, these parameters are simply chosen \emph{ad hoc}, but \path{basicTrain} initializes them to reasonable values. To train the emulator, run the command
+
+\commandline{basicTrain stat1}
+
+When training the emulator, {\tt basicTrain} looks for parameters defined in a file named\\ \path{stat1/settings.dat}, which is a text file describing parameters used in the emulator construction and tuning and for the MCMC procedure. The file has a simple form, 
+
+\begin{quote}
+{\tt GPE\_USE\_EMULATOR\_ERROR false}\\
+{\tt PCA\_PRINCIPAL\_COMPONENTS 6}\\
+{\tt MCMC\_BURN\_IN 100000}\\
+{\tt MCMC\_ITERATIONS 1000000}\\
+{\tt MCMC\_STEP\_SIZE 0.1}
+\end{quote}
+
+\path{basicTrain} produces a file called \path{stat1/EmulatorState.dat}. This file has the following format:
+\begin{quote}
+{\tt SUBMODELS}~$M_Z$~~~$\leftarrow$Each principal component is modeled separately.\\
+{\tt MODEL~~~0}~~~~~~~~~$\leftarrow$ The submodels are numbered zero through $M_z-1$.\\
+{\tt COVARIANCE\_FUNCTION} {\it SQUARE\_EXPONENTIAL\_FUNCTION}\\
+$\uparrow$ This describes the  functional form assumed by the GPE for the covariance.\\
+The choice determines what hyper-parameters mean.\\
+{\tt REGRESSION\_ORDER }~~ $\leftarrow$ Order of polynomial to fit to the model outputs\\
+{\tt THETAS}~~~~~$\leftarrow$ Hyper-parameter values for this submodel\\
+$N_\Theta$~~~~~~~~~~$\leftarrow$ This is the number of hyper-parameters\\
+$\Theta_1$\\
+$\Theta_2$\\
+$\vdots$\\
+$\Theta_{N_\Theta}$\\
+{\tt END\_OF\_MODEL}\\
+{\tt MODEL~~1}\\
+$\vdots$\\
+{\tt END\_OF\_MODEL}\\
+{\tt MODEL}~~~{$M_z-1$}\\
+$\vdots$\\
+{\tt END\_OF\_MODEL}\\
+{\tt END\_OF\_FILE}
+\end{quote}\vspace*{-8pt}
+
+The $\Theta_i$ values can be modified in these files to tune the emulator.
+
+There are several supported choices for the \variable{COVARIANCE\_FUNCTION}. (Fill in equations from \path{stat.git/DistributionSampling/doc/CovarianceFunctions/CovarianceFunctions.tex})
+
+\begin{description}
+
+\item \variable{SQUARE\_EXPONENTIAL\_FUNCTION}
+
+
+
+\item \variable{POWER\_EXPONENTIAL\_FUNCTION}
+
+\item \variable{MATERN\_32\_FUNCTION}
+
+\item \variable{MATERN\_52\_FUNCTION}
+
+\end{description}

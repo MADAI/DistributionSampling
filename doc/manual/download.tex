@@ -1,0 +1,23 @@
+% !TEX root =  manual.tex
+\section{Download and Installation Instructions}
+
+
+\subsection{Downloading Madai????Lib and Compilation}
+Tarheels write here.
+
+
+Install boost and eigen (on osX, macports works for boost, eigen is too old of version)
+
+sudo port install boost
+
+%sudo port install eigen
+
+download eigen from eigen.tuxfamily.org
+bunzip and tar -xf the file
+cd to download directory, call e.g. ../eigen-eigen-5097c01bcdc4/
+mkdir build\_dir
+cd build\_dir
+cmake .. -DCMAKE\_INSTALL\_PREFIX=/usr/local
+sudo make install
+
+cd ~/build/DistributionSampling/

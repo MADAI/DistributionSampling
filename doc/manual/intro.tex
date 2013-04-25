@@ -1,0 +1,21 @@
+% !TEX root =  manual.tex
+\section{Introduction}
+
+Numerous problems in both the natural and social sciences now involve large scale models characterized by numerous parameters and assumptions. These models are then often compared to heterogenous data sets, which in some cases are distilled from peta-scale observations. In addition to the investment usually required in obtaining such data sets, running the models is often expensive and time-consuming. 
+
+Perhaps the most common method for determining model parameters, $x_1\cdots x_P$ from comparing to a set of measurements $y_1\cdots y_M$ is to calculate the $\chi^2$ as a function of ${\bf x}$ where $\chi^2({\bf x})$ describes the ``goodness'' of the fit for a specific point in parameter space,
+\begin{equation}
+\chi^2({\bf x})\equiv
+\sum_i \frac{\left(y_i^{\rm(mod)}({\bf x})-y_i^{\rm(exp)}\right)^2}{\sigma_i^2}
+\end{equation}
+If the uncertainty involved in comparing the model to the data is normally distributed, and if there is no prior information about the parameters (a flat prior distribution), Bayes theorem tells us that the likelihood that the point in parameter space could reproduce the data is
+\begin{equation}
+\mathcal{L}({\bf x})\sim \exp\left\{-\frac{\chi^2({\bf x})}{2}\right\}.
+\end{equation}
+In some cases, one is interested in only the point of minimum $\chi^2$, but a much more appropriate goal is to understand the entire distribution $\mathcal{L}({\bf x})$, so that one knows not only the most likely value, but so that one has an understanding of the range and distribution of likely values of ${\bf x}$. 
+
+The textbook method for exploring determining $\mathcal{L}({\bf x})$ would be to perform Markov-chain Monte Carlo (MCMC) calculations. MCMC codes ergodically explore the $P-$dimension parameter space, and calculate the likelihood at as many points as possible. For a higher dimension parameter space, the exploration might require millions of sampling points. At each point ${\bf x}$, one would run the full model, and determine $\chi^2({\bf x})$. However, if the model is expensive to run, this procedure is untenable.
+
+In the last decade strategies based on {\it model emulators} (a.k.a. surrogate models or meta-models or interpolators) have been developed to handle this problem. The emulators are functions that estimate the observables $y_i({\bf x})$ given $N$ sampling runs, $Y_i({\bf x}_\alpha),~\alpha=1\cdots N$. When running the MCMC code, one calls the emulator to provide not only an interpolated value $y_i^{\bf(emu)}({\bf x})$, but an estimate of the emulator's error. Emulators are typically very fast, which makes the MCMC procedure plausible. The number of sampling runs is on the order of hundreds or thousands, which means the calculation remains expensive, but the procedure is much less expensive than the alternative of running the calculations at millions of points during the MCMC exploration.
+
+The software described in this manual is designed mainly to assist scientists in comparing models to data using emulators. This manual provides installation instructions, a summary of the statistical theory, directions for organizing the data, and instructions for creating the emulator and running the MCMC. The package includes both command-line elements and visualization tools. A separate tutorial is also part of the package.
