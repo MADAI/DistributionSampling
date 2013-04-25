@@ -37,15 +37,15 @@ The command will parse the file \path{stat1/stat\_parameters.dat} to determine t
 \subsection{Observational Data}
 The \path{experimental\_results} directory will contain the observables to which you wish to compare. This directory should contain a file \path{results.dat} which lists the observations or measurements from a real experiment. \path{results.dat} is a text file. Each line should have the format:
 
-\hspace*{20pt}{\variable{type name value uncertainty}}
+\hspace*{20pt}{\variable{name value uncertainty}}
 
 Each line entry is described below:
 
 \begin{description}
 
-\item \variable{type}
+%\item \variable{type}
 
-Variable type. Currently, only \type{double} is valid.
+%Variable type. Currently, only \type{double} is valid.
 
 \item \variable{name}
 
@@ -68,13 +68,13 @@ An example of the \path{experimental\_results/results.dat} file is presented her
 
 \begin{verbatim}
     #This is the length of the cat in inches
-    double catlength 17.42 0.55
+    catlength 17.42 0.55
 
     #This is the cat's weight in lbs
-    double catmass 8.85 0.09
+    catmass 8.85 0.09
 
     #This is the weight of the food consumed by the cat during January
-    double foodmass 13.23 0.1
+    foodmass 13.23 0.1
 \end{verbatim}
 
 Note that comments are preceded by \verb+#+. Empty lines are okay.
