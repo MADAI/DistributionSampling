@@ -109,7 +109,6 @@ int main(int argc, char ** argv) {
     stepSize = atof( settings.GetOption( "MCMC_STEP_SIZE" ).c_str() );
   }
 
-  std::string outputFileName( argv[2] );
   std::string observationsFile = experimentalResultsDirectory +
     madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
   
@@ -135,8 +134,6 @@ int main(int argc, char ** argv) {
   mcmc.SetStepSize( stepSize );
 
   std::vector< madai::Parameter > const & parameters = gpem.GetParameters();
-
-  int t = gpem.GetNumberOfScalarOutputs();
 
   int step = numberOfBurnInSamples / 100, percent = 0;
   if ( step < 1 ) {
@@ -166,6 +163,7 @@ int main(int argc, char ** argv) {
 
   std::string traceDirectory = statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
+  std::string outputFileName( argv[2] );
   std::string outputFilePath = traceDirectory + Paths::SEPARATOR + outputFileName;
   std::ofstream out( outputFilePath.c_str() );
   trace.WriteCSVOutput( out,
