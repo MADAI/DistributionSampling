@@ -34,7 +34,7 @@
 using madai::Model;
 using madai::Paths;
 
-const int DEFAULT_PERCENTILE_GRID_SAMPLES = 100;
+static const int DEFAULT_PERCENTILE_GRID_NUMBER_OF_SAMPLES = 100;
 
 template<class S, class T>
 int findIndex(const S & v, const T & s)
@@ -47,7 +47,7 @@ int findIndex(const S & v, const T & s)
 
 /**
    Load a file with experimental observations in it.  The model will
-   be comared against this. */
+   be compared against this. */
 Model::ErrorType
 LoadObservations(Model * model, std::istream & i)
 {
@@ -89,50 +89,11 @@ LoadObservations(Model * model, std::istream & i)
   return madai::Model::NO_ERROR;
 }
 
-struct PercentileGridRuntimeParameters
-{
-  int numberIter;
-  std::string ModelOutputDirectory;
-  std::string ExperimentalResultsDirectory;
-};
 
-bool parsePGRuntimeParameters(
-    int argc, char** argv,
-    struct PercentileGridRuntimeParameters & Opts )
-{
-  // Initialize as defaults
-  Opts.ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
-  Opts.ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
-  Opts.numberIter = DEFAULT_PERCENTILE_GRID_SAMPLES;
-  
-  for ( unsigned int i = 0; i < argc; i++ ) {
-    std::string argString( argv[i] );
-    
-    if ( argString == "MODEL_OUTPUT_DIRECTORY" ) {
-      Opts.ModelOutputDirectory = std::string( argv[i+1] );
-      i++;
-    } else if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) {
-      Opts.ExperimentalResultsDirectory = std::string( argv[i+1] );
-      i++;
-    } else if ( argString == "PERCENTILE_GRID_SAMPLES" ) {
-      Opts.numberIter = atoi( argv[i+1] );
-      if ( Opts.numberIter <= 0 ) {
-        std::cerr << "Error: PERCENTILE_GRID_SAMPLES given incorrect argument \""
-          << Opts.numberIter << "\"\n";
-      }
-      i++;
-    }
-  }
-  return true;
-}
-
-/**
-   \fixme document
- */
 int main(int argc, char ** argv) {
 
   if (argc < 3) {
-    std::cerr << "Useage:\n"
+    std::cerr << "Usage:\n"
               << "    generatePercentileGridTrace <StatisticsDirectory> <OutputFileName>\n"
               << "\n"
               << "This file generates a sampling of an emulated model on a\n"
@@ -152,66 +113,74 @@ int main(int argc, char ** argv) {
               << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
               << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
               << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
-              << "PERCENTILE_GRID_SAMPLES <value> (default: "
-              << DEFAULT_PERCENTILE_GRID_SAMPLES << ")\n";
+              << "PERCENTILE_GRID_NUMBER_OF_SAMPLES <value> (default: "
+              << DEFAULT_PERCENTILE_GRID_NUMBER_OF_SAMPLES << ")\n";
     return EXIT_FAILURE;
   }
-  std::string StatisticsDirectory( argv[1] );
-  std::string OutputFileName( argv[2] );
-  
-  madai::EnsurePathSeparatorAtEnd( StatisticsDirectory );
-  madai::RuntimeParameterFileReader RPFR;
-  RPFR.ParseFile( StatisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE );
-  char** Args = RPFR.GetArguments();
-  int NArgs = RPFR.GetNumberOfArguments();
-  struct PercentileGridRuntimeParameters Opts;
-  if ( !parsePGRuntimeParameters( NArgs, Args, Opts ) ) {
-    std::cerr << "Error: Parsing configuration file for gaussian process percentile grid.\n";
-    return EXIT_FAILURE;
-  }
-  madai::GaussianProcessEmulatedModel gpem;
-  std::string MOD = StatisticsDirectory + Opts.ModelOutputDirectory;
-  std::string ERD = StatisticsDirectory + Opts.ExperimentalResultsDirectory;
-  if ( gpem.LoadConfiguration( StatisticsDirectory, MOD, ERD ) != madai::Model::NO_ERROR ) {
-    std::cerr << "error in GaussianProcessEmulatedModel::LoadConfiguration\n";
+  std::string statisticsDirectory( argv[1] );
+  madai::EnsurePathSeparatorAtEnd( statisticsDirectory );
+
+  madai::RuntimeParameterFileReader settings;
+  std::string settingsFile = statisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE;
+  if ( !settings.ParseFile( settingsFile ) ) {
+    std::cerr << "Could not open runtime parameter file '" << settingsFile << "'\n";
     return EXIT_FAILURE;
   }
 
-  gpem.SetUseModelCovarianceToCalulateLogLikelihood(false);
+  std::string modelOutputDirectory =
+    madai::GetModelOutputDirectory( statisticsDirectory, settings );
+  std::string experimentalResultsDirectory =
+    madai::GetExperimentalResultsDirectory( statisticsDirectory, settings );
+
+  int numberOfSamples = DEFAULT_PERCENTILE_GRID_NUMBER_OF_SAMPLES;
+  if ( settings.HasOption( "PERCENTILE_GRID_NUMBER_OF_SAMPLES" ) ) {
+    numberOfSamples = atoi( settings.GetOption( "PERCENTILE_GRID_NUMBER_OF_SAMPLES" ).c_str() );
+  }
+
+  madai::GaussianProcessEmulatedModel gpem;
+  if ( gpem.LoadConfiguration( statisticsDirectory,
+                               modelOutputDirectory,
+                               experimentalResultsDirectory ) != madai::Model::NO_ERROR ) {
+    std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
+    return EXIT_FAILURE;
+  }
+
+  gpem.SetUseModelCovarianceToCalulateLogLikelihood( false );
   
-  std::string observationsFile = ERD + madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
+  std::string observationsFile = experimentalResultsDirectory + Paths::SEPARATOR +
+    Paths::RESULTS_FILE;
   std::ifstream observations( observationsFile.c_str() );
-  if (madai::Model::NO_ERROR != LoadObservations(&gpem, observations)) {
-    std::cerr << "error loading observations.\n";
+  if ( madai::Model::NO_ERROR != LoadObservations( &gpem, observations ) ) {
+    std::cerr << "Error loading observations.\n";
     return EXIT_FAILURE;
   }
   observations.close();
 
   madai::PercentileGridSampler sampler;
   sampler.SetModel( &gpem );
-  sampler.SetNumberSamples(Opts.numberIter);
-  int numberIter = sampler.GetNumberSamples();
+  sampler.SetNumberSamples( numberOfSamples );
+  numberOfSamples = sampler.GetNumberSamples();
 
-  std::vector< madai::Parameter > const & parameters
-    = gpem.GetParameters();
+  std::vector< madai::Parameter > const & parameters = gpem.GetParameters();
 
   madai::Trace trace;
 
-  int step = numberIter / 100, percent = 0;
-  for (int count = 0; count < numberIter; count ++) {
+  int step = numberOfSamples / 100, percent = 0;
+  for (int count = 0; count < numberOfSamples; count ++) {
     if (count % step == 0)
-      std::cerr <<  '\r' << percent++ << "%";
+      std::cout <<  '\r' << percent++ << "%";
     trace.Add(sampler.NextSample());
   }
-  std::cerr << "\r" ;
+  std::cout << "\r" ;
 
-  std::string traceDirectory = StatisticsDirectory + madai::Paths::TRACE_DIRECTORY;
+  std::string traceDirectory = statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
-  std::string OutputFile = traceDirectory + OutputFileName;
-  std::ofstream Out( OutputFile.c_str() );
-  trace.WriteCSVOutput(
-      Out,
-      gpem.GetParameters(),
-      gpem.GetScalarOutputNames() );
+  std::string outputFileName( argv[2] );
+  std::string outputFile = traceDirectory + Paths::SEPARATOR + outputFileName;
+  std::ofstream out( outputFile.c_str() );
+  trace.WriteCSVOutput( out,
+                        gpem.GetParameters(),
+                        gpem.GetScalarOutputNames() );
+
   return EXIT_SUCCESS;
 }
