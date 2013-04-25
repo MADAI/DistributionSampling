@@ -124,7 +124,7 @@ inline bool getIndex(
     return false;
   } else {
     index = x - sv.begin();
-    assert (index < sv.size());
+    assert( static_cast< size_t >( index ) < sv.size() );
     return true;
   }
 }
@@ -136,7 +136,7 @@ bool parseExperimentalResults(
     std::string ExperimentalResultsDirectory ) {
   const std::vector< std::string > & outputNames = gpe.m_OutputNames;
   int numberOutputs = gpe.m_NumberOutputs;
-  if (numberOutputs != outputNames.size()) {
+  if ( static_cast< size_t >( numberOutputs ) != outputNames.size()) {
     std::cerr << "numberOutputs != outputNames.size()";
     return false;
   }
@@ -318,8 +318,8 @@ inline bool parseParameterAndOutputValues(
   }
   std::sort( runDirectories.begin(), runDirectories.end() );
 
-  int p = parameters.size();
-  int t = outputNames.size();
+  size_t p = parameters.size();
+  size_t t = outputNames.size();
   // Copy m_
   Eigen::MatrixBase< TDerived > & m
   = const_cast< Eigen::MatrixBase< TDerived > & >(m_);

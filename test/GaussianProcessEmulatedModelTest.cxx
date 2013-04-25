@@ -118,9 +118,6 @@ int main(int argc, char ** argv) {
 
   mcmc.SetStepSize(0.1);
 
-  std::vector< madai::Parameter > const & parameters
-    = gpem.GetParameters();
-
   assert (2 == gpem.GetNumberOfScalarOutputs());
   int t = gpem.GetNumberOfScalarOutputs();
   std::vector< double > observedScalarValues;

@@ -161,7 +161,7 @@ std::ostream & serializeEmulatorData(
     std::ostream & o ) {
   o << "SUBMODELS\t"
     << gpme.m_NumberPCAOutputs << "\n";
-  for ( unsigned int i = 0; i < gpme.m_NumberPCAOutputs; i++ ) {
+  for ( int i = 0; i < gpme.m_NumberPCAOutputs; i++ ) {
     serializeSubmodels( gpme.m_PCADecomposedModels[i], i, o );
   }
   o << "END_OF_FILE\n";

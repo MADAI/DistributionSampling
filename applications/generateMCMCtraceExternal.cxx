@@ -145,8 +145,6 @@ int main(int argc, char ** argv) {
   mcmc.SetModel( &em );
   mcmc.SetStepSize( stepSize );
 
-  std::vector< madai::Parameter > const & parameters = em.GetParameters();
-
   int step = numberOfBurnInSamples / 100, percent = 0;
   if ( step < 1 ) {
     step = 1; // avoid div-by-zero error

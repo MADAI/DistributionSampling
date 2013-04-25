@@ -82,7 +82,7 @@ int main(int argc, char ** argv) {
     RPFR.ParseFile( StatisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE );
     char** Args = RPFR.GetArguments();
     int NArgs = RPFR.GetNumberOfArguments();
-    for ( unsigned int i = 0; i < NArgs; i++ ) {
+    for ( int i = 0; i < NArgs; i++ ) {
       std::string argString( Args[i] );
       
       if ( argString == "MODEL_OUTPUT_DIRECTORY" ) {

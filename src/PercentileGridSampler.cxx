@@ -91,7 +91,7 @@ PercentileGridSampler
 
   double rangeOverN = 1.0 / static_cast< double >( m_SampleScale );
   double start = 0.5 * rangeOverN;
-  for ( int dim = 0; dim < p; ++dim ) {
+  for ( unsigned int dim = 0; dim < p; ++dim ) {
     x[dim] =
       m_Model->GetParameters()[dim].GetPriorDistribution()
       ->GetPercentile(start + (m_StateVector[dim] * rangeOverN));

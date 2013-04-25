@@ -307,7 +307,7 @@ GaussianProcessEmulator::SingleModel::SingleModel() :
    Use m_OutputUncertaintyScales, m_OutputValues, m_OutputMeans, and
    m_RetainedPCAEigenvectors to determine m_PCADecomposedModels[i].m_ZValues; */
 bool GaussianProcessEmulator::BuildZVectors() {
-  if (m_PCADecomposedModels.size() != m_NumberPCAOutputs) {
+  if (m_PCADecomposedModels.size() != static_cast< size_t >( m_NumberPCAOutputs ) ) {
     std::cout << "Error [m_PCADecomposedModels.size() == "
               << m_PCADecomposedModels.size() << " != m_NumberPCAOutputs == "
               << m_NumberPCAOutputs << "]\n";

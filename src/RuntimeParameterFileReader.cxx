@@ -80,7 +80,7 @@ RuntimeParameterFileReader
 
     m_NumberOfArguments = arg_list.size();
     m_Arguments = new char*[m_NumberOfArguments]();
-    for ( unsigned int i = 0; i < m_NumberOfArguments; i++ ) {
+    for ( int i = 0; i < m_NumberOfArguments; i++ ) {
       m_Arguments[i] = new char[arg_list[i].size()+1];
       std::strcpy( m_Arguments[i], arg_list[i].c_str() );
     }
@@ -130,7 +130,7 @@ void
 RuntimeParameterFileReader
 ::FreeMemory()
 {
-  for ( unsigned int i = 0; i < m_NumberOfArguments; i++ ) {
+  for ( int i = 0; i < m_NumberOfArguments; i++ ) {
     delete[] m_Arguments[i];
   }
   delete[] m_Arguments;

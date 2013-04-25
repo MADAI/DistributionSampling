@@ -92,18 +92,6 @@ static bool discard_comments( std::FILE * fp, char comment_character ) {
 }
 
 
-static void eat_whitespace( std::istream & i ) {
-  while ( true ) {
-    if ( !std::isspace( i.peek() ) ) {
-      return;
-    }
-    if ( i.get() == '\n' ) {
-      return;
-    }
-  }
-}
-
-
 static void eat_whitespace( std::FILE * fp ) {
   while ( true ) {
     int c = std::fgetc( fp );
@@ -115,17 +103,6 @@ static void eat_whitespace( std::FILE * fp ) {
       return;
     }
   }
-}
-
-
-static bool discard_comments( std::istream & i, char comment_character ) {
-  int c = i.peek();
-  while ( i.good() && ( ( c == comment_character ) || ( c == '\n' ) ) ) {
-    std::string s;
-    std::getline( i, s );
-    c = i.peek();
-  }
-  return true;
 }
 
 
@@ -335,7 +312,7 @@ ExternalModel
       return OTHER_ERROR;
     }
   } else if (str_equal(buffer, "VARIANCE")) {
-    int varianceSize;
+    unsigned int varianceSize;
     if ( 1 != std::fscanf( m_Process.answer, "%d", &varianceSize ) ) {
       std::cerr << "fscanf failure @ varianceSize.\n";
       return OTHER_ERROR;
@@ -444,8 +421,8 @@ ExternalModel
 
   case TRIANGULAR_COVARIANCE:
     scalarCovariance.resize(t * t);
-    for (int i = 0; i < t; ++i) {
-      for (int j = i; j < t; ++j) {
+    for (size_t i = 0; i < t; ++i) {
+      for (size_t j = i; j < t; ++j) {
         double d;
         if (! read_double(proc.answer, &d)) {
           std::cerr << "interprocess communication error\n";
@@ -461,8 +438,8 @@ ExternalModel
 
   case FULL_MATRIX_COVARIANCE:
     scalarCovariance.resize(t * t);
-    for (int i = 0; i < t; ++i) {
-      for (int j = 0; j < t; ++j) {
+    for (size_t i = 0; i < t; ++i) {
+      for (size_t j = 0; j < t; ++j) {
         double * d = &(scalarCovariance[i+(t*j)]);
         if (! read_double(proc.answer, d)) {
           std::cerr << "interprocess communication error\n";
@@ -474,7 +451,7 @@ ExternalModel
 
   case DIAGONAL_MATRIX_COVARIANCE: /* VARIANCE only */
     scalarCovariance.assign(t * t,0.0);
-    for (int i = 0; i < t; ++i) {
+    for ( size_t i = 0; i < t; ++i) {
       if (! read_double(proc.answer, &(scalarCovariance[i*(1+t)]))) {
         std::cerr << "interprocess communication error\n";
         return OTHER_ERROR;

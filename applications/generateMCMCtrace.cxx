@@ -133,8 +133,6 @@ int main(int argc, char ** argv) {
   mcmc.SetModel( &gpem );
   mcmc.SetStepSize( stepSize );
 
-  std::vector< madai::Parameter > const & parameters = gpem.GetParameters();
-
   int step = numberOfBurnInSamples / 100, percent = 0;
   if ( step < 1 ) {
     step = 1; // avoid div-by-zero error

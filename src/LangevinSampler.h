@@ -57,7 +57,7 @@ public:
   virtual double GetMassScale() { return this->m_MassScale; }
   
   virtual ErrorType SetVelocity( const std::string & parameterName, double Velocity );
-  virtual std::vector< double > GetVelocities() { return this->m_CurrentVelocities; }
+  virtual std::vector< double > GetVelocities() { return m_CurrentVelocities; }
   
 protected:
   

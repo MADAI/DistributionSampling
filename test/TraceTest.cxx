@@ -185,7 +185,7 @@ int main( int argc, char* argv[] )
         << trace.GetSize() << ") " << std::endl;
     return EXIT_FAILURE;
   }
-  for ( int i = 0; i < trace.GetSize(); ++i ) {
+  for ( unsigned int i = 0; i < trace.GetSize(); ++i ) {
     madai::Sample referenceSample = referenceTrace[i];
     madai::Sample readSample = readTrace[i];
 

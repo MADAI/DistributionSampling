@@ -136,7 +136,7 @@ LatinHypercubeGenerator
   std::vector< Sample > samples( numberOfTrainingPoints );
   for ( int i = 0; i < numberOfTrainingPoints; ++i ) {
     std::vector< double > parameterValues( parameters.size() );
-    for ( int j = 0; j < parameters.size(); ++j ) {
+    for ( size_t j = 0; j < parameters.size(); ++j ) {
       parameterValues[j] = parameterSubdivisions[j][i];
     }
 

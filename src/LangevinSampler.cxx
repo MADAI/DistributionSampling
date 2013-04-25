@@ -29,10 +29,10 @@ LangevinSampler
 ::LangevinSampler() :
   Sampler(),
   m_TimeStep( 1.0e-2 ),
-  m_MassScale( 1 ),
   m_MeanTime( 1 ),
   m_KickStrength( 1 ),
-  m_DragCoefficient( 1.0e-2 )
+  m_DragCoefficient( 1.0e-2 ),
+  m_MassScale( 1 )
 {
 }
 

@@ -108,8 +108,6 @@ int main(int argc, char ** argv) {
   sampler.SetNumberSamples( numberOfSamples );
   numberOfSamples = sampler.GetNumberSamples();
 
-  std::vector< madai::Parameter > const & parameters = gpem.GetParameters();
-
   madai::Trace trace;
 
   int step = numberOfSamples / 100, percent = 0;

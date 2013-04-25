@@ -36,7 +36,7 @@ GaussianProcessEmulatorTestGenerator
   m_NumberTrainingPoints(numberTrainingPoints),
   m_Parameters( parameters )
 {
-  assert (parameters.size() >= numberParameters);
+  assert (parameters.size() >= static_cast< size_t >( numberParameters ));
   assert((numberTrainingPoints > 0) && (numberParameters > 0));
 
   madai::LatinHypercubeGenerator latinHypercubeGenerator;

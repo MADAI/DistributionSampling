@@ -110,7 +110,6 @@ Gaussian2DModel
   }
 
   double functionValue = scalars[0];
-  unsigned int activeParameter = 0;
   assert( activeParameters.size() == 2 );
   assert( m_ObservedScalarValues.size() == 1 );
   if ( activeParameters[0] ) {
