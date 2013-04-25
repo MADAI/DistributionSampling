@@ -17,26 +17,15 @@
  *=========================================================================*/
 
 /**
-emulate
-  execute a N-D Gaussian Process Model Emulator
-
 ACKNOWLEDGMENTS:
   This software was written in 2012-2013 by Hal Canary
   <cs.unc.edu/~hal>, based off of the MADAIEmulator program (Copyright
   2009-2012 Duke University) by C.Coleman-Smith <cec24@phy.duke.edu>
   in 2010-2012 while working for the MADAI project <http://madai.us/>.
-
-USE:
-  For details on how to use emulate, consult the manpage via:
-    $ nroff -man < [PATH_TO/]emulate.1 | less
-  or, if the manual is installed:
-    $ man 1 emulate
 */
 
 #include <iostream>
 #include <fstream>
-#include <cassert>
-#include <cstdlib>
 
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
@@ -49,46 +38,7 @@ USE:
 
 using madai::Paths;
 
-struct RuntimeOpts{
-  bool quietFlag;
-  std::string ModelOutputDirectory;
-  std::string ExperimentalResultsDirectory;
-};
-
-/**
-   Option parsing using getoptlong.  If it fails, returns false. */
-bool parseRuntimeOptions(int argc, char** argv, struct RuntimeOpts & opts)
-{
-  // init with default values
-  opts.ModelOutputDirectory = madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
-  opts.ExperimentalResultsDirectory = madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
-  opts.quietFlag = false;
-  
-  for ( unsigned int i = 0; i < argc; i++ ) {
-    std::string argString( argv[i] );
-    
-    if ( argString == "MODEL_OUTPUT_DIRECTORY" ) {
-      opts.ModelOutputDirectory = std::string( argv[i+1] );
-      i++;
-    } else if ( argString == "EXPERIMENTAL_RESULTS_DIRECTORY" ) {
-      opts.ExperimentalResultsDirectory = std::string( argv[i+1] );
-      i++;
-    } else if ( argString == "EMULTE_QUIET" ) {
-      std::string tstring( argv[i+1] );
-      if ( tstring == "true" || tstring == "1" ) {
-        opts.quietFlag = true;
-      } else if ( tstring == "false" || tstring == "0" ) {
-        opts.quietFlag = false;
-      } else {
-        std::cerr << "Unrecognized value for parameter EMULATE_QUIET: "
-                  << tstring << "\n";
-        return false;
-      }
-      i++;
-    }
-  }
-  return true;
-}
+bool DEFAULT_EMULATE_WRITE_HEADER = true;
 
 std::ostream & operator <<(std::ostream & o, const madai::Distribution * d) {
   const madai::UniformDistribution * uniformPriorDist
@@ -108,20 +58,18 @@ std::ostream & operator <<(std::ostream & o, const madai::Distribution * d) {
     return o << "UNKNOWN_PRIOR_TYPE\t0\t1\n";
   }
 }
+
 std::ostream & operator <<(std::ostream & o, const madai::Parameter & param) {
-  // return o << param.m_Name << '\t'
-  //          << param.GetPriorDistribution()->GetPercentile(0.001) << '\t'
-  //          << param.GetPriorDistribution()->GetPercentile(0.999) << '\n';
   return o << param.m_Name << '\t' << param.GetPriorDistribution();
 }
 
 /**
-   The meat of the program.  Interactive Query of the model. */
+   The meat of the program.  Interactive query of the model. */
 bool Interact(
     madai::GaussianProcessEmulator & gpme,
     std::istream & input,
     std::ostream & output,
-    bool quietFlag)
+    bool writeHeader )
 {
   unsigned int p = gpme.m_NumberParameters;
   unsigned int t = gpme.m_NumberOutputs;
@@ -130,7 +78,7 @@ bool Interact(
   std::vector< double > the_covariance((t * t),0.0);
 
   output.precision(17);
-  if (! quietFlag) {
+  if ( writeHeader ) {
     output
       << "VERSION 1\n"
       << "PARAMETERS\n"
@@ -182,11 +130,9 @@ bool Interact(
   return (input.eof());
 }
 
+
 int main(int argc, char ** argv) {
-  std::string StatisticsDirectory;
-  if ( argc > 1 ) {
-    StatisticsDirectory = std::string( argv[1] );
-  } else {
+  if ( argc < 2 ) {
     std::cerr << "Usage:\n"
               << "    emulate <StatisticsDirectory>\n"
               << "\n"
@@ -204,46 +150,56 @@ int main(int argc, char ** argv) {
               << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
               << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
               << "EMULATE_QUIET <value> (false)\n";
+
     return EXIT_FAILURE;
   }
-  madai::GaussianProcessEmulator gpme;
-  struct RuntimeOpts options;
-  if ( StatisticsDirectory == "-" ) {
-    madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
-    singleFileReader.LoadTrainingData( &gpme, std::cin );
-  } else {
-    madai::EnsurePathSeparatorAtEnd( StatisticsDirectory );
-    madai::RuntimeParameterFileReader RPFR;
-    RPFR.ParseFile( StatisticsDirectory +
-                    madai::Paths::RUNTIME_PARAMETER_FILE );
-    char** Args = RPFR.GetArguments();
-    int NArgs = RPFR.GetNumberOfArguments();
-    if ( !parseRuntimeOptions( NArgs, Args, options ) ) {
-      std::cerr << "Error parsing runtime options.\n";
-      return EXIT_FAILURE;
-    }
-    std::string MOD = StatisticsDirectory + options.ModelOutputDirectory;
-    std::string ERD = StatisticsDirectory + options.ExperimentalResultsDirectory;
-    madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-    if ( !directoryReader.LoadTrainingData(&gpme, MOD, StatisticsDirectory, ERD) ) {
-      std::cerr << "Error loading training data.\n";
-      return EXIT_FAILURE;
-    }
-    if ( !directoryReader.LoadPCA(&gpme, StatisticsDirectory) ) {
-      std::cerr << "Error loading PCA data.\n";
-      return EXIT_FAILURE;
-    }
-    if ( !directoryReader.LoadEmulator(&gpme, StatisticsDirectory) ) {
-      std::cerr << "Error loading the emulator state data.\n";
-      return EXIT_FAILURE;
-    }
+  std::string statisticsDirectory( argv[1] );
+  madai::EnsurePathSeparatorAtEnd( statisticsDirectory );
+
+  madai::RuntimeParameterFileReader settings;
+  std::string settingsFile = statisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE;
+  if ( !settings.ParseFile( settingsFile ) ) {
+    std::cerr << "Could not open runtime parameter file '" << settingsFile << "'\n";
+    return EXIT_FAILURE;
+  }
+
+  std::string modelOutputDirectory =
+    madai::GetModelOutputDirectory( statisticsDirectory, settings );
+  std::string experimentalResultsDirectory =
+    madai::GetExperimentalResultsDirectory( statisticsDirectory, settings );
+
+  bool emulatorWriteHeader = DEFAULT_EMULATE_WRITE_HEADER;
+  if ( settings.HasOption( "EMULATE_WRITE_HEADER" ) ) {
+    emulatorWriteHeader = ( settings.GetOption( "EMULATE_WRITE_HEADER" ) == "true" );
+  }
+
+  madai::GaussianProcessEmulator gpe;
+  madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  if ( !directoryReader.LoadTrainingData( &gpe,
+                                          modelOutputDirectory,
+                                          statisticsDirectory,
+                                          experimentalResultsDirectory ) ) {
+    std::cerr << "Error loading training data.\n";
+    return EXIT_FAILURE;
+  }
+
+  if ( !directoryReader.LoadPCA( &gpe, statisticsDirectory ) ) {
+    std::cerr << "Error loading PCA data.\n";
+    return EXIT_FAILURE;
+  }
+
+  if ( !directoryReader.LoadEmulator( &gpe, statisticsDirectory ) ) {
+    std::cerr << "Error loading the emulator state data.\n";
+    return EXIT_FAILURE;
   }
   
-  if (gpme.m_Status != madai::GaussianProcessEmulator::READY)
+  if ( gpe.GetStatus() != madai::GaussianProcessEmulator::READY ) {
     return EXIT_FAILURE;
+  }
 
-  if (Interact(gpme, std::cin, std::cout, options.quietFlag))
+  if ( Interact( gpe, std::cin, std::cout, emulatorWriteHeader ) ) {
     return EXIT_SUCCESS;
-  else
+  } else {
     return EXIT_FAILURE;
+  }
 }
