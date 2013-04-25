@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 
+#include "Model.h"
 #include "Paths.h"
 #include "RuntimeParameterFileReader.h"
 
@@ -41,6 +42,18 @@ std::string LowerCase( char * buffer );
 std::string LowerCase( std::string & s );
 
 std::vector< std::string > SplitString( const std::string & input, char separator );
+
+template<class S, class T>
+int FindIndex(const S & v, const T & s)
+{
+  typename S::const_iterator it = std::find(v.begin(), v.end(), s);
+  if (it == v.end())
+    return -1;
+  return std::distance(v.begin(), it);
+}
+
+Model::ErrorType LoadObservations(Model * model, std::istream & i);
+
 
 } // end namespace madai
 
