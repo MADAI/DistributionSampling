@@ -85,21 +85,10 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  std::string modelOutputDirectory = Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
-  if ( settings.HasOption( "MODEL_OUTPUT_DIRECTORY" ) ) {
-    modelOutputDirectory = settings.GetOption( "MODEL_OUTPUT_DIRECTORY" );
-  }
-  if ( modelOutputDirectory[0] != Paths::SEPARATOR ) {
-    modelOutputDirectory.insert( 0, statisticsDirectory );
-  }
-
-  std::string experimentalResultsDirectory = Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
-  if ( settings.HasOption( "EXPERIMENTAL_RESULTS_DIRECTORY" ) ) {
-    experimentalResultsDirectory = settings.GetOption( "EXPERIMENTAL_RESULTS_DIRECTORY" );
-  }
-  if ( experimentalResultsDirectory[0] != Paths::SEPARATOR ) {
-    experimentalResultsDirectory.insert( 0, statisticsDirectory );
-  }
+  std::string modelOutputDirectory =
+    madai::GetModelOutputDirectory( statisticsDirectory, settings );
+  std::string experimentalResultsDirectory =
+    madai::GetExperimentalResultsDirectory( statisticsDirectory, settings );
 
   std::string covarianceFunctionString = DEFAULT_EMULATOR_COVARIANCE_FUNCTION;
   if ( settings.HasOption( "EMULATOR_COVARIANCE_FUNCTION" ) ) {

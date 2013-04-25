@@ -28,11 +28,7 @@ using madai::Paths;
 
 int main( int argc, char ** argv )
 {
-  std::string statisticsDirectory;
-  if ( argc > 1 ) {
-    statisticsDirectory = std::string( argv[1] );
-    madai::EnsurePathSeparatorAtEnd( statisticsDirectory );
-  } else {
+  if ( argc < 2 ) {
     std::cerr << "Usage:\n"
               << "    PCADecompose <StatisticsDirectory>\n"
               << "\n"
@@ -51,61 +47,50 @@ int main( int argc, char ** argv )
               << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
               << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
               << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n";
+
     return EXIT_FAILURE;
   }
 
-  madai::GaussianProcessEmulator gpme;
+  std::string statisticsDirectory = std::string( argv[1] );
+  madai::EnsurePathSeparatorAtEnd( statisticsDirectory );
 
   // Read in runtime parameters
-  madai::RuntimeParameterFileReader runtimeParameters;
-  std::string runtimeParameterFile = statisticsDirectory + 
+  madai::RuntimeParameterFileReader settings;
+  std::string settingsFile = statisticsDirectory +
     madai::Paths::RUNTIME_PARAMETER_FILE;
-  if ( !runtimeParameters.ParseFile( runtimeParameterFile ) ) {
-    std::cerr << "Could not open runtime parameter file '"
-              << runtimeParameterFile << "'\n";
+  if ( !settings.ParseFile( settingsFile ) ) {
+    std::cerr << "Could not open runtime parameter file '" << settingsFile << "'\n";
     return EXIT_FAILURE;
   }
 
   std::string modelOutputDirectory =
-    Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+    madai::GetModelOutputDirectory( statisticsDirectory, settings );
   std::string experimentalResultsDirectory =
-    Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
-
-  if ( runtimeParameters.HasOption( "MODEL_OUTPUT_DIRECTORY" ) ) {
-    modelOutputDirectory =
-      runtimeParameters.GetOption( "MODEL_OUTPUT_DIRECTORY" );
-  }
-
-  if ( runtimeParameters.HasOption( "EXPERIMENTAL_RESULTS_DIRECTORY" ) ) {
-    experimentalResultsDirectory =
-      runtimeParameters.GetOption( "EXPERIMENTAL_RESULTS_DIRECTORY" );
-  }
+    madai::GetExperimentalResultsDirectory( statisticsDirectory, settings );
 
   // Read in the training data
-  std::string modelOutputPath = statisticsDirectory + modelOutputDirectory;
-  std::string experimentalResultsPath = statisticsDirectory +
-    experimentalResultsDirectory;
+  madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-  if ( !directoryReader.LoadTrainingData(&gpme,
-                                         modelOutputPath,
-                                         statisticsDirectory,
-                                         experimentalResultsPath ) ) {
+  if ( !directoryReader.LoadTrainingData( &gpe,
+                                          modelOutputDirectory,
+                                          statisticsDirectory,
+                                          experimentalResultsDirectory ) ) {
     std::cerr << "Error loading training data.\n";
     return EXIT_FAILURE;
   }
-  
+
   std::string outputFileName = statisticsDirectory +
     madai::Paths::PCA_DECOMPOSITION_FILE;
 
   // get the PCA decomposition
-  if ( !gpme.PrincipalComponentDecompose() ) {
+  if ( !gpe.PrincipalComponentDecompose() ) {
     return EXIT_FAILURE;
   }
 
   std::ofstream os( outputFileName.c_str() );
 
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
-  singleFileWriter.WritePCA(&gpme,os);
+  singleFileWriter.WritePCA( &gpe, os );
 
   return EXIT_SUCCESS;
 }
