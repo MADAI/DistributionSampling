@@ -17,6 +17,8 @@
  *=========================================================================*/
 #include "ApplicationUtilities.h"
 
+#include <algorithm> // std::transform
+
 #include "Paths.h"
 
 namespace madai {
@@ -55,5 +57,22 @@ std::string GetExperimentalResultsDirectory( const std::string & statisticsDirec
 
   return experimentalResultsDirectory;
 }
+
+std::string LowerCase( char * buffer )
+{
+  std::string outBuffer( buffer );
+
+  return LowerCase( outBuffer );
+}
+
+std::string LowerCase( std::string & s )
+{
+  std::string copy( s );
+  std::transform( copy.begin(), copy.end(),
+                  copy.begin(), ::tolower );
+
+  return copy;
+}
+
 
 } // end namespace madai

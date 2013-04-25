@@ -35,6 +35,10 @@ std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
 std::string GetExperimentalResultsDirectory( const std::string & statisticsDirectory,
                                              const RuntimeParameterFileReader & settings );
 
+std::string LowerCase( char * buffer );
+
+std::string LowerCase( std::string & s );
+
 } // end namespace madai
 
 
