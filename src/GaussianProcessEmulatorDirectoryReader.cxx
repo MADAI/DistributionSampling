@@ -67,6 +67,12 @@ GaussianProcessEmulatorDirectoryReader
 
 namespace {
 
+inline void discardWhitespace(std::istream & input) {
+  while (std::isspace(input.peek())) {
+    input.get();
+  }
+}
+
 /**
    Read a word from input.  If it equals the expected value, return
    true.  Else print error message to std::cerr and return false*/
@@ -151,9 +157,11 @@ bool parseExperimentalResults(
   gpe.m_OutputUncertaintyScales = Eigen::VectorXd::Constant(numberOutputs, 1.0);
   gpe.m_ObservedOutputValues = Eigen::VectorXd::Zero(numberOutputs);
   while ( !results_file.eof() ) {
+    discardWhitespace(results_file); // whitespace at beginning of line,
     while ( results_file.peek() == '#' ) {// Disregard comments, go to next output
       std::string temp;
       std::getline( results_file, temp );
+      discardWhitespace(results_file); // whitespace at beginning of line,
     }
     std::string name;
     double value, error;
@@ -182,9 +190,11 @@ bool parseParameters(
   if ( !input.good() ) return false;
   parameters.clear(); // Empty the output vector
   while ( input.good() ) {
+    discardWhitespace(input); // whitespace at beginning of line,
     while ( input.peek() == '#' ) { // Disregard commented lines
       std::string s;
       std::getline( input, s );
+      discardWhitespace(input); // whitespace at beginning of line,
     }
     std::string name;
     std::string type;
@@ -209,9 +219,7 @@ bool parseParameters(
     }
   }
   numberParameters = parameters.size();
-  assert( numberParameters > 0 );
-
-  return true;
+  return (numberParameters > 0 );
 }
 
 
@@ -249,21 +257,20 @@ bool parseOutputs(
   if ( !input.good() ) return false;
   outputNames.clear(); // Empty the output vector
   while ( !input.eof() ) {
+    discardWhitespace(input);
     while ( input.peek() == '#' ) { // Disregard commented lines
       std::string s;
       std::getline( input, s );
     }
-    std::string name;
-    input >> name;
-    outputNames.push_back( name );
-  }
-  if ( outputNames.back() == "" || outputNames.back() == " " ) {
-    outputNames.pop_back();
+    discardWhitespace(input); // at beginning of line
+    if ( !input.eof() ) {
+      std::string name;
+      input >> name;
+      outputNames.push_back( name );
+    }
   }
   numberOutputs = outputNames.size();
-  assert( numberOutputs > 0 );
-
-  return true;
+  return (numberOutputs > 0);
 }
 
 
@@ -350,9 +357,11 @@ inline bool parseParameterAndOutputValues(
       if ( verbose )
         std::cout << "Opened file '" << par_file_name << "'\n";
       while ( !parfile.eof() ) {
+        discardWhitespace(parfile); // whitespace at befinning of line
         while ( parfile.peek() == '#' ) {
           std::string tline;
           std::getline( parfile, tline );
+          discardWhitespace(parfile); // whitespace at befinning of line
         }
         std::string name;
         parfile >> name;
@@ -376,9 +385,12 @@ inline bool parseParameterAndOutputValues(
         std::cout << "Opened file " << results_file_name << "'\n";
 
       // Check the style of the outputs
+      discardWhitespace(results_file); // whitespace at befinning of line
       std::string line;
-      while ( results_file.peek() == '#' ) // Disregard comments go to first output
+      while ( results_file.peek() == '#' ) { // Disregard comments go to first output
         std::getline( results_file, line );
+        discardWhitespace(results_file); // whitespace at befinning of line
+      }
       char* temp1 = new char[100]();
       std::getline( results_file, line );
       std::strncpy( temp1, line.c_str(), 100 );
@@ -393,8 +405,11 @@ inline bool parseParameterAndOutputValues(
       results_file.seekg( 0, results_file.beg);
       if ( !results_file.good() ) return false;
       while ( !results_file.eof() ) {
-        while ( results_file.peek() == '#' ) // Disregard comments, go to next output
+        discardWhitespace(results_file); // whitespace at befinning of line
+        while ( results_file.peek() == '#' ) { // Disregard comments, go to next output
           std::getline( results_file, line );
+          discardWhitespace(results_file); // whitespace at befinning of line
+        }
         std::string name;
         results_file >> name;
         for ( unsigned int i = 0; i < t; i++ )
@@ -627,7 +642,7 @@ bool parsePCADecomposition(
 bool parseGaussianProcessEmulator(
     GaussianProcessEmulator & gpme,
     std::string StatisticsDirectory) {
-  std::string EmulatorFile = StatisticsDirectory + Paths::SEPARATOR + 
+  std::string EmulatorFile = StatisticsDirectory + Paths::SEPARATOR +
     Paths::EMULATOR_STATE_FILE;
   std::ifstream input( EmulatorFile.c_str() );
   parseComments(gpme.m_Comments,input);
@@ -688,12 +703,12 @@ GaussianProcessEmulatorDirectoryReader
                                          StatisticalAnalysisDirectory,
                                          m_Verbose ) )
     return false;
-  
+
   if (! parseExperimentalResults( *gpe, ExperimentalResultsDirectory )) {
     std::cerr << "Error in parseExperimentalResults()\n";
     return false;
   }
-  
+
   return (gpe->CheckStatus() == GaussianProcessEmulator::UNTRAINED);
 }
 
