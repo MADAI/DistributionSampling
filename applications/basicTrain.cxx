@@ -59,11 +59,11 @@ int main(int argc, char ** argv) {
               << "\n"
               << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
               << ":\n\n"
-              << "PCA_FRACTION_RESOLVING_POWER <value> (default: 0.95)\n"
               << "MODEL_OUTPUT_DIRECTORY <value> (default: "
               << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
               << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
               << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "PCA_FRACTION_RESOLVING_POWER <value> (default: 0.95)\n"
               << "EMULATOR_COVARIANCE_FUNCTION <value> (default: "
               << DEFAULT_EMULATOR_COVARIANCE_FUNCTION << ")\n"
               << "EMULATOR_REGRESSION_ORDER <value> (default: "
