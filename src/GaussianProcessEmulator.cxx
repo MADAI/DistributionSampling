@@ -339,7 +339,9 @@ bool GaussianProcessEmulator::MakeCache() {
     return false;
   assert(m_NumberPCAOutputs == static_cast<int>(m_PCADecomposedModels.size()));
   bool errorflag = false;
+#if defined( OPENMP_FOUND )
   #pragma omp parallel for
+#endif // OPENMP_FOUND
   for (int i = 0; i < m_NumberPCAOutputs; ++i) {
     if (! m_PCADecomposedModels[i].MakeCache())
       errorflag = true;
@@ -700,7 +702,9 @@ bool GaussianProcessEmulator::GetEmulatorOutputs (
   Eigen::VectorXd mean_pca(m_NumberPCAOutputs);
 
   bool errorflag = false;
+#if defined( OPENMP_FOUND )
   #pragma omp parallel for
+#endif // OPENMP_FOUND
   for (int i = 0; i < m_NumberPCAOutputs; ++i) {
     double d;
     if(! m_PCADecomposedModels[i].GetEmulatorOutputs(x, d)) {
