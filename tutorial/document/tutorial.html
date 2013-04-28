@@ -1,0 +1,504 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MADAI Distribution-Sampling Tutorial</title>
+<style>
+div.column { color: black; background-color: white; margin-left: auto;
+margin-right: auto; margin-top: 0px; margin-bottom: 0px; max-width:
+640px; text-align: left; padding: 8px 8px 8px 8px; border: 1px solid
+#56A0D3; }
+div.wide { color: black; background-color: white; margin-left: 0.5em;
+margin-right: 0.5em; padding: 0.5em; }
+body { color: #000000; background-color: #56A0D3; padding: 0; margin:
+0; font-family: sans-serif; text-align: center; background-repeat:
+repeat; background-attachment: fixed; background-size: cover; }
+tt { color:#001A57;background-color:#ffffff;}
+pre { color:#001A57; background-color:#f0f0f0; -moz-tab-size: 4;
+-o-tab-size: 4; tab-size: 4; overflow: auto; overflow-y: visible;
+border-left: 2px #dddddd solid; margin-left: 15px; padding-left: 10px;
+padding-top: 2px; padding-bottom: 2px; margin-top: 3px; margin-bottom:
+3px; z-index: 12; }
+table {border-collapse:collapse}
+th {    color:black; background-color:#f0f0f0;}
+td,th { border:1px black solid}
+.centered {text-align:center;}
+.cbracket { color: #440044; background-color: #f0f0f0; text-decoration: none; font-weight: bold; }
+.comment { color: #880000; background-color: #f0f0f0; text-decoration: none; font-weight: normal; }
+.function { color: #008800; background-color: #f0f0f0; text-decoration: none; font-weight: bold; }
+.keyword { color: #000088; background-color: #f0f0f0; text-decoration: none; font-weight: normal; }
+.normal { color: #000000; background-color: #f0f0f0; text-decoration: none; font-weight: normal; }
+.number { color: #224466; background-color: #f0f0f0; text-decoration: none; font-weight: normal; }
+.preproc { color: #444400; background-color: #f0f0f0; text-decoration: underline; font-weight: normal; }
+.specialchar { color: #004488; background-color: #f0f0f0; text-decoration: none; font-weight: normal; }
+.string { color: #004444; background-color: #f0f0f0; text-decoration: none; font-weight: normal; }
+.symbol { color: #008844; background-color: #f0f0f0; text-decoration: none; font-weight: normal; }
+.type { color: #444444; background-color: #f0f0f0; text-decoration: none; font-weight: normal; }
+</style>
+<script>
+function toggleViz(name) {
+	var e = document.getElementById(name);
+	if(e.style.display == 'block') {
+		e.style.display = 'none';
+	} else {
+		e.style.display = 'block';
+	}
+	return false;
+}
+</script>
+</head>
+<body>
+<div class="column">
+<!--=========================================================================-->
+<h1>MADAI Distribution-Sampling Tutorial</h1>
+
+<!--=========================================================================-->
+<h2>0. Introduction</h2>
+
+<!--=========================================================================-->
+<h2>1. Installing The Software</h2>
+
+<p> Pre-compiled versions of this software can be found here:</p>
+<ul>
+  <li> MaxOS 32-bit: <u>href://.....</u></li>
+  <li> MaxOS 64-bit: <u>href://.....</u></li>
+  <li> RedHat 64-bit: <u>href://.....</u></li>
+  <li> Ubuntu 64-bit: <u>href://.....</u></li>
+  <li> ... </li>
+</ul>
+
+<p>If you can not use one of those sources, you will have to compile
+  it yourself.</p>
+<ol>
+  <li>Install the prerequisite packages (<a href="http://www.cmake.org/cmake/resources/software.html">CMake</a>, <a href="http://www.boost.org/users/download/">Boost</a>, <a href="http://eigen.tuxfamily.org/">Eigen3</a>):
+	<ul>
+	  <li>Ubuntu/Debian-based:
+		<pre>
+$ sudo apt-get -y install \
+    build-essential \
+    cmake \
+    libboost-dev \
+    libeigen3-dev</pre>
+	  </li>
+	  <li>Red Hat-based:
+		<pre>
+$ sudo yum -y groupinstall "Development Tools"
+$ sudo yum -y install \
+    cmake \
+    boost-devel \
+    eigen3-devel</pre>
+	  </li>
+	  <li>MacOS 10.x with macports:
+		<pre>$ port install cmake boost eigen3</pre>
+	  </li>
+	</ul>
+  </li>
+  <li>Download DistributionSampling.tar.gz (<u>link</u>)</li>
+  <li>Extract
+		<pre>
+$ mkdir ~/src
+$ cd ~/src
+$ tar -x -z -f .../DistributionSampling.tar.gz</pre></li>
+  <li>Make a build directory:<pre>
+$ mkdir ~/build/DistributionSampling
+$ cd ~/build/DistributionSampling</pre></li>
+  <li>Build:<pre>
+$ cmake ~/src/DistributionSampling <!--
+CORY: make sure the defaults in CmakeLists.txt are for a Release '-O3'
+/ no-testing version.
+-->
+$ make</pre></li>
+</ol>
+<p>Your executables will be in the
+directory <tt>${HOME}/build/DistributionSampling/bin</tt>. You can
+make these executables available by including this directory in your
+PATH:</p>
+<pre>$ PATH=&quot;${PATH}:${HOME}/build/DistributionSampling/bin&quot;</pre>
+
+<!--=========================================================================-->
+<h2>2. Running the Software</h2>
+
+<p>The first example will be the parabolic potential model.  This
+model has the parameters <tt>X0</tt>, <tt>K</tt>, and <tt>TEMP</tt>;
+and the observables <tt>MEAN_X</tt>, <tt>MEAN_X_SQUARED</tt>, and
+<tt>MEAN_ENERGY</tt></p>
+
+
+<p>Begin by choosing a working directory
+<pre>
+$ DIR=&quot;${HOME}/data/parabolic_stat&quot;
+$ mkdir -p &quot;$DIR&quot;
+$ cd &quot;$DIR&quot;</pre>
+
+From here on out, we will assume that you are in your working directory and will refer to it as <tt>.</tt>
+
+<p>The first thing we will do it create a <tt>setting.dat</tt> file in
+  this directory with some default values in it. All of the
+  DistributionSampling utilities will look for this file.</p>
+<pre>
+$ cat &gt; &quot;settings.dat&quot; &lt;&lt;EOF
+MODEL_OUTPUT_DIRECTORY model_output
+EXPERIMENTAL_RESULTS_DIRECTORY experimental_results
+GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS 100
+GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION 1
+GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS 3
+PCA_FRACTION_RESOLVING_POWER 0.95
+EMULATOR_COVARIANCE_FUNCTION SQUARE_EXPONENTIAL_FUNCTION
+EMULATOR_REGRESSION_ORDER 1
+EMULATOR_NUGGET 0.001
+EMULATOR_AMPLITUDE 1
+EMULATOR_SCALE 0.01
+MCMC_NUMBER_OF_SAMPLES 100
+MCMC_NUMBER_OF_BURN_IN_SAMPLES 0
+MCMC_USE_EMULATOR_COVARIANCE 0
+MCMC_STEP_SIZE 0.1
+EOF
+</pre>
+<p><a href="" onclick="return toggleViz('settings_options');">A detailed descripton of options in <tt>settings.dat</tt></a></p>
+</div>
+<div class="wide" id="settings_options" style="display:none;">
+<table style="width:100%">
+  <p style="text-align:center"><b>Options in <tt>settings.dat</tt></b></p>
+<tr><th>Variable Name</th><th>Default Value</th><th>meaning</th></tr>
+<tr><td><tt>MODEL_OUTPUT_DIRECTORY</tt></td>
+  <td>model_output</td>
+  <td>The directory (relative to the working directory) where the model inputs and outputs can be found.</td></tr>
+<tr><td><tt>EXPERIMENTAL_RESULTS_DIRECTORY</tt></td>
+  <td>experimental_results</td>
+  <td>The directory (relative to the working directory) where the experimental observations can be found.</td></tr>
+<tr><td><tt>GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS</tt></td>
+  <td>100</td>
+  <td>The number of training points generated by <tt>generateTrainingPoints</tt></td></tr>
+<tr><td><tt>GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION</tt></td>
+  <td>1</td>
+  <td>If the prior distribution for a parameter is not uniform, should the training points be percentiles from the distribution, or should they be evenly spaced?</td></tr>
+<tr><td><tt>GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS</tt></td>
+  <td>3</td>
+  <td>If the prior distribution for a parameter is Gaussian, how far out should the uniformly-spaced sampled points go?</td></tr>
+<tr><td><tt>PCA_FRACTION_RESOLVING_POWER</tt></td>
+  <td>0.95</td>
+  <td>When <tt>basicTrain</tt> is deciding how many principal components to retain, it considers the total resolving power of the model.  The resolving power of a single principal component is &radic;(1 + &lambda;[i]), where &lambda;[i] is the eigenvalue associated with that variable.  The total resolving power is the product the resolving powers of all of the components.  <tt>basicTrain</tt> will retain enough components to keep this fraction of the resolving power.
+</td></tr>
+<tr><td><tt>EMULATOR_COVARIANCE_FUNCTION</tt></td>
+  <td><tt>SQUARE_EXPONENTIAL_FUNCTION</tt></td>
+  <td>See <u>Covariance Functions<!-- \TODO add link to document --></u></td></tr>
+<tr><td><tt>EMULATOR_REGRESSION_ORDER</tt></td>
+  <td>1</td>
+  <td>The assumed functional form of the model before Gaussian Process Emulation.  This is the order of the polynomial.  0, 1, 2,or 3. </td></tr>
+<tr><td><tt>EMULATOR_NUGGET</tt></td>
+  <td>0.001</td>
+  <td>See <u>Covariance Functions<!-- \TODO add link to document --></td></tr>
+<tr><td><tt>EMULATOR_AMPLITUDE</tt></td>
+  <td>1</td>
+  <td>See <u>Covariance Functions<!-- \TODO add link to document --></td></tr>
+<tr><td><tt>EMULATOR_SCALE</tt></td>
+  <td>0.01</td>
+  <td>See <u>Covariance Functions<!-- \TODO add link to document --></td></tr>
+<tr><td><tt>MCMC_NUMBER_OF_SAMPLES</tt></td>
+  <td>100</td>
+  <td>How many samples should <tt>generateMCMCtrace</tt> produce.  The default is small for testing purposes.  Values around 10<sup>6</sup> are reccomended.</td></tr>
+<tr><td><tt>MCMC_NUMBER_OF_BURN_IN_SAMPLES</tt></td>
+  <td>0</td>
+  <td>What does this do???</td></tr>
+<tr><td><tt>MCMC_USE_EMULATOR_COVARIANCE</tt></td>
+  <td>0</td>
+  <td>Should the variance returned by the Gaussian Process Emulator be used in the likelihood calculation?</td></tr>
+<tr><td><tt>MCMC_STEP_SIZE</tt></td>
+  <td>0.1</td>
+  <td>How big should each step be in the Metropolis Hastings
+  algorithm?  (This will be scaled by the charactaristic length of
+  each parameter's prior distiution)</td></tr>
+</table>
+</div>
+<div class="column">
+
+<p>Next, we need to create a parameter_priors.dat file that contains our a priori assumtions about possible values for the parameters.
+<pre>
+$ cat &gt; &quot;parameter_priors.dat&quot; &lt;&lt;EOF
+uniform X0   &#0045;2.0 2.0
+uniform K    0.5  4.0
+uniform TEMP 0.5  10.0
+EOF
+</pre>
+
+<p>Next we will specify all of the experimentally observed measurements and errors:</p>
+<pre>
+$ mkdir &quot;experimental_results&quot;
+$ cat &gt; &quot;experimental_results/results.dat&quot; &lt;&lt;EOF
+MEAN_X         1.14           0.1
+MEAN_X_SQUARED 2.77634418605  0.1
+MEAN_ENERGY    3.4925         0.1
+EOF
+</pre>
+
+<p>Finally, we create a file that contains the list of observables
+that we want to make use of.  This should be a subset
+of <tt>results.dat</tt>.</p>
+<pre>
+$ cat &gt; &quot;observable_names.dat&quot; &lt;&lt;EOF
+MEAN_X
+MEAN_X_SQUARED
+MEAN_ENERGY
+EOF
+</pre>
+
+<p>We are now ready to run the first Distribution-Sampling
+utility, <tt>generateTrainingPoints</tt>.  This program will generate
+a latin hypercube in the parameter space.  The number of sample points
+is set by the <tt>GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS</tt>
+variable. (The command-line argument is the name of the working
+directory.)</p>
+<pre>
+$ generateTrainingPoints .
+</pre>
+
+<p>The output of <tt>generateTrainingPoints</tt> is a series of
+files <tt>model_output/run*/parameters.dat</tt>.  For example:</p>
+
+<pre>$ cat ./model_output/run0001/parameters.dat
+X0 1.18
+K 2.6875
+TEMP 9.2875</pre>
+
+<p>The next task is to actually evaluate the model at this point in
+parameter space.  To that end, we have written a little Python program
+to do just that.  To see the program,
+<a href="" onclick="return toggleViz('parabolic_py');">click
+here: parabolic.py</a>.</p>
+
+<pre class="markup" id="parabolic_py" style="display:none;">
+<span class="comment">#!/usr/bin/env python</span>
+<span class="comment"># -*- coding: utf-8 -*-</span>
+<span class="comment">##=========================================================================</span>
+<span class="comment">##</span>
+<span class="comment">##  Copyright 2011-2013 The University of North Carolina at Chapel Hill</span>
+<span class="comment">##  and Michigan State University.  All rights reserved.</span>
+<span class="comment">##</span>
+<span class="comment">##  Licensed under the MADAI Software License. You may obtain a copy of</span>
+<span class="comment">##  this license at</span>
+<span class="comment">##</span>
+<span class="comment">##    https://madai-public.cs.unc.edu/visualization/software-license/</span>
+<span class="comment">##</span>
+<span class="comment">##  Unless required by applicable law or agreed to in writing, software</span>
+<span class="comment">##  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="comment">##  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="comment">##  See the License for the specific language governing permissions and</span>
+<span class="comment">##  limitations under the License.</span>
+<span class="comment">##</span>
+<span class="comment">##=========================================================================</span>
+<span class="preproc">import</span><span class="normal"> os</span><span class="symbol">,</span><span class="normal"> glob</span><span class="symbol">,</span><span class="normal"> math</span><span class="symbol">,</span><span class="normal"> sys</span>
+
+<span class="keyword">def</span><span class="normal"> </span><span class="function">model</span><span class="symbol">(</span><span class="normal">x</span><span class="symbol">):</span>
+<span class="comment">	&quot;&quot;&quot;</span>
+<span class="comment">	Parabolic Potential Model</span>
+<span class="comment">	Copyright 2012-2013, Michigan State University.</span>
+<span class="comment">	The software was written in 2013 by Jeffrey Wyka</span>
+<span class="comment">	while working for the MADAI project &lt;http://madai.us/&gt;</span>
+<span class="comment">	This is inteded as an example of a parameterized model of a</span>
+<span class="comment">	physical system with a parabolic potential</span>
+<span class="comment">	&quot;&quot;&quot;</span>
+
+<span class="normal">	x </span><span class="symbol">=</span><span class="normal"> </span><span class="function">map</span><span class="symbol">(</span><span class="normal">float</span><span class="symbol">,</span><span class="normal">x</span><span class="symbol">)</span>
+<span class="normal">	</span><span class="keyword">for</span><span class="normal"> i </span><span class="keyword">in</span><span class="normal"> </span><span class="function">xrange</span><span class="symbol">(</span><span class="number">1</span><span class="symbol">,</span><span class="number">3</span><span class="symbol">):</span>
+<span class="normal">		</span><span class="keyword">if</span><span class="normal"> x</span><span class="symbol">[</span><span class="normal">i</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">&lt;=</span><span class="normal"> </span><span class="number">0</span><span class="symbol">:</span>
+<span class="normal">			</span><span class="keyword">raise</span><span class="normal"> </span><span class="function">Exception</span><span class="symbol">(</span><span class="string">&#0039;Parameter %d cannot be non-positive&#0039;</span><span class="normal"> </span><span class="symbol">%</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">i</span><span class="symbol">+</span><span class="number">1</span><span class="symbol">))</span>
+
+<span class="normal">	x0</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">,</span><span class="normal"> T </span><span class="symbol">=</span><span class="normal"> x</span><span class="symbol">[:</span><span class="number">3</span><span class="symbol">]</span>
+
+<span class="normal">	</span><span class="keyword">def</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="normal"> power</span><span class="symbol">,</span><span class="normal"> scale  </span><span class="symbol">):</span>
+<span class="normal">		n </span><span class="symbol">=</span><span class="normal"> </span><span class="function">int</span><span class="symbol">(</span><span class="normal">power</span><span class="symbol">)</span>
+<span class="normal">		alpha </span><span class="symbol">=</span><span class="normal"> </span><span class="function">float</span><span class="symbol">(</span><span class="normal">scale</span><span class="symbol">)</span>
+<span class="normal">		Integral </span><span class="symbol">=</span><span class="normal"> </span><span class="function">float</span><span class="symbol">(</span><span class="number">1.0</span><span class="symbol">)</span>
+<span class="normal">		</span><span class="keyword">if</span><span class="normal"> n </span><span class="symbol">%</span><span class="normal"> </span><span class="number">2</span><span class="normal"> </span><span class="symbol">==</span><span class="normal"> </span><span class="number">1</span><span class="symbol">:</span>
+<span class="normal">			Integral </span><span class="symbol">=</span><span class="normal"> </span><span class="number">0.0</span>
+<span class="normal">		</span><span class="keyword">elif</span><span class="normal"> n </span><span class="symbol">%</span><span class="normal"> </span><span class="number">2</span><span class="normal"> </span><span class="symbol">==</span><span class="normal"> </span><span class="number">0</span><span class="symbol">:</span>
+<span class="normal">			</span><span class="keyword">for</span><span class="normal"> i </span><span class="keyword">in</span><span class="normal"> </span><span class="function">xrange</span><span class="symbol">(</span><span class="normal">n</span><span class="symbol">/</span><span class="number">2</span><span class="symbol">,</span><span class="normal"> n</span><span class="symbol">):</span>
+<span class="normal">				Integral </span><span class="symbol">*=</span><span class="normal"> </span><span class="function">float</span><span class="symbol">(</span><span class="normal">i </span><span class="symbol">+</span><span class="normal"> </span><span class="number">1</span><span class="symbol">)</span>
+<span class="normal">			Integral </span><span class="symbol">*=</span><span class="normal"> </span><span class="symbol">(</span><span class="number">2.0</span><span class="normal"> </span><span class="symbol">*</span><span class="normal"> math</span><span class="symbol">.</span><span class="function">sqrt</span><span class="symbol">(</span><span class="number">3.14159265</span><span class="symbol">))</span>
+<span class="normal">			Integral </span><span class="symbol">/=</span><span class="normal"> </span><span class="symbol">(</span><span class="normal"> </span><span class="number">2.0</span><span class="normal"> </span><span class="symbol">*</span><span class="normal"> math</span><span class="symbol">.</span><span class="function">sqrt</span><span class="symbol">(</span><span class="normal">alpha</span><span class="symbol">)</span><span class="normal"> </span><span class="symbol">)**(</span><span class="normal"> n</span><span class="symbol">+</span><span class="number">1</span><span class="normal"> </span><span class="symbol">)</span>
+<span class="normal">		</span><span class="keyword">return</span><span class="normal"> Integral</span>
+
+<span class="normal">	</span><span class="comment"># Calculate the normalization</span>
+<span class="normal">	</span><span class="comment"># Integrate( e^( -k/T*(x-x0)^2 ) )</span>
+<span class="normal">	normalization </span><span class="symbol">=</span><span class="normal"> </span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">0</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))</span>
+
+<span class="normal">	</span><span class="comment"># Calculate Mean X</span>
+<span class="normal">	</span><span class="comment"># Integrate( x e^( -k/T*(x - x0)^2 ) ) / normalization</span>
+<span class="normal">	MeanX </span><span class="symbol">=</span><span class="normal"> </span><span class="symbol">(</span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">1</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))</span>
+<span class="normal">			 </span><span class="symbol">+</span><span class="normal"> x0</span><span class="symbol">*</span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">0</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">)))</span>
+<span class="normal">	MeanX </span><span class="symbol">/=</span><span class="normal"> normalization</span>
+
+<span class="normal">	</span><span class="comment"># Calculate Mean X^2</span>
+<span class="normal">	</span><span class="comment"># Integrate( x^2 e^( -k/T*(x - x0)^2 ) ) / normalization</span>
+<span class="normal">	MeanX2 </span><span class="symbol">=</span><span class="normal"> </span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">2</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))</span>
+<span class="normal">	MeanX2 </span><span class="symbol">+=</span><span class="normal"> </span><span class="number">2.0</span><span class="symbol">*</span><span class="normal">x0</span><span class="symbol">*</span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">1</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))</span>
+<span class="normal">	MeanX2 </span><span class="symbol">+=</span><span class="normal"> x0</span><span class="symbol">*</span><span class="normal">x0</span><span class="symbol">*</span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">0</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))</span>
+<span class="normal">	MeanX2 </span><span class="symbol">/=</span><span class="normal">normalization</span>
+
+<span class="normal">	</span><span class="comment"># Calculate Mean Energy</span>
+<span class="normal">	</span><span class="comment"># Integrate( k (x - x0)^2 * e^( -k/T*(x - x0)^2 ) ) /</span>
+<span class="normal">	</span><span class="comment">#					 normalization + T/2</span>
+<span class="normal">	MeanE </span><span class="symbol">=</span><span class="normal"> k</span><span class="symbol">*</span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">2</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))/</span><span class="normal">normalization </span><span class="symbol">+</span><span class="normal"> T</span><span class="symbol">/</span><span class="number">2.0</span>
+
+<span class="normal">	</span><span class="comment"># Calculate Mean X^4 for getting the model error</span>
+<span class="normal">	</span><span class="comment"># Integrate( x^4 e^( -k/T*(x-x0)^2 ) ) / normalization</span>
+<span class="normal">	MeanX4 </span><span class="symbol">=</span><span class="normal"> </span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">4</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))</span>
+<span class="normal">	MeanX4 </span><span class="symbol">+=</span><span class="normal"> </span><span class="number">4.0</span><span class="symbol">*</span><span class="normal">x0</span><span class="symbol">*</span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">3</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))</span>
+<span class="normal">	MeanX4 </span><span class="symbol">+=</span><span class="normal"> </span><span class="number">6.0</span><span class="symbol">*</span><span class="normal">x0</span><span class="symbol">*</span><span class="normal">x0</span><span class="symbol">*</span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">2</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))</span>
+<span class="normal">	MeanX4 </span><span class="symbol">+=</span><span class="normal"> </span><span class="number">4.0</span><span class="symbol">*(</span><span class="normal">x0</span><span class="symbol">**</span><span class="number">3</span><span class="symbol">)*</span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">1</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))</span>
+<span class="normal">	MeanX4 </span><span class="symbol">+=</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">x0</span><span class="symbol">**</span><span class="number">4</span><span class="symbol">)*</span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">0</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))</span>
+<span class="normal">	MeanX4 </span><span class="symbol">/=</span><span class="normal"> normalization</span>
+
+<span class="normal">	</span><span class="comment"># Calculate Mean Energy^2 for getting the model error</span>
+<span class="normal">	</span><span class="comment"># Integrate( ( k^2*(x - x0)^4 + k*T*(x - x0)^2 )</span>
+<span class="normal">	</span><span class="comment">#					  * e^( -k/T*(x-x0)^2 ) ) + 0.25*T^2</span>
+<span class="normal">	MeanE2 </span><span class="symbol">=</span><span class="normal"> k</span><span class="symbol">*</span><span class="normal">k</span><span class="symbol">*</span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">4</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))/</span><span class="normal">normalization</span>
+<span class="normal">	MeanE2 </span><span class="symbol">+=</span><span class="normal"> k</span><span class="symbol">*</span><span class="normal">T</span><span class="symbol">*</span><span class="function">float</span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">2</span><span class="symbol">,</span><span class="normal"> k</span><span class="symbol">/</span><span class="normal">T</span><span class="symbol">))/</span><span class="normal">normalization</span>
+<span class="normal">	MeanE2 </span><span class="symbol">+=</span><span class="normal"> T</span><span class="symbol">*</span><span class="normal">T</span><span class="symbol">/</span><span class="number">4.0</span>
+
+<span class="normal">	</span><span class="comment"># Calculate Errors</span>
+<span class="normal">	ErrorX </span><span class="symbol">=</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">MeanX2 </span><span class="symbol">-</span><span class="normal"> MeanX</span><span class="symbol">**</span><span class="number">2</span><span class="symbol">)**(</span><span class="number">0.5</span><span class="symbol">)</span>
+<span class="normal">	ErrorX2 </span><span class="symbol">=</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">MeanX4 </span><span class="symbol">-</span><span class="normal"> MeanX2</span><span class="symbol">**</span><span class="number">2</span><span class="symbol">)**(</span><span class="number">0.5</span><span class="symbol">)</span>
+<span class="normal">	ErrorE </span><span class="symbol">=</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">MeanE2 </span><span class="symbol">-</span><span class="normal"> MeanE</span><span class="symbol">**</span><span class="number">2</span><span class="symbol">)**(</span><span class="number">0.5</span><span class="symbol">)</span>
+
+<span class="normal">	</span><span class="keyword">return</span><span class="normal"> </span><span class="symbol">(</span><span class="normal"> </span><span class="symbol">[</span><span class="normal"> MeanX</span><span class="symbol">,</span><span class="normal"> MeanX2</span><span class="symbol">,</span><span class="normal"> MeanE</span><span class="symbol">],</span><span class="normal"> </span><span class="symbol">[</span><span class="normal">ErrorX</span><span class="symbol">,</span><span class="normal"> ErrorX2</span><span class="symbol">,</span><span class="normal"> ErrorE </span><span class="symbol">])</span>
+
+<span class="keyword">def</span><span class="normal"> </span><span class="function">process_model_output_directory</span><span class="symbol">(</span><span class="normal">rundir</span><span class="symbol">):</span>
+<span class="normal">	parameter_names </span><span class="symbol">=</span><span class="normal"> </span><span class="symbol">[</span><span class="string">&#0039;X0&#0039;</span><span class="symbol">,</span><span class="normal"> </span><span class="string">&#0039;K&#0039;</span><span class="symbol">,</span><span class="normal"> </span><span class="string">&#0039;TEMP&#0039;</span><span class="symbol">]</span>
+<span class="normal">	output_names </span><span class="symbol">=</span><span class="normal"> </span><span class="symbol">[</span><span class="string">&#0039;MEAN_X&#0039;</span><span class="symbol">,</span><span class="normal"> </span><span class="string">&#0039;MEAN_X_SQUARED&#0039;</span><span class="symbol">,</span><span class="normal"> </span><span class="string">&#0039;MEAN_ENERGY&#0039;</span><span class="symbol">]</span>
+<span class="normal">	params </span><span class="symbol">=</span><span class="normal"> </span><span class="symbol">[</span><span class="number">0.0</span><span class="normal"> </span><span class="keyword">for</span><span class="normal"> p </span><span class="keyword">in</span><span class="normal"> parameter_names</span><span class="symbol">]</span>
+<span class="normal">	parameters_file </span><span class="symbol">=</span><span class="normal"> os</span><span class="symbol">.</span><span class="normal">path</span><span class="symbol">.</span><span class="function">join</span><span class="symbol">(</span><span class="normal">rundir</span><span class="symbol">,</span><span class="normal"> </span><span class="string">&#0039;parameters.dat&#0039;</span><span class="symbol">)</span>
+<span class="normal">	</span><span class="keyword">if</span><span class="normal"> </span><span class="keyword">not</span><span class="normal"> os</span><span class="symbol">.</span><span class="normal">path</span><span class="symbol">.</span><span class="function">isfile</span><span class="symbol">(</span><span class="normal">parameters_file</span><span class="symbol">):</span>
+<span class="normal">		</span><span class="keyword">raise</span><span class="normal"> </span><span class="function">IOError</span><span class="symbol">(</span><span class="string">&#0039;&quot;%s&quot; does not exist!&#0039;</span><span class="normal"> </span><span class="symbol">%</span><span class="normal"> parameters_file</span><span class="symbol">)</span>
+<span class="normal">	with </span><span class="function">open</span><span class="symbol">(</span><span class="normal">parameters_file</span><span class="symbol">,</span><span class="string">&#0039;r&#0039;</span><span class="symbol">)</span><span class="normal"> as f</span><span class="symbol">:</span>
+<span class="normal">		</span><span class="keyword">for</span><span class="normal"> line </span><span class="keyword">in</span><span class="normal"> f</span><span class="symbol">:</span>
+<span class="normal">			line </span><span class="symbol">=</span><span class="normal"> line</span><span class="symbol">.</span><span class="function">strip</span><span class="symbol">()</span>
+<span class="normal">			</span><span class="keyword">if</span><span class="normal"> </span><span class="function">len</span><span class="symbol">(</span><span class="normal">line</span><span class="symbol">)</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="number">0</span><span class="normal"> </span><span class="keyword">and</span><span class="normal"> line</span><span class="symbol">[</span><span class="number">0</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">!=</span><span class="normal"> </span><span class="string">&#0039;#&#0039;</span><span class="symbol">:</span>
+<span class="normal">				name</span><span class="symbol">,</span><span class="normal"> value </span><span class="symbol">=</span><span class="normal"> line</span><span class="symbol">.</span><span class="function">split</span><span class="symbol">()[:</span><span class="number">2</span><span class="symbol">]</span>
+<span class="normal">				index </span><span class="symbol">=</span><span class="normal"> parameter_names</span><span class="symbol">.</span><span class="function">index</span><span class="symbol">(</span><span class="normal">name</span><span class="symbol">)</span>
+<span class="normal">				params</span><span class="symbol">[</span><span class="normal">index</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> value</span>
+<span class="normal">	outputs</span><span class="symbol">,</span><span class="normal"> errors </span><span class="symbol">=</span><span class="normal"> </span><span class="function">model</span><span class="symbol">(</span><span class="normal">params</span><span class="symbol">)</span>
+<span class="normal">	with </span><span class="function">open</span><span class="symbol">(</span><span class="normal">os</span><span class="symbol">.</span><span class="normal">path</span><span class="symbol">.</span><span class="function">join</span><span class="symbol">(</span><span class="normal">rundir</span><span class="symbol">,</span><span class="normal"> </span><span class="string">&#0039;results.dat&#0039;</span><span class="symbol">),</span><span class="normal"> </span><span class="string">&#0039;w&#0039;</span><span class="symbol">)</span><span class="normal"> as o</span><span class="symbol">:</span>
+<span class="normal">		</span><span class="keyword">for</span><span class="normal"> name</span><span class="symbol">,</span><span class="normal"> value</span><span class="symbol">,</span><span class="normal"> error </span><span class="keyword">in</span><span class="normal"> </span><span class="function">zip</span><span class="symbol">(</span><span class="normal">output_names</span><span class="symbol">,</span><span class="normal"> outputs</span><span class="symbol">,</span><span class="normal"> errors</span><span class="symbol">):</span>
+<span class="normal">			</span><span class="keyword">print</span><span class="normal"> </span><span class="symbol">&gt;&gt;</span><span class="normal">o</span><span class="symbol">,</span><span class="normal"> name</span><span class="symbol">,</span><span class="normal"> value</span><span class="symbol">,</span><span class="normal"> error</span>
+
+<span class="keyword">if</span><span class="normal"> </span><span class="function">len</span><span class="symbol">(</span><span class="normal">sys</span><span class="symbol">.</span><span class="normal">argv</span><span class="symbol">)</span><span class="normal"> </span><span class="symbol">==</span><span class="normal"> </span><span class="number">1</span><span class="symbol">:</span>
+<span class="normal">	</span><span class="keyword">print</span><span class="normal"> </span><span class="string">&#0039;useage: %s DIRECTORY [MORE DIRECTORIES...]&#0039;</span><span class="normal"> </span><span class="symbol">%</span><span class="normal"> sys</span><span class="symbol">.</span><span class="normal">argv</span><span class="symbol">[</span><span class="number">0</span><span class="symbol">]</span>
+<span class="keyword">for</span><span class="normal"> arg </span><span class="keyword">in</span><span class="normal"> sys</span><span class="symbol">.</span><span class="normal">argv</span><span class="symbol">[</span><span class="number">1</span><span class="symbol">:]:</span>
+<span class="normal">	</span><span class="keyword">for</span><span class="normal"> path </span><span class="keyword">in</span><span class="normal"> glob</span><span class="symbol">.</span><span class="function">glob</span><span class="symbol">(</span><span class="normal">arg</span><span class="symbol">):</span>
+<span class="normal">		</span><span class="keyword">if</span><span class="normal"> os</span><span class="symbol">.</span><span class="normal">path</span><span class="symbol">.</span><span class="function">isdir</span><span class="symbol">(</span><span class="normal">path</span><span class="symbol">):</span>
+<span class="normal">			</span><span class="keyword">try</span><span class="symbol">:</span>
+<span class="normal">				</span><span class="function">process_model_output_directory</span><span class="symbol">(</span><span class="normal">path</span><span class="symbol">)</span>
+<span class="normal">				</span><span class="keyword">print</span><span class="normal"> </span><span class="string">&#0039;&quot;%s&quot; processed successfully&#0039;</span><span class="normal"> </span><span class="symbol">%</span><span class="normal"> path</span>
+<span class="normal">			</span><span class="keyword">except</span><span class="symbol">:</span>
+<span class="normal">				</span><span class="keyword">print</span><span class="normal"> </span><span class="string">&#0039;ERROR PROCESSING &quot;%s&quot;!&#0039;</span><span class="normal"> </span><span class="symbol">%</span><span class="normal"> path</span>
+<span class="normal">				</span><span class="keyword">raise</span>
+<span class="normal">		</span><span class="keyword">else</span><span class="symbol">:</span>
+<span class="normal">			</span><span class="keyword">print</span><span class="normal"> </span><span class="string">&#0039;&quot;%s&quot; is not a directory&#0039;</span><span class="normal"> </span><span class="symbol">%</span><span class="normal"> path</span>
+</pre>
+
+<p><tt>parabolic.py</tt> takes as command-line arguments the names of
+a directory that contains a file <tt>parameters.dat</tt> and write a
+file called <tt>results.dat</tt>.</p>
+
+<pre>
+$ python parabolic.py &quot;model_output&quot;/run*
+</pre>
+
+<p>After generating the training points, we generate the principal
+component analysis decomposition of the outputs.</p>
+<pre>
+$ PCADecompose .
+</pre>
+
+<p>The file <tt>pca_decomposition.dat</tt> contains the PCA data.  The
+eigenvalues are sorted in increasing order.</p>
+
+<p>The next step is to generate a Gaussian Process Emulator on the
+training points.  The hyperparameters of the emulator are the
+hyperparameters of the covariance (kernel) functions on the parameter
+space and the regression function.  The <tt>basicTrain</tt> program
+that generates &ldquo;okay&rdquo; values for the hyperparameters.  The
+  default is a square exponential function:</p>
+
+<p class="centered">dist(<em>u</em>,<em>v</em>) = sqrt(sum( ((<em>u</em>[<em>i</em>]-<em>v</em>[<em>i</em>]) / &theta;[<em>i</em>+2])^<sup>2</sup> ))</p>
+<p class="centered">Cov(<em>u</em>,<em>v</em>) = &theta;[0] exp( (-0.5) dist(<em>u</em>,<em>v</em>)^<sup>2</sup>) + &theta;[1] &delta;[<em>u</em>,<em>v</em>]</p>
+
+<p>Where <em>u</em> and <em>v</em> are points in parameter space, &theta; is a list of hyperparameters and &delta; is the kroneker delta.</p>
+
+<p>By default, the nugget (&theta;[1]) is 0.001 and the amplitude
+(&theta;[0]) is 1.0.  We define the characteristic length scale of a
+parameter value as the difference between the 75th percentile and the
+25th percentile of the prior distribution.  For a uniform prior, this
+is half the range.  The default value for &theta;[2+<em>i</em>] the
+characteristic length scale of the <em>i</em>th parameter times
+  the <tt>EMULATOR_SCALE</tt> option.</p>
+
+<p>(In the future we plan on providing robust software to search for more
+  optimal hyperparameters.)</p>
+
+<p>To run the basic training program:</p>
+
+<pre>
+$ basicTrain .
+</pre>
+
+<p><tt>basicTrain</tt> writes out a file <tt>emulator_state.dat</tt>
+which contains hyperparameters for each of the retained pca-decomposed
+submodels.
+
+<p>The final step is to run the Markov chain Monte Carlo (MCMC)
+routine on the code.  The <tt>generateMCMCtrace</tt> program uses the
+trained Gaussian Process model emulator to produce model outputs for
+points in parameter space.  These model outputs are compared to
+  observed values to calculate likelihood.</p>
+
+<p class="centered"><em>L</em> ~ exp((-0.5) sum(
+(<em>Y<sub>_observed</sub></em>[i] - <em>Y<sub>_model</sub></em>[i]) /
+&sigma;[i] ))</p>
+
+<p>The Metropolis-Hastings MCMC algorithm is used to draw a large
+number of samples from the distribution proportional to likelihood.
+These values are stored in a comma-separated-value (csv) file
+specified in the arguments.</p>
+
+<pre>
+$ generateMCMCtrace . &quot;mcmc.csv&quot;
+</pre>
+
+<p>The output file is left in the <tt>trace</tt> directory:</p>
+
+<pre>
+$ head trace/mcmc.csv
+"X0","K","TEMP","MEAN_X","MEAN_X_SQUARED","MEAN_ENERGY","LogLikelihood"
+-0.167188,1.63734,0.790651,0,0,0,-7.0052
+-0.176625,1.60696,0.673026,-0.176625,1.87896,0.673026,-6.89768
+-0.181315,1.61748,0.744548,-0.181315,1.89524,0.744548,-6.97992
+-0.181315,1.61748,0.744548,-0.181315,1.89524,0.744548,-6.97992
+-0.222542,1.62965,0.668291,-0.222542,1.85553,0.668291,-6.85991
+-0.188486,1.62792,0.638246,-0.188486,1.84436,0.638246,-6.81262
+-0.198998,1.65095,0.659951,-0.198998,1.82891,0.659951,-6.80038
+-0.19968,1.6921,0.574281,-0.19968,1.75331,0.574281,-6.61224
+-0.19968,1.6921,0.574281,-0.19968,1.75331,0.574281,-6.61224
+</pre>
+
+<p>The <tt>generateMCMCtrace</tt> program will produce the number of
+ points specified in the <tt>settings.dat</tt> under in
+ the <tt>MCMC_NUMBER_OF_SAMPLES</tt> variable.
+
+<h2>3. Visualizing the Results</h2>
+
+
+</div>
+</body>
+</html>
+
+<!--  LocalWords:  px pre moz dddddd MaxOS RedHat Eigen sudo cmake cd
+      LocalWords:  libboost dev libeigen groupinstall devel eigen src
+      LocalWords:  MacOS macports mkdir executables EOF PCA py mcmc
+      LocalWords:  generateTrainingPoints PCADecompose basicTrain csv
+      LocalWords:  generateMCMCtrace utf os sys Wyka xrange elif sqrt
+      LocalWords:  GetGaussianIntegral MeanX MeanE ErrorX ErrorE dat
+      LocalWords:  rundir params IOError len argv arg tt ffffff th td
+      LocalWords:  DistributionSampling
+ -->
