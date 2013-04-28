@@ -111,7 +111,7 @@ int main(int argc, char ** argv) {
 
   std::string observationsFile = experimentalResultsDirectory +
     madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
-  
+
   madai::GaussianProcessEmulatedModel gpem;
   if ( gpem.LoadConfiguration( statisticsDirectory,
                                modelOutputDirectory,
@@ -157,7 +157,7 @@ int main(int argc, char ** argv) {
       std::cout <<  '\r' << "MCMC percent done: " << percent++ << "%";
     trace.Add( mcmc.NextSample() );
   }
-  std::cout << "\r" ;
+  std::cout << "\r                          \r";
 
   std::string traceDirectory = statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );

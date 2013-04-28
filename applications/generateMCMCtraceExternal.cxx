@@ -129,7 +129,7 @@ int main(int argc, char ** argv) {
   }
 
   em.SetUseModelCovarianceToCalulateLogLikelihood( useModelError );
-  
+
   std::string observationsFile = experimentalResultsDirectory +
     madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
   std::ifstream observations( observationsFile.c_str() );
@@ -169,7 +169,7 @@ int main(int argc, char ** argv) {
       std::cout <<  '\r' << "MCMC percent done: " << percent++ << "%";
     trace.Add( mcmc.NextSample() );
   }
-  std::cout << "\r" ;
+  std::cout << "\r                          \r";
 
   std::string traceDirectory = statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
