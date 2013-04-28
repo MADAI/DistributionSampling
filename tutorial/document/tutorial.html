@@ -22,6 +22,7 @@ padding-top: 2px; padding-bottom: 2px; margin-top: 3px; margin-bottom:
 table {border-collapse:collapse}
 th {    color:black; background-color:#f0f0f0;}
 td,th { border:1px black solid}
+hr { width:100%;background-color:#56A0D3;color:#001A57;border:0;height:1px;margin:0}
 .centered {text-align:center;}
 .cbracket { color: #440044; background-color: #f0f0f0; text-decoration: none; font-weight: bold; }
 .comment { color: #880000; background-color: #f0f0f0; text-decoration: none; font-weight: normal; }
@@ -51,19 +52,22 @@ function toggleViz(name) {
 <div class="column">
 <!--=========================================================================-->
 <h1>MADAI Distribution-Sampling Tutorial</h1>
+<hr>
 
 <!--=========================================================================-->
 <h2>0. Introduction</h2>
+
+<!-- \todo insert background for what we want to accomplish -->
 
 <!--=========================================================================-->
 <h2>1. Installing The Software</h2>
 
 <p> Pre-compiled versions of this software can be found here:</p>
 <ul>
-  <li> MaxOS 32-bit: <u>href://.....</u></li>
-  <li> MaxOS 64-bit: <u>href://.....</u></li>
-  <li> RedHat 64-bit: <u>href://.....</u></li>
-  <li> Ubuntu 64-bit: <u>href://.....</u></li>
+  <li> MaxOS 32-bit:  <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
+  <li> MaxOS 64-bit:  <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
+  <li> RedHat 64-bit: <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
+  <li> Ubuntu 64-bit: <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
   <li> ... </li>
 </ul>
 
@@ -116,13 +120,25 @@ PATH:</p>
 <pre>$ PATH=&quot;${PATH}:${HOME}/build/DistributionSampling/bin&quot;</pre>
 
 <!--=========================================================================-->
-<h2>2. Running the Software</h2>
+<h2>2. Running the Software With a Fast Model</h2>
+
+<p>By a "fast model" we mean that you can wait while it runs millions
+of times. </p>
+
+<p>Our example will be the parabolic potential model.  This
+model has the parameters <tt>X0</tt>, <tt>K</tt>, and <tt>TEMP</tt>;
+and the observables <tt>MEAN_X</tt>, <tt>MEAN_X_SQUARED</tt>, and
+<tt>MEAN_ENERGY</tt>.</p>
+
+<p>Write a program that prints out on the standard output some information
+
+<!--=========================================================================-->
+<h2>2. Running the Software With a Slow Model</h2>
 
 <p>The first example will be the parabolic potential model.  This
 model has the parameters <tt>X0</tt>, <tt>K</tt>, and <tt>TEMP</tt>;
 and the observables <tt>MEAN_X</tt>, <tt>MEAN_X_SQUARED</tt>, and
 <tt>MEAN_ENERGY</tt></p>
-
 
 <p>Begin by choosing a working directory
 <pre>
@@ -453,9 +469,9 @@ trained Gaussian Process model emulator to produce model outputs for
 points in parameter space.  These model outputs are compared to
   observed values to calculate likelihood.</p>
 
-<p class="centered"><em>L</em> ~ exp((-0.5) sum(
-(<em>Y<sub>_observed</sub></em>[i] - <em>Y<sub>_model</sub></em>[i]) /
-&sigma;[i] ))</p>
+<p class="centered"><em>L</em> &#8733; exp((-0.5) sum(
+(<em>Y<sub>_observed</sub></em>[<em>i</em>] - <em>Y<sub>_model</sub></em>[<em>i</em>]) /
+&sigma;[<em>i</em>] ))</p>
 
 <p>The Metropolis-Hastings MCMC algorithm is used to draw a large
 number of samples from the distribution proportional to likelihood.
@@ -484,11 +500,30 @@ $ head trace/mcmc.csv
 
 <p>The <tt>generateMCMCtrace</tt> program will produce the number of
  points specified in the <tt>settings.dat</tt> under in
- the <tt>MCMC_NUMBER_OF_SAMPLES</tt> variable.
+ the <tt>MCMC_NUMBER_OF_SAMPLES</tt> variable.  Depending on the
+ number of the parameters, a larger or smaller number of samples will
+ need to be drawn.  Once you are sure that the program is working
+ correctly, set <tt>MCMC_NUMBER_OF_SAMPLES</tt> to a large number
+ (10<sup>6</sup> or 10<sup>7</sup>) and let the program run for a
+  while.</p>
 
 <h2>3. Visualizing the Results</h2>
 
+While visualization software is capable of displaying ten million
+points in space, for analysis you may need to reduce the number of
+points.  To keep the same random distribution, it may be easiest to
+pick out evert <em>N</em>th line.  For example, to reduce ten million
+points down to ten thousand, pick out every 1000th line:</p>
 
+<pre>
+$ awk 'NR % 1000 == 1' < trace/mcmc.csv > trace/mcmc-subsample.csv
+</pre>
+
+<p>CSV files can be opened in ParaView or the MADAI Workbench.</p>
+
+<p>&nbsp;</p>
+
+<hr>
 </div>
 </body>
 </html>
