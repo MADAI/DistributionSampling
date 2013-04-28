@@ -59,9 +59,9 @@ MetropolisHastingsSampler
     // set step scales
   }
   Model * m = const_cast< Model * >(m_Model);
-  std::vector< double > y( model->GetNumberOfScalarOutputs() );
+  m_CurrentOutputs.resize( model->GetNumberOfScalarOutputs() );
   Model::ErrorType error = m->GetScalarOutputsAndLogLikelihood(
-    m_CurrentParameters, y, m_CurrentLogLikelihood);
+    m_CurrentParameters, m_CurrentOutputs, m_CurrentLogLikelihood);
   // initial starting point LogLikelihood.
   assert (error == Model::NO_ERROR);
 }
