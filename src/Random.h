@@ -60,7 +60,16 @@ public:
   virtual void Reseed();
 
   /** Returns an integer < N and >= 0 */
-  virtual int Integer(unsigned long int N);
+  virtual int Integer( int N );
+
+  /** Returns an integer < N and >= 0 */
+  virtual int operator()( int N );
+
+  /** Returns a long < N and >= 0 */
+  virtual long Integer( long N );
+
+  /** Returns a long < N and >= 0 */
+  virtual long operator()( long N );
 
   /** Returns a uniform random number in the range [0.0, 1.0] */
   virtual double Uniform();
@@ -76,22 +85,6 @@ public:
    * and standard deviation supplied as arguments */
   virtual double Gaussian(double mean, double standardDeviation);
 
-  /** Shuffles the vector passed to it. */
-  template< class T >
-  void ShuffleVector( std::vector< T > & v )
-  {
-    size_t n = v.size();
-
-    // Iterate over items from the back, replacing the current index
-    // with an item randomly drawn from the portion of the vector before
-    // the current index.
-    for ( size_t i = n-1; i >= 1; i-- ) {
-    int randomInt = this->Integer( i + 1 );
-    std::swap( v[i], v[randomInt] );
-    }
-
-  }
-
 private:
   /** Explicitly disallowed */
   Random& operator=(madai::Random &);
@@ -102,7 +95,8 @@ private:
   /** Typedefs for random number generation */
   //@{
   typedef boost::mt19937               BaseGeneratorType;
-  typedef boost::uniform_int<>         UniformIntDistributionType;
+  typedef boost::uniform_int< int >    UniformIntDistributionType;
+  typedef boost::uniform_int< long >   UniformLongDistributionType;
   typedef boost::uniform_real<>        UniformRealDistributionType;
   typedef boost::normal_distribution<> NormalDistributionType;
   typedef boost::variate_generator<
@@ -115,6 +109,9 @@ private:
 
   /** Uniform int distribution */
   UniformIntDistributionType  m_UniformIntDistribution;
+
+  /** Uniform long distribution */
+  UniformLongDistributionType  m_UniformLongDistribution;
 
   /** Uniform real distribution */
   UniformRealDistributionType m_UniformRealDistribution;

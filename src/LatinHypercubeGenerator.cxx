@@ -128,7 +128,9 @@ LatinHypercubeGenerator
                               parameterSubdivisions[i] );
 
     // Randomly shuffle the subdivisions
-    m_Random->ShuffleVector( parameterSubdivisions[i] );
+    std::random_shuffle( parameterSubdivisions[i].begin(),
+                         parameterSubdivisions[i].end(),
+                         *m_Random );
   }
 
   // Now loop over the samples and create a parameter position from

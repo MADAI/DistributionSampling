@@ -65,9 +65,33 @@ void Random::Reseed()
 /**
  * Returns an integer < N and >= 0
  */
-int Random::Integer(unsigned long int N)
+int Random::Integer( int N )
 {
   return m_UniformIntDistribution( m_BaseGenerator, N );
+}
+
+/**
+ * Returns an integer < N and >= 0
+ */
+int Random::operator()( int N )
+{
+  return m_UniformIntDistribution( m_BaseGenerator, N );
+}
+
+/**
+ * Returns a long < N and >= 0
+ */
+long Random::Integer( long N )
+{
+  return m_UniformLongDistribution( m_BaseGenerator, N );
+}
+
+/**
+ * Returns a long < N and >= 0
+ */
+long Random::operator()( long N )
+{
+  return m_UniformLongDistribution( m_BaseGenerator, N );
 }
 
 /**
