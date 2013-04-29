@@ -27,30 +27,23 @@
 namespace madai {
 
 RuntimeParameterFileReader
-::RuntimeParameterFileReader() :
-  m_NumberOfArguments( 0 ),
-  m_Arguments( NULL )
+::RuntimeParameterFileReader()
 {
 }
 
 RuntimeParameterFileReader
 ::~RuntimeParameterFileReader()
 {
-  this->FreeMemory();
 }
 
 bool
 RuntimeParameterFileReader
 ::ParseFile( const std::string fileName )
 {
-  this->FreeMemory();
-
   std::ifstream inFile( fileName.c_str() );
   if ( inFile.is_open() ) {
     std::string line;
     std::string element;
-    std::vector< std::string > arg_list;
-    m_NumberOfArguments = 0;
     while ( inFile.good() ) {
       std::getline( inFile, line );
 
@@ -66,27 +59,11 @@ RuntimeParameterFileReader
         } else {
           m_Options[ name ] = std::string();
         }
-        arg_list.push_back( name );
-
-        // Push rest of tokens onto the arg_list
-        while ( firstSpace != std::string::npos ) {
-          size_t nextSpace = line.find_first_of( ' ', firstSpace+1 );
-          std::string token = line.substr( firstSpace+1,
-                                           (nextSpace - firstSpace - 1) );
-          arg_list.push_back( token );
-          firstSpace = nextSpace;
-        }
       }
     }
-
-    m_NumberOfArguments = arg_list.size();
-    m_Arguments = new char*[m_NumberOfArguments]();
-    for ( int i = 0; i < m_NumberOfArguments; i++ ) {
-      m_Arguments[i] = new char[arg_list[i].size()+1];
-      std::strcpy( m_Arguments[i], arg_list[i].c_str() );
-    }
   } else {
-    std::cerr << "RuntimeParameterFileReader couldn't find input file'" << fileName << "'\n";
+    std::cerr << "RuntimeParameterFileReader couldn't find input file'"
+      << fileName << "'\n";
     return false;
   }
 
@@ -141,33 +118,6 @@ RuntimeParameterFileReader
 ::GetAllOptions() const
 {
   return m_Options; // implicit cast to const
-}
-
-
-int
-RuntimeParameterFileReader
-::GetNumberOfArguments() const
-{
-  return m_NumberOfArguments;
-}
-
-char **
-RuntimeParameterFileReader
-::GetArguments() const
-{
-  return m_Arguments;
-}
-
-void
-RuntimeParameterFileReader
-::FreeMemory()
-{
-  for ( int i = 0; i < m_NumberOfArguments; i++ ) {
-    delete[] m_Arguments[i];
-  }
-  delete[] m_Arguments;
-
-  m_Arguments = NULL;
 }
 
 bool IsSameWhitespace( char c1, char c2 )

@@ -41,12 +41,6 @@ public:
   // Read a file and output its contents as a character string
   bool ParseFile( const std::string fileName );
 
-  // Get number of arguments
-  int GetNumberOfArguments() const;
-
-  // Get arguments themselves
-  char ** GetArguments() const;
-
   /**
    Get an option value */
   const std::string & GetOption(const std::string & key) const;
@@ -75,11 +69,6 @@ public:
 
 private:
   std::map<std::string, std::string> m_Options;
-
-  int    m_NumberOfArguments;
-  char** m_Arguments;
-
-  void FreeMemory();
 
   // Converts line to format "<name> <value1> <value1> ...\n"
   std::string RegularizeLine( std::string line );
