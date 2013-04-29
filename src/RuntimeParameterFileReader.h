@@ -50,9 +50,28 @@ public:
   /**
    Get an option value */
   const std::string & GetOption(const std::string & key) const;
+
+  /**
+   Get an option value cast to double
+   It is up to the user to call HasOption(key) before calling this.  */
+  double GetOptionAsDouble(const std::string & key) const;
+
+  /**
+   Get an option value cast to integer
+   It is up to the user to call HasOption(key) before calling this.  */
+  long GetOptionAsInt(const std::string & key) const;
+
   /**
    Check to see if an option is specified. */
   bool HasOption(const std::string & key) const;
+
+  /**
+   Used for debugging. */
+  void PrintAllOptions(std::ostream & out) const;
+
+  /**
+   Used for unit tests. */
+  const std::map<std::string, std::string> GetAllOptions() const;
 
 private:
   std::map<std::string, std::string> m_Options;
