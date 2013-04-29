@@ -54,11 +54,24 @@ RegularStepGradientAscentSampler
   Model::ErrorType error =
     m_Model->GetScalarAndGradientOutputs( m_CurrentParameters, activeParameters,
                                           scalars, gradient );
+  if (error != Model::NO_ERROR) {
+    std::cerr << "In RegularStepGradientAscentSampler::NextSample()\n"
+      "  Model::GetScalarAndGradientOutputs() returned error "
+              << Model::GetErrorTypeAsString(error) << '\n';
+    return Sample();
+  }
 
   // Get the log likelihood
   double logLikelihood = 0.0;
   error =
     m_Model->GetScalarOutputsAndLogLikelihood( m_CurrentParameters, scalars, logLikelihood );
+
+  if (error != Model::NO_ERROR) {
+    std::cerr << "In RegularStepGradientAscentSampler::NextSample()\n"
+      "  Model::GetScalarOutputsAndLogLikelihood() returned error "
+              << Model::GetErrorTypeAsString(error) << '\n';
+    return Sample();
+  }
 
   Sample sample( m_CurrentParameters, scalars, logLikelihood );
 
