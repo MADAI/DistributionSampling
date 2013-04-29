@@ -59,8 +59,6 @@ int main(int argc, char ** argv) {
               << "\n"
               << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
               << ":\n\n"
-              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
-              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
               << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
               << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
               << "MCMC_NUMBER_OF_SAMPLES <value> (default: "
@@ -87,8 +85,6 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  std::string modelOutputDirectory =
-    madai::GetModelOutputDirectory( statisticsDirectory, settings );
   std::string experimentalResultsDirectory =
     madai::GetExperimentalResultsDirectory( statisticsDirectory, settings );
 
