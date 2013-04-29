@@ -112,6 +112,37 @@ RuntimeParameterFileReader
   }
 }
 
+double
+RuntimeParameterFileReader
+::GetOptionAsDouble(const std::string & key) const
+{
+  return std::atof(this->GetOption(key).c_str());
+}
+
+long
+RuntimeParameterFileReader
+::GetOptionAsInt(const std::string & key) const
+{
+  return std::atol(this->GetOption(key).c_str());
+}
+
+void
+RuntimeParameterFileReader
+::PrintAllOptions(std::ostream & out) const
+{
+  for (std::map<std::string, std::string>::const_iterator it =
+         m_Options.begin(); it != m_Options.end(); ++it)
+    out << "Options[\"" << it->first << "\"] = \"" << it->second << "\"\n";
+}
+
+const std::map<std::string, std::string>
+RuntimeParameterFileReader
+::GetAllOptions() const
+{
+  return m_Options; // implicit cast to const
+}
+
+
 int
 RuntimeParameterFileReader
 ::GetNumberOfArguments() const
