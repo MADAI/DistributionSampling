@@ -736,19 +736,12 @@ GaussianProcessEmulatorDirectoryReader
     std::cerr << "Error parsing runtime parameters.\n" << std::endl;
   }
 
-  double fractionalResolvingPower = 0.95;
-  int runtimeParameters = runtimeParameterReader.GetNumberOfArguments();
-  char ** runtimeArguments = runtimeParameterReader.GetArguments();
-  for ( int i = 0; i < runtimeParameters; ++i ) {
-    std::string argument( runtimeArguments[i] );
-    if ( argument == "PCA_FRACTION_RESOLVING_POWER" ) {
-      fractionalResolvingPower = atof( runtimeArguments[i+1] );
-      break;
-    } else {
-      // Skip the argument
-      i++;
-    }
-  }
+  double fractionalResolvingPower;
+  if (runtimeParameterReader.HasOption("PCA_FRACTION_RESOLVING_POWER"))
+    fractionalResolvingPower = runtimeParameterReader.GetOptionAsDouble(
+        "PCA_FRACTION_RESOLVING_POWER");
+  else
+    fractionalResolvingPower = 0.95;
 
   gpe->RetainPrincipalComponents( fractionalResolvingPower );
 
