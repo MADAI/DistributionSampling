@@ -85,8 +85,9 @@ MetropolisHastingsSampler
 
   unsigned int numberOfActiveParameters = this->GetNumberOfActiveParameters();
 
-  assert( std::count( m_ActiveParameterIndices.begin(),
-                      m_ActiveParameterIndices.end(), true )
+  assert( static_cast<unsigned int>(
+              std::count( m_ActiveParameterIndices.begin(),
+                          m_ActiveParameterIndices.end(), true ))
           == numberOfActiveParameters);
 
   for ( unsigned int i = 0; i < m_Model->GetNumberOfParameters(); i++ ) {
