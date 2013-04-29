@@ -18,6 +18,7 @@
 
 #include "RuntimeParameterFileReader.h"
 
+#include <algorithm>
 #include <cctype>
 #include <cstring>
 #include <vector>
@@ -169,6 +170,20 @@ RuntimeParameterFileReader
   m_Arguments = NULL;
 }
 
+bool IsSameWhitespace( char c1, char c2 )
+{
+  return ( ::isspace( c1 ) && ::isspace( c2 ) );
+}
+
+char TabToSpace( char input )
+{
+  if ( input == '\t' ) {
+    return ' ';
+  }
+
+  return input;
+}
+
 std::string
 RuntimeParameterFileReader
 ::RegularizeLine( std::string line )
@@ -177,51 +192,24 @@ RuntimeParameterFileReader
   size_t commentPosition = line.find_first_of( '#' );
   line = line.substr( 0, commentPosition );
 
-  // Trim left whitespace
-  size_t left;
-  for ( left = 0; left < line.size(); ++left ) {
-    if ( line[left] != ' ' || line[left] != '\t' ) {
-      break;
-    }
-  }
-
-  // Trim right whitespace
-  size_t right;
-  for ( right = line.size()-1; right > 0; --right ) {
-    if ( line[right] != ' ' || line[right] != '\t' ) {
-      break;
-    }
-  }
-
-  line = line.substr( left, (right - left + 1) );
+  // Convert any tabs to spaces
+  std::transform( line.begin(), line.end(), line.begin(), TabToSpace );
 
   // Convert contiguous white space in line to a single space
-  bool inWhiteSpace = std::isspace( line[0] );
-  std::string newLine;
-  for ( size_t i = 0; i < line.size(); ++i ) {
-    char character = line[i];
-    if ( inWhiteSpace ) {
-      if ( std::isspace( character ) ) {
-        // Skip
-      } else {
-        inWhiteSpace = false;
-        newLine.push_back( character );
-      }
-    } else {
-      if ( std::isspace( character ) ) {
-        inWhiteSpace = true;
-        newLine.push_back( ' ' );
-      } else {
-        newLine.push_back( character );
-      }
-    }
+  std::string::iterator newEnd = std::unique( line.begin(), line.end(), IsSameWhitespace );
+  line.resize( std::distance( line.begin(), newEnd ) );
+
+  // Trim whitespace left
+  if ( *(line.begin()) == ' ' ) {
+    line.erase( line.begin() );
   }
 
-  if ( *(newLine.end()-1) == ' ' ) {
-    newLine.erase( newLine.end() - 1 );
+  // Trim whitespace right
+  if ( *(line.end() - 1) == ' ' ) {
+    line.erase( (line.end() - 1) );
   }
 
-  return newLine;
+  return line;
 }
 
 } // end namespace madai
