@@ -68,9 +68,11 @@ ExternalModel
 
 
 static void discard_line( std::FILE * fp ) {
-  static int buffersize = 1024;
+  const static int buffersize = 1024;
   char buffer[buffersize];
-  std::fgets( buffer, buffersize, fp );
+  if (NULL == std::fgets( buffer, buffersize, fp ) && !feof(fp)) {
+    std::cerr << "ExternalModel: discard_line(): error in fgets()\n";
+  }
 }
 
 
@@ -253,7 +255,7 @@ ExternalModel
 
   // Get output names
   unsigned int numberOfOutputs;
-  if ( 1 != std::fscanf( m_Process.answer, "%d", &numberOfOutputs ) ) {
+  if ( 1 != std::fscanf( m_Process.answer, "%u", &numberOfOutputs ) ) {
     std::cerr << "fscanf failure reading from the external process [2]\n";
     return OTHER_ERROR;
   }
@@ -284,7 +286,7 @@ ExternalModel
     if (str_equal(buffer, "FULL_MATRIX")) {
       this->m_CovarianceMode = FULL_MATRIX_COVARIANCE;
       unsigned int covarianceSize;
-      if ( 1 != std::fscanf( m_Process.answer, "%d", &covarianceSize ) ) {
+      if ( 1 != std::fscanf( m_Process.answer, "%u", &covarianceSize ) ) {
         std::cerr << "fscanf failure @ covarianceSize.\n";
         return OTHER_ERROR;
       }
@@ -295,7 +297,7 @@ ExternalModel
     } else if (str_equal(buffer, "TRIANGULAR_MATRIX")) {
       this->m_CovarianceMode = TRIANGULAR_COVARIANCE;
       unsigned int covarianceSize;
-      if ( 1 != std::fscanf( m_Process.answer, "%d", &covarianceSize ) ) {
+      if ( 1 != std::fscanf( m_Process.answer, "%u", &covarianceSize ) ) {
         std::cerr << "fscanf failure @ covarianceSize.\n";
         return OTHER_ERROR;
       }
@@ -313,7 +315,7 @@ ExternalModel
     }
   } else if (str_equal(buffer, "VARIANCE")) {
     unsigned int varianceSize;
-    if ( 1 != std::fscanf( m_Process.answer, "%d", &varianceSize ) ) {
+    if ( 1 != std::fscanf( m_Process.answer, "%u", &varianceSize ) ) {
       std::cerr << "fscanf failure @ varianceSize.\n";
       return OTHER_ERROR;
     }
@@ -399,7 +401,7 @@ ExternalModel
   for ( std::vector< double >::const_iterator par_it = parameters.begin();
        par_it < parameters.end(); par_it++ ) {
     //FIXME to do: check against parameter range.
-    std::fprintf( proc.question,"%.17lf\n", *par_it );
+    std::fprintf( proc.question,"%.17f\n", *par_it );
   }
   std::fflush( proc.question );
 
