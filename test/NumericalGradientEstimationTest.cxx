@@ -45,11 +45,25 @@ int main( int, char *[] )
   madai::Model::ErrorType error =
     model->GetScalarAndGradientOutputs( parameters, activeParameters,
                                         scalars, actualGradient );
+  if (error != madai::Model::NO_ERROR) {
+    std::cerr << "In NumericalGradientEstimationTest.cxx: main()\n:"
+              <<  __LINE__
+              << "  Model::GetScalarAndGradientOutputs() returned error "
+              << madai::Model::GetErrorTypeAsString(error) << '\n';
+    return EXIT_FAILURE;
+  }
 
   std::vector< double > estimatedGradient;
   error =
     model->Model::GetScalarAndGradientOutputs( parameters, activeParameters,
                                                scalars, estimatedGradient );
+  if (error != madai::Model::NO_ERROR) {
+    std::cerr << "In NumericalGradientEstimationTest.cxx: main():"
+              <<  __LINE__
+              << "\n  Model::GetScalarAndGradientOutputs() returned error "
+              << madai::Model::GetErrorTypeAsString(error) << '\n';
+    return EXIT_FAILURE;
+  }
 
   unsigned int activeParameterIndex = 0;
   for ( unsigned int i = 0; i < model->GetNumberOfParameters(); ++i ) {
@@ -75,6 +89,14 @@ int main( int, char *[] )
   error =
     model->Model::GetScalarAndGradientOutputs( parameters, activeParameters,
                                                scalars, partialGradient );
+  if (error != madai::Model::NO_ERROR) {
+    std::cerr << "In NumericalGradientEstimationTest.cxx: main():"
+              <<  __LINE__
+              << "\n  Model::GetScalarAndGradientOutputs() returned error "
+              << madai::Model::GetErrorTypeAsString(error) << '\n';
+    return EXIT_FAILURE;
+  }
+
   double partial    = partialGradient[0];
   double estimated  = estimatedGradient[0];
   if ( fabs( estimated - partial ) > 1.0e-5 ) {
@@ -88,6 +110,13 @@ int main( int, char *[] )
   error =
     model->Model::GetScalarAndGradientOutputs( parameters, activeParameters,
                                                scalars, partialGradient );
+  if (error != madai::Model::NO_ERROR) {
+    std::cerr << "In NumericalGradientEstimationTest.cxx: main():"
+              <<  __LINE__
+              << "\n  Model::GetScalarAndGradientOutputs() returned error "
+              << madai::Model::GetErrorTypeAsString(error) << '\n';
+    return EXIT_FAILURE;
+  }
 
   partial   = partialGradient[0];
   estimated = estimatedGradient[1];
