@@ -148,7 +148,7 @@ int main(int argc, char ** argv) {
 
   for ( int count = 0; count < numberOfBurnInSamples; count++ ) {
     if ( count % step == 0 ) {
-      std::cout << '\r' << "Burn in percent done: " << percent++ << "%";
+      std::cerr << '\r' << "Burn in percent done: " << percent++ << "%";
     }
 
     // Discard samples in the burn-in phase
@@ -162,10 +162,10 @@ int main(int argc, char ** argv) {
   madai::Trace trace;
   for (int count = 0; count < numberOfSamples; count ++) {
     if (count % step == 0)
-      std::cout <<  '\r' << "MCMC percent done: " << percent++ << "%";
+      std::cerr <<  '\r' << "MCMC percent done: " << percent++ << "%";
     trace.Add( mcmc.NextSample() );
   }
-  std::cout << "\r                          \r";
+  std::cerr << "\r                          \r";
 
   std::string traceDirectory = statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
