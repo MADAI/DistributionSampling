@@ -25,7 +25,7 @@
 /**
    \todo document */
 int main(int, char**) {
-  std::string file_name( "/tmp/tmpRuntimeParameterFileReaderTestFile.dat" );
+  std::string file_name( "tmpRuntimeParameterFileReaderTestFile.dat" );
   std::ofstream testFile;
   testFile.open(file_name.c_str());
   testFile <<
