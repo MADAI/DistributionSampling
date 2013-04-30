@@ -89,15 +89,13 @@ void
 Sampler
 ::ActivateParameter( const std::string & parameterName )
 {
-  bool found = false;
   unsigned int parameterIndex = this->GetParameterIndex( parameterName );
+  assert( parameterIndex != static_cast< unsigned int >(-1) );
+  // should return an error, but this is a void function :(
   if ( parameterIndex != static_cast< unsigned int >(-1) ) {
     m_ActiveParameterIndices[parameterIndex] = true;
     m_ActiveParameters.insert( parameterName );
-    found = true;
   }
-
-  assert(found); // should return an error, but this is a void function :(
 }
 
 
@@ -116,15 +114,13 @@ void
 Sampler
 ::DeactivateParameter( const std::string & parameterName )
 {
-  bool found = false;
   unsigned int parameterIndex = this->GetParameterIndex( parameterName );
+  assert ( parameterIndex != static_cast< unsigned int >(-1) );
+     // should return an error, but this is a void function :(
   if ( parameterIndex != static_cast< unsigned int >(-1) ) {
     m_ActiveParameterIndices[ parameterIndex ] = false;
     m_ActiveParameters.erase( parameterName );
-    found = true;
   }
-
-  assert(found); // should return an error, but this is a void function :(
 }
 
 
