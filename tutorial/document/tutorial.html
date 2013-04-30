@@ -126,17 +126,19 @@ $ <span class="input">mkdir ~/build/DistributionSampling</span>
 $ <span class="input">cd ~/build/DistributionSampling</span></pre></li>
   <li>Build:
 <pre>
-$ <span class="input">cmake ~/src/DistributionSampling</span> <!--
+$ <span class="input">cmake ~/src/DistributionSampling \
+    -DCMAKE_INSTALL_PREFIX:PATH="${HOME}/local"</span> <!--
 CORY: make sure the defaults in CmakeLists.txt are for a Release '-O3'
 / no-testing version.
 -->
-$ <span class="input">make</span></pre></li>
+$ <span class="input">make</span>
+$ <span class="input">make install</span></pre></li>
 </ol>
 <p>Your executables will be in the
-directory <code>${HOME}/build/DistributionSampling/bin</code>. You can
+directory <code>${HOME}/local/bin</code>. You can
 make these executables available by including this directory in your
-PATH:</p>
-<pre>$ <span class="input">PATH=&quot;${PATH}:${HOME}/build/DistributionSampling/bin&quot;</span></pre>
+path/:</p>
+<pre>$ <span class="input">PATH=&quot;${PATH}:${HOME}/local/bin&quot;</span></pre>
 
 <!--=========================================================================-->
 <h2>2. Running the Software With a Fast Model</h2>
@@ -283,27 +285,97 @@ $ <span class="input">head trace/mcmc.csv</span>
 -0.542122,3.93226,3.24617,-0.542122,0.706659,3.24617,-10.5558
 </pre>
 
-<p>The <code>generateMCMCtraceExternal</code> program will produce the number of
- points specified in the <code>settings.dat</code> under in
+<p>The <code>generateMCMCtraceExternal</code> program will produce the
+ number of points specified in the <code>settings.dat</code> under in
  the <code>MCMC_NUMBER_OF_SAMPLES</code> variable.  Depending on the
  number of the parameters, a larger or smaller number of samples will
  need to be drawn.  Once you are sure that the program is working
  correctly, set <code>MCMC_NUMBER_OF_SAMPLES</code> to a large number
  (10<sup>6</sup> or 10<sup>7</sup>) and let the program run for a
-  while.</p>
+ while.</p>
+
 
 <!--=========================================================================-->
-<h2>2. Running the Software With a Slow Model</h2>
+<h2>3. (Advanced) Linking to the Library</h2>
 
-<p>The first example will be the parabolic potential model.  This
-  model has the parameters <code>X0</code>, <code>K</code>, and <code>TEMP</code>;
-  and the observables <code>MEAN_X</code>, <code>MEAN_X_SQUARED</code>, and
-  <code>MEAN_ENERGY</code></p>
+<p>Another way to interface with the DistributionSampling library is
+to link directly to it.  In this example, your model is implemented as
+a subclass of the madai::Model class.
+
+<p>MyModel.cxx</p>
+
+<pre><span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/Model.h&gt;</span>
+<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/MetropolisHastingsSampler.h&gt;</span>
+<span class="keyword">class</span><span class="normal"> </span><span class="classname">MyModel</span><span class="normal"> </span><span class="symbol">:</span><span class="normal"> </span><span class="keyword">public</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model </span><span class="cbracket">{</span>
+<span class="keyword">public</span><span class="symbol">:</span>
+<span class="normal">  </span><span class="function">MyModel</span><span class="symbol">();</span>
+<span class="normal">  </span><span class="keyword">virtual</span><span class="normal"> </span><span class="symbol">~</span><span class="function">MyModel</span><span class="symbol">()</span><span class="normal"> </span><span class="cbracket">{}</span>
+<span class="normal">  </span><span class="keyword">virtual</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> </span><span class="function">GetScalarOutputsAndCovariance</span><span class="symbol">(</span>
+<span class="normal">      </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;,</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;,</span>
+<span class="normal">       std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;)</span><span class="normal"> </span><span class="keyword">const</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="keyword">virtual</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> </span><span class="function">GetScalarOutputs</span><span class="symbol">(</span>
+<span class="normal">      </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;,</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;)</span><span class="normal"> </span><span class="keyword">const</span><span class="symbol">;</span>
+<span class="cbracket">}</span><span class="symbol">;</span>
+<span class="normal">MyModel</span><span class="symbol">::</span><span class="function">MyModel</span><span class="symbol">()</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">  </span><span class="comment">// Insert your code here.</span>
+<span class="normal">  </span><span class="comment">// This constructor calls</span>
+<span class="normal">  </span><span class="comment">//   this-&gt;AddParameter(),</span>
+<span class="normal">  </span><span class="comment">//   this-&gt;AddScalarOutputName(),</span>
+<span class="normal">  </span><span class="comment">//   this-&gt;SetObservedScalarValues(), and</span>
+<span class="normal">  </span><span class="comment">//   this-&gt;SetObservedScalarCovariance().</span>
+<span class="cbracket">}</span>
+<span class="normal">madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> MyModel</span><span class="symbol">::</span><span class="function">GetScalarOutputsAndCovariance</span><span class="symbol">(</span>
+<span class="normal">    </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> parameters</span><span class="symbol">,</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> scalars</span><span class="symbol">,</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> scalarCovariance</span><span class="symbol">)</span><span class="normal"> </span><span class="keyword">const</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">  </span><span class="comment">// Insert your code here.</span>
+<span class="cbracket">}</span>
+<span class="normal">madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> MyModel</span><span class="symbol">::</span><span class="function">GetScalarOutputs</span><span class="symbol">(</span>
+<span class="normal">    </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> parameters</span><span class="symbol">,</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> scalars </span><span class="symbol">)</span><span class="normal"> </span><span class="keyword">const</span> <span class="cbracket">{</span>
+<span class="normal">  </span><span class="comment">// Insert your code here.</span>
+<span class="cbracket">}</span>
+<span class="type">int</span><span class="normal"> </span><span class="function">main</span><span class="symbol">(</span><span class="type">int</span><span class="symbol">,</span><span class="normal"> </span><span class="type">char</span><span class="symbol">**)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">  </span><span class="usertype">MyModel</span><span class="normal"> model</span><span class="symbol">;</span>
+<span class="normal">  madai</span><span class="symbol">::</span><span class="usertype">MetropolisHastingsSampler</span><span class="normal"> mcmc</span><span class="symbol">;</span>
+<span class="normal">  mcmc</span><span class="symbol">.</span><span class="function">SetStepSize</span><span class="symbol">(</span><span class="normal"> </span><span class="number">0.1</span><span class="normal"> </span><span class="symbol">);</span>
+<span class="normal">  </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Sampler</span><span class="symbol">::</span><span class="function">GenerateSamplesAndSaveToFile</span><span class="symbol">(</span>
+<span class="normal">      mcmc</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">model</span><span class="symbol">,</span><span class="normal"> </span><span class="string">"out.csv"</span><span class="symbol">,</span><span class="normal"> </span><span class="number">1000000</span><span class="symbol">,</span><span class="normal"> </span><span class="number">0</span><span class="symbol">,</span><span class="normal"> </span><span class="keyword">false</span><span class="symbol">,</span><span class="normal"> </span><span class="keyword">true</span><span class="symbol">);</span>
+<span class="cbracket">}</span>
+</pre>
+
+<p>Assuming <code>CMAKE_INSTALL_PREFIX</code> was set
+to <code>${HOME}/local</code>, here is the Makefile:</p>
+
+<pre><span class="symbol">all:</span><span class="normal"> MyModel</span>
+<span class="type">CXXFLAGS =</span><span class="normal"> -O</span><span class="number">3</span><span class="normal"> -Wall -pedantic -I</span><span class="string">"${HOME}/local/include"</span>
+<span class="type">LDFLAGS =</span><span class="normal"> -L</span><span class="string">"${HOME}/local/lib/madai"</span><span class="normal"> -lDistributionSampling</span>
+<span class="symbol">%</span><span class="normal">.o </span><span class="symbol">:</span><span class="normal"> </span><span class="symbol">%</span><span class="normal">.cxx</span>
+<span class="normal">	</span><span class="variable">$(CXX)</span><span class="normal"> -c </span><span class="variable">$(CXXFLAGS)</span><span class="normal"> </span><span class="variable">$&lt;</span><span class="normal"> -o </span><span class="variable">$@</span>
+<span class="symbol">%</span><span class="normal"> </span><span class="symbol">:</span><span class="normal"> </span><span class="symbol">%</span><span class="normal">.o</span>
+<span class="normal">	</span><span class="variable">$(CXX)</span><span class="normal"> </span><span class="variable">$&lt;</span><span class="normal"> </span><span class="variable">$(LDFLAGS)</span><span class="normal"> -o </span><span class="variable">$@</span>
+<span class="preproc">.PHONY :</span><span class="normal"> all</span>
+</pre>
+
+<p>&nbsp;</p>
+
+<!--=========================================================================-->
+<h2>4. Running the Software With a Slow Model</h2>
+
+<p>The DistributionSampling library uses a Gaussian Proccess Emulator
+to emulate a slow model much more quickly.  To train the Emulator, the
+software requires hundreds of sample points.  At each training point,
+you will need the parameter values and the model outputs.</p>
+
+<p> We will use the parabolic potential model as an example again.
+  This model has the parameters <code>X0</code>, <code>K</code>,
+  and <code>TEMP</code>; and the observables <code>MEAN_X</code>,
+  <code>MEAN_X_SQUARED</code>, and <code>MEAN_ENERGY</code>.</p>
 
 <p>Begin by choosing a working directory:</p>
 
 <pre>
-$ <span class="input">DIR=&quot;${HOME}/data/parabolic_stat&quot;</span>
+$ <span class="input">DIR=&quot;${HOME}/data/parabolic_emulated&quot;</span>
 $ <span class="input">mkdir -p &quot;$DIR&quot;</span>
 $ <span class="input">cd &quot;$DIR&quot;</span></pre>
 
@@ -559,7 +631,9 @@ $ <span class="input">awk 'NR % 1000 == 1' &lt; trace/mcmc.csv &gt; trace/mcmc-s
 
 <p>&nbsp;</p>
 
+
 <hr>
+
 </div>
 </body>
 </html>
