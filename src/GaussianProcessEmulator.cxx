@@ -111,7 +111,6 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
 {
   static const double EPSILON = 1e-10;
   int p = m_Parent->m_NumberParameters;
-  int numberThetas = m_Thetas.size();
   int offset;
   switch(m_CovarianceFunction) {
   case POWER_EXPONENTIAL_FUNCTION:
@@ -124,8 +123,9 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
     break;
   default:
     assert(false);
+    return 0.0; // we should throw an exception.
   }
-  assert(numberThetas == (p + offset));
+  assert(m_Thetas.size() == (p + offset));
   const double & amplitude = m_Thetas(0);
   const double & nugget = m_Thetas(1);
   double nug = 0.0;
