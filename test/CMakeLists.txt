@@ -7,6 +7,8 @@ set( TEST_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ )
 
+include_directories( ${DistributionSampling_SOURCE_DIR}/applications )
+
 add_library( DistributionSamplingTest STATIC Gaussian2DModel.cxx )
 target_link_libraries( DistributionSamplingTest ${LIBRARIES} )
 
@@ -57,3 +59,14 @@ add_executable( GaussianProcessEmulatedModelTest
   GaussianProcessEmulatorTestGenerator.cxx )
 target_link_libraries( GaussianProcessEmulatedModelTest ${LIBRARIES} )
 add_test( GaussianProcessEmulatedModelTest GaussianProcessEmulatedModelTest )
+
+add_executable( GaussianProcessEmulatorDirectoryReaderTest
+  GaussianProcessEmulatorDirectoryReaderTest.cxx )
+target_link_libraries( GaussianProcessEmulatorDirectoryReaderTest
+  ${LIBRARIES}
+  ApplicationUtilities
+)
+add_test( GaussianProcessEmulatorDirectoryReaderTest
+  GaussianProcessEmulatorDirectoryReaderTest
+  ${TEST_BASE_DIR}/DirectoryStructureTest/statistical_analysis
+)

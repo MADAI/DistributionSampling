@@ -154,7 +154,6 @@ bool parseExperimentalResults(
     return false;
   }
   // default values.
-  gpe.m_OutputUncertaintyScales = Eigen::VectorXd::Constant(numberOutputs, 1.0);
   gpe.m_ObservedOutputValues = Eigen::VectorXd::Zero(numberOutputs);
   while ( !results_file.eof() ) {
     discardWhitespace(results_file); // whitespace at beginning of line,
@@ -169,7 +168,6 @@ bool parseExperimentalResults(
     int index;
     if (getIndex(outputNames, name, index)) {
       gpe.m_ObservedOutputValues(index) = value;
-      gpe.m_OutputUncertaintyScales(index) = error;
     }
   }
 
@@ -327,6 +325,7 @@ inline bool parseParameterAndOutputValues(
 
   size_t p = parameters.size();
   size_t t = outputNames.size();
+
   // Copy m_
   Eigen::MatrixBase< TDerived > & m
   = const_cast< Eigen::MatrixBase< TDerived > & >(m_);
@@ -417,17 +416,21 @@ inline bool parseParameterAndOutputValues(
             results_file >> m2( run_counter, i );
             if ( verbose )
               std::cout << "Parsed output '" << name << "' with value "
-                        << m2( run_counter, i ) << std::endl;
+                        << m2( run_counter, i );
             if ( NVal == 3 ) {
               double ModelUnc;
               results_file >> ModelUnc;
+              if ( verbose )
+                std::cout << " and uncertainty " << ModelUnc;
               avgUnc[i] += ModelUnc;
             } else if ( NVal == 2 ) {
-              avgUnc[i] += 1.0; // default model uncertainty is 1
+              avgUnc[i] += 0.0; // default model uncertainty is 0
             } else if ( NVal != 2 ) {
               std::cerr << "Unknown output format error.\n";
               return false;
             }
+            if ( verbose )
+              std::cout << "\n";
           }
       }
       results_file.close();
@@ -458,6 +461,11 @@ bool parseModelDataDirectoryStructure(
     std::cerr << "Couldn't parse outputs\n";
     return false;
   }
+
+  // Initialize means and uncertainty scales
+  gpme.m_OutputMeans = Eigen::VectorXd::Constant( gpme.m_NumberOutputs, 0.0 );
+  gpme.m_OutputUncertaintyScales = Eigen::VectorXd::Constant( gpme.m_NumberOutputs, 0.0 );
+
   if ( !parseNumberOfModelRuns(
                                gpme.m_NumberTrainingPoints, Model_Outs_Dir ) ) {
     std::cerr << "Couldn't parse number of model runs.\n";
