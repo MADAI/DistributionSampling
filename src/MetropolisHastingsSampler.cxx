@@ -63,7 +63,11 @@ MetropolisHastingsSampler
   Model::ErrorType error = m->GetScalarOutputsAndLogLikelihood(
     m_CurrentParameters, m_CurrentOutputs, m_CurrentLogLikelihood);
   // initial starting point LogLikelihood.
+  #ifdef NDEBUG
+  (void)error;
+  #else
   assert (error == Model::NO_ERROR);
+  #endif
 }
 
 
@@ -83,12 +87,10 @@ MetropolisHastingsSampler
   std::vector< double > xc( m_Model->GetNumberOfParameters(), 0.0 );
   std::vector< double > yc( m_Model->GetNumberOfScalarOutputs(), 0.0 );
 
-  unsigned int numberOfActiveParameters = this->GetNumberOfActiveParameters();
-
   assert( static_cast<unsigned int>(
               std::count( m_ActiveParameterIndices.begin(),
                           m_ActiveParameterIndices.end(), true ))
-          == numberOfActiveParameters);
+          == ( this->GetNumberOfActiveParameters() ) );
 
   for ( unsigned int i = 0; i < m_Model->GetNumberOfParameters(); i++ ) {
     if ( m_ActiveParameterIndices[i] ) {
