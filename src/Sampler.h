@@ -152,6 +152,18 @@ public:
   /** Get the current log-likelihood. */
   double & GetCurrentLogLikelihood() const;
 
+  /**
+     Execute Sampler and save trace to file.
+   */
+  static int GenerateSamplesAndSaveToFile(
+      Sampler & sampler,
+      Model * model,
+      const char * outputFileName,
+      int NumberOfSamples,
+      int NumberOfBurnInSamples,
+      int UseEmulatorCovariance,
+      bool verbose);
+
 protected:
   /** Initialize the Sampler
    *

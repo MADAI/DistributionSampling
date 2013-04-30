@@ -96,7 +96,7 @@ Sampler
     m_ActiveParameters.insert( parameterName );
     found = true;
   }
-
+  (void)found; // NDEBUG unused_parameter error;
   assert(found); // should return an error, but this is a void function :(
 }
 
@@ -123,7 +123,7 @@ Sampler
     m_ActiveParameters.erase( parameterName );
     found = true;
   }
-
+  (void)found;
   assert(found); // should return an error, but this is a void function :(
 }
 
@@ -205,6 +205,54 @@ Sampler
   }
 
   return m_CurrentParameters[parameterIndex];
+}
+
+  /**
+     Execute Sampler and save trace to file.
+  */
+int Sampler
+::GenerateSamplesAndSaveToFile(
+    Sampler & sampler,
+    Model * model,
+    const char * outputFileName,
+    int NumberOfSamples,
+    int NumberOfBurnInSamples,
+    int UseEmulatorCovariance,
+    bool verbose)
+{
+  model->SetUseModelCovarianceToCalulateLogLikelihood(UseEmulatorCovariance);
+  sampler.SetModel( model );
+  int step = NumberOfBurnInSamples / 100, percent = 0;
+  if ( step < 1 ) {
+    step = 1; // avoid div-by-zero error
+  }
+  for ( int count = 0; count < NumberOfBurnInSamples; count++ ) {
+    if (verbose) {
+      if ( count % step == 0 ) {
+        std::cerr << '\r' << "Burn in percent done: " << percent++ << "%";
+      }
+    }
+    sampler.NextSample(); // Discard samples in the burn-in phase
+  }
+  step = NumberOfSamples / 100, percent = 0;
+  if ( step < 1 ) {
+    step = 1; // avoid div-by-zero error
+  }
+  madai::Trace trace;
+  for (int count = 0; count < NumberOfSamples; count ++) {
+    if (verbose) {
+      if (count % step == 0)
+        std::cerr <<  '\r' << "SAMPLER percent done: " << percent++ << "%";
+    }
+    trace.Add( sampler.NextSample() );
+  }
+  if (verbose) {
+    std::cerr << "\r                          \r";
+  }
+  std::ofstream out( outputFileName );
+  trace.WriteCSVOutput(
+      out, model->GetParameters(), model->GetScalarOutputNames() );
+  return EXIT_SUCCESS;
 }
 
 
