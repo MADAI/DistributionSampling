@@ -270,6 +270,43 @@ GaussianProcessEmulator::CheckStatus() {
   return m_Status;
 }
 
+
+/**
+   \returns m_Status */
+GaussianProcessEmulator::StatusType
+GaussianProcessEmulator::GetStatus() const {
+  return m_Status;
+}
+
+
+std::string
+GaussianProcessEmulator::GetStatusAsString() const
+{
+  switch ( m_Status ) {
+  case GaussianProcessEmulator::READY:
+    return std::string( "READY" );
+    break;
+
+  case GaussianProcessEmulator::UNCACHED:
+    return std::string( "UNCACHED" );
+    break;
+
+  case GaussianProcessEmulator::UNTRAINED:
+    return std::string( "UNTRAINED" );
+    break;
+
+  case GaussianProcessEmulator::UNINITIALIZED:
+    return std::string( "UNINITIALIZED" );
+    break;
+
+  case GaussianProcessEmulator::ERROR:
+  default: return std::string( "ERROR" );
+  }
+
+  return std::string();
+}
+
+
 void GaussianProcessEmulator::GetOutputUncertaintyScales(
     std::vector< double > & x)
 {
@@ -814,14 +851,6 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
         m_RetainedPCAEigenvectors.transpose());
 
   return true;
-}
-
-
-/**
-   \returns m_Status */
-GaussianProcessEmulator::StatusType
-GaussianProcessEmulator::GetStatus() const {
-  return m_Status;
 }
 
 } // namespace madai

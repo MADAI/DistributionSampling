@@ -37,26 +37,28 @@
 
 
 std::vector< std::string > getLineAsTokens( std::ifstream & is,
-                                            std::string line )
+                                            std::string & line )
 {
+  std::vector< std::string > tokens;
+
   std::getline( is, line );
 
-  std::vector< std::string > tokens;
-  boost::split( tokens, line, boost::is_any_of("\t "),
+  // First, split on comment character
+  std::vector< std::string > contentAndComments;
+  boost::split( contentAndComments, line, boost::is_any_of("#") );
+
+  if ( contentAndComments.size() == 0 ) {
+    return tokens;
+  }
+
+  // Next, split only the non-comment content
+  boost::split( tokens, contentAndComments[0], boost::is_any_of("\t "),
                 boost::token_compress_on );
 
   // If first token is empty string, remove it and return
   if ( tokens[0] == "" ) {
     tokens.erase( tokens.begin() );
     return tokens;
-  }
-
-  // Remove first token starting with '#' and all tokens after
-  for ( size_t i = 0; i < tokens.size(); ++i ) {
-    if ( tokens[i][0] == '#' ) {
-      tokens.resize( i );
-      break;
-    }
   }
 
   return tokens;
@@ -563,7 +565,8 @@ int main( int argc, char *argv[] )
   // Read in the training data
   madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-  //directoryReader.SetVerbose( true );
+
+  directoryReader.SetVerbose( true );
   if ( !directoryReader.LoadTrainingData( &gpe,
                                           modelOutputDirectory,
                                           statisticsDirectory,

@@ -115,8 +115,16 @@ public:
     std::vector< double > & ycov) const;
 
   /**
+     Check status; make sure that the emulator is in a good state. */
+  StatusType CheckStatus();
+
+  /**
      \returns m_Status */
   StatusType GetStatus() const;
+
+  /**
+     \returns Status as string */
+  std::string GetStatusAsString() const;
 
   //@{
   /**
@@ -135,10 +143,6 @@ public:
      cache some data to make calling GetEmulatorOutputsAndCovariance()
      faster. */
   bool MakeCache();
-
-  /**
-     Check status; make sure that the emulator is in a good state. */
-  StatusType CheckStatus();
 
   // FIELDS
   /**
