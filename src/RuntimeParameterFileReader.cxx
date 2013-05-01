@@ -90,6 +90,26 @@ RuntimeParameterFileReader
   }
 }
 
+bool
+RuntimeParameterFileReader
+::GetOptionAsBool(const std::string & key, bool defaultValue) const
+{
+  if (! this->HasOption(key))
+    return defaultValue;
+  const std::string & Option = this->GetOption(key);
+  if (Option == "1") // for fastest results, use 0 and 1.
+    return true;
+  if (Option == "0")
+    return false;
+  std::string value = Option;
+  std::transform( Option.begin(), Option.end(), value.begin(), ::tolower );
+  if ((value == "true") || (value == "yes") || (value == "on"))
+    return true;
+  if ((value == "false") || (value == "no") || (value == "off"))
+    return false;
+  return defaultValue;
+}
+
 double
 RuntimeParameterFileReader
 ::GetOptionAsDouble(const std::string & key) const

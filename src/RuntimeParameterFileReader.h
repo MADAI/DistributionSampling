@@ -56,6 +56,18 @@ public:
   long GetOptionAsInt(const std::string & key) const;
 
   /**
+   Get an option value as a bool.
+   If (! this->HasOption(key)
+     return defaultValue.
+   If this->GetOption(key) is 1, true, TRUE, True, yes, YES, on, On, or ON,
+     return true
+   If this->GetOption(key) is 0, false FALSE, False, NO, no, off, Off, or OFF,
+     return false
+   Otherwise behavior is undefined.
+  */
+  bool GetOptionAsBool(const std::string & key, bool defaultValue=false) const;
+
+  /**
    Check to see if an option is specified. */
   bool HasOption(const std::string & key) const;
 
