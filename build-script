@@ -1,0 +1,5 @@
+#!/bin/sh
+SRC_DIR="$(cd "$(dirname "$0")" ; pwd)"
+cd `/tmp/madai_build_1v22de`
+cmake "$SRC_DIR" -DCMAKE_INSTALL_PREFIX:PATH="${1:-"${HOME}/local"}" \
+  && make && make install
