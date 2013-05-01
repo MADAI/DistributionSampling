@@ -29,6 +29,7 @@
 #include "Paths.h"
 #include "RuntimeParameterFileReader.h"
 #include "Trace.h"
+#include "SamplerCSVWriter.h"
 
 #include "madaisys/SystemTools.hxx"
 
@@ -79,9 +80,11 @@ int main(int argc, char ** argv) {
   madai::EnsurePathSeparatorAtEnd( statisticsDirectory );
 
   madai::RuntimeParameterFileReader settings;
-  std::string settingsFile = statisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE;
+  std::string settingsFile =
+    statisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE;
   if ( !settings.ParseFile( settingsFile ) ) {
-    std::cerr << "Could not open runtime parameter file '" << settingsFile << "'\n";
+    std::cerr
+      << "Could not open runtime parameter file '" << settingsFile << "'\n";
     return EXIT_FAILURE;
   }
 
@@ -90,7 +93,8 @@ int main(int argc, char ** argv) {
 
   int numberOfSamples = DEFAULT_MCMC_NUMBER_OF_SAMPLES;
   if ( settings.HasOption( "MCMC_NUMBER_OF_SAMPLES" ) ) {
-    numberOfSamples = atoi( settings.GetOption( "MCMC_NUMBER_OF_SAMPLES" ).c_str() );
+    numberOfSamples =
+      atoi( settings.GetOption( "MCMC_NUMBER_OF_SAMPLES" ).c_str() );
   }
   int numberOfBurnInSamples = DEFAULT_MCMC_NUMBER_OF_BURN_IN_SAMPLES;
   if ( settings.HasOption( "MCMC_NUMBER_OF_BURN_IN_SAMPLES" ) ) {
@@ -113,7 +117,8 @@ int main(int argc, char ** argv) {
   // Split arguments into vector of strings
   std::vector< std::string > arguments;
   if ( settings.HasOption( "EXTERNAL_MODEL_ARGUMENTS" ) ) {
-    std::string argumentsString = settings.GetOption( "EXTERNAL_MODEL_ARGUMENTS" );
+    std::string argumentsString =
+      settings.GetOption( "EXTERNAL_MODEL_ARGUMENTS" );
     arguments = madai::SplitString( argumentsString, ' ' );
   }
 
@@ -123,8 +128,6 @@ int main(int argc, char ** argv) {
     std::cerr << "Something is wrong with the external model\n";
     return EXIT_FAILURE;
   }
-
-  em.SetUseModelCovarianceToCalulateLogLikelihood( useModelError );
 
   std::string observationsFile = experimentalResultsDirectory +
     madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
@@ -138,43 +141,22 @@ int main(int argc, char ** argv) {
   observations.close();
 
   madai::MetropolisHastingsSampler mcmc;
-  mcmc.SetModel( &em );
   mcmc.SetStepSize( stepSize );
 
-  int step = numberOfBurnInSamples / 100, percent = 0;
-  if ( step < 1 ) {
-    step = 1; // avoid div-by-zero error
-  }
-
-  for ( int count = 0; count < numberOfBurnInSamples; count++ ) {
-    if ( count % step == 0 ) {
-      std::cerr << '\r' << "Burn in percent done: " << percent++ << "%";
-    }
-
-    // Discard samples in the burn-in phase
-    mcmc.NextSample();
-  }
-  step = numberOfSamples / 100, percent = 0;
-  if ( step < 1 ) {
-    step = 1; // avoid div-by-zero error
-  }
-
-  madai::Trace trace;
-  for (int count = 0; count < numberOfSamples; count ++) {
-    if (count % step == 0)
-      std::cerr <<  '\r' << "MCMC percent done: " << percent++ << "%";
-    trace.Add( mcmc.NextSample() );
-  }
-  std::cerr << "\r                          \r";
-
-  std::string traceDirectory = statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
+  std::string traceDirectory =
+    statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
   std::string outputFileName( argv[2] );
-  std::string outputFilePath = traceDirectory + madai::Paths::SEPARATOR + outputFileName;
-  std::ofstream out( outputFilePath.c_str() );
-  trace.WriteCSVOutput( out,
-                        em.GetParameters(),
-                        em.GetScalarOutputNames() );
+  std::string outputFilePath =
+    traceDirectory + madai::Paths::SEPARATOR + outputFileName;
 
-  return EXIT_SUCCESS;
+  std::ofstream outFile(outputFilePath.c_str());
+  return madai::SamplerCSVWriter::GenerateSamplesAndSaveToFile(
+      &mcmc,
+      &em,
+      outFile,
+      numberOfSamples,
+      numberOfBurnInSamples,
+      useModelError,
+      &(std::cerr));
 }

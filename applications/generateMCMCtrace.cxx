@@ -29,6 +29,7 @@
 #include "RuntimeParameterFileReader.h"
 #include "Paths.h"
 #include "Trace.h"
+#include "SamplerCSVWriter.h"
 
 #include "madaisys/SystemTools.hxx"
 
@@ -113,14 +114,16 @@ int main(int argc, char ** argv) {
     madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
 
   madai::GaussianProcessEmulatedModel gpem;
-  if ( gpem.LoadConfiguration( statisticsDirectory,
-                               modelOutputDirectory,
-                               experimentalResultsDirectory ) != madai::Model::NO_ERROR ) {
+  if ( gpem.LoadConfiguration(
+           statisticsDirectory,
+           modelOutputDirectory,
+           experimentalResultsDirectory ) != madai::Model::NO_ERROR ) {
     std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
     return EXIT_FAILURE;
   }
 
-  gpem.SetUseModelCovarianceToCalulateLogLikelihood( useEmulatorCovariance );
+  madai::MetropolisHastingsSampler mcmc;
+  mcmc.SetStepSize( stepSize );
 
   std::ifstream observations( observationsFile.c_str() );
   if ( madai::Model::NO_ERROR != gpem.LoadObservations( observations ) ) {
@@ -129,44 +132,20 @@ int main(int argc, char ** argv) {
   }
   observations.close();
 
-  madai::MetropolisHastingsSampler mcmc;
-  mcmc.SetModel( &gpem );
-  mcmc.SetStepSize( stepSize );
-
-  int step = numberOfBurnInSamples / 100, percent = 0;
-  if ( step < 1 ) {
-    step = 1; // avoid div-by-zero error
-  }
-
-  for ( int count = 0; count < numberOfBurnInSamples; count++ ) {
-    if ( count % step == 0 ) {
-      std::cerr << '\r' << "Burn in percent done: " << percent++ << "%";
-    }
-
-    // Discard samples in the burn-in phase
-    mcmc.NextSample();
-  }
-  step = numberOfSamples / 100, percent = 0;
-  if ( step < 1 ) {
-    step = 1; // avoid div-by-zero error
-  }
-
-  madai::Trace trace;
-  for (int count = 0; count < numberOfSamples; count ++) {
-    if (count % step == 0)
-      std::cerr <<  '\r' << "MCMC percent done: " << percent++ << "%";
-    trace.Add( mcmc.NextSample() );
-  }
-  std::cerr << "\r                          \r";
-
-  std::string traceDirectory = statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
+  std::string traceDirectory =
+    statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
   std::string outputFileName( argv[2] );
-  std::string outputFilePath = traceDirectory + Paths::SEPARATOR + outputFileName;
-  std::ofstream out( outputFilePath.c_str() );
-  trace.WriteCSVOutput( out,
-                        gpem.GetParameters(),
-                        gpem.GetScalarOutputNames() );
+  std::string outputFilePath =
+    traceDirectory + Paths::SEPARATOR + outputFileName;
 
-  return EXIT_SUCCESS;
+  std::ofstream outFile(outputFilePath.c_str());
+  return madai::SamplerCSVWriter::GenerateSamplesAndSaveToFile(
+      &mcmc,
+      &gpem,
+      outFile,
+      numberOfSamples,
+      numberOfBurnInSamples,
+      useEmulatorCovariance,
+      &(std::cerr));
 }
