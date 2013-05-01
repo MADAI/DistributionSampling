@@ -84,7 +84,7 @@ bool CheckForEvenSpacing( const std::vector< madai::Sample > samples ) {
                   << (i2 - i1 ) << "\n";
         return false;
       }
-    }    
+    }
   }
 
   return true;
@@ -117,7 +117,7 @@ int main( int, char *[] )
     return EXIT_FAILURE;
   }
 
-  std::vector< madai::Sample > samples = 
+  std::vector< madai::Sample > samples =
     generator.Generate( numberOfTrainingPoints, parameters );
   PrintSamples( samples );
 
@@ -127,7 +127,7 @@ int main( int, char *[] )
 
   // Now flip on dividing by percentile and make sure we get even spacing
   generator.SetPartitionSpaceByPercentile( true );
-  samples = generator.Generate( numberOfTrainingPoints, parameters );  
+  samples = generator.Generate( numberOfTrainingPoints, parameters );
 
   PrintSamples( samples );
 
@@ -139,4 +139,3 @@ int main( int, char *[] )
 
   return EXIT_SUCCESS;
 }
-
