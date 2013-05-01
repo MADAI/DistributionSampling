@@ -54,6 +54,7 @@ protected:
   /**
      the number of samples in each direction */
   std::vector<unsigned int> m_StateVector;
+
   unsigned int m_SampleScale;
 
 protected:
