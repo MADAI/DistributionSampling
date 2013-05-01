@@ -51,4 +51,3 @@ public:
 } // end namespace madai
 
 #endif // madai_GaussianProcessEmulatorSingleFileWriter_h_included
-
