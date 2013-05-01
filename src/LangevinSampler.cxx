@@ -71,12 +71,10 @@ LangevinSampler
   Model * m = const_cast< Model * >(m_Model);
   double TimeLeft = m_TimeStep;
 
-  unsigned int numberOfActiveParameters = this->GetNumberOfActiveParameters();
-
   assert( static_cast<unsigned int> (
               std::count( m_ActiveParameterIndices.begin(),
                           m_ActiveParameterIndices.end(), true ))
-          == numberOfActiveParameters);
+          == this->GetNumberOfActiveParameters());
 
   // Get the gradient of the Log Likelihood at the current point
   std::vector< double > Gradient;
