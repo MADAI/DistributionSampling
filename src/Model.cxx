@@ -24,15 +24,13 @@
 #include <cmath>
 #include <limits>
 
-namespace {
 template<class S, class T>
-int findIndex(const S & v, const T & s)
+int static findIndex(const S & v, const T & s)
 {
   typename S::const_iterator it = std::find(v.begin(), v.end(), s);
   if (it == v.end())
     return -1;
   return std::distance(v.begin(), it);
-}
 }
 
 namespace madai {
