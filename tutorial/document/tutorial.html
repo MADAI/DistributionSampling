@@ -22,7 +22,7 @@ pre { color:#000000; background-color:#f0f0f0;
 	margin-top:3px; margin-bottom:3px; z-index:12; }
 table { border-collapse:collapse; }
 th { color:black; background-color:#f0f0f0;}
-td,th { border:1px black solid}
+td,th { border:1px black solid; text-align:left}
 hr { width:100%; background-color:#56A0D3; color:#001A57;
 	border:0;height:1px; margin:0}
 .centered {text-align:center;}
@@ -70,6 +70,20 @@ function toggleViz(name) {
 <!--=========================================================================-->
 <h2>0. Introduction</h2>
 
+<p>This software will enable you to determine model parameters from
+comparing model outputs to a set of experimental measurements to
+  determine the relative likelihood of a set of parameter values.</p>
+
+<p>Before starting, You will need to build an effectively parametrized
+ model.  Decide which parameters you want to vary in your model and
+ what you think the prior distribution of each parameter is (this may
+ be as simple as a uniform distribution between <code>value_min</code>
+ and <code>value_max</code>).</p>
+
+<p>Next, decide which model outputs you want to use.  These should be
+numbers which can be readily compared to your experimental/
+  observational data.</p>
+
 <!-- \todo insert background for what we want to accomplish -->
 
 <!--=========================================================================-->
@@ -77,10 +91,14 @@ function toggleViz(name) {
 
 <p> Pre-compiled versions of this software can be found here:</p>
 <ul>
-  <li> MaxOS 32-bit:  <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
-  <li> MaxOS 64-bit:  <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
-  <li> RedHat 64-bit: <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
-  <li> Ubuntu 64-bit: <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
+  <li> MaxOS 32-bit:
+       <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
+  <li> MaxOS 64-bit:
+       <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
+  <li> RedHat 64-bit:
+       <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
+  <li> Ubuntu 64-bit:
+       <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
   <li> ... </li>
 </ul>
 
@@ -114,31 +132,38 @@ $ <span class="input">sudo yum -y install \
 	  </li>
 	</ul>
   </li>
-  <li>Download DistributionSampling.tar.gz (<u>href://.....<!-- \todo insert apropriate URLs --></u>)</li>
+  <li>Download DistributionSampling.tar.gz
+      (<u>href://.....<!-- \todo insert apropriate URLs --></u>)</li>
   <li>Extract
+<!-- $ <span class="input">mkdir ~/src</span> -->
+<!-- $ <span class="input">cd ~/src</span> -->
 <pre>
-$ <span class="input">mkdir ~/src</span>
-$ <span class="input">cd ~/src</span>
 $ <span class="input">tar -x -z -f .../DistributionSampling.tar.gz</span></pre></li>
-  <li>Make a build directory:
+  <li>Build and install.  In this example, we will install in <code>${HOME}/local</code>.
 <pre>
-$ <span class="input">mkdir ~/build/DistributionSampling</span>
-$ <span class="input">cd ~/build/DistributionSampling</span></pre></li>
-  <li>Build:
-<pre>
-$ <span class="input">cmake ~/src/DistributionSampling \
-    -DCMAKE_INSTALL_PREFIX:PATH="${HOME}/local"</span> <!--
-CORY: make sure the defaults in CmakeLists.txt are for a Release '-O3'
-/ no-testing version.
--->
-$ <span class="input">make</span>
-$ <span class="input">make install</span></pre></li>
+$ <span class="input">DistributionSampling/build.sh "${HOME}/local"</span></pre>
+  </li>
+
+<!-- <li>Make a build directory: -->
+<!-- <pre> -->
+<!-- $ <span class="input">mkdir ~/build/DistributionSampling</span> -->
+<!-- $ <span class="input">cd ~/build/DistributionSampling</span></pre></li> -->
+<!--   <li>Build: -->
+<!-- <pre> -->
+<!-- $ <span class="input">cmake ~/src/DistributionSampling \ -->
+<!--     -DCMAKE_INSTALL_PREFIX:PATH="${HOME}/local"</span> <\!-- -->
+<!-- $ <span class="input">make</span> -->
+<!-- $ <span class="input">make install</span></pre></li> -->
 </ol>
 <p>Your executables will be in the
 directory <code>${HOME}/local/bin</code>. You can
 make these executables available by including this directory in your
-path/:</p>
+path:</p>
 <pre>$ <span class="input">PATH=&quot;${PATH}:${HOME}/local/bin&quot;</span></pre>
+
+<p>If you wish to compile your own software that links against the
+library, the include files are in <code>${HOME}/local/include</code> and
+the library is in <code>${HOME}/local/lib/madai</code> .  </p>
 
 <!--=========================================================================-->
 <h2>2. Running the Software With a Fast Model</h2>
@@ -146,10 +171,13 @@ path/:</p>
 <p>By a "fast model" we mean that you can wait while it runs millions
 of times.</p>
 
-<p>The program <code>generateMCMCtraceExternal</code> will call your
-executable and interactively query it for model outputs at given
-parameter vectors.  <code>generateMCMCtraceExternal</code> expects a
-certain format, which we will describe.</p>
+<p>You will need to build an executable program to interface with
+  the <code>generateMCMCtraceExternal</code> program.</p>
+
+<p><code>generateMCMCtraceExternal</code> will call your executable
+and interactively query it for model outputs at given parameter
+vectors.  <code>generateMCMCtraceExternal</code> expects a certain
+format, which we will describe.</p>
 
 <ol>
 <li>First your program (which we will call the &ldquo;external model&rdquo;) will
@@ -248,7 +276,8 @@ MEAN_ENERGY    3.4925         0.1
 EOF</span>
 </pre>
 
-<p>If you skip that step, it assumes that the measurements is 0.0 and the error is 1.0.</p>
+<p>If you skip that step, it assumes that the measurements are 0.0 and
+the error is 1.0.  </p>
 
 <p>The final step is to run the Markov chain Monte Carlo (MCMC)
 routine on your model.  The <code>generateMCMCtraceExternal</code> program
@@ -256,9 +285,14 @@ uses the external model to produce model outputs for points in
 parameter space.  These model outputs are compared to the experimental
 values to calculate likelihood.</p>
 
-<p class="centered"><em>L</em> &#8733; exp((-0.5) sum(
+<p class="centered"><em>L</em> &#8733; exp((-0.5) &times; sum(
 (<em>Y<sub>_observed</sub></em>[<em>i</em>] - <em>Y<sub>_model</sub></em>[<em>i</em>]) /
 &sigma;[<em>i</em>] ))</p>
+
+<p class="centered">ln(<em>L</em>) = C - 0.5 &times; sum(
+(<em>Y<sub>_observed</sub></em>[<em>i</em>] - <em>Y<sub>_model</sub></em>[<em>i</em>]) /
+&sigma;[<em>i</em>] )</p>
+
 
 <p>The Metropolis-Hastings MCMC algorithm is used to draw a large
 number of samples from the distribution proportional to likelihood.
@@ -273,7 +307,7 @@ $ <span class="input">generateMCMCtraceExternal . &quot;mcmc.csv&quot;</span>
 
 <pre>
 $ <span class="input">head trace/mcmc.csv</span>
-"X0","K","TEMP","MEAN_X","MEAN_X_SQUARED","MEAN_ENERGY","LogLikelihood"
+&quot;X0&quot;,&quot;K&quot;,&quot;TEMP&quot;,&quot;MEAN_X&quot;,&quot;MEAN_X_SQUARED&quot;,&quot;MEAN_ENERGY&quot;,&quot;LogLikelihood&quot;
 -0.687954,3.69012,3.48753,-0.687954,0.945831,3.48753,-11.6557
 -0.68372,3.76719,3.42022,-0.68372,0.921423,3.42022,-11.3976
 -0.71932,3.75696,3.38807,-0.71932,0.968327,3.38807,-11.3574
@@ -304,8 +338,14 @@ a subclass of the madai::Model class.
 
 <p>MyModel.cxx</p>
 
-<pre><span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/Model.h&gt;</span>
+
+<pre><!-- Generator: GNU source-highlight 3.1.5 -->
+<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;iostream&gt;</span>
+<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;fstream&gt;</span>
+<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/Model.h&gt;</span>
 <span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/MetropolisHastingsSampler.h&gt;</span>
+<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/SamplerCSVWriter.h&gt;</span>
+
 <span class="keyword">class</span><span class="normal"> </span><span class="classname">MyModel</span><span class="normal"> </span><span class="symbol">:</span><span class="normal"> </span><span class="keyword">public</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model </span><span class="cbracket">{</span>
 <span class="keyword">public</span><span class="symbol">:</span>
 <span class="normal">  </span><span class="function">MyModel</span><span class="symbol">();</span>
@@ -316,53 +356,60 @@ a subclass of the madai::Model class.
 <span class="normal">  </span><span class="keyword">virtual</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> </span><span class="function">GetScalarOutputs</span><span class="symbol">(</span>
 <span class="normal">      </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;,</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;)</span><span class="normal"> </span><span class="keyword">const</span><span class="symbol">;</span>
 <span class="cbracket">}</span><span class="symbol">;</span>
+
 <span class="normal">MyModel</span><span class="symbol">::</span><span class="function">MyModel</span><span class="symbol">()</span><span class="normal"> </span><span class="cbracket">{</span>
-<span class="normal">  </span><span class="comment">// Insert your code here.</span>
-<span class="normal">  </span><span class="comment">// This constructor calls</span>
+<span class="normal">  </span><span class="comment">// Insert your code here. This constructor calls:</span>
 <span class="normal">  </span><span class="comment">//   this-&gt;AddParameter(),</span>
 <span class="normal">  </span><span class="comment">//   this-&gt;AddScalarOutputName(),</span>
 <span class="normal">  </span><span class="comment">//   this-&gt;SetObservedScalarValues(), and</span>
 <span class="normal">  </span><span class="comment">//   this-&gt;SetObservedScalarCovariance().</span>
 <span class="cbracket">}</span>
+
 <span class="normal">madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> MyModel</span><span class="symbol">::</span><span class="function">GetScalarOutputsAndCovariance</span><span class="symbol">(</span>
 <span class="normal">    </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> parameters</span><span class="symbol">,</span>
-<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> scalars</span><span class="symbol">,</span>
-<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> scalarCovariance</span><span class="symbol">)</span><span class="normal"> </span><span class="keyword">const</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> outputs</span><span class="symbol">,</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> outputCovariance</span><span class="symbol">)</span><span class="normal"> </span><span class="keyword">const</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">  </span><span class="symbol">(</span><span class="type">void</span><span class="symbol">)</span><span class="normal">parameters</span><span class="symbol">;</span><span class="normal"> </span><span class="symbol">(</span><span class="type">void</span><span class="symbol">)</span><span class="normal">outputs</span><span class="symbol">;</span><span class="normal"> </span><span class="symbol">(</span><span class="type">void</span><span class="symbol">)</span><span class="normal">outputCovariance</span><span class="symbol">;</span>
 <span class="normal">  </span><span class="comment">// Insert your code here.</span>
+<span class="normal">  </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">NO_ERROR</span><span class="symbol">;</span>
 <span class="cbracket">}</span>
+
 <span class="normal">madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> MyModel</span><span class="symbol">::</span><span class="function">GetScalarOutputs</span><span class="symbol">(</span>
 <span class="normal">    </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> parameters</span><span class="symbol">,</span>
-<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> scalars </span><span class="symbol">)</span><span class="normal"> </span><span class="keyword">const</span> <span class="cbracket">{</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> outputs </span><span class="symbol">)</span><span class="normal"> </span><span class="keyword">const</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">  </span><span class="symbol">(</span><span class="type">void</span><span class="symbol">)</span><span class="normal">parameters</span><span class="symbol">;</span><span class="normal"> </span><span class="symbol">(</span><span class="type">void</span><span class="symbol">)</span><span class="normal">outputs</span><span class="symbol">;</span>
 <span class="normal">  </span><span class="comment">// Insert your code here.</span>
+<span class="normal">  </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">NO_ERROR</span><span class="symbol">;</span>
 <span class="cbracket">}</span>
+
 <span class="type">int</span><span class="normal"> </span><span class="function">main</span><span class="symbol">(</span><span class="type">int</span><span class="symbol">,</span><span class="normal"> </span><span class="type">char</span><span class="symbol">**)</span><span class="normal"> </span><span class="cbracket">{</span>
 <span class="normal">  </span><span class="usertype">MyModel</span><span class="normal"> model</span><span class="symbol">;</span>
 <span class="normal">  madai</span><span class="symbol">::</span><span class="usertype">MetropolisHastingsSampler</span><span class="normal"> mcmc</span><span class="symbol">;</span>
 <span class="normal">  mcmc</span><span class="symbol">.</span><span class="function">SetStepSize</span><span class="symbol">(</span><span class="normal"> </span><span class="number">0.1</span><span class="normal"> </span><span class="symbol">);</span>
-<span class="normal">  </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Sampler</span><span class="symbol">::</span><span class="function">GenerateSamplesAndSaveToFile</span><span class="symbol">(</span>
-<span class="normal">      mcmc</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">model</span><span class="symbol">,</span><span class="normal"> </span><span class="string">"out.csv"</span><span class="symbol">,</span><span class="normal"> </span><span class="number">1000000</span><span class="symbol">,</span><span class="normal"> </span><span class="number">0</span><span class="symbol">,</span><span class="normal"> </span><span class="keyword">false</span><span class="symbol">,</span><span class="normal"> </span><span class="keyword">true</span><span class="symbol">);</span>
-<span class="cbracket">}</span>
-</pre>
+<span class="normal">  std</span><span class="symbol">::</span><span class="usertype">ofstream</span><span class="normal"> </span><span class="function">output</span><span class="symbol">(</span><span class="string">"output.csv"</span><span class="symbol">);</span>
+<span class="normal">  </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">SamplerCSVWriter</span><span class="symbol">::</span><span class="function">GenerateSamplesAndSaveToFile</span><span class="symbol">(</span>
+<span class="normal">      </span><span class="symbol">&amp;</span><span class="normal">mcmc</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">model</span><span class="symbol">,</span><span class="normal"> output</span><span class="symbol">,</span><span class="normal"> </span><span class="number">1000000</span><span class="symbol">,</span><span class="normal"> </span><span class="number">0</span><span class="symbol">,</span><span class="normal"> </span><span class="keyword">false</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;(</span><span class="normal">std</span><span class="symbol">::</span><span class="normal">cerr</span><span class="symbol">));</span>
+<span class="cbracket">}</span></pre>
 
 <p>Assuming <code>CMAKE_INSTALL_PREFIX</code> was set
 to <code>${HOME}/local</code>, here is the Makefile:</p>
 
 <pre><span class="symbol">all:</span><span class="normal"> MyModel</span>
-<span class="type">CXXFLAGS =</span><span class="normal"> -O</span><span class="number">3</span><span class="normal"> -Wall -pedantic -I</span><span class="string">"${HOME}/local/include"</span>
-<span class="type">LDFLAGS =</span><span class="normal"> -L</span><span class="string">"${HOME}/local/lib/madai"</span><span class="normal"> -lDistributionSampling</span>
+<span class="type">MADAI_PREFIX =</span><span class="normal"> </span><span class="string">"${HOME}/local"</span>
+<span class="type">CXXFLAGS =</span><span class="normal"> -O</span><span class="number">3</span><span class="normal"> -Wall -Wextra -pedantic -I</span><span class="string">"${MADAI_PREFIX}/include"</span>
+<span class="type">LDFLAGS =</span><span class="normal"> -L</span><span class="string">"${MADAI_PREFIX}/lib/madai"</span><span class="normal"> -lDistributionSampling</span>
 <span class="symbol">%</span><span class="normal">.o </span><span class="symbol">:</span><span class="normal"> </span><span class="symbol">%</span><span class="normal">.cxx</span>
 <span class="normal">	</span><span class="variable">$(CXX)</span><span class="normal"> -c </span><span class="variable">$(CXXFLAGS)</span><span class="normal"> </span><span class="variable">$&lt;</span><span class="normal"> -o </span><span class="variable">$@</span>
 <span class="symbol">%</span><span class="normal"> </span><span class="symbol">:</span><span class="normal"> </span><span class="symbol">%</span><span class="normal">.o</span>
 <span class="normal">	</span><span class="variable">$(CXX)</span><span class="normal"> </span><span class="variable">$&lt;</span><span class="normal"> </span><span class="variable">$(LDFLAGS)</span><span class="normal"> -o </span><span class="variable">$@</span>
-<span class="preproc">.PHONY :</span><span class="normal"> all</span>
-</pre>
+<span class="preproc">.PHONY :</span><span class="normal"> all</span></pre>
 
-<p>&nbsp;</p>
+<p>This can run significantly faster than the external model.</p>
 
 <!--=========================================================================-->
 <h2>4. Running the Software With a Slow Model</h2>
 
-<p>The DistributionSampling library uses a Gaussian Proccess Emulator
+<p>The DistributionSampling library uses a Gaussian Process Emulator
 to emulate a slow model much more quickly.  To train the Emulator, the
 software requires hundreds of sample points.  At each training point,
 you will need the parameter values and the model outputs.</p>
@@ -409,55 +456,41 @@ EOF</span>
 <div class="wide" id="settings_options" style="display:none;">
 <p style="text-align:center"><b>Options in <code>settings.dat</code></b></p>
 <table style="width:100%">
-<tr><th>Variable Name</th><th>Default Value</th><th>meaning</th></tr>
-<tr><td><code>MODEL_OUTPUT_DIRECTORY</code></td>
-  <td>model_output</td>
-  <td>The directory (relative to the working directory) where the model inputs and outputs can be found.</td></tr>
-<tr><td><code>EXPERIMENTAL_RESULTS_DIRECTORY</code></td>
-  <td>experimental_results</td>
-  <td>The directory (relative to the working directory) where the experimental observations can be found.</td></tr>
-<tr><td><code>GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS</code></td>
-  <td>100</td>
-  <td>The number of training points generated by <code>generateTrainingPoints</code></td></tr>
-<tr><td><code>GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION</code></td>
-  <td>1</td>
-  <td>If the prior distribution for a parameter is not uniform, should the training points be percentiles from the distribution, or should they be evenly spaced?</td></tr>
-<tr><td><code>GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS</code></td>
-  <td>3</td>
-  <td>If the prior distribution for a parameter is Gaussian, how far out should the uniformly-spaced sampled points go?</td></tr>
-<tr><td><code>PCA_FRACTION_RESOLVING_POWER</code></td>
-  <td>0.95</td>
-  <td>When <code>basicTrain</code> is deciding how many principal components to retain, it considers the total resolving power of the model.  The resolving power of a single principal component is &radic;(1 + &lambda;[i]), where &lambda;[i] is the eigenvalue associated with that variable.  The total resolving power is the product the resolving powers of all of the components.  <code>basicTrain</code> will retain enough components to keep this fraction of the resolving power.
-</td></tr>
-<tr><td><code>EMULATOR_COVARIANCE_FUNCTION</code></td>
-  <td><code>SQUARE_EXPONENTIAL_FUNCTION</code></td>
-  <td>See <u>Covariance Functions<!-- \TODO add link to document --></u></td></tr>
-<tr><td><code>EMULATOR_REGRESSION_ORDER</code></td>
-  <td>1</td>
-  <td>The assumed functional form of the model before Gaussian Process Emulation.  This is the order of the polynomial.  0, 1, 2,or 3. </td></tr>
-<tr><td><code>EMULATOR_NUGGET</code></td>
-  <td>0.001</td>
-  <td>See <u>Covariance Functions</u><!-- \TODO add link to document --></td></tr>
-<tr><td><code>EMULATOR_AMPLITUDE</code></td>
-  <td>1</td>
-  <td>See <u>Covariance Functions</u><!-- \TODO add link to document --></td></tr>
-<tr><td><code>EMULATOR_SCALE</code></td>
-  <td>0.01</td>
-  <td>See <u>Covariance Functions</u><!-- \TODO add link to document --></td></tr>
-<tr><td><code>MCMC_NUMBER_OF_SAMPLES</code></td>
-  <td>100</td>
-  <td>How many samples should <code>generateMCMCtrace</code> produce.  The default is small for testing purposes.  Values around 10<sup>6</sup> are recommended.</td></tr>
-<tr><td><code>MCMC_NUMBER_OF_BURN_IN_SAMPLES</code></td>
-  <td>0</td>
-  <td>What does this do???</td></tr>
-<tr><td><code>MCMC_USE_EMULATOR_COVARIANCE</code></td>
-  <td>0</td>
-  <td>Should the variance returned by the Gaussian Process Emulator be used in the likelihood calculation?</td></tr>
-<tr><td><code>MCMC_STEP_SIZE</code></td>
-  <td>0.1</td>
-  <td>How big should each step be in the Metropolis Hastings
+<tr><th>Variable Name<br>Default Value</th><th>Meaning</th></tr>
+<tr><td><code>MODEL_OUTPUT_DIRECTORY</code><br>model_output</td>
+  <td><p>The directory (relative to the working directory) where the model inputs and outputs can be found.</p></td></tr>
+<tr><td><code>EXPERIMENTAL_RESULTS_DIRECTORY</code><br>experimental_results</td>
+  <td><p>The directory (relative to the working directory) where the experimental observations can be found.</p></td></tr>
+<tr><td><code>GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS</code><br>100</td>
+  <td><p>The number of training points generated by <code>generateTrainingPoints</code></p></td></tr>
+<tr><td><code>GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION</code><br>1</td>
+  <td><p>If the prior distribution for a parameter is not uniform, should the training points be percentiles from the distribution, or should they be evenly spaced?</p></td></tr>
+<tr><td><code>GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS</code><br>3</td>
+  <td><p>If the prior distribution for a parameter is Gaussian, how far out should the uniformly-spaced sampled points go?</p></td></tr>
+<tr><td><code>PCA_FRACTION_RESOLVING_POWER</code><br>0.95</td>
+  <td><p>When <code>basicTrain</code> is deciding how many principal components to retain, it considers the total resolving power of the model.  The resolving power of a single principal component is &radic;(1 + &lambda;[i]), where &lambda;[i] is the eigenvalue associated with that variable.  The total resolving power is the product the resolving powers of all of the components.  <code>basicTrain</code> will retain enough components to keep this fraction of the resolving power.
+</p></td></tr>
+<tr><td><code>EMULATOR_COVARIANCE_FUNCTION</code><br><code>SQUARE_EXPONENTIAL_FUNCTION</code></td>
+  <td><p>See <a href="../../doc/CovarianceFunctions/">Covariance Functions</a></p></td></tr>
+<tr><td><code>EMULATOR_REGRESSION_ORDER</code><br>1</td>
+  <td><p>The assumed functional form of the model before Gaussian Process Emulation.  This is the order of the polynomial.  0, 1, 2,or 3. </p></td></tr>
+<tr><td><code>EMULATOR_NUGGET</code><br>0.001</td>
+  <td><p>See <a href="../../doc/CovarianceFunctions/">Covariance Functions</a></p></td></tr>
+<tr><td><code>EMULATOR_AMPLITUDE</code><br>1</td>
+  <td><p>See <a href="../../doc/CovarianceFunctions/">Covariance Functions</a></p></td></tr>
+<tr><td><code>EMULATOR_SCALE</code><br>0.01</td>
+  <td><p>See <a href="../../doc/CovarianceFunctions/">Covariance Functions</a>.  The final value ofr each parameter's scale will be <code>EMULATOR_SCALE</code> times the width of the middle two quartiles of that parameter's prior distribution.</p></td></tr>
+<tr><td><code>MCMC_NUMBER_OF_SAMPLES</code><br>100</td>
+  <td><p>How many samples should <code>generateMCMCtrace</code> produce.  The default is small for testing purposes.  Values around 10<sup>6</sup> are recommended.</p></td></tr>
+<tr><td><code>MCMC_NUMBER_OF_BURN_IN_SAMPLES</code><br>0</td>
+  <td><p>The number of MCMC samples to be discarded at the beginning
+  of the MCMC run.</p></td></tr>
+<tr><td><code>MCMC_USE_EMULATOR_COVARIANCE</code><br>0</td>
+  <td><p>Should the variance returned by the Gaussian Process Emulator be used in the likelihood calculation?</p></td></tr>
+<tr><td><code>MCMC_STEP_SIZE</code><br>0.1</td>
+  <td><p>How big should each step be in the Metropolis Hastings
   algorithm?  (This will be scaled by the characteristic length of
-  each parameter's prior distribution)</td></tr>
+  each parameter's prior distribution)</p></td></tr>
 </table>
 <p>[<a href="" onclick="return toggleViz('settings_options');">close</a>]</p>
 
@@ -594,7 +627,7 @@ $ <span class="input">generateMCMCtrace . &quot;mcmc.csv&quot;</span>
 
 <pre>
 $ <span class="input">head trace/mcmc.csv</span>
-"X0","K","TEMP","MEAN_X","MEAN_X_SQUARED","MEAN_ENERGY","LogLikelihood"
+&quot;X0&quot;,&quot;K&quot;,&quot;TEMP&quot;,&quot;MEAN_X&quot;,&quot;MEAN_X_SQUARED&quot;,&quot;MEAN_ENERGY&quot;,&quot;LogLikelihood&quot;
 -0.167188,1.63734,0.790651,0,0,0,-7.0052
 -0.176625,1.60696,0.673026,-0.176625,1.87896,0.673026,-6.89768
 -0.181315,1.61748,0.744548,-0.181315,1.89524,0.744548,-6.97992
@@ -648,5 +681,12 @@ $ <span class="input">awk 'NR % 1000 == 1' &lt; trace/mcmc.csv &gt; trace/mcmc-s
       LocalWords:  DistributionSampling cbracket preproc specialchar
       LocalWords:  generateMCMCtraceExternal stdout endin whitespace
       LocalWords:  STDDEV ParabolicPotentialModel stdin LogLikelihood
-      LocalWords:  pca Cov awk
+      LocalWords:  pca Cov awk ln MyModel cxx iostream fstream madai
+      LocalWords:  ErrorType GetScalarOutputsAndCovariance const cerr
+      LocalWords:  GetScalarOutputs AddParameter AddScalarOutputName
+      LocalWords:  SetObservedScalarValues outputCovariance ofstream
+      LocalWords:  SetObservedScalarCovariance SetStepSize Makefile
+      LocalWords:  MetropolisHastingsSampler SamplerCSVWriter Wextra
+      LocalWords:  GenerateSamplesAndSaveToFile CXXFLAGS LDFLAGS
+      LocalWords:  lDistributionSampling
  -->
