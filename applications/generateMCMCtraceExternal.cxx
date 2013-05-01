@@ -29,6 +29,7 @@
 #include "Paths.h"
 #include "RuntimeParameterFileReader.h"
 #include "Trace.h"
+#include "SamplerCSVWriter.h"
 
 #include "madaisys/SystemTools.hxx"
 
@@ -149,12 +150,13 @@ int main(int argc, char ** argv) {
   std::string outputFilePath =
     traceDirectory + madai::Paths::SEPARATOR + outputFileName;
 
-  return madai::Sampler::GenerateSamplesAndSaveToFile(
-      mcmc,
+  std::ofstream outFile(outputFilePath.c_str());
+  return madai::SamplerCSVWriter::GenerateSamplesAndSaveToFile(
+      &mcmc,
       &em,
-      outputFilePath.c_str(),
+      outFile,
       numberOfSamples,
       numberOfBurnInSamples,
       useModelError,
-      true);
+      &(std::cerr));
 }
