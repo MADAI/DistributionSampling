@@ -1,0 +1,331 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+<style>
+div.column { color:black; background-color:white; margin-left:auto;
+	margin-right:auto; margin-top:0px; margin-bottom:0px;
+	max-width:700px; text-align:left; padding:8px 8px 8px 8px;
+	 }
+div.wide { color:black; background-color:white; margin-left:0.5em;
+	margin-right:0.5em; padding:0.5em; }
+body { padding:0; margin:0;
+	font-family:sans-serif; text-align:center;  }
+code { color:#001A57;background-color:#ffffff;}
+pre .input { color:#001A57; background-color:#edf8f8; }
+pre { color:#000000; background-color:#edf8f8;
+	overflow:auto; overflow-y:visible;
+	border-left:2px #dddddd solid; margin-left:15px;
+	padding-left:10px; padding-top:2px; padding-bottom:2px;
+	margin-top:3px; margin-bottom:3px; z-index:12; }
+table { border-collapse:collapse; }
+th { color:black; background-color:#edf8f8;}
+td,th { border:1px black solid; text-align:left}
+hr { width:100%; background-color:#56A0D3; color:#000000;
+	border:0;height:1px; margin:0}
+.centered {text-align:center;}
+.cbracket { color:#440044; background-color:#edf8f8;
+	text-decoration:none; font-weight:bold; }
+.comment { color:#880000; background-color:#edf8f8;
+	text-decoration:none; font-weight:normal; }
+.function { color:#008800; background-color:#edf8f8;
+	text-decoration:none; font-weight:bold; }
+.keyword { color:#000088; background-color:#edf8f8;
+	text-decoration:none; font-weight:normal; }
+.normal { color:#000000; background-color:#edf8f8;
+	text-decoration:none; font-weight:normal; }
+.number { color:#224466; background-color:#edf8f8;
+	text-decoration:none; font-weight:normal; }
+.preproc { color:#444400; background-color:#edf8f8;
+	text-decoration:underline; font-weight:normal; }
+.specialchar { color:#004488; background-color:#edf8f8;
+	text-decoration:none; font-weight:normal; }
+.string { color:#004444; background-color:#edf8f8;
+	text-decoration:none; font-weight:normal; }
+.symbol { color:#008844; background-color:#edf8f8;
+	text-decoration:none; font-weight:normal; }
+.type { color:#444444; background-color:#edf8f8;
+	text-decoration:none; font-weight:normal; }
+</style>
+</head>
+<body>
+<div class="column">
+<p><strong>ParabolicPotentialModel.cxx</strong></p>
+<!-- Generator: GNU source-highlight 3.1.5
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span class="comment">/*=========================================================================</span>
+<span class="comment"> *</span>
+<span class="comment"> *  Copyright 2011-2013 The University of North Carolina at Chapel Hill</span>
+<span class="comment"> *  and Michigan State University.  All rights reserved.</span>
+<span class="comment"> *</span>
+<span class="comment"> *  Licensed under the MADAI Software License. You may obtain a copy of</span>
+<span class="comment"> *  this license at</span>
+<span class="comment"> *</span>
+<span class="comment"> *         </span><span class="url">https://madai-public.cs.unc.edu/visualization/software-license/</span>
+<span class="comment"> *</span>
+<span class="comment"> *  Unless required by applicable law or agreed to in writing, software</span>
+<span class="comment"> *  distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span class="comment"> *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="comment"> *  See the License for the specific language governing permissions and</span>
+<span class="comment"> *  limitations under the License.</span>
+<span class="comment"> *</span>
+<span class="comment"> *=========================================================================*/</span>
+
+<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;iostream&gt;</span><span class="normal"> </span><span class="comment">// std::cerr</span>
+<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;fstream&gt;</span><span class="normal">  </span><span class="comment">// std::ofstream</span>
+<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;cmath&gt;</span><span class="normal"> </span><span class="comment">// std::pow std::sqrt</span>
+<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/Model.h&gt;</span>
+<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/UniformDistribution.h&gt;</span>
+<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/MetropolisHastingsSampler.h&gt;</span>
+<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/SamplerCSVWriter.h&gt;</span>
+
+<span class="comment">/**</span>
+<span class="comment">   Parabolic Potential Model Copyright 2012-2013, Michigan State</span>
+<span class="comment">   University.  The software was written in 2013 by Jeffrey Wyka while</span>
+<span class="comment">   working for the MADAI project </span><span class="url">&lt;http://madai.us/&gt;</span><span class="comment"> This is inteded as</span>
+<span class="comment">   an example of a parameterized model of a physical system with a</span>
+<span class="comment">   parabolic potential.  */</span>
+<span class="keyword">class</span><span class="normal"> </span><span class="classname">ParabolicPotentialModel</span><span class="normal"> </span><span class="symbol">:</span><span class="normal"> </span><span class="keyword">public</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model </span><span class="cbracket">{</span>
+<span class="keyword">public</span><span class="symbol">:</span>
+<span class="normal">  </span><span class="function">ParabolicPotentialModel</span><span class="symbol">();</span>
+<span class="normal">  </span><span class="keyword">virtual</span><span class="normal"> </span><span class="symbol">~</span><span class="function">ParabolicPotentialModel</span><span class="symbol">()</span><span class="normal"> </span><span class="cbracket">{}</span>
+<span class="normal">  </span><span class="keyword">virtual</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> </span><span class="function">GetScalarOutputsAndCovariance</span><span class="symbol">(</span>
+<span class="normal">      </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> parameters</span><span class="symbol">,</span>
+<span class="normal">      std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> scalars</span><span class="symbol">,</span>
+<span class="normal">      std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> scalarCovariance</span><span class="symbol">)</span><span class="normal"> </span><span class="keyword">const</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="keyword">virtual</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> </span><span class="function">GetScalarOutputs</span><span class="symbol">(</span>
+<span class="normal">      </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> parameters</span><span class="symbol">,</span>
+<span class="normal">      std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> scalars </span><span class="symbol">)</span><span class="normal"> </span><span class="keyword">const</span><span class="symbol">;</span>
+<span class="cbracket">}</span><span class="symbol">;</span>
+
+
+<span class="normal">ParabolicPotentialModel</span><span class="symbol">::</span><span class="function">ParabolicPotentialModel</span><span class="symbol">()</span>
+<span class="cbracket">{</span>
+<span class="normal">  m_StateFlag </span><span class="symbol">=</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">UNINITIALIZED</span><span class="symbol">;</span>
+
+<span class="normal">  </span><span class="comment">// ADD INPUTS</span>
+<span class="normal">  madai</span><span class="symbol">::</span><span class="usertype">UniformDistribution</span><span class="normal"> uniformDistribution</span><span class="symbol">;</span>
+<span class="normal">  uniformDistribution</span><span class="symbol">.</span><span class="function">SetMinimum</span><span class="symbol">(</span><span class="normal"> </span><span class="symbol">-</span><span class="number">2.0</span><span class="normal"> </span><span class="symbol">);</span>
+<span class="normal">  uniformDistribution</span><span class="symbol">.</span><span class="function">SetMaximum</span><span class="symbol">(</span><span class="normal"> </span><span class="number">2.0</span><span class="normal">  </span><span class="symbol">);</span>
+<span class="normal">  </span><span class="keyword">this</span><span class="symbol">-&gt;</span><span class="function">AddParameter</span><span class="symbol">(</span><span class="normal"> </span><span class="string">"X0"</span><span class="symbol">,</span><span class="normal"> uniformDistribution </span><span class="symbol">);</span>
+<span class="normal">  </span><span class="comment">// This is safe because the madai::Parameter constructor clones</span>
+<span class="normal">  </span><span class="comment">// the priorDistribution.</span>
+<span class="normal">  uniformDistribution</span><span class="symbol">.</span><span class="function">SetMinimum</span><span class="symbol">(</span><span class="normal"> </span><span class="number">0.5</span><span class="normal"> </span><span class="symbol">);</span>
+<span class="normal">  uniformDistribution</span><span class="symbol">.</span><span class="function">SetMaximum</span><span class="symbol">(</span><span class="normal"> </span><span class="number">4.0</span><span class="normal"> </span><span class="symbol">);</span>
+<span class="normal">  </span><span class="keyword">this</span><span class="symbol">-&gt;</span><span class="function">AddParameter</span><span class="symbol">(</span><span class="normal"> </span><span class="string">"K"</span><span class="symbol">,</span><span class="normal"> uniformDistribution </span><span class="symbol">);</span>
+<span class="normal">  uniformDistribution</span><span class="symbol">.</span><span class="function">SetMinimum</span><span class="symbol">(</span><span class="normal"> </span><span class="number">0.5</span><span class="normal">  </span><span class="symbol">);</span>
+<span class="normal">  uniformDistribution</span><span class="symbol">.</span><span class="function">SetMaximum</span><span class="symbol">(</span><span class="normal"> </span><span class="number">10.0</span><span class="normal"> </span><span class="symbol">);</span>
+<span class="normal">  </span><span class="keyword">this</span><span class="symbol">-&gt;</span><span class="function">AddParameter</span><span class="symbol">(</span><span class="normal"> </span><span class="string">"TEMP"</span><span class="symbol">,</span><span class="normal"> uniformDistribution </span><span class="symbol">);</span>
+
+<span class="normal">  </span><span class="comment">// ADD OUTPUTS</span>
+<span class="normal">  </span><span class="keyword">this</span><span class="symbol">-&gt;</span><span class="function">AddScalarOutputName</span><span class="symbol">(</span><span class="string">"MEAN_X"</span><span class="symbol">);</span>
+<span class="normal">  </span><span class="keyword">this</span><span class="symbol">-&gt;</span><span class="function">AddScalarOutputName</span><span class="symbol">(</span><span class="string">"MEAN_X_SQUARED"</span><span class="symbol">);</span>
+<span class="normal">  </span><span class="keyword">this</span><span class="symbol">-&gt;</span><span class="function">AddScalarOutputName</span><span class="symbol">(</span><span class="string">"MEAN_ENERGY"</span><span class="symbol">);</span>
+<span class="normal">  m_GradientEstimateStepSize </span><span class="symbol">=</span><span class="normal"> </span><span class="number">1e-9</span><span class="symbol">;</span>
+<span class="normal">  m_StateFlag </span><span class="symbol">=</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">READY</span><span class="symbol">;</span>
+
+<span class="normal">  </span><span class="comment">// ADD OBSERVATIONS</span>
+<span class="normal">  std</span><span class="symbol">::</span><span class="usertype">vector&lt; double &gt;</span><span class="normal"> </span><span class="function">observedScalarValues</span><span class="symbol">(</span><span class="number">3</span><span class="symbol">);</span>
+<span class="normal">  observedScalarValues</span><span class="symbol">[</span><span class="number">0</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> </span><span class="number">1.14</span><span class="symbol">;</span>
+<span class="normal">  observedScalarValues</span><span class="symbol">[</span><span class="number">1</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> </span><span class="number">2.77634418605</span><span class="symbol">;</span>
+<span class="normal">  observedScalarValues</span><span class="symbol">[</span><span class="number">2</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> </span><span class="number">3.4925</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">NO_ERROR </span><span class="symbol">!=</span>
+<span class="normal">      </span><span class="keyword">this</span><span class="symbol">-&gt;</span><span class="function">SetObservedScalarValues</span><span class="symbol">(</span><span class="normal">observedScalarValues</span><span class="symbol">))</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">cerr </span><span class="symbol">&lt;&lt;</span><span class="normal"> </span><span class="string">"Error in Model::SetObservedScalarValues()</span><span class="specialchar">\n\n</span><span class="string">"</span><span class="symbol">;</span>
+
+<span class="normal">  </span><span class="comment">// ADD OBSERVATION ERRORS</span>
+<span class="normal">  std</span><span class="symbol">::</span><span class="usertype">vector&lt; double &gt;</span><span class="normal"> </span><span class="function">observedScalarCovariance</span><span class="symbol">(</span><span class="number">9</span><span class="symbol">,</span><span class="number">0.0</span><span class="symbol">);</span>
+<span class="normal">  observedScalarCovariance</span><span class="symbol">[</span><span class="number">0</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> </span><span class="number">0.01</span><span class="symbol">;</span>
+<span class="normal">  observedScalarCovariance</span><span class="symbol">[</span><span class="number">4</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> </span><span class="number">0.01</span><span class="symbol">;</span>
+<span class="normal">  observedScalarCovariance</span><span class="symbol">[</span><span class="number">8</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> </span><span class="number">0.01</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">NO_ERROR </span><span class="symbol">!=</span>
+<span class="normal">      </span><span class="keyword">this</span><span class="symbol">-&gt;</span><span class="function">SetObservedScalarCovariance</span><span class="symbol">(</span><span class="normal">observedScalarCovariance</span><span class="symbol">))</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">cerr </span><span class="symbol">&lt;&lt;</span><span class="normal"> </span><span class="string">"Error in Model::SetObservedScalarCovariance()</span><span class="specialchar">\n\n</span><span class="string">"</span><span class="symbol">;</span>
+<span class="normal">  m_StateFlag </span><span class="symbol">=</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">READY</span><span class="symbol">;</span>
+<span class="cbracket">}</span>
+
+
+<span class="keyword">static</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="normal"> </span><span class="type">int</span><span class="normal"> power</span><span class="symbol">,</span><span class="normal"> </span><span class="type">double</span><span class="normal"> scale </span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">  </span><span class="keyword">const</span><span class="normal"> </span><span class="keyword">static</span><span class="normal"> </span><span class="type">double</span><span class="normal"> twosqrtpi </span><span class="symbol">=</span><span class="normal"> </span><span class="number">2.0</span><span class="normal"> </span><span class="symbol">*</span><span class="normal"> std</span><span class="symbol">::</span><span class="function">sqrt</span><span class="symbol">(</span><span class="number">3.14159265</span><span class="symbol">);</span>
+<span class="normal">  </span><span class="type">double</span><span class="normal"> Integral </span><span class="symbol">=</span><span class="normal"> </span><span class="number">1.0</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">power </span><span class="symbol">%</span><span class="normal"> </span><span class="number">2</span><span class="normal"> </span><span class="symbol">==</span><span class="normal"> </span><span class="number">1</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">    Integral </span><span class="symbol">=</span><span class="normal"> </span><span class="number">0.0</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="cbracket">}</span><span class="normal"> </span><span class="keyword">else</span><span class="normal"> </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">power </span><span class="symbol">%</span><span class="normal"> </span><span class="number">2</span><span class="normal"> </span><span class="symbol">==</span><span class="normal"> </span><span class="number">0</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">    </span><span class="keyword">for</span><span class="normal"> </span><span class="symbol">(</span><span class="type">int</span><span class="normal"> i </span><span class="symbol">=</span><span class="normal"> power</span><span class="symbol">/</span><span class="number">2</span><span class="symbol">;</span><span class="normal"> i </span><span class="symbol">&lt;</span><span class="normal"> power</span><span class="symbol">;</span><span class="normal"> </span><span class="symbol">++</span><span class="normal">i</span><span class="symbol">)</span>
+<span class="normal">      Integral </span><span class="symbol">*=</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">i </span><span class="symbol">+</span><span class="normal"> </span><span class="number">1</span><span class="symbol">);</span>
+<span class="normal">    Integral </span><span class="symbol">*=</span><span class="normal"> twosqrtpi</span><span class="symbol">;</span>
+<span class="normal">    Integral </span><span class="symbol">/=</span><span class="normal"> std</span><span class="symbol">::</span><span class="function">pow</span><span class="symbol">(</span><span class="number">2.0</span><span class="normal"> </span><span class="symbol">*</span><span class="normal"> std</span><span class="symbol">::</span><span class="function">sqrt</span><span class="symbol">(</span><span class="normal">scale</span><span class="symbol">),</span><span class="normal"> power </span><span class="symbol">+</span><span class="normal"> </span><span class="number">1</span><span class="symbol">);</span>
+<span class="normal">  </span><span class="cbracket">}</span>
+<span class="normal">  </span><span class="keyword">return</span><span class="normal"> Integral</span><span class="symbol">;</span>
+<span class="cbracket">}</span>
+
+
+<span class="normal">madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">ErrorType</span>
+<span class="normal">ParabolicPotentialModel</span><span class="symbol">::</span><span class="function">GetScalarOutputsAndCovariance</span><span class="symbol">(</span>
+<span class="normal">    </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> parameters</span><span class="symbol">,</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> scalars</span><span class="symbol">,</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> scalarCovariance</span><span class="symbol">)</span><span class="normal"> </span><span class="keyword">const</span>
+<span class="cbracket">{</span>
+<span class="normal">  </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">parameters</span><span class="symbol">.</span><span class="function">size</span><span class="symbol">()</span><span class="normal"> </span><span class="symbol">!=</span><span class="normal"> </span><span class="number">3</span><span class="symbol">)</span>
+<span class="normal">    </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">OTHER_ERROR</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">((</span><span class="normal">parameters</span><span class="symbol">[</span><span class="number">1</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">&lt;=</span><span class="normal"> </span><span class="number">0</span><span class="symbol">)</span><span class="normal"> </span><span class="symbol">||</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">parameters</span><span class="symbol">[</span><span class="number">2</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">&lt;=</span><span class="normal"> </span><span class="number">0</span><span class="symbol">))</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">cerr </span><span class="symbol">&lt;&lt;</span><span class="normal"> </span><span class="string">"Parameter cannot be non-positive</span><span class="specialchar">\n</span><span class="string">"</span><span class="symbol">;</span>
+<span class="normal">    </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">OTHER_ERROR</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="cbracket">}</span>
+<span class="normal">  </span><span class="type">double</span><span class="normal"> x0 </span><span class="symbol">=</span><span class="normal"> parameters</span><span class="symbol">[</span><span class="number">0</span><span class="symbol">],</span><span class="normal"> k </span><span class="symbol">=</span><span class="normal"> parameters</span><span class="symbol">[</span><span class="number">1</span><span class="symbol">],</span><span class="normal"> T </span><span class="symbol">=</span><span class="normal"> parameters</span><span class="symbol">[</span><span class="number">2</span><span class="symbol">];</span>
+<span class="normal">  </span><span class="comment">// # Calculate the normalization</span>
+<span class="normal">  </span><span class="comment">// # Integrate( e^( -k/T*(x-x0)^2 ) )</span>
+<span class="normal">  </span><span class="type">double</span><span class="normal"> k_over_T </span><span class="symbol">=</span><span class="normal"> k </span><span class="symbol">/</span><span class="normal"> T</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="type">double</span><span class="normal"> normalization </span><span class="symbol">=</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">0</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">);</span>
+
+<span class="normal">  </span><span class="type">double</span><span class="normal"> MeanX</span><span class="symbol">,</span><span class="normal"> MeanX2</span><span class="symbol">,</span><span class="normal"> MeanE</span><span class="symbol">,</span><span class="normal"> MeanX4</span><span class="symbol">,</span><span class="normal"> MeanE2</span><span class="symbol">;</span>
+
+<span class="normal">  </span><span class="comment">/*******************************************/</span>
+<span class="normal">  </span><span class="comment">// Calculate Mean X</span>
+<span class="normal">  </span><span class="comment">// Integrate( x e^( -k/T*(x - x0)^2 ) ) / normalization</span>
+<span class="normal">  MeanX </span><span class="symbol">=</span><span class="normal"> </span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">1</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">)</span>
+<span class="normal">           </span><span class="symbol">+</span><span class="normal"> x0 </span><span class="symbol">*</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">0</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">));</span>
+<span class="normal">  MeanX </span><span class="symbol">/=</span><span class="normal"> normalization</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="comment">/*******************************************/</span>
+<span class="normal">  </span><span class="comment">// Calculate Mean X^2</span>
+<span class="normal">  </span><span class="comment">// Integrate( x^2 e^( -k/T*(x - x0)^2 ) ) / normalization</span>
+<span class="normal">  </span><span class="comment">// MeanX2 = f(x0, k_over_T, normalization)</span>
+<span class="normal">  MeanX2 </span><span class="symbol">=</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">2</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">);</span>
+<span class="normal">  MeanX2 </span><span class="symbol">+=</span><span class="normal"> </span><span class="number">2.0</span><span class="normal"> </span><span class="symbol">*</span><span class="normal"> x0 </span><span class="symbol">*</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">1</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">);</span>
+<span class="normal">  MeanX2 </span><span class="symbol">+=</span><span class="normal"> x0 </span><span class="symbol">*</span><span class="normal"> x0 </span><span class="symbol">*</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">0</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">);</span>
+<span class="normal">  MeanX2 </span><span class="symbol">/=</span><span class="normal">normalization</span><span class="symbol">;</span>
+
+<span class="normal">  </span><span class="comment">/*******************************************/</span>
+<span class="normal">  </span><span class="comment">// Calculate Mean Energy</span>
+<span class="normal">  </span><span class="comment">// Integrate( k (x - x0)^2 * e^( -k/T*(x - x0)^2 ) ) /</span>
+<span class="normal">  </span><span class="comment">//                                   normalization + T/2</span>
+<span class="normal">  </span><span class="comment">// MeanE = f(k, T, k_over_T, normalization)</span>
+<span class="normal">  MeanE </span><span class="symbol">=</span><span class="normal"> k</span><span class="symbol">*</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">2</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">)/</span><span class="normal">normalization </span><span class="symbol">+</span><span class="normal"> T</span><span class="symbol">/</span><span class="number">2.0</span><span class="symbol">;</span>
+
+<span class="normal">  </span><span class="comment">/*******************************************/</span>
+<span class="normal">  </span><span class="comment">// Calculate Mean X^4 for getting the model error</span>
+<span class="normal">  </span><span class="comment">// Integrate( x^4 e^( -k/T*(x-x0)^2 ) ) / normalization</span>
+<span class="normal">  MeanX4 </span><span class="symbol">=</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">4</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">);</span>
+<span class="normal">  MeanX4 </span><span class="symbol">+=</span><span class="normal"> </span><span class="number">4.0</span><span class="normal"> </span><span class="symbol">*</span><span class="normal"> x0 </span><span class="symbol">*</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">3</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">);</span>
+<span class="normal">  MeanX4 </span><span class="symbol">+=</span><span class="normal"> </span><span class="number">6.0</span><span class="symbol">*</span><span class="normal">x0</span><span class="symbol">*</span><span class="normal">x0</span><span class="symbol">*(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">2</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">));</span>
+<span class="normal">  MeanX4 </span><span class="symbol">+=</span><span class="normal"> </span><span class="number">4.0</span><span class="symbol">*(</span><span class="normal">std</span><span class="symbol">::</span><span class="function">pow</span><span class="symbol">(</span><span class="normal">x0</span><span class="symbol">,</span><span class="number">3</span><span class="symbol">))*(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">1</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">));</span>
+<span class="normal">  MeanX4 </span><span class="symbol">+=</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">std</span><span class="symbol">::</span><span class="function">pow</span><span class="symbol">(</span><span class="normal">x0</span><span class="symbol">,</span><span class="number">4</span><span class="symbol">))*(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">0</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">));</span>
+<span class="normal">  MeanX4 </span><span class="symbol">/=</span><span class="normal"> normalization</span><span class="symbol">;</span>
+
+<span class="normal">  </span><span class="comment">/*******************************************/</span>
+<span class="normal">  </span><span class="comment">// Calculate Mean Energy^2 for getting the model error</span>
+<span class="normal">  </span><span class="comment">// Integrate( ( k^2*(x - x0)^4 + k*T*(x - x0)^2 )</span>
+<span class="normal">  </span><span class="comment">//                  * e^( -k/T*(x-x0)^2 ) ) + 0.25*T^2</span>
+<span class="normal">  MeanE2 </span><span class="symbol">=</span><span class="normal"> k</span><span class="symbol">*</span><span class="normal">k</span><span class="symbol">*(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">4</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">))/</span><span class="normal">normalization</span><span class="symbol">;</span>
+<span class="normal">  MeanE2 </span><span class="symbol">+=</span><span class="normal"> k</span><span class="symbol">*</span><span class="normal">T</span><span class="symbol">*(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">2</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">))/</span><span class="normal">normalization</span><span class="symbol">;</span>
+<span class="normal">  MeanE2 </span><span class="symbol">+=</span><span class="normal"> T</span><span class="symbol">*</span><span class="normal">T</span><span class="symbol">/</span><span class="number">4.0</span><span class="symbol">;</span>
+
+<span class="normal">  </span><span class="comment">/*******************************************/</span>
+<span class="normal">  </span><span class="comment">// Calculate Errors</span>
+<span class="normal">  </span><span class="type">double</span><span class="normal"> ErrorX </span><span class="symbol">=</span><span class="normal"> std</span><span class="symbol">::</span><span class="function">sqrt</span><span class="symbol">(</span><span class="normal">MeanX2 </span><span class="symbol">-</span><span class="normal">std</span><span class="symbol">::</span><span class="function">pow</span><span class="symbol">(</span><span class="normal"> MeanX</span><span class="symbol">,</span><span class="number">2</span><span class="symbol">));</span>
+<span class="normal">  </span><span class="type">double</span><span class="normal"> ErrorX2 </span><span class="symbol">=</span><span class="normal"> std</span><span class="symbol">::</span><span class="function">sqrt</span><span class="symbol">(</span><span class="normal">MeanX4 </span><span class="symbol">-</span><span class="normal"> std</span><span class="symbol">::</span><span class="function">pow</span><span class="symbol">(</span><span class="normal">MeanX2</span><span class="symbol">,</span><span class="number">2</span><span class="symbol">));</span>
+<span class="normal">  </span><span class="type">double</span><span class="normal"> ErrorE </span><span class="symbol">=</span><span class="normal"> std</span><span class="symbol">::</span><span class="function">sqrt</span><span class="symbol">(</span><span class="normal">MeanE2 </span><span class="symbol">-</span><span class="normal"> std</span><span class="symbol">::</span><span class="function">pow</span><span class="symbol">(</span><span class="normal">MeanE</span><span class="symbol">,</span><span class="number">2</span><span class="symbol">));</span>
+
+<span class="normal">  scalars</span><span class="symbol">.</span><span class="function">resize</span><span class="symbol">(</span><span class="number">3</span><span class="symbol">);</span>
+<span class="normal">  scalars</span><span class="symbol">[</span><span class="number">0</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> MeanX</span><span class="symbol">;</span>
+<span class="normal">  scalars</span><span class="symbol">[</span><span class="number">1</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> MeanX2</span><span class="symbol">;</span>
+<span class="normal">  scalars</span><span class="symbol">[</span><span class="number">2</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> MeanE</span><span class="symbol">;</span>
+<span class="normal">  scalarCovariance</span><span class="symbol">.</span><span class="function">assign</span><span class="symbol">(</span><span class="number">9</span><span class="symbol">,</span><span class="number">0.0</span><span class="symbol">);</span>
+<span class="normal">  scalarCovariance</span><span class="symbol">[</span><span class="number">0</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> ErrorX </span><span class="symbol">*</span><span class="normal"> ErrorX</span><span class="symbol">;</span>
+<span class="normal">  scalarCovariance</span><span class="symbol">[</span><span class="number">4</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> ErrorX2 </span><span class="symbol">*</span><span class="normal"> ErrorX2</span><span class="symbol">;</span>
+<span class="normal">  scalarCovariance</span><span class="symbol">[</span><span class="number">8</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> ErrorE </span><span class="symbol">*</span><span class="normal"> ErrorE</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">NO_ERROR</span><span class="symbol">;</span>
+<span class="cbracket">}</span>
+
+
+<span class="normal">madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">ErrorType</span>
+<span class="normal">ParabolicPotentialModel</span><span class="symbol">::</span><span class="function">GetScalarOutputs</span><span class="symbol">(</span>
+<span class="normal">    </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> parameters</span><span class="symbol">,</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> scalars </span><span class="symbol">)</span><span class="normal"> </span><span class="keyword">const</span>
+<span class="cbracket">{</span>
+<span class="normal">  </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">parameters</span><span class="symbol">.</span><span class="function">size</span><span class="symbol">()</span><span class="normal"> </span><span class="symbol">!=</span><span class="normal"> </span><span class="number">3</span><span class="symbol">)</span>
+<span class="normal">    </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">OTHER_ERROR</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">((</span><span class="normal">parameters</span><span class="symbol">[</span><span class="number">1</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">&lt;=</span><span class="normal"> </span><span class="number">0</span><span class="symbol">)</span><span class="normal"> </span><span class="symbol">||</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">parameters</span><span class="symbol">[</span><span class="number">2</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">&lt;=</span><span class="normal"> </span><span class="number">0</span><span class="symbol">))</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">cerr </span><span class="symbol">&lt;&lt;</span><span class="normal"> </span><span class="string">"Parameter cannot be non-positive</span><span class="specialchar">\n</span><span class="string">"</span><span class="symbol">;</span>
+<span class="normal">    </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">OTHER_ERROR</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="cbracket">}</span>
+<span class="normal">  </span><span class="type">double</span><span class="normal"> x0 </span><span class="symbol">=</span><span class="normal"> parameters</span><span class="symbol">[</span><span class="number">0</span><span class="symbol">],</span><span class="normal"> k </span><span class="symbol">=</span><span class="normal"> parameters</span><span class="symbol">[</span><span class="number">1</span><span class="symbol">],</span><span class="normal"> T </span><span class="symbol">=</span><span class="normal"> parameters</span><span class="symbol">[</span><span class="number">2</span><span class="symbol">];</span>
+<span class="normal">  </span><span class="comment">// # Calculate the normalization</span>
+<span class="normal">  </span><span class="comment">// # Integrate( e^( -k/T*(x-x0)^2 ) )</span>
+<span class="normal">  </span><span class="type">double</span><span class="normal"> k_over_T </span><span class="symbol">=</span><span class="normal"> k </span><span class="symbol">/</span><span class="normal"> T</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="type">double</span><span class="normal"> normalization </span><span class="symbol">=</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">0</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">);</span>
+
+<span class="normal">  </span><span class="type">double</span><span class="normal"> MeanX</span><span class="symbol">,</span><span class="normal"> MeanX2</span><span class="symbol">,</span><span class="normal"> MeanE</span><span class="symbol">;</span>
+
+<span class="normal">  </span><span class="comment">/*******************************************/</span>
+<span class="normal">  </span><span class="comment">// Calculate Mean X</span>
+<span class="normal">  </span><span class="comment">// Integrate( x e^( -k/T*(x - x0)^2 ) ) / normalization</span>
+<span class="normal">  MeanX </span><span class="symbol">=</span><span class="normal"> </span><span class="symbol">(</span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">1</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">)</span>
+<span class="normal">           </span><span class="symbol">+</span><span class="normal"> x0 </span><span class="symbol">*</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">0</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">));</span>
+<span class="normal">  MeanX </span><span class="symbol">/=</span><span class="normal"> normalization</span><span class="symbol">;</span>
+
+<span class="normal">  </span><span class="comment">/*******************************************/</span>
+<span class="normal">  </span><span class="comment">// Calculate Mean X^2</span>
+<span class="normal">  </span><span class="comment">// Integrate( x^2 e^( -k/T*(x - x0)^2 ) ) / normalization</span>
+<span class="normal">  MeanX2 </span><span class="symbol">=</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">2</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">);</span>
+<span class="normal">  MeanX2 </span><span class="symbol">+=</span><span class="normal"> </span><span class="number">2.0</span><span class="normal"> </span><span class="symbol">*</span><span class="normal"> x0 </span><span class="symbol">*</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">1</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">);</span>
+<span class="normal">  MeanX2 </span><span class="symbol">+=</span><span class="normal"> x0 </span><span class="symbol">*</span><span class="normal"> x0 </span><span class="symbol">*</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">0</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">);</span>
+<span class="normal">  MeanX2 </span><span class="symbol">/=</span><span class="normal">normalization</span><span class="symbol">;</span>
+
+<span class="normal">  </span><span class="comment">/*******************************************/</span>
+<span class="normal">  </span><span class="comment">// Calculate Mean Energy</span>
+<span class="normal">  </span><span class="comment">// Integrate( k (x - x0)^2 * e^( -k/T*(x - x0)^2 ) ) /</span>
+<span class="normal">  </span><span class="comment">//                                   normalization + T/2</span>
+<span class="normal">  MeanE </span><span class="symbol">=</span><span class="normal"> k</span><span class="symbol">*</span><span class="normal"> </span><span class="function">GetGaussianIntegral</span><span class="symbol">(</span><span class="number">2</span><span class="symbol">,</span><span class="normal"> k_over_T</span><span class="symbol">)/</span><span class="normal">normalization </span><span class="symbol">+</span><span class="normal"> T</span><span class="symbol">/</span><span class="number">2.0</span><span class="symbol">;</span>
+
+<span class="normal">  </span><span class="comment">/*******************************************/</span>
+<span class="normal">  scalars</span><span class="symbol">.</span><span class="function">resize</span><span class="symbol">(</span><span class="number">3</span><span class="symbol">);</span>
+<span class="normal">  scalars</span><span class="symbol">[</span><span class="number">0</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> MeanX</span><span class="symbol">;</span>
+<span class="normal">  scalars</span><span class="symbol">[</span><span class="number">1</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> MeanX2</span><span class="symbol">;</span>
+<span class="normal">  scalars</span><span class="symbol">[</span><span class="number">2</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> MeanE</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">NO_ERROR</span><span class="symbol">;</span>
+<span class="cbracket">}</span>
+
+
+<span class="type">int</span><span class="normal"> </span><span class="function">main</span><span class="symbol">(</span><span class="type">int</span><span class="normal"> argc</span><span class="symbol">,</span><span class="normal"> </span><span class="type">char</span><span class="symbol">**</span><span class="normal"> argv</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">  </span><span class="keyword">static</span><span class="normal"> </span><span class="keyword">const</span><span class="normal"> </span><span class="type">int</span><span class="normal">    MCMC_NUMBER_OF_BURN_IN_SAMPLES </span><span class="symbol">=</span><span class="normal"> </span><span class="number">0</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="keyword">static</span><span class="normal"> </span><span class="keyword">const</span><span class="normal"> </span><span class="type">bool</span><span class="normal">   MCMC_USE_EMULATOR_COVARIANCE   </span><span class="symbol">=</span><span class="normal"> </span><span class="keyword">false</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="keyword">static</span><span class="normal"> </span><span class="keyword">const</span><span class="normal"> </span><span class="type">double</span><span class="normal"> MCMC_STEP_SIZE                 </span><span class="symbol">=</span><span class="normal"> </span><span class="number">0.1</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">argc </span><span class="symbol">&lt;</span><span class="normal"> </span><span class="number">3</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">    std</span><span class="symbol">::</span><span class="normal">cerr </span><span class="symbol">&lt;&lt;</span><span class="normal"> </span><span class="string">"Useage:</span><span class="specialchar">\n</span><span class="string">    "</span><span class="normal"> </span><span class="symbol">&lt;&lt;</span><span class="normal"> argv</span><span class="symbol">[</span><span class="number">0</span><span class="symbol">]</span>
+<span class="normal">              </span><span class="symbol">&lt;&lt;</span><span class="string">" &lt;Output_File_Name&gt; &lt;Number_Of_Samples&gt;</span><span class="specialchar">\n\n</span><span class="string">"</span><span class="symbol">;</span>
+<span class="normal">    </span><span class="keyword">return</span><span class="normal"> EXIT_FAILURE</span><span class="symbol">;</span>
+<span class="normal">  </span><span class="cbracket">}</span>
+<span class="normal">  std</span><span class="symbol">::</span><span class="usertype">ofstream</span><span class="normal"> </span><span class="function">output</span><span class="symbol">(</span><span class="normal">argv</span><span class="symbol">[</span><span class="number">1</span><span class="symbol">]);</span>
+<span class="normal">  </span><span class="type">int</span><span class="normal"> numberOfSamples </span><span class="symbol">=</span><span class="normal"> std</span><span class="symbol">::</span><span class="function">atoi</span><span class="symbol">(</span><span class="normal">argv</span><span class="symbol">[</span><span class="number">2</span><span class="symbol">]);</span>
+<span class="normal">  </span><span class="usertype">ParabolicPotentialModel</span><span class="normal">  model</span><span class="symbol">;</span>
+<span class="normal">  madai</span><span class="symbol">::</span><span class="usertype">MetropolisHastingsSampler</span><span class="normal"> mcmc</span><span class="symbol">;</span>
+<span class="normal">  mcmc</span><span class="symbol">.</span><span class="function">SetStepSize</span><span class="symbol">(</span><span class="normal"> MCMC_STEP_SIZE </span><span class="symbol">);</span>
+<span class="normal">  </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">SamplerCSVWriter</span><span class="symbol">::</span><span class="function">GenerateSamplesAndSaveToFile</span><span class="symbol">(</span>
+<span class="normal">      </span><span class="symbol">&amp;</span><span class="normal">mcmc</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">model</span><span class="symbol">,</span><span class="normal"> output</span><span class="symbol">,</span><span class="normal"> numberOfSamples</span><span class="symbol">,</span><span class="normal"> MCMC_NUMBER_OF_BURN_IN_SAMPLES</span><span class="symbol">,</span>
+<span class="normal">      MCMC_USE_EMULATOR_COVARIANCE</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;(</span><span class="normal">std</span><span class="symbol">::</span><span class="normal">cerr</span><span class="symbol">));</span>
+<span class="cbracket">}</span>
+</tt></pre>
+<hr>
+<p><strong>Makefile</strong></p>
+<!-- Generator: GNU source-highlight 3.1.5
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span class="symbol">all:</span><span class="normal"> ParabolicPotentialModel</span>
+<span class="type">MADAI_PREFIX =</span><span class="normal"> </span><span class="variable">${HOME}</span><span class="normal">/local</span>
+<span class="type">CXXFLAGS =</span><span class="normal"> -O</span><span class="number">3</span><span class="normal"> -Wall -Wextra -pedantic -I</span><span class="string">"${MADAI_PREFIX}/include"</span>
+<span class="type">LDFLAGS =</span><span class="normal"> -L</span><span class="string">"${MADAI_PREFIX}/lib/madai"</span><span class="normal"> -lDistributionSampling</span>
+<span class="symbol">%</span><span class="normal">.o </span><span class="symbol">:</span><span class="normal"> </span><span class="symbol">%</span><span class="normal">.cxx</span>
+<span class="normal">	</span><span class="variable">$(CXX)</span><span class="normal"> -c </span><span class="variable">$(CXXFLAGS)</span><span class="normal"> </span><span class="variable">$&lt;</span><span class="normal"> -o </span><span class="variable">$@</span>
+<span class="symbol">%</span><span class="normal"> </span><span class="symbol">:</span><span class="normal"> </span><span class="symbol">%</span><span class="normal">.o</span>
+<span class="normal">	</span><span class="variable">$(CXX)</span><span class="normal"> </span><span class="variable">$&lt;</span><span class="normal"> </span><span class="variable">$(LDFLAGS)</span><span class="normal"> -o </span><span class="variable">$@</span>
+<span class="preproc">.PHONY :</span><span class="normal"> all</span>
+</tt></pre>
+<hr>
+</div>
+</body>
+</html>

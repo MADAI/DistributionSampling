@@ -166,7 +166,8 @@ library, the include files are in <code>${HOME}/local/include</code> and
 the library is in <code>${HOME}/local/lib/madai</code> .  </p>
 
 <!--=========================================================================-->
-<h2>2. Running the Software With a Fast Model</h2>
+<h2>2. Running the Software</h2>
+<h3>2a. With a Fast Model</h3>
 
 <p>By a "fast model" we mean that you can wait while it runs millions
 of times.</p>
@@ -330,7 +331,7 @@ $ <span class="input">head trace/mcmc.csv</span>
 
 
 <!--=========================================================================-->
-<h2>3. (Advanced) Linking to the Library</h2>
+<h3>2b. (Advanced) Linking to the Library</h3>
 
 <p>Another way to interface with the DistributionSampling library is
 to link directly to it.  In this example, your model is implemented as
@@ -395,7 +396,7 @@ a subclass of the madai::Model class.
 to <code>${HOME}/local</code>, here is the Makefile:</p>
 
 <pre><span class="symbol">all:</span><span class="normal"> MyModel</span>
-<span class="type">MADAI_PREFIX =</span><span class="normal"> </span><span class="string">"${HOME}/local"</span>
+<span class="type">MADAI_PREFIX =</span><span class="normal"> </span><span class="string">${HOME}/local</span>
 <span class="type">CXXFLAGS =</span><span class="normal"> -O</span><span class="number">3</span><span class="normal"> -Wall -Wextra -pedantic -I</span><span class="string">"${MADAI_PREFIX}/include"</span>
 <span class="type">LDFLAGS =</span><span class="normal"> -L</span><span class="string">"${MADAI_PREFIX}/lib/madai"</span><span class="normal"> -lDistributionSampling</span>
 <span class="symbol">%</span><span class="normal">.o </span><span class="symbol">:</span><span class="normal"> </span><span class="symbol">%</span><span class="normal">.cxx</span>
@@ -406,8 +407,11 @@ to <code>${HOME}/local</code>, here is the Makefile:</p>
 
 <p>This can run significantly faster than the external model.</p>
 
+<p>Here is an example of <a href="ParabolicPotentialModel.html">implementing
+the Parabolic Potential in C++</a></p>
+
 <!--=========================================================================-->
-<h2>4. Running the Software With a Slow Model</h2>
+<h3>2c. With a Slow Model</h3>
 
 <p>The DistributionSampling library uses a Gaussian Process Emulator
 to emulate a slow model much more quickly.  To train the Emulator, the
