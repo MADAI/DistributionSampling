@@ -424,8 +424,7 @@ bool checkOutputMeans( const madai::GaussianProcessEmulator & gpe )
 }
 
 bool checkOutputUncertaintyScales( const madai::GaussianProcessEmulator & gpe,
-                                   const std::string & modelOutputDirectory,
-                                   const std::string & experimentalResultsDirectory )
+                                   const std::string & modelOutputDirectory )
 {
   // Average the uncertainties from the model output
   std::vector< double > accumulatedUncertainties( gpe.m_NumberOutputs, 0.0 );
@@ -604,8 +603,7 @@ int main( int argc, char *argv[] )
   }
 
   if ( !checkOutputUncertaintyScales( gpe,
-                                      modelOutputDirectory,
-                                      experimentalResultsDirectory ) ) {
+                                      modelOutputDirectory ) ) {
     std::cerr << "Error in checkOutputUncertaintyScales\n";
     return EXIT_FAILURE;
   }
