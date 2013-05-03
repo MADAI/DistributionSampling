@@ -149,7 +149,8 @@ int main(int argc, char ** argv) {
               << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
               << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
               << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
-              << "EMULATE_QUIET <value> (false)\n";
+              << "EMULATE_QUIET <value> (false)\n"
+              << "READER_VERBOSE <value> (default: false )\n";
 
     return EXIT_FAILURE;
   }
@@ -175,6 +176,9 @@ int main(int argc, char ** argv) {
 
   madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  bool verbose = settings.GetOptionAsBool( "READER_VERBOSE", false );
+  directoryReader.SetVerbose( verbose );
+
   if ( !directoryReader.LoadTrainingData( &gpe,
                                           modelOutputDirectory,
                                           statisticsDirectory,
