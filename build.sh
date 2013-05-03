@@ -15,17 +15,24 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# Change these variables:
-
-TARGET_BUILD_DIR="${HOME}/build/DistributionSampling"
-BUILD_TYPE="Debug"
-#BUILD_TYPE="Release"
-
+if [ -z "$1" ] ; then
+    echo "Usage:"
+    echo "  $0 INSTALL_PREFIX"
+    echo "Examples:"
+    echo "  $0 \"\${HOME}/local\""
+    echo "  $0 \"\${HOME}/madai\""
+    echo "  $0 /usr/local"
+    exit 1
+fi
+INSTALL_PREFIX="$1"
 SRC_DIR="$(cd "$(dirname "$0")" ; pwd)"
-mkdir -p "$TARGET_BUILD_DIR"
-cd "$TARGET_BUILD_DIR"
+BUILD_DIR=`mktemp -d -t madai_build_XXXXXX`
+cd "$BUILD_DIR"
+renice 1 $$
 cmake "$SRC_DIR" \
-  -DBUILD_TESTING:BOOL="1" \
-  -DCMAKE_BUILD_TYPE:STRING="${BUILD_TYPE}" \
-  && make && echo "SUCCESS:" "$TARGET_BUILD_DIR"
-
+  -DCMAKE_INSTALL_PREFIX:PATH="${INSTALL_PREFIX}" \
+  -DCMAKE_BUILD_TYPE:STRING=Release \
+  -DBUILD_TESTING:BOOL=0 \
+  -DUSE_OPENMP:BOOL=0 \
+  -DUSE_GPROF:BOOL=0 \
+  && make && make install
