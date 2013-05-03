@@ -139,6 +139,15 @@ GaussianProcessEmulatedModel
 }
 
 /**
+   Returns a const reference to internal data for debugging purposes. */
+const GaussianProcessEmulator &
+GaussianProcessEmulatedModel
+::GetGaussianProcessEmulator() const
+{
+  return m_GPME;
+}
+
+/**
  * Get the scalar outputs from the model evaluated at x.  If an
  * error happens, the scalar output array will be left incomplete.
  */

@@ -59,6 +59,10 @@ class GaussianProcessEmulatedModel : public Model {
    * Set the gaussian process emulator
    */
   virtual ErrorType SetGaussianProcessEmulator( GaussianProcessEmulator & GPME );
+
+  /**
+     Returns a const reference to internal data for debugging purposes. */
+  const GaussianProcessEmulator & GetGaussianProcessEmulator() const;
   
   /**
    * Get the scalar outputs from the model evaluated at point
