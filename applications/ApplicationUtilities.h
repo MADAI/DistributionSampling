@@ -19,6 +19,7 @@
 #ifndef madai_ApplicationUtilities_h_included
 #define madai_ApplicationUtilities_h_included
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
