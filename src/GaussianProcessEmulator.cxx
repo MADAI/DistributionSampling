@@ -204,9 +204,9 @@ GaussianProcessEmulator::CheckStatus() {
   if (m_OutputValues.cols() != m_NumberOutputs) {
     return m_Status;
   }
-  if(m_OutputUncertaintyScales.size() != m_NumberOutputs) {
-    m_OutputUncertaintyScales
-      = Eigen::VectorXd::Constant(m_NumberOutputs,1.0);
+  if(m_OutputUncertaintyMeans.size() != m_NumberOutputs) {
+    m_OutputUncertaintyMeans
+      = Eigen::VectorXd::Constant(m_NumberOutputs,0.0);
   }
   if(m_ObservedOutputValues.size() != m_NumberOutputs) {
     m_ObservedOutputValues
@@ -339,13 +339,31 @@ GaussianProcessEmulator::SingleModel::SingleModel() :
   m_RegressionOrder(-1)
 { }
 
+bool GaussianProcessEmulator::BuildOutputUncertaintyScales()
+{
+  if ( m_OutputUncertaintyMeans.size() != m_NumberOutputs ) {
+    std::cerr << "Error in "
+              << "GaussianProcessEmulator::BuildOutputUncertaintyScales():\n";
+    std::cerr << "  m_OutputUncertaintyMeans.size() != m_NumberOutputs\n";
+    return false;
+  }
+
+  // Compute uncertainty scales.
+  m_OutputUncertaintyScales = Eigen::VectorXd::Constant( m_NumberOutputs, 0.0 );
+  for ( int i = 0; i < m_OutputUncertaintyMeans.size(); ++i ) {
+    m_OutputUncertaintyScales( i ) = m_OutputUncertaintyMeans( i );
+    // + m_ObservedUncertainty(i);
+  }
+
+  return true;
+}
 
 /**
    Use m_OutputUncertaintyScales, m_OutputValues, m_OutputMeans, and
    m_RetainedPCAEigenvectors to determine m_PCADecomposedModels[i].m_ZValues; */
 bool GaussianProcessEmulator::BuildZVectors() {
   if (m_PCADecomposedModels.size() != static_cast< size_t >( m_NumberPCAOutputs ) ) {
-    std::cout << "Error [m_PCADecomposedModels.size() == "
+    std::cerr << "Error [m_PCADecomposedModels.size() == "
               << m_PCADecomposedModels.size() << " != m_NumberPCAOutputs == "
               << m_NumberPCAOutputs << "]\n";
     return false;
@@ -663,7 +681,7 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose()
   Eigen::MatrixXd Y_standardized(N,t);
   for (int outputIndex = 0; outputIndex < t; ++outputIndex) {
     if ( m_OutputUncertaintyScales(outputIndex) == 0.0 ) {
-      std::cerr << "Output uncertainty scale is 0.0" << std::endl;
+      std::cerr << "Output uncertainty scale is 0.0, which is invalid\n";
       return false;
     }
     double oneOverUncertaintyScale

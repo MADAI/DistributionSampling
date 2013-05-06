@@ -133,6 +133,10 @@ public:
   void GetOutputObservedValues(std::vector< double > & x);
   //@}
 
+  /** Use m_OutputUncertaintyMeans and m_ObservedUncertainty to
+      compute the output uncertainty scales. */
+  bool BuildOutputUncertaintyScales();
+
   /**
    Use m_OutputUncertaintyScales, m_OutputValues, m_OutputMeans, and
    m_PCAEigenvectors to determine m_PCADecomposedModels[i].m_ZValues; */
@@ -185,6 +189,7 @@ public:
      The mean values and uncertainty of the columns of
      outputValues (size:numberOutputs) */
   Eigen::VectorXd m_OutputMeans;
+  Eigen::VectorXd m_OutputUncertaintyMeans;
   Eigen::VectorXd m_OutputUncertaintyScales;
   //@}
 

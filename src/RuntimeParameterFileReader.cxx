@@ -23,6 +23,8 @@
 #include <cstring>
 #include <vector>
 
+#include <boost/algorithm/string.hpp>
+
 
 namespace madai {
 
@@ -169,15 +171,7 @@ RuntimeParameterFileReader
   std::string::iterator newEnd = std::unique( line.begin(), line.end(), IsSameWhitespace );
   line.resize( std::distance( line.begin(), newEnd ) );
 
-  // Trim whitespace left
-  if ( *(line.begin()) == ' ' ) {
-    line.erase( line.begin() );
-  }
-
-  // Trim whitespace right
-  if ( *(line.end() - 1) == ' ' ) {
-    line.erase( (line.end() - 1) );
-  }
+  boost::algorithm::trim( line );
 
   return line;
 }

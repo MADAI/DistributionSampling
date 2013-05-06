@@ -672,7 +672,7 @@ bool parseModelDataDirectoryStructure(
 
   // Initialize means and uncertainty scales
   gpme.m_OutputMeans = Eigen::VectorXd::Constant( gpme.m_NumberOutputs, 0.0 );
-  gpme.m_OutputUncertaintyScales = Eigen::VectorXd::Constant( gpme.m_NumberOutputs, 0.0 );
+  gpme.m_OutputUncertaintyMeans = Eigen::VectorXd::Constant( gpme.m_NumberOutputs, 0.0 );
 
   if ( !parseNumberOfModelRuns( gpme.m_NumberTrainingPoints,
                                 modelOutputDirectory ) ) {
@@ -687,7 +687,7 @@ bool parseModelDataDirectoryStructure(
     std::cerr << "parse Parameter and Output Values error\n";
     return false;
   }
-  gpme.m_OutputUncertaintyScales = TMat.col(0);
+  gpme.m_OutputUncertaintyMeans = TMat.col(0);
 
   return true;
 }
@@ -827,7 +827,7 @@ bool parsePCADecomposition(
       }
       outputMeansRead = true;
     } else if (word == "OUTPUT_UNCERTAINTY_SCALES") {
-      if (! ReadVector(gpme.m_OutputUncertaintyScales, input)) {
+      if (! ReadVector(gpme.m_OutputUncertaintyMeans, input)) {
         std::cerr << "Could not read OUTPUT_UNCERTAINTY_SCALES in PCA "
                   << "decomposition file.\n";
         return false;
@@ -936,6 +936,11 @@ GaussianProcessEmulatorDirectoryReader
   if (! parseExperimentalResults( *gpe, experimentalResultsDirectory,
                                   this->m_Verbose )) {
     std::cerr << "Error in parseExperimentalResults()\n";
+    return false;
+  }
+
+  if ( !gpe->BuildOutputUncertaintyScales() ) {
+    std::cerr << "Error in gpe->BuildOutputUncertaintyScales\n";
     return false;
   }
 
