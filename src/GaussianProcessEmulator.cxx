@@ -860,10 +860,10 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
   Eigen::Map< Eigen::VectorXd > mean(&(y[0]), t);
   Eigen::Map< Eigen::MatrixXd > covariance(&(ycov[0]), t, t);
   mean = m_OutputMeans +
-    m_OutputUncertaintyScales.cwiseProduct(m_RetainedPCAEigenvectors * mean_pca);
+    m_OutputUncertaintyMeans.cwiseProduct(m_RetainedPCAEigenvectors * mean_pca);
 
   Eigen::MatrixXd uncertaintyScales
-    = m_OutputUncertaintyScales * m_OutputUncertaintyScales.transpose();
+    = m_OutputUncertaintyMeans * m_OutputUncertaintyMeans.transpose();
   covariance
     = uncertaintyScales.cwiseProduct(
         m_RetainedPCAEigenvectors * var_pca.asDiagonal() *
