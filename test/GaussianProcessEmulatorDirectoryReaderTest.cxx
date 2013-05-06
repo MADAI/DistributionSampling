@@ -338,7 +338,7 @@ bool checkParameterValues( const madai::GaussianProcessEmulator & gpe,
         double expectedValue = atof( tokens[1].c_str() );
         for ( size_t j = 0; j < gpe.m_Parameters.size(); ++j ) {
           if ( gpe.m_Parameters[j].m_Name == name ) {
-            double value = gpe.m_ParameterValues( i, j );
+            double value = gpe.m_TrainingParameterValues( i, j );
             if ( expectedValue != value ) {
               std::cerr << "Expected parameter value " << expectedValue << " in "
                         << "gpe.m_ParameterValues(" << i << ", "
@@ -392,10 +392,10 @@ bool checkOutputValues( const madai::GaussianProcessEmulator & gpe,
 
         for ( size_t j = 0; j < gpe.m_OutputNames.size(); ++j ) {
           if ( gpe.m_OutputNames[j] == name ) {
-            double value = gpe.m_OutputValues( i, j );
+            double value = gpe.m_TrainingOutputValues( i, j );
             if ( expectedValue != value ) {
               std::cerr << "Expected output value " << expectedValue << " in "
-                        << "gpe.m_OutputValues(" << i << ", "
+                        << "gpe.m_TrainingOutputValues(" << i << ", "
                         << j << ") but got " << value << "\n";
               return false;
             }
@@ -414,10 +414,10 @@ bool checkOutputValues( const madai::GaussianProcessEmulator & gpe,
 bool checkOutputMeans( const madai::GaussianProcessEmulator & gpe )
 {
   // Check output means
-  for ( int i = 0; i < gpe.m_OutputMeans.size(); ++i ) {
-    if ( gpe.m_OutputMeans(i) != 0.0 ) {
-      std::cerr << "Output mean was expected to be 0.0, but got "
-                << gpe.m_OutputMeans << "\n";
+  for ( int i = 0; i < gpe.m_TrainingOutputMeans.size(); ++i ) {
+    if ( gpe.m_TrainingOutputMeans(i) != 0.0 ) {
+      std::cerr << "Training output mean was expected to be 0.0, but got "
+                << gpe.m_TrainingOutputMeans << "\n";
       return false;
     }
   }
@@ -512,14 +512,14 @@ bool checkOutputUncertaintyScales( const madai::GaussianProcessEmulator & gpe,
       static_cast< double >( directories.size() );
 
     double outputUncertaintyScale =
-      std::sqrt( std::pow( averagedOutputUncertainty, 2 ) +
-                 std::pow( experimentalUncertainties[i], 2 ) );
+      std::pow( averagedOutputUncertainty, 2 ) +
+      std::pow( experimentalUncertainties[i], 2 );
 
     // Add averaged model uncertainty to observed uncertainty
-    if ( outputUncertaintyScale != gpe.m_OutputUncertaintyScales[i] ) {
-      std::cerr << "Expected m_OutputUncertaintyScales to be "
+    if ( outputUncertaintyScale != gpe.m_UncertaintyScales[i] ) {
+      std::cerr << "Expected m_UncertaintyScales to be "
                 << outputUncertaintyScale << " but reader got "
-                << gpe.m_OutputUncertaintyScales[i] << "\n";
+                << gpe.m_UncertaintyScales[i] << "\n";
       return false;
     }
   }
@@ -558,7 +558,7 @@ bool checkObservedOutputValues( const madai::GaussianProcessEmulator & gpe,
       if ( outputNameIter != gpe.m_OutputNames.end() ) {
         int index = static_cast< int >( std::distance( gpe.m_OutputNames.begin(),
                                                        outputNameIter ) );
-        double value = gpe.m_ObservedOutputValues[ index ];
+        double value = gpe.m_ObservedValues[ index ];
         if ( value != expectedValue ) {
           std::cerr << "Observed output value in emulator is " << value
                     << " but " << expectedValue << " was expected.\n";

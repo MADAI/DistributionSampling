@@ -200,8 +200,8 @@ bool parseExperimentalResults(
   }
 
   // default values.
-  gpe.m_ObservedOutputValues = Eigen::VectorXd::Zero(numberOutputs);
-  gpe.m_ObservedOutputUncertainty = Eigen::VectorXd::Zero(numberOutputs);
+  gpe.m_ObservedValues = Eigen::VectorXd::Zero(numberOutputs);
+  gpe.m_ObservedVariances = Eigen::VectorXd::Zero(numberOutputs);
 
   while ( resultsFile.good() ) {
     std::string line;
@@ -238,8 +238,8 @@ bool parseExperimentalResults(
                   << "\n";
       }
 
-      gpe.m_ObservedOutputValues(index) = value;
-      gpe.m_ObservedOutputUncertainty(index) = uncertainty;
+      gpe.m_ObservedValues(index) = value;
+      gpe.m_ObservedVariances(index) = uncertainty;
     } else {
       std::cerr << "Could not find output name '" << name << "'\n";
       return false;
@@ -674,8 +674,8 @@ bool parseModelDataDirectoryStructure(
   }
 
   // Initialize means and uncertainty scales
-  gpme.m_OutputMeans = Eigen::VectorXd::Constant( gpme.m_NumberOutputs, 0.0 );
-  gpme.m_OutputUncertaintyMeans = Eigen::VectorXd::Constant( gpme.m_NumberOutputs, 0.0 );
+  gpme.m_TrainingOutputMeans = Eigen::VectorXd::Constant( gpme.m_NumberOutputs, 0.0 );
+  gpme.m_TrainingOutputVarianceMeans = Eigen::VectorXd::Constant( gpme.m_NumberOutputs, 0.0 );
 
   if ( !parseNumberOfModelRuns( gpme.m_NumberTrainingPoints,
                                 modelOutputDirectory ) ) {
@@ -684,13 +684,13 @@ bool parseModelDataDirectoryStructure(
   }
   Eigen::MatrixXd TMat( gpme.m_NumberOutputs, 1 );
   if ( !parseParameterAndOutputValues(
-          gpme.m_ParameterValues, gpme.m_OutputValues, TMat,
+          gpme.m_TrainingParameterValues, gpme.m_TrainingOutputValues, TMat,
           modelOutputDirectory, gpme.m_NumberTrainingPoints,
           gpme.m_Parameters, gpme.m_OutputNames, verbose ) ) {
     std::cerr << "parse Parameter and Output Values error\n";
     return false;
   }
-  gpme.m_OutputUncertaintyMeans = TMat.col(0);
+  gpme.m_TrainingOutputVarianceMeans = TMat.col(0);
 
   return true;
 }
@@ -823,14 +823,14 @@ bool parsePCADecomposition(
     if (! input.good()) return false;
     input >> word;
     if (word == "OUTPUT_MEANS") {
-      if (! ReadVector(gpme.m_OutputMeans, input)) {
+      if (! ReadVector(gpme.m_TrainingOutputMeans, input)) {
         std::cerr << "Could not read OUTPUT_MEANS entry in PCA decomposition "
                   << "file.\n";
         return false;
       }
       outputMeansRead = true;
     } else if (word == "OUTPUT_UNCERTAINTY_SCALES") {
-      if (! ReadVector(gpme.m_OutputUncertaintyMeans, input)) {
+      if (! ReadVector(gpme.m_UncertaintyScales, input)) {
         std::cerr << "Could not read OUTPUT_UNCERTAINTY_SCALES in PCA "
                   << "decomposition file.\n";
         return false;

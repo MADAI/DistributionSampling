@@ -192,30 +192,30 @@ GaussianProcessEmulator::CheckStatus() {
   if (static_cast<int>(m_OutputNames.size()) != m_NumberOutputs) {
     return m_Status;
   }
-  if (m_ParameterValues.rows() != m_NumberTrainingPoints) {
+  if (m_TrainingParameterValues.rows() != m_NumberTrainingPoints) {
     return m_Status;
   }
-  if (m_OutputValues.rows() != m_NumberTrainingPoints) {
+  if (m_TrainingOutputValues.rows() != m_NumberTrainingPoints) {
     return m_Status;
   }
-  if (m_ParameterValues.cols() != m_NumberParameters) {
+  if (m_TrainingParameterValues.cols() != m_NumberParameters) {
     return m_Status;
   }
-  if (m_OutputValues.cols() != m_NumberOutputs) {
+  if (m_TrainingOutputValues.cols() != m_NumberOutputs) {
     return m_Status;
   }
-  if(m_OutputUncertaintyMeans.size() != m_NumberOutputs) {
-    m_OutputUncertaintyMeans
+  if(m_TrainingOutputVarianceMeans.size() != m_NumberOutputs) {
+    m_TrainingOutputVarianceMeans
       = Eigen::VectorXd::Constant(m_NumberOutputs,0.0);
   }
-  if(m_ObservedOutputValues.size() != m_NumberOutputs) {
-    m_ObservedOutputValues
+  if(m_ObservedValues.size() != m_NumberOutputs) {
+    m_ObservedValues
       = Eigen::VectorXd::Constant(m_NumberOutputs,0.0);
   }
   m_Status = UNTRAINED;
   if(m_NumberPCAOutputs < 1)
     return m_Status;
-  if(m_OutputMeans.size() != m_NumberOutputs)
+  if(m_TrainingOutputMeans.size() != m_NumberOutputs)
     return m_Status;
   if(m_PCAEigenvalues.size() != m_NumberOutputs)
     return m_Status;
@@ -310,24 +310,24 @@ GaussianProcessEmulator::GetStatusAsString() const
 void GaussianProcessEmulator::GetOutputUncertaintyScales(
     std::vector< double > & x)
 {
-  if(m_OutputUncertaintyScales.size() != m_NumberOutputs) {
+  if(m_UncertaintyScales.size() != m_NumberOutputs) {
     x.assign(m_NumberOutputs,0.0);
   } else {
     x.resize(m_NumberOutputs);
     for (int i = 0; i < m_NumberOutputs; ++i)
-      x[i] = m_OutputUncertaintyScales(i);
+      x[i] = m_UncertaintyScales(i);
   }
 }
 
 void GaussianProcessEmulator::GetOutputObservedValues(
     std::vector< double > & x)
 {
-  if(m_ObservedOutputValues.size() != m_NumberOutputs) {
+  if(m_ObservedValues.size() != m_NumberOutputs) {
     x.assign(m_NumberOutputs,0.0);
   } else {
     x.resize(m_NumberOutputs);
     for (int i = 0; i < m_NumberOutputs; ++i)
-      x[i] = m_ObservedOutputValues(i);
+      x[i] = m_ObservedValues(i);
   }
 }
 
@@ -341,27 +341,28 @@ GaussianProcessEmulator::SingleModel::SingleModel() :
 
 bool GaussianProcessEmulator::BuildOutputUncertaintyScales()
 {
-  if ( m_OutputUncertaintyMeans.size() != m_NumberOutputs ) {
+  if ( m_TrainingOutputVarianceMeans.size() != m_NumberOutputs ) {
     std::cerr << "Error in "
               << "GaussianProcessEmulator::BuildOutputUncertaintyScales():\n";
-    std::cerr << "  m_OutputUncertaintyMeans.size() != m_NumberOutputs\n";
+    std::cerr << "  m_TrainingOutputVarianceMeans.size() != m_NumberOutputs\n";
     return false;
   }
 
   // Compute uncertainty scales.
-  m_OutputUncertaintyScales = Eigen::VectorXd::Constant( m_NumberOutputs, 0.0 );
-  for ( int i = 0; i < m_OutputUncertaintyMeans.size(); ++i ) {
-    m_OutputUncertaintyScales( i ) =
-      std::pow( m_OutputUncertaintyMeans( i ), 2 ) +
-      std::pow( m_ObservedOutputUncertainty(i), 2 );
+  m_UncertaintyScales = Eigen::VectorXd::Constant( m_NumberOutputs, 0.0 );
+  for ( int i = 0; i < m_TrainingOutputVarianceMeans.size(); ++i ) {
+    m_UncertaintyScales( i ) =
+      std::pow( m_TrainingOutputVarianceMeans( i ), 2 ) +
+      std::pow( m_ObservedVariances(i), 2 );
   }
 
   return true;
 }
 
 /**
-   Use m_OutputUncertaintyScales, m_OutputValues, m_OutputMeans, and
-   m_RetainedPCAEigenvectors to determine m_PCADecomposedModels[i].m_ZValues; */
+   Use m_UncertaintyScales, m_TrainingOutputValues,
+   m_TrainingOutputMeans, and m_RetainedPCAEigenvectors to determine
+   m_PCADecomposedModels[i].m_ZValues; */
 bool GaussianProcessEmulator::BuildZVectors() {
   if (m_PCADecomposedModels.size() != static_cast< size_t >( m_NumberPCAOutputs ) ) {
     std::cerr << "Error [m_PCADecomposedModels.size() == "
@@ -371,10 +372,10 @@ bool GaussianProcessEmulator::BuildZVectors() {
   }
   Eigen::MatrixXd Y_standardized(m_NumberTrainingPoints, m_NumberOutputs);
   for (int i = 0; i < m_NumberOutputs; ++i) {
-    double scale = 1.0 / m_OutputUncertaintyScales(i);
+    double scale = 1.0 / m_UncertaintyScales(i);
     for (int j = 0; j < m_NumberTrainingPoints; ++j) {
       Y_standardized(j, i)
-        = scale * (m_OutputValues(j,i) - m_OutputMeans(i));
+        = scale * (m_TrainingOutputValues(j,i) - m_TrainingOutputMeans(i));
     }
   }
   Eigen::MatrixXd zMatrix = Y_standardized * m_RetainedPCAEigenvectors;
@@ -412,7 +413,7 @@ bool GaussianProcessEmulator::SingleModel::MakeCache() {
   int N = m_Parent->m_NumberTrainingPoints;
   int p = m_Parent->m_NumberParameters;
   int F = NumberRegressionFunctions(m_RegressionOrder, p);
-  const Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
+  const Eigen::MatrixXd & X = m_Parent->m_TrainingParameterValues;
 
   // allocate members
   m_CInverse.resize(N, N);
@@ -674,19 +675,19 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose()
   int t = m_NumberOutputs;
   int N = m_NumberTrainingPoints;
 
-  // FIND PCA DECOMPOSITION OF m_OutputValues - m_OutputMeans
-  m_OutputMeans = m_OutputValues.colwise().mean();
+  // FIND PCA DECOMPOSITION OF m_TrainingOutputValues - m_TrainingOutputMeans
+  m_TrainingOutputMeans = m_TrainingOutputValues.colwise().mean();
   Eigen::MatrixXd Y_minus_means
-    = m_OutputValues.rowwise() - (m_OutputValues.colwise().mean());
+    = m_TrainingOutputValues.rowwise() - (m_TrainingOutputValues.colwise().mean());
 
   Eigen::MatrixXd Y_standardized(N,t);
   for (int outputIndex = 0; outputIndex < t; ++outputIndex) {
-    if ( m_OutputUncertaintyScales(outputIndex) == 0.0 ) {
+    if ( m_UncertaintyScales(outputIndex) == 0.0 ) {
       std::cerr << "Output uncertainty scale is 0.0, which is invalid\n";
       return false;
     }
     double oneOverUncertaintyScale
-      = 1.0 / m_OutputUncertaintyScales(outputIndex);
+      = 1.0 / m_UncertaintyScales(outputIndex);
     for (int pointIndex = 0; pointIndex < N; ++pointIndex) {
       Y_standardized(pointIndex, outputIndex)
         = oneOverUncertaintyScale * Y_minus_means(pointIndex, outputIndex);
@@ -718,7 +719,7 @@ bool GaussianProcessEmulator::SingleModel::GetEmulatorOutputs (
   int p = m_Parent->m_NumberParameters;
   assert(p > 0);
   int F = 1 + (m_RegressionOrder * p);
-  const Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
+  const Eigen::MatrixXd & X = m_Parent->m_TrainingParameterValues;
   Eigen::VectorXd kplus(N); // kplus is C(x,D)
   for (int j = 0; j < N; ++j) {
     Eigen::VectorXd xrow = X.row(j);
@@ -773,8 +774,8 @@ bool GaussianProcessEmulator::GetEmulatorOutputs (
     return false;
   y.resize(m_NumberOutputs);
   Eigen::Map< Eigen::VectorXd > mean(&(y[0]),m_NumberOutputs);
-  mean = m_OutputMeans +
-    m_OutputUncertaintyScales.cwiseProduct(m_RetainedPCAEigenvectors * mean_pca);
+  mean = m_TrainingOutputMeans +
+    m_TrainingOutputVarianceMeans.cwiseProduct(m_RetainedPCAEigenvectors * mean_pca);
   return true;
 }
 
@@ -792,7 +793,7 @@ bool GaussianProcessEmulator::SingleModel
   int p = m_Parent->m_NumberParameters;
   assert(p > 0);
   int F = 1 + (m_RegressionOrder * p);
-  const Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
+  const Eigen::MatrixXd & X = m_Parent->m_TrainingParameterValues;
   Eigen::VectorXd kplus(N);
   // kplus is C(x,D)
   for (int j = 0; j < N; ++j) {
@@ -859,11 +860,11 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
   ycov.resize(t * t);
   Eigen::Map< Eigen::VectorXd > mean(&(y[0]), t);
   Eigen::Map< Eigen::MatrixXd > covariance(&(ycov[0]), t, t);
-  mean = m_OutputMeans +
-    m_OutputUncertaintyMeans.cwiseProduct(m_RetainedPCAEigenvectors * mean_pca);
+  mean = m_TrainingOutputMeans +
+    m_TrainingOutputVarianceMeans.cwiseProduct(m_RetainedPCAEigenvectors * mean_pca);
 
   Eigen::MatrixXd uncertaintyScales
-    = m_OutputUncertaintyMeans * m_OutputUncertaintyMeans.transpose();
+    = m_TrainingOutputVarianceMeans * m_TrainingOutputVarianceMeans.transpose();
   covariance
     = uncertaintyScales.cwiseProduct(
         m_RetainedPCAEigenvectors * var_pca.asDiagonal() *
