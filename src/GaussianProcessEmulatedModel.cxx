@@ -50,25 +50,21 @@ GaussianProcessEmulatedModel
                      const std::string ModelOutputDirectory,
                      const std::string ExperimentalResultsDirectory )
 {
-  if ( StatisticsDirectory == "-" ) {
-    GaussianProcessEmulatorSingleFileReader singleFileReader;
-    singleFileReader.Load(&m_GPME, std::cin);
-  } else {
-    GaussianProcessEmulatorDirectoryReader directoryReader;
-    if ( !directoryReader.LoadTrainingData( &m_GPME, ModelOutputDirectory,
-                                           StatisticsDirectory, ExperimentalResultsDirectory ) ) {
-      std::cerr << "Error loading from the directory structure.\n";
-      return Model::OTHER_ERROR;
-    }
-    if ( !directoryReader.LoadPCA( &m_GPME, StatisticsDirectory ) ) {
-      std::cerr << "Error loading the PCA decomposition data.\n";
-      return Model::OTHER_ERROR;
-    }
-    if ( !directoryReader.LoadEmulator( &m_GPME, StatisticsDirectory ) ) {
-      std::cerr << "Error loading Emulator data.\n";
-      return Model::OTHER_ERROR;
-    }
+  GaussianProcessEmulatorDirectoryReader directoryReader;
+  if ( !directoryReader.LoadTrainingData( &m_GPME, ModelOutputDirectory,
+                                          StatisticsDirectory, ExperimentalResultsDirectory ) ) {
+    std::cerr << "Error loading from the directory structure.\n";
+    return Model::OTHER_ERROR;
   }
+  if ( !directoryReader.LoadPCA( &m_GPME, StatisticsDirectory ) ) {
+    std::cerr << "Error loading the PCA decomposition data.\n";
+    return Model::OTHER_ERROR;
+  }
+  if ( !directoryReader.LoadEmulator( &m_GPME, StatisticsDirectory ) ) {
+    std::cerr << "Error loading Emulator data.\n";
+    return Model::OTHER_ERROR;
+  }
+
   if ( m_GPME.m_Status != GaussianProcessEmulator::READY )
     return Model::OTHER_ERROR;
   m_StateFlag = READY;
