@@ -198,6 +198,7 @@ public:
      experimentally observed mean values of the output variables.
    */
   Eigen::VectorXd m_ObservedOutputValues;
+  Eigen::VectorXd m_ObservedOutputUncertainty;
 
   //@{
   /**

@@ -201,6 +201,7 @@ bool parseExperimentalResults(
 
   // default values.
   gpe.m_ObservedOutputValues = Eigen::VectorXd::Zero(numberOutputs);
+  gpe.m_ObservedOutputUncertainty = Eigen::VectorXd::Zero(numberOutputs);
 
   while ( resultsFile.good() ) {
     std::string line;
@@ -227,6 +228,7 @@ bool parseExperimentalResults(
 
     std::string name( tokens[0] );
     double value = atof( tokens[1].c_str() );
+    double uncertainty = atof( tokens[2].c_str() );
 
     int index = -1;
     bool success = getIndex( outputNames, name, index );
@@ -237,6 +239,7 @@ bool parseExperimentalResults(
       }
 
       gpe.m_ObservedOutputValues(index) = value;
+      gpe.m_ObservedOutputUncertainty(index) = uncertainty;
     } else {
       std::cerr << "Could not find output name '" << name << "'\n";
       return false;

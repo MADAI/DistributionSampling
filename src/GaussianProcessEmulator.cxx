@@ -351,8 +351,9 @@ bool GaussianProcessEmulator::BuildOutputUncertaintyScales()
   // Compute uncertainty scales.
   m_OutputUncertaintyScales = Eigen::VectorXd::Constant( m_NumberOutputs, 0.0 );
   for ( int i = 0; i < m_OutputUncertaintyMeans.size(); ++i ) {
-    m_OutputUncertaintyScales( i ) = m_OutputUncertaintyMeans( i );
-    // + m_ObservedUncertainty(i);
+    m_OutputUncertaintyScales( i ) =
+      std::pow( m_OutputUncertaintyMeans( i ), 2 ) +
+      std::pow( m_ObservedOutputUncertainty(i), 2 );
   }
 
   return true;

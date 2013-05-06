@@ -124,13 +124,13 @@ bool checkParameters( const madai::GaussianProcessEmulator & gpe,
       std::cerr << "Parameter '" << *i << "' not parsed by reader\n";
       return false;
     }
-    
+
   }
 
   // Check parameter prior distributions
   for ( size_t i = 0; i < gpe.m_Parameters.size(); ++i ) {
     madai::UniformDistribution * uDistribution =
-      dynamic_cast< madai::UniformDistribution * >( gpe.m_Parameters[i].m_PriorDistribution ); 
+      dynamic_cast< madai::UniformDistribution * >( gpe.m_Parameters[i].m_PriorDistribution );
     madai::GaussianDistribution * gDistribution =
       dynamic_cast< madai::GaussianDistribution * >( gpe.m_Parameters[i].m_PriorDistribution );
 
@@ -290,7 +290,7 @@ bool checkNumberOfTrainingPoints( const madai::GaussianProcessEmulator & gpe,
     std::ifstream resultsFile( resultsFileName.c_str() );
 
     if ( parametersFile.good() && resultsFile.good() ) {
-      runCounter++; 
+      runCounter++;
     }
 
     parametersFile.close();
@@ -406,7 +406,7 @@ bool checkOutputValues( const madai::GaussianProcessEmulator & gpe,
 
     resultsFile.close();
   }
-  
+
   return true;
 }
 
@@ -426,8 +426,44 @@ bool checkOutputMeans( const madai::GaussianProcessEmulator & gpe )
 }
 
 bool checkOutputUncertaintyScales( const madai::GaussianProcessEmulator & gpe,
-                                   const std::string & modelOutputDirectory )
+                                   const std::string & modelOutputDirectory,
+                                   const std::string & experimentalResultsDirectory )
 {
+  // Read in the uncertainty from the experimental results
+  std::string resultsFileName = experimentalResultsDirectory +
+    madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
+  std::ifstream resultsFile( resultsFileName.c_str() );
+
+  if ( !resultsFile.good() ) {
+    std::cerr << "Could not open file '" << resultsFileName << "'\n";
+    return false;
+  }
+
+  std::vector< double > experimentalUncertainties( gpe.m_NumberOutputs, 0.0 );
+  while ( resultsFile.good() ) {
+    std::string line;
+    std::vector< std::string > tokens = getLineAsTokens( resultsFile, line );
+
+    // Skip lines with no tokens
+    if ( tokens.size() == 0 ) continue;
+
+    if ( tokens.size() != 3 ) {
+      std::cerr << "Too few tokens in line '" << line << "' in file '"
+                << resultsFileName << "'\n";
+      std::cerr << "Format should be <name> <value> <uncertainty>\n";
+      return false;
+    }
+
+    std::string name( tokens[0] );
+    double uncertainty = atof( tokens[2].c_str() );
+    for ( size_t j = 0; j < gpe.m_OutputNames.size(); ++j ) {
+      if ( gpe.m_OutputNames[j] == name ) {
+        experimentalUncertainties[j] = uncertainty;
+        break;
+      }
+    }
+  }
+
   // Average the uncertainties from the model output
   std::vector< double > accumulatedUncertainties( gpe.m_NumberOutputs, 0.0 );
 
@@ -461,7 +497,7 @@ bool checkOutputUncertaintyScales( const madai::GaussianProcessEmulator & gpe,
 
         std::vector< std::string >::const_iterator outputNameIter =
           std::find( gpe.m_OutputNames.begin(), gpe.m_OutputNames.end(), name );
-      
+
         if ( outputNameIter != gpe.m_OutputNames.end() ) {
           int index = static_cast< int >( std::distance( gpe.m_OutputNames.begin(),
                                                          outputNameIter ) );
@@ -472,13 +508,17 @@ bool checkOutputUncertaintyScales( const madai::GaussianProcessEmulator & gpe,
   }
 
   for ( size_t i = 0; i < accumulatedUncertainties.size(); ++i ) {
-    double averagedUncertainty = accumulatedUncertainties[i] /
+    double averagedOutputUncertainty = accumulatedUncertainties[i] /
       static_cast< double >( directories.size() );
 
+    double outputUncertaintyScale =
+      std::sqrt( std::pow( averagedOutputUncertainty, 2 ) +
+                 std::pow( experimentalUncertainties[i], 2 ) );
+
     // Add averaged model uncertainty to observed uncertainty
-    if ( averagedUncertainty != gpe.m_OutputUncertaintyScales[i] ) {
+    if ( outputUncertaintyScale != gpe.m_OutputUncertaintyScales[i] ) {
       std::cerr << "Expected m_OutputUncertaintyScales to be "
-                << averagedUncertainty << " but reader got "
+                << outputUncertaintyScale << " but reader got "
                 << gpe.m_OutputUncertaintyScales[i] << "\n";
       return false;
     }
@@ -606,7 +646,8 @@ int main( int argc, char *argv[] )
   }
 
   if ( !checkOutputUncertaintyScales( gpe,
-                                      modelOutputDirectory ) ) {
+                                      modelOutputDirectory,
+                                      experimentalResultsDirectory ) ) {
     std::cerr << "Error in checkOutputUncertaintyScales\n";
     return EXIT_FAILURE;
   }
@@ -615,6 +656,6 @@ int main( int argc, char *argv[] )
     std::cerr << "Error in checkObservedOutputValues\n";
     return EXIT_FAILURE;
   }
-  
+
   return EXIT_SUCCESS;
 }
