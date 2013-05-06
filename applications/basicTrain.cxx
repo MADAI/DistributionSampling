@@ -73,7 +73,8 @@ int main(int argc, char ** argv) {
               << "EMULATOR_AMPLITUDE <value> (default: "
               << DEFAULT_EMULATOR_AMPLITUDE << ")\n"
               << "EMULATOR_SCALE <value> (default: "
-              << DEFAULT_EMULATOR_SCALE << ")\n";
+              << DEFAULT_EMULATOR_SCALE << ")\n"
+              << "READER_VERBOSE <value> (default: false )\n";
 
     return EXIT_FAILURE;
   }
@@ -132,6 +133,9 @@ int main(int argc, char ** argv) {
 
   madai::GaussianProcessEmulator gpm;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  bool verbose = settings.GetOptionAsBool( "READER_VERBOSE", false );
+  directoryReader.SetVerbose( verbose );
+
   if ( !directoryReader.LoadTrainingData( &gpm,
                                           modelOutputDirectory,
                                           statisticsDirectory,
