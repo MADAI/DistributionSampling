@@ -129,13 +129,9 @@ public:
   //@{
   /**
      \todo document */
-  void GetOutputUncertaintyScales(std::vector< double > & x);
-  void GetOutputObservedValues(std::vector< double > & x);
+  bool GetUncertaintyScales(std::vector< double > & x) const;
+  bool GetObservedValues(std::vector< double > & x);
   //@}
-
-  /** Use m_TrainingOutputVarianceMeans and m_ObservedUncertainty to
-      compute the output uncertainty scales. */
-  bool BuildOutputUncertaintyScales();
 
   /**
    Use m_UncertaintyScales, m_TrainingOutputValues,
@@ -219,6 +215,13 @@ public:
   Eigen::VectorXd m_PCAEigenvalues;
   Eigen::MatrixXd m_PCAEigenvectors;
   //@}
+
+protected:
+  /** Use m_TrainingOutputVarianceMeans and m_ObservedUncertainty to
+      compute the output uncertainty scales. */
+  bool BuildUncertaintyScales();
+
+public:
 
   /**
      This represents one PCA-decomposed model */
@@ -318,6 +321,7 @@ public:
     An array of length numberPCAOutputs/ */
   std::vector< SingleModel > m_PCADecomposedModels;
 };
+
 } // end namespace madai
 
 

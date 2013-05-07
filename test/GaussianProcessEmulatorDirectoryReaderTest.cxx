@@ -507,6 +507,9 @@ bool checkOutputUncertaintyScales( const madai::GaussianProcessEmulator & gpe,
     }
   }
 
+  std::vector< double > uncertaintyScales;
+  gpe.GetUncertaintyScales( uncertaintyScales );
+
   for ( size_t i = 0; i < accumulatedUncertainties.size(); ++i ) {
     double averagedOutputUncertainty = accumulatedUncertainties[i] /
       static_cast< double >( directories.size() );
@@ -516,10 +519,10 @@ bool checkOutputUncertaintyScales( const madai::GaussianProcessEmulator & gpe,
       std::pow( experimentalUncertainties[i], 2 );
 
     // Add averaged model uncertainty to observed uncertainty
-    if ( outputUncertaintyScale != gpe.m_UncertaintyScales[i] ) {
+    if ( outputUncertaintyScale != uncertaintyScales[i] ) {
       std::cerr << "Expected m_UncertaintyScales to be "
                 << outputUncertaintyScale << " but reader got "
-                << gpe.m_UncertaintyScales[i] << "\n";
+                << uncertaintyScales[i] << "\n";
       return false;
     }
   }

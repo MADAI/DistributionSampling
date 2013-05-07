@@ -942,11 +942,6 @@ GaussianProcessEmulatorDirectoryReader
     return false;
   }
 
-  if ( !gpe->BuildOutputUncertaintyScales() ) {
-    std::cerr << "Error in gpe->BuildOutputUncertaintyScales\n";
-    return false;
-  }
-
   return (gpe->CheckStatus() == GaussianProcessEmulator::UNTRAINED);
 }
 

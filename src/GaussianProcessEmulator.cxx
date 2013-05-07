@@ -307,19 +307,26 @@ GaussianProcessEmulator::GetStatusAsString() const
 }
 
 
-void GaussianProcessEmulator::GetOutputUncertaintyScales(
-    std::vector< double > & x)
+bool GaussianProcessEmulator::GetUncertaintyScales(
+    std::vector< double > & x) const
 {
   if(m_UncertaintyScales.size() != m_NumberOutputs) {
-    x.assign(m_NumberOutputs,0.0);
-  } else {
-    x.resize(m_NumberOutputs);
-    for (int i = 0; i < m_NumberOutputs; ++i)
-      x[i] = m_UncertaintyScales(i);
+    GaussianProcessEmulator * nonConstGPE = const_cast< GaussianProcessEmulator * >( this );
+    if ( !nonConstGPE->BuildUncertaintyScales() ) {
+      x.clear();
+      return false;
+    }
   }
+
+  x.resize(m_NumberOutputs);
+  for (int i = 0; i < m_NumberOutputs; ++i) {
+    x[i] = m_UncertaintyScales(i);
+  }
+
+  return true;
 }
 
-void GaussianProcessEmulator::GetOutputObservedValues(
+bool GaussianProcessEmulator::GetObservedValues(
     std::vector< double > & x)
 {
   if(m_ObservedValues.size() != m_NumberOutputs) {
@@ -329,6 +336,7 @@ void GaussianProcessEmulator::GetOutputObservedValues(
     for (int i = 0; i < m_NumberOutputs; ++i)
       x[i] = m_ObservedValues(i);
   }
+  return true;
 }
 
 /**
@@ -339,12 +347,19 @@ GaussianProcessEmulator::SingleModel::SingleModel() :
   m_RegressionOrder(-1)
 { }
 
-bool GaussianProcessEmulator::BuildOutputUncertaintyScales()
+bool GaussianProcessEmulator::BuildUncertaintyScales()
 {
   if ( m_TrainingOutputVarianceMeans.size() != m_NumberOutputs ) {
     std::cerr << "Error in "
-              << "GaussianProcessEmulator::BuildOutputUncertaintyScales():\n";
+              << "GaussianProcessEmulator::BuildUncertaintyScales():\n";
     std::cerr << "  m_TrainingOutputVarianceMeans.size() != m_NumberOutputs\n";
+    return false;
+  }
+
+  if ( m_ObservedVariances.size() != m_NumberOutputs ) {
+    std::cerr << "Error in "
+              << "GaussianProcessEmulator::BuildUncertaintyScales():\n";
+    std::cerr << "  m_ObservedVariances.size() != m_NumberOutputs\n";
     return false;
   }
 
@@ -370,9 +385,15 @@ bool GaussianProcessEmulator::BuildZVectors() {
               << m_NumberPCAOutputs << "]\n";
     return false;
   }
+
+  std::vector< double > uncertaintyScales;
+  if ( !this->GetUncertaintyScales( uncertaintyScales ) ) {
+    return false;
+  }
+
   Eigen::MatrixXd Y_standardized(m_NumberTrainingPoints, m_NumberOutputs);
   for (int i = 0; i < m_NumberOutputs; ++i) {
-    double scale = 1.0 / m_UncertaintyScales(i);
+    double scale = 1.0 / uncertaintyScales[i];
     for (int j = 0; j < m_NumberTrainingPoints; ++j) {
       Y_standardized(j, i)
         = scale * (m_TrainingOutputValues(j,i) - m_TrainingOutputMeans(i));
@@ -675,6 +696,11 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose()
   int t = m_NumberOutputs;
   int N = m_NumberTrainingPoints;
 
+  std::vector< double > uncertaintyScales;
+  if ( !this->GetUncertaintyScales( uncertaintyScales ) ) {
+    return false;
+  }
+
   // FIND PCA DECOMPOSITION OF m_TrainingOutputValues - m_TrainingOutputMeans
   m_TrainingOutputMeans = m_TrainingOutputValues.colwise().mean();
   Eigen::MatrixXd Y_minus_means
@@ -682,12 +708,12 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose()
 
   Eigen::MatrixXd Y_standardized(N,t);
   for (int outputIndex = 0; outputIndex < t; ++outputIndex) {
-    if ( m_UncertaintyScales(outputIndex) == 0.0 ) {
+    if ( uncertaintyScales[outputIndex] == 0.0 ) {
       std::cerr << "Output uncertainty scale is 0.0, which is invalid\n";
       return false;
     }
     double oneOverUncertaintyScale
-      = 1.0 / m_UncertaintyScales(outputIndex);
+      = 1.0 / uncertaintyScales[outputIndex];
     for (int pointIndex = 0; pointIndex < N; ++pointIndex) {
       Y_standardized(pointIndex, outputIndex)
         = oneOverUncertaintyScale * Y_minus_means(pointIndex, outputIndex);
@@ -869,6 +895,9 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
     = uncertaintyScales.cwiseProduct(
         m_RetainedPCAEigenvectors * var_pca.asDiagonal() *
         m_RetainedPCAEigenvectors.transpose());
+
+  // Add the training output variance to the emulator covariance
+  covariance += m_TrainingOutputVarianceMeans.asDiagonal();
 
   return true;
 }
