@@ -326,6 +326,24 @@ bool GaussianProcessEmulator::GetUncertaintyScales(
   return true;
 }
 
+bool GaussianProcessEmulator::GetUncertaintyScalesAsCovariance(
+    std::vector< double > & x) const
+{
+  x.clear();
+  int t = m_NumberOutputs;
+  if( m_UncertaintyScales.size() != t ) {
+    GaussianProcessEmulator * nonConstGPE = const_cast< GaussianProcessEmulator * >( this );
+    if ( !nonConstGPE->BuildUncertaintyScales() ) {
+      return false;
+    }
+  }
+  
+  x.resize(t*t);
+  Eigen::Map< Eigen::VectorXd > Cov(&(x[0]),t,t);
+  Cov = m_UncertaintyScales.asDiagonal();
+  return true;
+}
+
 bool GaussianProcessEmulator::GetObservedValues(
     std::vector< double > & x)
 {
@@ -895,9 +913,6 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
     = uncertaintyScales.cwiseProduct(
         m_RetainedPCAEigenvectors * var_pca.asDiagonal() *
         m_RetainedPCAEigenvectors.transpose());
-
-  // Add the training output variance to the emulator covariance
-  covariance += m_TrainingOutputVarianceMeans.asDiagonal();
 
   return true;
 }

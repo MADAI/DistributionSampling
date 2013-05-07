@@ -131,6 +131,7 @@ public:
      \todo document */
   bool GetUncertaintyScales(std::vector< double > & x) const;
   bool GetObservedValues(std::vector< double > & x);
+  bool GetUncertaintyScalesAsCovariance(std::vector< double > & x);
   //@}
 
   /**

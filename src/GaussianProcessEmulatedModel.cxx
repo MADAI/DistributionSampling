@@ -70,6 +70,7 @@ GaussianProcessEmulatedModel
   m_StateFlag = READY;
   m_Parameters = m_GPME.m_Parameters;
   m_ScalarOutputNames = m_GPME.m_OutputNames;
+  m_ConstantCovariance = m_GPME.GetUncertaintyScalesAsCovariance();
   return Model::NO_ERROR;
 }
 
