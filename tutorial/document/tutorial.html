@@ -6,7 +6,7 @@
 <style>
 div.column { color:black; background-color:white; margin-left:auto;
 	margin-right:auto; margin-top:0px; margin-bottom:0px;
-	max-width:640px; text-align:left; padding:8px 8px 8px 8px;
+	max-width:872px; text-align:left; padding:8px 8px 8px 8px;
 	border:1px solid #56A0D3; }
 div.wide { color:black; background-color:white; margin-left:0.5em;
 	margin-right:0.5em; padding:0.5em; }
@@ -89,21 +89,22 @@ numbers which can be readily compared to your experimental/
 <!--=========================================================================-->
 <h2>1. Installing The Software</h2>
 
-<p> Pre-compiled versions of this software can be found here:</p>
-<ul>
-  <li> MaxOS 32-bit:
-       <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
-  <li> MaxOS 64-bit:
-       <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
-  <li> RedHat 64-bit:
-       <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
-  <li> Ubuntu 64-bit:
-       <u>href://.....<!-- \todo insert apropriate URLs --></u></li>
-  <li> ... </li>
-</ul>
+<!-- <p> Pre-compiled versions of this software can be found here:</p> -->
+<!-- <ul> -->
+<!-- <\!-- \todo insert apropriate URLs -\-> -->
+<!--   <li> MaxOS 32-bit: -->
+<!--        <u>href://.....</u></li> -->
+<!--   <li> MaxOS 64-bit: -->
+<!--        <u>href://.....</u></li> -->
+<!--   <li> RedHat 64-bit: -->
+<!--        <u>href://.....</u></li> -->
+<!--   <li> Ubuntu 64-bit: -->
+<!--        <u>href://.....</u></li> -->
+<!--   <li> ... </li> -->
+<!-- </ul> -->
 
-<p>If you can not use one of those sources, you will have to compile
-  it yourself.</p>
+<!-- <p>If you can not use one of those sources, you will have to compile -->
+<!--   it yourself.</p> -->
 
 <ol>
   <li>Install the prerequisite packages
@@ -132,8 +133,7 @@ $ <span class="input">sudo yum -y install \
 	  </li>
 	</ul>
   </li>
-  <li>Download DistributionSampling.tar.gz
-      (<u>href://.....<!-- \todo insert apropriate URLs --></u>)</li>
+  <li>Download <a href="http://cs.unc.edu/~hal/pub/DistributionSampling.tar.gz">DistributionSampling.tar.gz</a></li>
   <li>Extract
 <!-- $ <span class="input">mkdir ~/src</span> -->
 <!-- $ <span class="input">cd ~/src</span> -->
@@ -164,6 +164,23 @@ path:</p>
 <p>If you wish to compile your own software that links against the
 library, the include files are in <code>${HOME}/local/include</code> and
 the library is in <code>${HOME}/local/lib/madai</code> .  </p>
+
+<h3>Other software</h3>
+
+<ul>
+<li>MADAI Workbench (customized ParaView) <a href="https://madai-public.cs.unc.edu/visualization/madai-workbench/">madai.us</a></li>
+
+<li>ParaView &mdash; <a href="http://www.paraview.org/paraview/resources/software.php">paraview.org</a>
+<pre>$ <span class="input">sudo apt-get -y install paraview</span></pre>
+<pre>$ <span class="input">sudo yum -y install paraview</span></pre>
+</li>
+
+<li>GGobi &mdash; <a href="http://www.ggobi.org/downloads/">ggobi.org</a>
+<pre>$ <span class="input">sudo apt-get -y install ggobi</span></pre>
+<pre>$ <span class="input">sudo yum -y install ggobi</span></pre>
+</li>
+</ul>
+
 
 <!--=========================================================================-->
 <h2>2. Running the Software</h2>
@@ -658,16 +675,37 @@ $ <span class="input">head trace/mcmc.csv</span>
 points in space, for analysis you may need to reduce the number of
 points.  To keep the same random distribution, it may be easiest to
 pick out every <em>N</em>th line.  For example, to reduce ten million
-points down to ten thousand, pick out every 1000th line:</p>
+points down to a hundred thousand, pick out every 100th line:</p>
 
 <pre>
-$ <span class="input">awk 'NR % 1000 == 1' &lt; trace/mcmc.csv &gt; trace/mcmc-subsample.csv</span>
+$ <span class="input">awk 'NR % 100 == 1' &lt; trace/mcmc.csv &gt; trace/mcmc-subsample.csv</span>
 </pre>
 
+
+<h3>3a. ParaView</h3>
 <p>CSV files can be opened in ParaView or the MADAI Workbench.</p>
 
-<p>&nbsp;</p>
+<p><img src="images/screenshot_001.png" alt=""></p>
+<p><img src="images/screenshot_002.png" alt=""></p>
 
+<h3>3b. Scatterplot Matrix</h3>
+
+<p>This image was created via <a href="http://matplotlib.org/">Matplotlib</a>.</p>
+<p><img src="images/scatterplot.png" alt=""></p>
+
+
+<h3>3c. GGobi</h3>
+<p>CSV files can be directly loaded by GGobi.</p>
+
+<h3>3d. Percentile Surface</h3>
+<p>This is a stand-alone program that links against VTK.  Compiling
+  instructions are located inside the file.</p>
+<p><a href="../pub/PercentileSurface.tgz">PercentileSurface.tgz</a></p>
+<p>This is the 95% surface</p>
+<p><img src="images/screenshot_003.png" alt=""></p>
+<p>This is a comparison of the the 95% surface to a scatterplot of the
+samples.</p>
+<p><img src="images/screenshot_004.png" alt=""></p>
 
 <hr>
 
