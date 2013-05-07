@@ -23,6 +23,8 @@
 #include <cstring>
 #include <vector>
 
+#include <boost/algorithm/string.hpp>
+
 
 namespace madai {
 
@@ -41,12 +43,14 @@ RuntimeParameterFileReader
 ::ParseFile( const std::string fileName )
 {
   std::ifstream inFile( fileName.c_str() );
-  if ( inFile.is_open() ) {
+  if ( inFile.good() ) {
     std::string line;
     std::string element;
     while ( inFile.good() ) {
       std::getline( inFile, line );
 
+      // This gets rid of leading and trailing whitespace and chops
+      // off comments
       line = this->RegularizeLine( line );
 
       // Split the regularized string by the first space
@@ -54,7 +58,8 @@ RuntimeParameterFileReader
       std::string name = line.substr( 0, firstSpace );
       if ( name.size() > 0 ) {
         if ( firstSpace != std::string::npos ) {
-          std::string value = line.substr( firstSpace+1 );
+          std::string value( line.substr( firstSpace+1 ) );
+          boost::algorithm::trim( value );
           m_Options[ name ] = value;
         } else {
           m_Options[ name ] = std::string();
@@ -162,22 +167,7 @@ RuntimeParameterFileReader
   size_t commentPosition = line.find_first_of( '#' );
   line = line.substr( 0, commentPosition );
 
-  // Convert any tabs to spaces
-  std::transform( line.begin(), line.end(), line.begin(), TabToSpace );
-
-  // Convert contiguous white space in line to a single space
-  std::string::iterator newEnd = std::unique( line.begin(), line.end(), IsSameWhitespace );
-  line.resize( std::distance( line.begin(), newEnd ) );
-
-  // Trim whitespace left
-  if ( *(line.begin()) == ' ' ) {
-    line.erase( line.begin() );
-  }
-
-  // Trim whitespace right
-  if ( *(line.end() - 1) == ' ' ) {
-    line.erase( (line.end() - 1) );
-  }
+  boost::algorithm::trim( line );
 
   return line;
 }
