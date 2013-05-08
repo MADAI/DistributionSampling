@@ -87,7 +87,7 @@ class GaussianProcessEmulatedModel : public Model {
   
 protected:
   
-  std::vector< double > m_ModelAndObservedCovariance;
+  std::vector< double > m_TrainingAndObservedCovariance;
 
 private:
   GaussianProcessEmulator m_GPME;

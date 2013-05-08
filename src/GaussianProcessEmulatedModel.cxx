@@ -70,7 +70,7 @@ GaussianProcessEmulatedModel
   m_StateFlag = READY;
   m_Parameters = m_GPME.m_Parameters;
   m_ScalarOutputNames = m_GPME.m_OutputNames;
-  if ( !m_GPME.GetUncertaintyScalesAsCovariance( m_ModelAndObservedCovariance ) ) {
+  if ( !m_GPME.GetUncertaintyScalesAsCovariance( m_TrainingAndObservedCovariance ) ) {
     std::cerr << "Error setting the covariance containing experimental and model"
               << " output data.\n";
     return Model::OTHER_ERROR;
@@ -156,14 +156,14 @@ GaussianProcessEmulatedModel
 {
   x.clear();
   unsigned int t = m_ScalarOutputNames.size();
-  if ( m_ModelAndObservedCovariance.size() != (t*t) ) {
+  if ( m_TrainingAndObservedCovariance.size() != (t*t) ) {
     std::cerr << "Constant covariance matrix has invalid size "
-              << m_ModelAndObservedCovariance.size() << "\n";
+              << m_TrainingAndObservedCovariance.size() << "\n";
     return false;
   }
   
   x.resize(t*t);
-  x = m_ModelAndObservedCovariance;
+  x = m_TrainingAndObservedCovariance;
   return true;
 }
 
