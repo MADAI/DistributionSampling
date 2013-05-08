@@ -417,23 +417,29 @@ Model
       distSq += std::pow(scalarDifferences[i],2);
     }
   }
+  
+  std::vector< double > constantCovariance;
+  if ( !this->GetConstantCovariance(constantCovariance) ) {
+    std::cerr << "Error getting the constant covariance matrix from the model\n";
+    return OTHER_ERROR;
+  }
 
   if ((scalarCovariance.size() == 0) &&
-      (this->m_ConstantCovariance.size() == 0)) {
+      (constantCovariance.size() == 0)) {
     // Infinite precision makes no sense, so assume variance of 1.0
     // for each variable.
     logLikelihood = ((-0.5) * distSq) + logPriorLikelihood;
     return NO_ERROR;
   } else if (scalarCovariance.size() == 0) {
-    assert(this->m_ObservedScalarCovariance.size() == (t*t));
-    covariance = this->m_ConstantCovariance;
-  } else if (this->m_ConstantCovariance.size() == 0) {
+    assert(constantCovariance.size() == (t*t));
+    covariance = constantCovariance;
+  } else if (constantCovariance.size() == 0) {
     assert(scalarCovariance.size() == (t*t));
     covariance = scalarCovariance;
   } else {
     for (size_t i = 0; i < (t*t); ++i)
       covariance[i]
-        = scalarCovariance[i] + this->m_ConstantCovariance[i];
+        = scalarCovariance[i] + constantCovariance[i];
   }
 
   Eigen::Map< Eigen::VectorXd > diff(&(scalarDifferences[0]),t);
@@ -461,6 +467,24 @@ Model
       params[i].GetPriorDistribution()->GetLogProbabilityDensity(x[i]);
   }
   return logPriorLikelihood;
+}
+
+
+bool
+Model
+::GetConstantCovariance(std::vector< double > & x) const
+{
+  x.clear();
+  unsigned int t = m_ScalarOutputNames.size();
+  if ( m_ObservedScalarCovariance.size() != (t*t) ) {
+    std::cerr << "Observed scalar covariance is of invalid size "
+              << m_ObservedScalarCovariance.size() << "\n";
+    return false;
+  }
+  
+  x.resize(t*t);
+  x = m_ObservedScalarCovariance;
+  return true;
 }
 
 

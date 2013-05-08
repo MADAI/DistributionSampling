@@ -82,6 +82,12 @@ class GaussianProcessEmulatedModel : public Model {
     const std::vector<double>&, double&, double&) const {
     return METHOD_NOT_IMPLEMENTED;
   }
+  
+  virtual bool GetConstantCovariance(std::vector< double > & x) const;
+  
+protected:
+  
+  std::vector< double > m_ModelAndObservedCovariance;
 
 private:
   GaussianProcessEmulator m_GPME;

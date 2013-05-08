@@ -217,6 +217,8 @@ public:
      this->SetObservedScalarValues() and
      this->SetObservedScalarCovariance(). */
   virtual ErrorType LoadObservations(std::istream & i);
+  
+  virtual bool GetConstantCovariance(std::vector< double > & x) const;
 
 protected:
   /** Enumeration of internal state. */
@@ -273,12 +275,6 @@ protected:
    *
    * If empty, assume zero matrix. */
   std::vector< double > m_ObservedScalarCovariance;
-  
-  /** A (GetNumberOfScalarOutputs x GetNumberOfScalarOutputs) matrix,
-   * flattened so that we can use a gsl_matrix_view to look at it
-   *
-   * If empty, ammume zero matrix. */
-  std::vector< double > m_ConstantCovariance;
 
 }; // end Model
 

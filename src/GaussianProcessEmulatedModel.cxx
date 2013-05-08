@@ -70,7 +70,7 @@ GaussianProcessEmulatedModel
   m_StateFlag = READY;
   m_Parameters = m_GPME.m_Parameters;
   m_ScalarOutputNames = m_GPME.m_OutputNames;
-  if ( !m_GPME.GetUncertaintyScalesAsCovariance( m_ConstantCovariance ) ) {
+  if ( !m_GPME.GetUncertaintyScalesAsCovariance( m_ModelAndObservedCovariance ) ) {
     std::cerr << "Error setting the covariance containing experimental and model"
               << " output data.\n";
     return Model::OTHER_ERROR;
@@ -148,6 +148,23 @@ GaussianProcessEmulatedModel
     return Model::OTHER_ERROR;
 
   return Model::NO_ERROR;
+}
+
+bool
+GaussianProcessEmulatedModel
+::GetConstantCovariance(std::vector< double > & x)  const
+{
+  x.clear();
+  unsigned int t = m_ScalarOutputNames.size();
+  if ( m_ModelAndObservedCovariance.size() != (t*t) ) {
+    std::cerr << "Constant covariance matrix has invalid size "
+              << m_ModelAndObservedCovariance.size() << "\n";
+    return false;
+  }
+  
+  x.resize(t*t);
+  x = m_ModelAndObservedCovariance;
+  return true;
 }
 
 } // namespace madai
