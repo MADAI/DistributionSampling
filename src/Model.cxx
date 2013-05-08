@@ -419,21 +419,21 @@ Model
   }
 
   if ((scalarCovariance.size() == 0) &&
-      (this->m_ObservedScalarCovariance.size() == 0)) {
+      (this->m_ConstantCovariance.size() == 0)) {
     // Infinite precision makes no sense, so assume variance of 1.0
     // for each variable.
     logLikelihood = ((-0.5) * distSq) + logPriorLikelihood;
     return NO_ERROR;
   } else if (scalarCovariance.size() == 0) {
     assert(this->m_ObservedScalarCovariance.size() == (t*t));
-    covariance = this->m_ObservedScalarCovariance;
-  } else if (this->m_ObservedScalarCovariance.size() == 0) {
+    covariance = this->m_ConstantCovariance;
+  } else if (this->m_ConstantCovariance.size() == 0) {
     assert(scalarCovariance.size() == (t*t));
     covariance = scalarCovariance;
   } else {
     for (size_t i = 0; i < (t*t); ++i)
       covariance[i]
-        = scalarCovariance[i] + this->m_ObservedScalarCovariance[i];
+        = scalarCovariance[i] + this->m_ConstantCovariance[i];
   }
 
   Eigen::Map< Eigen::VectorXd > diff(&(scalarDifferences[0]),t);
