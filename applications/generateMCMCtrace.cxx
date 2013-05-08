@@ -110,9 +110,6 @@ int main(int argc, char ** argv) {
     stepSize = atof( settings.GetOption( "MCMC_STEP_SIZE" ).c_str() );
   }
 
-  std::string observationsFile = experimentalResultsDirectory +
-    madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
-
   madai::GaussianProcessEmulatedModel gpem;
   if ( gpem.LoadConfiguration(
            statisticsDirectory,
