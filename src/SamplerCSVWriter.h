@@ -20,9 +20,13 @@
 #define madai_SamplerCSVWriter_h_included
 
 #include <iostream>
+#include <string>
+#include <vector>
 
 namespace madai {
 
+class Parameter;
+class Sample;
 class Sampler;
 class Model;
 
@@ -38,13 +42,19 @@ public:
      If progress is not NULL, will print out a progrss bar.
    */
   static int GenerateSamplesAndSaveToFile(
-    Sampler * sampler,
-    Model * model,
+    Sampler & sampler,
+    Model & model,
     std::ostream & outFile,
     int NumberOfSamples,
     int NumberOfBurnInSamples=0,
     bool UseEmulatorCovariance=true,
     std::ostream * progress=NULL);
+
+  static void WriteHeader( std::ostream & o,
+                           const std::vector< Parameter > & params,
+                           const std::vector< std::string > & outputs);
+
+  static void WriteSample( std::ostream & out, const Sample & sample );
 
 }; // end SamplerCSVWriter
 
