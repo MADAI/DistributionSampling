@@ -514,9 +514,9 @@ bool checkOutputUncertaintyScales( const madai::GaussianProcessEmulator & gpe,
     double averagedOutputUncertainty = accumulatedUncertainties[i] /
       static_cast< double >( directories.size() );
 
-    double outputUncertaintyScale =
+    double outputUncertaintyScale = std::sqrt(
       std::pow( averagedOutputUncertainty, 2 ) +
-      std::pow( experimentalUncertainties[i], 2 );
+      std::pow( experimentalUncertainties[i], 2 ) );
 
     // Add averaged model uncertainty to observed uncertainty
     if ( outputUncertaintyScale != uncertaintyScales[i] ) {
