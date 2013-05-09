@@ -327,12 +327,12 @@ bool parsePCADecomposition(
     if (! input.good()) return false;
     input >> word;
     if (word == "OUTPUT_MEANS") {
-      if (! ReadVector(gpme.m_OutputMeans, input)) {
+      if (! ReadVector(gpme.m_TrainingOutputMeans, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
     } else if (word == "OUTPUT_UNCERTAINTY_SCALES") {
-      if (! ReadVector(gpme.m_OutputUncertaintyScales, input)) {
+      if (! ReadVector(gpme.m_UncertaintyScales, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
@@ -390,27 +390,27 @@ bool parseGaussianProcessEmulator(
         return false;
       }
     } else if (word == "PARAMETER_VALUES") {
-      if (! ReadMatrix(gpme.m_ParameterValues, input)) {
+      if (! ReadMatrix(gpme.m_TrainingParameterValues, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
     } else if (word == "OUTPUT_VALUES") {
-      if (! ReadMatrix(gpme.m_OutputValues, input)) {
+      if (! ReadMatrix(gpme.m_TrainingOutputValues, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
     } else if (word == "OUTPUT_MEANS") {
-      if (! ReadVector(gpme.m_OutputMeans, input)) {
+      if (! ReadVector(gpme.m_TrainingOutputMeans, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
     } else if (word == "OUTPUT_UNCERTAINTY_SCALES") {
-      if (! ReadVector(gpme.m_OutputUncertaintyScales, input)) {
+      if (! ReadVector(gpme.m_UncertaintyScales, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }
     } else if (word == "OUTPUT_OBSERVED_VALUES") {
-      if (! ReadVector(gpme.m_ObservedOutputValues, input)) {
+      if (! ReadVector(gpme.m_ObservedValues, input)) {
         std::cerr << "parse error\n"; // \todo error message
         return false;
       }

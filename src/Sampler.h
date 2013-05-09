@@ -55,6 +55,11 @@ public:
 
   /** Set the current Model
    *
+   * \warning The observed values and covariances must be set prior to
+   * calling this method. Use Model::SetObservedScalarValues() and
+   * Model::SetObservedScalarCovariance() or call
+   * Model::LoadObservations() to set these values.
+   *
    * \param model The Model on which the Sampler will operate. */
   void SetModel( const Model * model );
 

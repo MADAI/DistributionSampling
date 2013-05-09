@@ -111,9 +111,6 @@ int main(int argc, char ** argv) {
     stepSize = atof( settings.GetOption( "MCMC_STEP_SIZE" ).c_str() );
   }
 
-  std::string observationsFile = experimentalResultsDirectory +
-    madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
-
   madai::GaussianProcessEmulatedModel gpem;
   if ( gpem.LoadConfiguration(
            statisticsDirectory,
@@ -125,13 +122,6 @@ int main(int argc, char ** argv) {
 
   madai::MetropolisHastingsSampler mcmc;
   mcmc.SetStepSize( stepSize );
-
-  std::ifstream observations( observationsFile.c_str() );
-  if ( madai::Model::NO_ERROR != gpem.LoadObservations( observations ) ) {
-    std::cerr << "Error loading observations.\n";
-    return EXIT_FAILURE;
-  }
-  observations.close();
 
   std::string traceDirectory =
     statisticsDirectory + madai::Paths::TRACE_DIRECTORY;

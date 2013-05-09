@@ -26,7 +26,9 @@
 #include "GaussianProcessEmulatedModel.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
+#include "GaussianProcessEmulatorDirectoryReader.h"
 #include "Trace.h"
+#include "Paths.h"
 
 inline double LogisticFunction(double x) {
   return 1.0 / (1.0 + std::exp(-x));
@@ -48,9 +50,6 @@ void model(const std::vector< double > & params, std::vector< double > & out) {
  * madai::MetropolisHastingsSampler classes.
  */
 int main( int, char *[] ) {
-
-  const char TRAINING_FILE[] = "/tmp/GaussianProcessEmulatorTestTraining.dat";
-  const char MODEL_FILE[] = "/tmp/GaussianProcessEmulatorTestModel.dat";
   static const int N = 100;
 
   madai::Parameter param0( "param_0", -1, 1 );
@@ -62,14 +61,24 @@ int main( int, char *[] ) {
   GaussianProcessEmulatorTestGenerator generator( &model,2,2,N,
                                                   generatorParameters);
 
-  std::ofstream out(TRAINING_FILE);
-  generator.WriteTrainingFile(dynamic_cast<std::ostream &>(out));
-  out.close();
+  std::string TempDirectory = "/tmp/";
+  if ( !generator.WriteDirectoryStructure(TempDirectory) ) {
+    std::cerr << "Error writing directory structure\n";
+    return EXIT_FAILURE;
+  }
 
+  std::string MOD = TempDirectory + madai::Paths::SEPARATOR +
+                    madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+  std::string ERD = TempDirectory + madai::Paths::SEPARATOR +
+                    madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
+                    
   madai::GaussianProcessEmulator gpe;
-  std::ifstream ifs(TRAINING_FILE);
-  madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
-  singleFileReader.LoadTrainingData(&gpe,ifs);
+  madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  if ( !directoryReader.LoadTrainingData( &gpe, MOD, TempDirectory, ERD ) ) {
+    std::cerr << "error loading from created directory structure\n";
+    return EXIT_FAILURE;
+  }
+  
   double fractionResolvingPower = 0.999;
   madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction
     = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
@@ -82,6 +91,18 @@ int main( int, char *[] ) {
     std::cerr << "Error in GaussianProcessEmulator::PrincipalComponentDecompose\n";
     return EXIT_FAILURE;
   }
+  
+  std::string PCAFileName = TempDirectory + madai::Paths::SEPARATOR
+      + madai::Paths::PCA_DECOMPOSITION_FILE;
+  std::ofstream PCAFile( PCAFileName.c_str() );
+  if ( !PCAFile ) {
+    std::cerr << "Could not open file '" << PCAFileName << "'\n";
+    return EXIT_FAILURE;
+  }
+  
+  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
+  singleFileWriter.WritePCA( &gpe, PCAFile );
+  PCAFile.close();
 
   if ( !gpe.RetainPrincipalComponents( fractionResolvingPower ) ) {
     std::cerr << "Error in GaussianProcessEmulator::RetainPrincipalComponents\n";
@@ -97,10 +118,17 @@ int main( int, char *[] ) {
     std::cerr << "Error in GaussianProcessEmulator::BasicTraining";
     return EXIT_FAILURE;
   }
-  out.open(MODEL_FILE);
-  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
-  singleFileWriter.Write(&gpe,out);
-  out.close();
+  
+  std::string EmulatorStateFileName = TempDirectory + madai::Paths::SEPARATOR
+      + madai::Paths::EMULATOR_STATE_FILE;
+  std::ofstream EmulatorStateFile( EmulatorStateFileName.c_str() );
+  if ( !EmulatorStateFile ) {
+    std::cerr << "Could not open file '" << EmulatorStateFileName << "'\n";
+    return EXIT_FAILURE;
+  }
+  
+  singleFileWriter.Write( &gpe, EmulatorStateFile );
+  EmulatorStateFile.close();
 
   if (! gpe.MakeCache()) {
     std::cerr << "Error in GaussianProcessEmulator::MakeCache().\n";
@@ -147,7 +175,6 @@ int main( int, char *[] ) {
   trace.WriteCSVOutput( std::cout,
                    gpem.GetParameters(),
                    gpem.GetScalarOutputNames() );
-  //trace.WriteData( std::cout );
 
   return EXIT_SUCCESS;
 }

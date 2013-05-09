@@ -39,50 +39,6 @@ GaussianProcessEmulatedModel
   // nothing to do.
 }
 
-/**
- * Loads a configuration from a file.  The format of the file is
- * defined by this function.  We'll lock it down later.
- */
-Model::ErrorType
-GaussianProcessEmulatedModel
-::LoadConfigurationFile( const std::string fileName )
-{
-  std::ifstream input(fileName.c_str());
-  if (! input.good())
-    return Model::FILE_NOT_FOUND_ERROR;
-  GaussianProcessEmulatorSingleFileReader singleFileReader;
-  if (! singleFileReader.Load(&m_GPME, input))
-    return Model::OTHER_ERROR;
-  if (m_GPME.m_Status != GaussianProcessEmulator::READY)
-    return Model::OTHER_ERROR;
-  m_StateFlag = READY;
-  // std::vector<T>::operator=(const std::vector<T>&)
-  m_Parameters = m_GPME.m_Parameters;
-  m_ScalarOutputNames = m_GPME.m_OutputNames;
-
-  int t = m_GPME.m_NumberOutputs;
-  std::vector< double > observedScalarValues(t, 0.0);
-  std::vector< double > observedUncertaintyScales(t, 0.0);
-  m_GPME.GetOutputObservedValues(observedScalarValues);
-  m_GPME.GetOutputUncertaintyScales(observedUncertaintyScales);
-  std::vector< double > observedScalarCovariance(t * t, 0.0);
-  for (int i = 0; i < t; ++i) {
-    observedScalarCovariance[i * (1 + t)]
-      = std::pow(observedUncertaintyScales[i],2);
-  }
-  Model::ErrorType error;
-  error = this->SetObservedScalarValues(observedScalarValues);
-  if (error != Model::NO_ERROR) {
-    std::cerr << "Error in Model::SetObservedScalarValues()";
-    return error;
-  }
-  error = this->SetObservedScalarCovariance(observedScalarCovariance);
-  if (error != Model::NO_ERROR) {
-    std::cerr << "Error in Model::SetObservedScalarCovariance()";
-    return error;
-  }
-  return Model::NO_ERROR;
-}
 
 /**
  * Loads a configuration from a directory structure. The format of the file
@@ -94,30 +50,31 @@ GaussianProcessEmulatedModel
                      const std::string ModelOutputDirectory,
                      const std::string ExperimentalResultsDirectory )
 {
-  if ( StatisticsDirectory == "-" ) {
-    GaussianProcessEmulatorSingleFileReader singleFileReader;
-    singleFileReader.Load(&m_GPME, std::cin);
-  } else {
-    GaussianProcessEmulatorDirectoryReader directoryReader;
-    if ( !directoryReader.LoadTrainingData( &m_GPME, ModelOutputDirectory,
-                                           StatisticsDirectory, ExperimentalResultsDirectory ) ) {
-      std::cerr << "Error loading from the directory structure.\n";
-      return Model::OTHER_ERROR;
-    }
-    if ( !directoryReader.LoadPCA( &m_GPME, StatisticsDirectory ) ) {
-      std::cerr << "Error loading the PCA decomposition data.\n";
-      return Model::OTHER_ERROR;
-    }
-    if ( !directoryReader.LoadEmulator( &m_GPME, StatisticsDirectory ) ) {
-      std::cerr << "Error loading Emulator data.\n";
-      return Model::OTHER_ERROR;
-    }
+  GaussianProcessEmulatorDirectoryReader directoryReader;
+  if ( !directoryReader.LoadTrainingData( &m_GPME, ModelOutputDirectory,
+                                          StatisticsDirectory, ExperimentalResultsDirectory ) ) {
+    std::cerr << "Error loading from the directory structure.\n";
+    return Model::OTHER_ERROR;
   }
+  if ( !directoryReader.LoadPCA( &m_GPME, StatisticsDirectory ) ) {
+    std::cerr << "Error loading the PCA decomposition data.\n";
+    return Model::OTHER_ERROR;
+  }
+  if ( !directoryReader.LoadEmulator( &m_GPME, StatisticsDirectory ) ) {
+    std::cerr << "Error loading Emulator data.\n";
+    return Model::OTHER_ERROR;
+  }
+
   if ( m_GPME.m_Status != GaussianProcessEmulator::READY )
     return Model::OTHER_ERROR;
   m_StateFlag = READY;
   m_Parameters = m_GPME.m_Parameters;
   m_ScalarOutputNames = m_GPME.m_OutputNames;
+  if ( !m_GPME.GetUncertaintyScalesAsCovariance( m_TrainingAndObservedCovariance ) ) {
+    std::cerr << "Error setting the covariance containing experimental and model"
+              << " output data.\n";
+    return Model::OTHER_ERROR;
+  }
   return Model::NO_ERROR;
 }
 
@@ -135,6 +92,11 @@ GaussianProcessEmulatedModel
   m_StateFlag = READY;
   m_Parameters = m_GPME.m_Parameters;
   m_ScalarOutputNames = m_GPME.m_OutputNames;
+  if ( !m_GPME.GetUncertaintyScalesAsCovariance( m_TrainingAndObservedCovariance ) ) {
+    std::cerr << "Error setting the covariance containing experimental and model"
+              << " output data.\n";
+    return Model::OTHER_ERROR;
+  }
   return Model::NO_ERROR;
 }
 
@@ -191,6 +153,23 @@ GaussianProcessEmulatedModel
     return Model::OTHER_ERROR;
 
   return Model::NO_ERROR;
+}
+
+bool
+GaussianProcessEmulatedModel
+::GetConstantCovariance(std::vector< double > & x)  const
+{
+  x.clear();
+  unsigned int t = m_ScalarOutputNames.size();
+  if ( m_TrainingAndObservedCovariance.size() != (t*t) ) {
+    std::cerr << "Constant covariance matrix has invalid size "
+              << m_TrainingAndObservedCovariance.size() << "\n";
+    return false;
+  }
+  
+  x.resize(t*t);
+  x = m_TrainingAndObservedCovariance;
+  return true;
 }
 
 } // namespace madai

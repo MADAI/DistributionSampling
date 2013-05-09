@@ -115,19 +115,29 @@ public:
     std::vector< double > & ycov) const;
 
   /**
+     Check status; make sure that the emulator is in a good state. */
+  StatusType CheckStatus();
+
+  /**
      \returns m_Status */
   StatusType GetStatus() const;
+
+  /**
+     \returns Status as string */
+  std::string GetStatusAsString() const;
 
   //@{
   /**
      \todo document */
-  void GetOutputUncertaintyScales(std::vector< double > & x);
-  void GetOutputObservedValues(std::vector< double > & x);
+  bool GetUncertaintyScales(std::vector< double > & x) const;
+  bool GetObservedValues(std::vector< double > & x);
+  bool GetUncertaintyScalesAsCovariance(std::vector< double > & x) const;
   //@}
 
   /**
-   Use m_OutputUncertaintyScales, m_OutputValues, m_OutputMeans, and
-   m_PCAEigenvectors to determine m_PCADecomposedModels[i].m_ZValues; */
+   Use m_UncertaintyScales, m_TrainingOutputValues,
+   m_TrainingOutputMeans, and m_PCAEigenvectors to determine
+   m_PCADecomposedModels[i].m_ZValues; */
   bool BuildZVectors();
 
   /**
@@ -135,10 +145,6 @@ public:
      cache some data to make calling GetEmulatorOutputsAndCovariance()
      faster. */
   bool MakeCache();
-
-  /**
-     Check status; make sure that the emulator is in a good state. */
-  StatusType CheckStatus();
 
   // FIELDS
   /**
@@ -170,25 +176,32 @@ public:
   /**
      Original training parameter values: the "design"
      (rows:numberTrainingPoints by cols:numberParameters) */
-  Eigen::MatrixXd m_ParameterValues;
+  Eigen::MatrixXd m_TrainingParameterValues;
   /**
      Original training output values.
      (rows:numberTrainingPoints by cols:numberOutputs) */
-  Eigen::MatrixXd m_OutputValues;
+  Eigen::MatrixXd m_TrainingOutputValues;
 
-  //@{
   /**
-     The mean values and uncertainty of the columns of
-     outputValues (size:numberOutputs) */
-  Eigen::VectorXd m_OutputMeans;
-  Eigen::VectorXd m_OutputUncertaintyScales;
-  //@}
+     The mean values of the columns of outputValues (size:numberOutputs) */
+  Eigen::VectorXd m_TrainingOutputMeans;
+
+  /**
+     The mean variance of the model outputs. */
+  Eigen::VectorXd m_TrainingOutputVarianceMeans;
 
   /**
      These values are not used by the emulator, but represent the
      experimentally observed mean values of the output variables.
    */
-  Eigen::VectorXd m_ObservedOutputValues;
+  Eigen::VectorXd m_ObservedValues;
+  Eigen::VectorXd m_ObservedVariances;
+
+  /**
+     These values are used for scaling the model output prior to PCA.
+     They are the sum of the training output variances squared and
+     the observed variances squared. */
+  Eigen::VectorXd m_UncertaintyScales;
 
   //@{
   /**
@@ -203,6 +216,13 @@ public:
   Eigen::VectorXd m_PCAEigenvalues;
   Eigen::MatrixXd m_PCAEigenvectors;
   //@}
+
+protected:
+  /** Use m_TrainingOutputVarianceMeans and m_ObservedUncertainty to
+      compute the output uncertainty scales. */
+  bool BuildUncertaintyScales();
+
+public:
 
   /**
      This represents one PCA-decomposed model */
@@ -302,6 +322,7 @@ public:
     An array of length numberPCAOutputs/ */
   std::vector< SingleModel > m_PCADecomposedModels;
 };
+
 } // end namespace madai
 
 

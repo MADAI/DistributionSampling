@@ -44,11 +44,6 @@ class GaussianProcessEmulatedModel : public Model {
   virtual ~GaussianProcessEmulatedModel();
 
   /**
-   * Loads a model emulator from a file.
-   */
-  virtual ErrorType LoadConfigurationFile( const std::string fileName);
-
-  /**
    * Loads a model emulator from a directory structure
    */
   virtual ErrorType LoadConfiguration( const std::string StatisticsDirectory,
@@ -87,6 +82,12 @@ class GaussianProcessEmulatedModel : public Model {
     const std::vector<double>&, double&, double&) const {
     return METHOD_NOT_IMPLEMENTED;
   }
+  
+  virtual bool GetConstantCovariance(std::vector< double > & x) const;
+  
+protected:
+  
+  std::vector< double > m_TrainingAndObservedCovariance;
 
 private:
   GaussianProcessEmulator m_GPME;

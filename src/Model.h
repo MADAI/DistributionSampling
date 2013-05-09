@@ -217,6 +217,8 @@ public:
      this->SetObservedScalarValues() and
      this->SetObservedScalarCovariance(). */
   virtual ErrorType LoadObservations(std::istream & i);
+  
+  virtual bool GetConstantCovariance(std::vector< double > & x) const;
 
 protected:
   /** Enumeration of internal state. */

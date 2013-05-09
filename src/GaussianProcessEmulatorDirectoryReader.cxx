@@ -27,9 +27,12 @@
 #include <madaisys/Directory.hxx>
 #include <madaisys/SystemTools.hxx>
 
+#include <algorithm>  // std::find
 #include <fstream>
 #include <iostream> // std::cerr
-#include <algorithm>  // std::find
+#include <set>
+
+#include <boost/algorithm/string.hpp>
 
 
 namespace madai {
@@ -38,14 +41,12 @@ GaussianProcessEmulatorDirectoryReader
 ::GaussianProcessEmulatorDirectoryReader() :
   m_Verbose( false )
 {
-
 }
 
 
 GaussianProcessEmulatorDirectoryReader
 ::~GaussianProcessEmulatorDirectoryReader()
 {
-
 }
 
 
@@ -67,7 +68,40 @@ GaussianProcessEmulatorDirectoryReader
 
 namespace {
 
-inline void discardWhitespace(std::istream & input) {
+
+std::vector< std::string > getLineAsTokens( std::ifstream & is,
+                                            std::string & line )
+{
+  std::vector< std::string > tokens;
+
+  std::getline( is, line );
+
+  // First, split on comment character
+  std::vector< std::string > contentAndComments;
+  boost::split( contentAndComments, line, boost::is_any_of("#") );
+
+  if ( contentAndComments.size() == 0 ) {
+    return tokens;
+  }
+
+  // Trim any leading or trailing spaces in the content
+  boost::trim( contentAndComments[0] );
+
+  // Next, split only the non-comment content
+  boost::split( tokens, contentAndComments[0], boost::is_any_of("\t "),
+                boost::token_compress_on );
+
+  // If first token is empty string, remove it and return
+  if ( tokens[0] == "" ) {
+    tokens.erase( tokens.begin() );
+    return tokens;
+  }
+
+  return tokens;
+}
+
+inline void discardWhitespace(std::istream & input)
+{
   while (std::isspace(input.peek())) {
     input.get();
   }
@@ -76,7 +110,8 @@ inline void discardWhitespace(std::istream & input) {
 /**
    Read a word from input.  If it equals the expected value, return
    true.  Else print error message to std::cerr and return false*/
-inline bool CheckWord(std::istream & input, const std::string & expected) {
+inline bool CheckWord(std::istream & input, const std::string & expected)
+{
   std::string s;
   if (! input.good()) {
     std::cerr << "premature end of input.  (" << expected << ")\n";
@@ -87,7 +122,7 @@ inline bool CheckWord(std::istream & input, const std::string & expected) {
     return true;
   std::cerr
     << "format error.  Expected \"" << expected
-    << "\", but got \"" << s << "\".\n";
+    << "', but got '" << s << "'.\n";
   return false;
 }
 
@@ -95,7 +130,8 @@ inline bool CheckWord(std::istream & input, const std::string & expected) {
    Read an integer from input.  If it equals the expected value, return
    true.  Else print error message to std::cerr and return false*/
 inline bool CheckInteger(std::istream & input, int i,
-    const std::string & errorMessage) {
+    const std::string & errorMessage)
+{
   if (! input.good()) {
     std::cerr << "premature end of input.  ("
       << errorMessage << ")\n";
@@ -106,14 +142,15 @@ inline bool CheckInteger(std::istream & input, int i,
   if (i == j)
     return true;
   std::cerr
-    << "format error.  Expected \"" << i
-    << "\", but got \"" << j << "\".  ("
+    << "format error.  Expected '" << i
+    << "', but got '" << j << "'.  ("
     << errorMessage << ")\n";
   return false;
 }
 
 
-bool parseInteger( int & x, std::istream & input ) {
+bool parseInteger( int & x, std::istream & input )
+{
   if (! input.good()) return false;
   input >> x;
   return true;
@@ -139,37 +176,73 @@ inline bool getIndex(
    Read the parameter_priors.dat file in statistical_analysis. */
 bool parseExperimentalResults(
     GaussianProcessEmulator & gpe,
-    std::string ExperimentalResultsDirectory ) {
+    const std::string & experimentalResultsDirectory,
+    bool verbose )
+{
   const std::vector< std::string > & outputNames = gpe.m_OutputNames;
   int numberOutputs = gpe.m_NumberOutputs;
   if ( static_cast< size_t >( numberOutputs ) != outputNames.size()) {
     std::cerr << "numberOutputs != outputNames.size()";
     return false;
   }
-  std::string ExperimentalResultsFileName
-    = ExperimentalResultsDirectory + Paths::SEPARATOR + Paths::RESULTS_FILE;
-  std::ifstream results_file( ExperimentalResultsFileName.c_str() );
-  if ( !results_file.good() ) {
-    std::cerr << "Error opening " << ExperimentalResultsFileName << '\n';
+  std::string experimentalResultsFileName
+    = experimentalResultsDirectory + Paths::SEPARATOR + Paths::RESULTS_FILE;
+
+  if ( verbose ) {
+    std::cout << "Opening experimental results file '"
+              << experimentalResultsFileName << "'\n";
+  }
+
+  std::ifstream resultsFile( experimentalResultsFileName.c_str() );
+  if ( !resultsFile.good() ) {
+    std::cerr << "Error opening " << experimentalResultsFileName << '\n';
     return false;
   }
+
   // default values.
-  gpe.m_OutputUncertaintyScales = Eigen::VectorXd::Constant(numberOutputs, 1.0);
-  gpe.m_ObservedOutputValues = Eigen::VectorXd::Zero(numberOutputs);
-  while ( !results_file.eof() ) {
-    discardWhitespace(results_file); // whitespace at beginning of line,
-    while ( results_file.peek() == '#' ) {// Disregard comments, go to next output
-      std::string temp;
-      std::getline( results_file, temp );
-      discardWhitespace(results_file); // whitespace at beginning of line,
+  gpe.m_ObservedValues = Eigen::VectorXd::Zero(numberOutputs);
+  gpe.m_ObservedVariances = Eigen::VectorXd::Zero(numberOutputs);
+
+  while ( resultsFile.good() ) {
+    std::string line;
+    std::vector< std::string > tokens = getLineAsTokens( resultsFile, line );
+
+    // Skip empty lines
+    if ( tokens.size() == 0 ) {
+      continue;
     }
-    std::string name;
-    double value, error;
-    results_file >> name >> value >> error;
-    int index;
-    if (getIndex(outputNames, name, index)) {
-      gpe.m_ObservedOutputValues(index) = value;
-      gpe.m_OutputUncertaintyScales(index) = error;
+
+    std::string formatMessage( "Format should be <name> <value> <uncertainty>" );
+    if ( tokens.size() < 3 ) {
+      std::cerr << "Too few tokens in line '" << line << "' in file '"
+                << experimentalResultsFileName << "'\n";
+      std::cerr << formatMessage << "\n";
+      return false;
+    }
+
+    if ( tokens.size() > 3 ) {
+      std::cerr << "Extra tokens in line '" << line << "' in file '"
+                << experimentalResultsFileName << "'\n";
+      std::cerr << formatMessage << "\n";
+    }
+
+    std::string name( tokens[0] );
+    double value = atof( tokens[1].c_str() );
+    double uncertainty = atof( tokens[2].c_str() );
+
+    int index = -1;
+    bool success = getIndex( outputNames, name, index );
+    if ( success ) {
+      if ( verbose ) {
+        std::cout << "Parsed output '" << name << "' with value " << value
+                  << "\n";
+      }
+
+      gpe.m_ObservedValues(index) = value;
+      gpe.m_ObservedVariances(index) = uncertainty;
+    } else {
+      std::cerr << "Could not find output name '" << name << "'\n";
+      return false;
     }
   }
 
@@ -182,63 +255,100 @@ bool parseExperimentalResults(
 bool parseParameters(
     std::vector< madai::Parameter > & parameters,
     int & numberParameters,
-    std::string AnalysisDir ) {
+    const std::string & statisticalAnalysisDirectory )
+{
   // First check to see if file exists
-  std::string PriorFileName = AnalysisDir + Paths::SEPARATOR +
+  std::string priorFileName = statisticalAnalysisDirectory + Paths::SEPARATOR +
     Paths::PARAMETER_PRIORS_FILE;
-  std::ifstream input( PriorFileName.c_str() );
-  if ( !input.good() ) return false;
+  std::ifstream input( priorFileName.c_str() );
+  if ( !input.good() ) {
+    std::cerr << "Could not read parameter prior file '" <<
+      priorFileName << "\n";
+    return false;
+  }
+
   parameters.clear(); // Empty the output vector
+
   while ( input.good() ) {
-    discardWhitespace(input); // whitespace at beginning of line,
-    while ( input.peek() == '#' ) { // Disregard commented lines
-      std::string s;
-      std::getline( input, s );
-      discardWhitespace(input); // whitespace at beginning of line,
+    std::string line;
+    std::vector< std::string > tokens = getLineAsTokens( input, line );
+
+    // Skip empty or comment lines
+    if ( tokens.size() == 0 ) continue;
+
+    // Check that we have four tokens (distribution type, name,
+    // distribution parameters)
+    std::string formatMessage
+      ( "Format should be <distribution type> <name> "
+        "<distribution parameter 1> <distribution parameter 2>" );
+    if ( tokens.size() < 4 ) {
+      std::cerr << "Too few tokens in line '" << line << "' in file '"
+                << priorFileName << "'\n";
+      std::cerr << formatMessage << "\n";
+      return false;
     }
-    std::string name;
-    std::string type;
-    double dist_vals[2];
-    if ( !(input >> type >> name >> dist_vals[0] >> dist_vals[1]) )
-      break;
-    std::transform( type.begin(), type.end(), type.begin(), ::tolower );
+
+    if ( tokens.size() > 4 ) {
+      std::cerr << "Extra tokens in line '" << line << "' in file '"
+                << priorFileName << "'\n";
+      std::cerr << formatMessage << "\n";
+    }
+
+    std::string type( tokens[0] );
+    std::string name( tokens[1] );
+    boost::algorithm::to_lower( name );
+    
+    // All supported distributions have two double parameters
+    double distributionValues[2];
+    distributionValues[0] = atof( tokens[2].c_str() );
+    distributionValues[1] = atof( tokens[3].c_str() );
+
     if ( type == "uniform" ) {
+
       madai::UniformDistribution priorDist;
-      priorDist.SetMinimum(dist_vals[0]);
-      priorDist.SetMaximum(dist_vals[1]);
-      parameters.push_back(madai::Parameter( name, priorDist ) );
+      priorDist.SetMinimum( distributionValues[0] );
+      priorDist.SetMaximum( distributionValues[1] );
+      parameters.push_back( madai::Parameter( name, priorDist ) );
+
     } else if ( type == "gaussian" ) {
+
       madai::GaussianDistribution priorDist;
-      priorDist.SetMean(dist_vals[0]);
-      priorDist.SetStandardDeviation(dist_vals[1]);
-      parameters.push_back(madai::Parameter( name, priorDist ) );
+      priorDist.SetMean( distributionValues[0] );
+      priorDist.SetStandardDeviation( distributionValues[1] );
+      parameters.push_back( madai::Parameter( name, priorDist ) );
+
     } else {
+
       std::cerr << "Expected uniform or gaussian, but got " <<
         type << "\n";
       return false;
+
     }
   }
+
   numberParameters = parameters.size();
-  return (numberParameters > 0 );
+
+  return ( numberParameters > 0 );
 }
 
 
 /**
    Read the CovarianceFunctionType from the command line. */
 bool parseCovarianceFunction(
-    GaussianProcessEmulator::CovarianceFunctionType & cov,
-    std::istream & input) {
+    GaussianProcessEmulator::CovarianceFunctionType & covarianceType,
+    std::istream & input)
+{
   if (! input.good()) return false;
   std::string s;
   input >> s;
   if (s == "POWER_EXPONENTIAL_FUNCTION")
-    cov = GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
+    covarianceType = GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
   else if (s == "SQUARE_EXPONENTIAL_FUNCTION")
-    cov = GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
+    covarianceType = GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
   else if (s == "MATERN_32_FUNCTION")
-    cov = GaussianProcessEmulator::MATERN_32_FUNCTION;
+    covarianceType = GaussianProcessEmulator::MATERN_32_FUNCTION;
   else if (s == "MATERN_52_FUNCTION")
-    cov = GaussianProcessEmulator::MATERN_52_FUNCTION;
+    covarianceType = GaussianProcessEmulator::MATERN_52_FUNCTION;
   else {
     return false;
   }
@@ -249,49 +359,61 @@ bool parseCovarianceFunction(
 bool parseOutputs(
     std::vector< std::string > & outputNames,
     int & numberOutputs,
-    std::string AnalysisDir ) {
-  // First cehck to see if file exists
-  std::string ObservablesFileName = AnalysisDir + Paths::SEPARATOR +
-    Paths::OBSERVABLE_NAMES_FILE;
-  std::ifstream input ( ObservablesFileName.c_str() );
-  if ( !input.good() ) return false;
-  outputNames.clear(); // Empty the output vector
-  while ( !input.eof() ) {
-    discardWhitespace(input);
-    while ( input.peek() == '#' ) { // Disregard commented lines
-      std::string s;
-      std::getline( input, s );
-    }
-    discardWhitespace(input); // at beginning of line
-    if ( !input.eof() ) {
-      std::string name;
-      input >> name;
-      outputNames.push_back( name );
-    }
+    const std::string & statisticalAnalysisDirectory )
+{
+  // First check to see if file exists
+  std::string observablesFileName = statisticalAnalysisDirectory +
+    Paths::SEPARATOR + Paths::OBSERVABLE_NAMES_FILE;
+  std::ifstream input( observablesFileName.c_str() );
+  if ( !input.good() ) {
+    std::cerr << "Could not read observables file '"
+              << observablesFileName << "'\n";
+    return false;
   }
+
+  outputNames.clear(); // Empty the output vector  
+
+  while ( input.good() ) {
+    std::string line;
+    std::vector< std::string > tokens = getLineAsTokens( input, line );
+
+    // Skip lines with no tokens
+    if ( tokens.size() == 0 ) continue;
+
+    // Warn if there is more than one token on a line
+    if ( tokens.size() > 1 ) {
+      std::cerr << "Extra tokens in line '" << line << "' in file "
+                << observablesFileName << "'\n";
+      std::cerr << "Format should be <observable name>\n";
+    }
+
+    outputNames.push_back( tokens[0] );
+  }
+
   numberOutputs = outputNames.size();
   return (numberOutputs > 0);
 }
 
 
-bool parseNumberOfModelRuns( int & x, std::string ModelOutDir ) {
-
+bool parseNumberOfModelRuns( int & x,
+                             const std::string & modelOutputDirectory )
+{
   madaisys::Directory directory;
-  if ( !directory.Load( ModelOutDir.c_str() ) ) {
-    std::cerr << "Couldn't read directory '" << ModelOutDir << "'\n";
+  if ( !directory.Load( modelOutputDirectory.c_str() ) ) {
+    std::cerr << "Couldn't read directory '" << modelOutputDirectory << "'\n";
     return false;
   }
 
-  unsigned int run_counter = 0;
+  unsigned int runCounter = 0;
 
   for ( unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i ) {
     int dummy;
     if ( sscanf( directory.GetFile( i ), "run%d", &dummy ) == 1 ) {
-      run_counter++;
+      runCounter++;
     }
   }
 
-  x = run_counter;
+  x = runCounter;
   assert ( x > 0 );
 
   return true;
@@ -300,178 +422,279 @@ bool parseNumberOfModelRuns( int & x, std::string ModelOutDir ) {
 
 template < typename TDerived >
 inline bool parseParameterAndOutputValues(
-    const Eigen::MatrixBase< TDerived > & m_,
-    const Eigen::MatrixBase< TDerived > & m2_,
-    const Eigen::MatrixBase< TDerived > & m3_,
-    std::string ModelOutDir,
+    Eigen::MatrixBase< TDerived > & parameterValues_,
+    Eigen::MatrixBase< TDerived > & outputValues_,
+    Eigen::MatrixBase< TDerived > & outputUncertainty_,
+    const std::string & modelOutputDirectory,
     unsigned int numberTrainingPoints,
     std::vector< madai::Parameter > parameters,
     std::vector< std::string > outputNames,
-    bool verbose ) {
+    bool verbose )
+{
   // Get the list of directories in model_outputs/
-
   madaisys::Directory directory;
-  if ( !directory.Load( ModelOutDir.c_str() ) ) {
+  if ( !directory.Load( modelOutputDirectory.c_str() ) ) {
     return false;
   }
 
   std::vector< std::string > runDirectories;
   for ( unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i ) {
     std::string fileName( directory.GetFile( i ) );
-    std::string filePath( ModelOutDir + fileName );
+    std::string filePath( modelOutputDirectory + fileName );
     if ( fileName.find_first_of( "run" ) == 0 ) {
       runDirectories.push_back( fileName );
     }
   }
   std::sort( runDirectories.begin(), runDirectories.end() );
 
-  size_t p = parameters.size();
-  size_t t = outputNames.size();
-  // Copy m_
-  Eigen::MatrixBase< TDerived > & m
-  = const_cast< Eigen::MatrixBase< TDerived > & >(m_);
-  // Copy m2_
-  Eigen::MatrixBase< TDerived > & m2
-  = const_cast< Eigen::MatrixBase< TDerived > & >(m2_);
-  // Copy m3_
-  Eigen::MatrixBase< TDerived > & m3
-  = const_cast< Eigen::MatrixBase< TDerived > & >(m3_);
-  m.derived().resize( numberTrainingPoints, p );
-  m2.derived().resize( numberTrainingPoints, t );
-  m3.derived().resize( t, 1 );
-  unsigned int run_counter = 0;
+  size_t numberParameters = parameters.size();
+  size_t numberOutputs = outputNames.size();
 
-  double* avgUnc = new double[t];
+  // Copy parameterValues_
+  Eigen::MatrixBase< TDerived > & parameterValues
+    = const_cast< Eigen::MatrixBase< TDerived > & >( parameterValues_ );
+  // Copy outputValues_
+  Eigen::MatrixBase< TDerived > & outputValues
+    = const_cast< Eigen::MatrixBase< TDerived > & >( outputValues_ );
+  // Copy outputUncertainty_
+  Eigen::MatrixBase< TDerived > & outputUncertainty
+    = const_cast< Eigen::MatrixBase< TDerived > & >( outputUncertainty_ );
+
+  parameterValues.derived().resize( numberTrainingPoints, numberParameters );
+  outputValues.derived().resize( numberTrainingPoints, numberOutputs );
+  outputUncertainty.derived().resize( numberOutputs, 1 );
+
+  unsigned int runCounter = 0;
+  std::vector< double > averageUncertainty( numberOutputs, 0.0 );
 
   for ( size_t i = 0; i < runDirectories.size(); ++i ) {
-    std::string dir_name( runDirectories[i] );
+    std::string directoryName( runDirectories[i] );
     if ( verbose )
       std::cout << "Run directory name: '" << dir_name << "'\n";
 
-    if ( dir_name.substr( 0, 3 ) == "run" ) {
-      // Open the parameters.dat file
-      std::string par_file_name = ModelOutDir + Paths::SEPARATOR + dir_name +
-        Paths::SEPARATOR + Paths::PARAMETERS_FILE;
-      std::ifstream parfile ( par_file_name.c_str() );
-      if ( !parfile.good() ) return false;
-      if ( verbose )
-        std::cout << "Opened file '" << par_file_name << "'\n";
-      while ( !parfile.eof() ) {
-        discardWhitespace(parfile); // whitespace at befinning of line
-        while ( parfile.peek() == '#' ) {
-          std::string tline;
-          std::getline( parfile, tline );
-          discardWhitespace(parfile); // whitespace at befinning of line
+    if ( directoryName.substr( 0, 3 ) == "run" ) {
+      std::cout << "Run directory name: '" << directoryName << "'\n";
+
+    if ( directoryName.find_first_of( "run" ) == 0 ) {
+      // Open the parameters file
+      std::string parametersFileName = modelOutputDirectory +
+        Paths::SEPARATOR + directoryName + Paths::SEPARATOR +
+        Paths::PARAMETERS_FILE;
+      std::ifstream parametersFile( parametersFileName.c_str() );
+      if ( !parametersFile.good() ) {
+        std::cerr << "Could not read parameter file '" << parametersFileName
+                  << "'\n";
+        return false;
+      }
+      if ( verbose ) {
+        std::cout << "Opened file '" << parametersFileName << "'\n";
+      }
+
+      // Keep track of which parameters were read
+      std::set< std::string > parametersRemaining;
+      for ( size_t p = 0; p < parameters.size(); ++p ) {
+        parametersRemaining.insert( parameters[p].m_Name );
+      }
+
+      while ( parametersFile.good() ) {
+        std::string line;
+        std::vector< std::string > tokens = getLineAsTokens( parametersFile,
+                                                             line );
+
+        // Skip lines with no tokens
+        if ( tokens.size() == 0 ) continue;
+
+        std::string formatString( "Format should be <parameter name> "
+                                  "<parameter value>" );
+        if ( tokens.size() < 2 ) {
+          std::cerr << "Too few tokens in line '" << line << "' in file '"
+                    << parametersFileName << "'\n";
+          std::cerr << formatString << "\n";
+          return false;
         }
-        std::string name;
-        parfile >> name;
-        for ( unsigned int i = 0; i < p; i++ ) {
+
+        if ( tokens.size() > 2 ) {
+          std::cerr << "Extra tokens in line '" << line << "' in file '"
+                    << parametersFileName << "' will be ignored.\n";
+          std::cerr << formatString << "\n";
+        }
+
+        std::string name( tokens[0] );
+        double value = atof( tokens[1].c_str() );
+
+        // Find the index of the parameter
+        bool foundParameter = false;
+        for ( unsigned int i = 0; i < parameters.size(); i++ ) {
           if ( name == parameters[i].m_Name ) {
-            parfile >> m( run_counter, i);
+            parameterValues( runCounter, i) = value;
+            foundParameter = true;
+            parametersRemaining.erase( name );
             if ( verbose )
               std::cout << "Parsed parameter '" << name << "' with value "
-                        << m( run_counter, i ) << std::endl;
+                        << parameterValues( runCounter, i ) << std::endl;
             break;
           }
         }
-      }
-      parfile.close();
-      // Open the results.dat file
-      std::string results_file_name = ModelOutDir + Paths::SEPARATOR +
-        dir_name + Paths::SEPARATOR + Paths::RESULTS_FILE;
-      std::ifstream results_file ( results_file_name.c_str() );
-      if ( !results_file.good() ) return false;
-      if ( verbose )
-        std::cout << "Opened file " << results_file_name << "'\n";
 
-      // Check the style of the outputs
-      discardWhitespace(results_file); // whitespace at befinning of line
-      std::string line;
-      while ( results_file.peek() == '#' ) { // Disregard comments go to first output
-        std::getline( results_file, line );
-        discardWhitespace(results_file); // whitespace at befinning of line
-      }
-      char* temp1 = new char[100]();
-      std::getline( results_file, line );
-      std::strncpy( temp1, line.c_str(), 100 );
-      char* token = strtok( temp1, " " );
-      int NVal = 0;
-      while ( true ) {
-        NVal++;
-        token = strtok( NULL, " " );
-        if ( token == NULL )
-          break;
-      }
-      results_file.seekg( 0, results_file.beg);
-      if ( !results_file.good() ) return false;
-      while ( !results_file.eof() ) {
-        discardWhitespace(results_file); // whitespace at befinning of line
-        while ( results_file.peek() == '#' ) { // Disregard comments, go to next output
-          std::getline( results_file, line );
-          discardWhitespace(results_file); // whitespace at befinning of line
+        if ( !foundParameter ) {
+          std::cerr << "Unknown parameter name '" << name << "' in line '"
+                    << line << "' in file '" << parametersFileName
+                    << "' will be ignored.\n";
         }
-        std::string name;
-        results_file >> name;
-        for ( unsigned int i = 0; i < t; i++ )
-          if ( name == outputNames[i] ) {
-            results_file >> m2( run_counter, i );
-            if ( verbose )
-              std::cout << "Parsed output '" << name << "' with value "
-                        << m2( run_counter, i ) << std::endl;
-            if ( NVal == 3 ) {
-              double ModelUnc;
-              results_file >> ModelUnc;
-              avgUnc[i] += ModelUnc;
-            } else if ( NVal == 2 ) {
-              avgUnc[i] += 1.0; // default model uncertainty is 1
-            } else if ( NVal != 2 ) {
-              std::cerr << "Unknown output format error.\n";
-              return false;
-            }
-          }
+        
       }
-      results_file.close();
-      run_counter++;
+      parametersFile.close();
+
+      // Check that we have read values for all parameters
+      if ( parametersRemaining.size() > 0 ) {
+        std::cerr << "Values were not read for all parameters in file '"
+                  << parametersFileName << "'\n";
+        std::cerr << "Missing values for:\n";
+        std::set< std::string >::iterator iter;
+        for ( iter = parametersRemaining.begin();
+              iter != parametersRemaining.end();
+              ++iter ) {
+          std::cerr << "  " << *iter << "\n";
+        }
+        return false;
+      }
+
+      // Open the results file
+      std::string resultsFileName = modelOutputDirectory +
+        Paths::SEPARATOR + directoryName + Paths::SEPARATOR +
+        Paths::RESULTS_FILE;
+      std::ifstream resultsFile ( resultsFileName.c_str() );
+      if ( !resultsFile.good() ) {
+        std::cerr << "Could not read results file '" << resultsFileName
+                  << "'\n";
+        return false;
+      }
+      if ( verbose )
+        std::cout << "Opened file " << resultsFileName << "'\n";
+
+      // Keep track of which parameters were read
+      std::set< std::string > outputsRemaining;
+      for ( size_t p = 0; p < outputNames.size(); ++p ) {
+        outputsRemaining.insert( outputNames[p] );
+      }
+
+      while ( resultsFile.good() ) {
+        std::string line;
+        std::vector< std::string > tokens = getLineAsTokens( resultsFile,
+                                                             line );
+
+        // Skip lines with no tokens
+        if ( tokens.size() == 0 ) continue;
+
+        std::string formatString( "Format should be <output name> "
+                                  "<output value> [output uncertainty]\n" );
+    
+        // Check for two few tokens
+        if ( tokens.size() < 2 ) {
+          std::cerr << "Too few tokens in line '" << line << "' in file '"
+                    << resultsFileName << "'\n";
+          std::cerr << formatString << "\n";
+          return false;
+        }
+
+        // Too many tokens
+        if ( tokens.size() > 4 ) {
+          std::cerr << "Extra tokens in line '" << line << "' in file '"
+                    << resultsFileName << "' will be ignored.\n";
+          std::cerr << formatString << "\n";
+        }
+
+        std::string name( tokens[0] );
+
+        // Find the output index
+        int outputIndex = -1;
+        if ( getIndex( outputNames, name, outputIndex ) ) {
+          double value = atof( tokens[1].c_str() );
+          outputValues( runCounter, outputIndex ) = value;
+
+          double uncertainty = 0.0;
+          if ( tokens.size() == 3 ) {
+            uncertainty = atof( tokens[2].c_str() );
+          }
+          averageUncertainty[ outputIndex ] += uncertainty;
+
+          outputsRemaining.erase( name );
+        } else {
+          std::cout << "Unknown output name '" << name << "' in line '"
+                    << line << "' in file '" << resultsFileName
+                    << "' will be ignored.\n";
+        }
+    
+      }
+
+      // Check that we have read values for all parameters
+      if ( outputsRemaining.size() > 0 ) {
+        std::cerr << "Values were not read for all results in file '"
+                  << resultsFileName << "'\n";
+        std::cerr << "Missing values for:\n";
+        std::set< std::string >::iterator iter;
+        for ( iter = outputsRemaining.begin();
+              iter != outputsRemaining.end();
+              ++iter ) {
+          std::cerr << "  " << *iter << "\n";
+        }
+        return false;
+      }
+
+    
+      runCounter++;
     }
   }
 
-  for ( unsigned int i = 0; i < t; i++ ) {
-    m3( i, 0 ) = avgUnc[i] / double( run_counter );
+  // Average the uncertainty across model runs
+  for ( unsigned int i = 0; i < numberOutputs; i++ ) {
+    outputUncertainty( i, 0 ) = averageUncertainty[i] / double( runCounter );
   }
-
+  
   return true;
 }
 
 
 bool parseModelDataDirectoryStructure(
     GaussianProcessEmulator & gpme,
-    std::string Model_Outs_Dir,
-    std::string Stat_Anal_Dir,
-    bool verbose) {
+    const std::string & modelOutputDirectory,
+    const std::string & statisticalAnalysisDirectory,
+    bool verbose )
+{
   if ( !parseParameters(
-          gpme.m_Parameters, gpme.m_NumberParameters, Stat_Anal_Dir ) ) {
+          gpme.m_Parameters,
+          gpme.m_NumberParameters,
+          statisticalAnalysisDirectory ) ) {
     std::cerr << "Couldn't parse parameters\n";
     return false;
   }
   if ( !parseOutputs(
-          gpme.m_OutputNames, gpme.m_NumberOutputs, Stat_Anal_Dir ) ) {
+          gpme.m_OutputNames,
+          gpme.m_NumberOutputs,
+          statisticalAnalysisDirectory ) ) {
     std::cerr << "Couldn't parse outputs\n";
     return false;
   }
-  if ( !parseNumberOfModelRuns(
-                               gpme.m_NumberTrainingPoints, Model_Outs_Dir ) ) {
+
+  // Initialize means and uncertainty scales
+  gpme.m_TrainingOutputMeans = Eigen::VectorXd::Constant( gpme.m_NumberOutputs, 0.0 );
+  gpme.m_TrainingOutputVarianceMeans = Eigen::VectorXd::Constant( gpme.m_NumberOutputs, 0.0 );
+
+  if ( !parseNumberOfModelRuns( gpme.m_NumberTrainingPoints,
+                                modelOutputDirectory ) ) {
     std::cerr << "Couldn't parse number of model runs.\n";
     return false;
   }
   Eigen::MatrixXd TMat( gpme.m_NumberOutputs, 1 );
   if ( !parseParameterAndOutputValues(
-          gpme.m_ParameterValues, gpme.m_OutputValues, TMat, Model_Outs_Dir,
-          gpme.m_NumberTrainingPoints, gpme.m_Parameters, gpme.m_OutputNames,
-          verbose ) ) {
+          gpme.m_TrainingParameterValues, gpme.m_TrainingOutputValues, TMat,
+          modelOutputDirectory, gpme.m_NumberTrainingPoints,
+          gpme.m_Parameters, gpme.m_OutputNames, verbose ) ) {
     std::cerr << "parse Parameter and Output Values error\n";
     return false;
   }
-  gpme.m_OutputUncertaintyScales = TMat.col(0);
+  gpme.m_TrainingOutputVarianceMeans = TMat.col(0);
+
   return true;
 }
 
@@ -481,7 +704,8 @@ bool parseModelDataDirectoryStructure(
    comments to existing comments. */
 bool parseComments(
     std::vector< std::string > & returnStrings,
-    std::istream & i) {
+    std::istream & i)
+{
   static const char comment_character = '#';
   if (! i.good()) return false;
   int c = i.peek();
@@ -559,23 +783,27 @@ bool parseSubmodels(
     input >> word;
     if (word == "COVARIANCE_FUNCTION") {
       if (!parseCovarianceFunction(m.m_CovarianceFunction,  input)) {
-        std::cerr << "parse error\n"; // \todo error message
+        std::cerr << "Could not parse COVARIANCE_FUNCTION when reading "
+                  << "submodel " << modelIndex << "\n";
         return false;
       }
     } else if (word == "REGRESSION_ORDER") {
       if (! parseInteger(m.m_RegressionOrder, input)) {
-        std::cerr << "parse error\n"; // \todo error message
+        std::cerr << "Could not parse REGRESSION_ORDER when reading "
+                  << "submodel " << modelIndex << "\n";
         return false;
       }
     } else if (word == "THETAS") {
       if (! ReadVector(m.m_Thetas, input)) {
-        std::cerr << "parse error\n"; // \todo error message
+        std::cerr << "Could not parse THETAS when reading "
+                  << "submodel " << modelIndex << "\n";
         return false;
       }
     } else if (word == "END_OF_MODEL") {
       return true;
     } else {
-      std::cerr << "Unexected keyword: \"" << word << "\"\n";
+      std::cerr << "Unexpected keyword: '" << word << "' when reading "
+                << "submodel.\n";
       return false;
     }
   }
@@ -598,33 +826,38 @@ bool parsePCADecomposition(
     if (! input.good()) return false;
     input >> word;
     if (word == "OUTPUT_MEANS") {
-      if (! ReadVector(gpme.m_OutputMeans, input)) {
-        std::cerr << "parse error\n"; // \todo error message
+      if (! ReadVector(gpme.m_TrainingOutputMeans, input)) {
+        std::cerr << "Could not read OUTPUT_MEANS entry in PCA decomposition "
+                  << "file.\n";
         return false;
       }
       outputMeansRead = true;
     } else if (word == "OUTPUT_UNCERTAINTY_SCALES") {
-      if (! ReadVector(gpme.m_OutputUncertaintyScales, input)) {
-        std::cerr << "parse error\n"; // \todo error message
+      if (! ReadVector(gpme.m_UncertaintyScales, input)) {
+        std::cerr << "Could not read OUTPUT_UNCERTAINTY_SCALES in PCA "
+                  << "decomposition file.\n";
         return false;
       }
       outputUncertaintyScalesRead = true;
     } else if (word == "OUTPUT_PCA_EIGENVALUES") {
       if (! ReadVector(gpme.m_PCAEigenvalues, input)) {
-        std::cerr << "parse error\n"; // \todo error message
+        std::cerr << "Could not read OUTPUT_PCA_EIGENVALUES in PCA "
+                  << "decomposition file.\n";
         return false;
       }
       outputPCAEigenvaluesRead = true;
     } else if (word == "OUTPUT_PCA_EIGENVECTORS") {
       if (! ReadMatrix(gpme.m_PCAEigenvectors, input)) {
-        std::cerr << "parse error\n"; // \todo error message
+        std::cerr << "Could not read OUTPUT_PCA_EIGENVECTORS in PCA "
+                  << "decomposition file.\n";
         return false;
       }
       outputPCAEigenvectorsRead = true;
     } else if (word == "END_OF_FILE") {
       break;
     } else {
-      std::cerr << "Unexected keyword: \"" << word << "\"\n";
+      std::cerr << "Unexpected keyword: '" << word << "' in PCA "
+                << "decomposition file.\n";
       return false;
     }
   }
@@ -632,6 +865,16 @@ bool parsePCADecomposition(
   if ( !( outputMeansRead && outputUncertaintyScalesRead &&
           outputPCAEigenvaluesRead && outputPCAEigenvectorsRead ) ) {
     std::cerr << "Not all required PCA components read.\n";
+    std::cerr << "Missing:\n";
+    if ( !outputMeansRead )
+      std::cerr << "OUTPUT_MEANS\n";
+    if ( !outputUncertaintyScalesRead )
+      std::cerr << "OUTPUT_UNCERTAINTY_SCALES\n";
+    if ( !outputPCAEigenvaluesRead )
+      std::cerr << "OUTPUT_PCA_EIGENVALUES\n";
+    if ( !outputPCAEigenvectorsRead )
+      std::cerr << "OUTPUT_PCA_EIGENVECTORS\n";
+
     return false;
   }
 
@@ -641,10 +884,10 @@ bool parsePCADecomposition(
 
 bool parseGaussianProcessEmulator(
     GaussianProcessEmulator & gpme,
-    std::string StatisticsDirectory) {
-  std::string EmulatorFile = StatisticsDirectory + Paths::SEPARATOR +
+    const std::string & statisticalAnalysisDirectory) {
+  std::string emulatorFile = statisticalAnalysisDirectory + Paths::SEPARATOR +
     Paths::EMULATOR_STATE_FILE;
-  std::ifstream input( EmulatorFile.c_str() );
+  std::ifstream input( emulatorFile.c_str() );
   parseComments(gpme.m_Comments,input);
   std::string word;
   while (input.good()) {
@@ -652,13 +895,15 @@ bool parseGaussianProcessEmulator(
     input >> word;
     if (word == "SUBMODELS") {
       if (! parseInteger(gpme.m_NumberPCAOutputs, input)) {
-        std::cerr << "parse error\n"; // \todo error message
+        std::cerr << "Could not parse number of SUBMODELS when reading "
+                  << "emulator state.\n";
         return false;
       }
       gpme.m_PCADecomposedModels.resize(gpme.m_NumberPCAOutputs);
       for (int i = 0; i < gpme.m_NumberPCAOutputs; ++i) {
         if (! parseSubmodels(gpme.m_PCADecomposedModels[i],i,input)) {
-          std::cerr << "parse error\n"; // \todo error message
+          std::cerr << "Could not parse submodels when reading emulator "
+                    << "state.\n";
           return false;
         }
         gpme.m_PCADecomposedModels[i].m_Parent = &gpme;
@@ -666,23 +911,12 @@ bool parseGaussianProcessEmulator(
     } else if (word == "END_OF_FILE") {
       return true;
     } else {
-      std::cerr << "Unexected keyword: \"" << word << "\"\n";
+      std::cerr << "Unexpected keyword: " << word << "\n";
       return false;
     }
   }
 
   return true;
-}
-
-const char * stat(GaussianProcessEmulator::StatusType s) {
-  switch(s) {
-  case GaussianProcessEmulator::READY        : return "READY";
-  case GaussianProcessEmulator::UNCACHED     : return "UNCACHED";
-  case GaussianProcessEmulator::UNTRAINED    : return "UNTRAINED";
-  case GaussianProcessEmulator::UNINITIALIZED: return "UNINITIALIZED";
-  case GaussianProcessEmulator::ERROR        :
-  default                                    : return "ERROR";
-  }
 }
 
 
@@ -694,17 +928,19 @@ const char * stat(GaussianProcessEmulator::StatusType s) {
   \returns true on success. */
 bool
 GaussianProcessEmulatorDirectoryReader
-::LoadTrainingData(GaussianProcessEmulator * gpe,
-                    std::string ModelOutputDirectory,
-                    std::string StatisticalAnalysisDirectory,
-                    std::string ExperimentalResultsDirectory)
+::LoadTrainingData( GaussianProcessEmulator * gpe,
+                    const std::string & modelOutputDirectory,
+                    const std::string & statisticalAnalysisDirectory,
+                    const std::string & experimentalResultsDirectory)
 {
-  if ( !parseModelDataDirectoryStructure(*gpe, ModelOutputDirectory,
-                                         StatisticalAnalysisDirectory,
+  if ( !parseModelDataDirectoryStructure(*gpe,
+                                         modelOutputDirectory,
+                                         statisticalAnalysisDirectory,
                                          m_Verbose ) )
     return false;
 
-  if (! parseExperimentalResults( *gpe, ExperimentalResultsDirectory )) {
+  if (! parseExperimentalResults( *gpe, experimentalResultsDirectory,
+                                  this->m_Verbose )) {
     std::cerr << "Error in parseExperimentalResults()\n";
     return false;
   }
@@ -718,9 +954,10 @@ GaussianProcessEmulatorDirectoryReader
   \returns true on success. */
 bool
 GaussianProcessEmulatorDirectoryReader
-::LoadPCA(GaussianProcessEmulator * gpe, std::string StatisticsDirectory)
+::LoadPCA(GaussianProcessEmulator * gpe,
+          const std::string & statisticsDirectory)
 {
-  std::string PCAFile = StatisticsDirectory + Paths::SEPARATOR +
+  std::string PCAFile = statisticsDirectory + Paths::SEPARATOR +
     Paths::PCA_DECOMPOSITION_FILE;
   std::ifstream input( PCAFile.c_str() );
   if ( !parsePCADecomposition(*gpe, input) ) {
@@ -729,19 +966,18 @@ GaussianProcessEmulatorDirectoryReader
   }
 
   // Initialize the retained principal components
-  std::string runtimeParameterFile = StatisticsDirectory + Paths::SEPARATOR +
+  std::string runtimeParameterFile = statisticsDirectory + Paths::SEPARATOR +
     Paths::RUNTIME_PARAMETER_FILE;
   RuntimeParameterFileReader runtimeParameterReader;
   if ( !runtimeParameterReader.ParseFile( runtimeParameterFile ) ) {
     std::cerr << "Error parsing runtime parameters.\n" << std::endl;
   }
 
-  double fractionalResolvingPower;
-  if (runtimeParameterReader.HasOption("PCA_FRACTION_RESOLVING_POWER"))
+  double fractionalResolvingPower = 0.95;
+  if (runtimeParameterReader.HasOption("PCA_FRACTION_RESOLVING_POWER")) {
     fractionalResolvingPower = runtimeParameterReader.GetOptionAsDouble(
         "PCA_FRACTION_RESOLVING_POWER");
-  else
-    fractionalResolvingPower = 0.95;
+  }
 
   gpe->RetainPrincipalComponents( fractionalResolvingPower );
 
@@ -756,20 +992,21 @@ GaussianProcessEmulatorDirectoryReader
   \returns true on success. */
 bool
 GaussianProcessEmulatorDirectoryReader
-::LoadEmulator(GaussianProcessEmulator * gpe, std::string StatisticsDirectory)
+::LoadEmulator(GaussianProcessEmulator * gpe,
+               const std::string & statisticalAnalysisDirectory)
 {
-  if ( !parseGaussianProcessEmulator(*gpe, StatisticsDirectory) ) {
+  if ( !parseGaussianProcessEmulator(*gpe, statisticalAnalysisDirectory) ) {
     std::cerr << "Error parsing gaussian process emulator.\n";
     return false;
   }
   // We are finished reading the input files.
   if ( gpe->CheckStatus() != GaussianProcessEmulator::UNCACHED ) {
     std::cerr << "Emulator already cached.\n";
-    std::cerr << stat(gpe->CheckStatus()) << "\n";
+    std::cerr << gpe->GetStatusAsString() << "\n";
     return false;
   }
   if ( !gpe->MakeCache() ) {
-    std::cerr << "Error while makeing cache.\n";
+    std::cerr << "Error while making cache.\n";
     return false;
   }
   return true;
