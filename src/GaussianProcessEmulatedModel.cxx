@@ -92,6 +92,11 @@ GaussianProcessEmulatedModel
   m_StateFlag = READY;
   m_Parameters = m_GPME.m_Parameters;
   m_ScalarOutputNames = m_GPME.m_OutputNames;
+  if ( !m_GPME.GetUncertaintyScalesAsCovariance( m_TrainingAndObservedCovariance ) ) {
+    std::cerr << "Error setting the covariance containing experimental and model"
+              << " output data.\n";
+    return Model::OTHER_ERROR;
+  }
   return Model::NO_ERROR;
 }
 

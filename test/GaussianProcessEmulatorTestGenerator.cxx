@@ -74,18 +74,6 @@ GaussianProcessEmulatorTestGenerator
   }
 }
 
-/** 
- * Need to create:
- *
- * 1. Paramter Files (parameters.dat) DONE
- * 2. Output Files (results.dat) DONE
- * 3. model_output directory DONE
- * 4. run directories DONE
- * 5. experimental results file 
- * 7. parameter_priors.dat DONE
- * 8. observable_names.dat DONE */ 
-
-
 bool
 GaussianProcessEmulatorTestGenerator
 ::WriteDirectoryStructure( std::string StatisticsDirectory )

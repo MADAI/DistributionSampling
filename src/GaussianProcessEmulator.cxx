@@ -339,7 +339,7 @@ bool GaussianProcessEmulator::GetUncertaintyScalesAsCovariance(
   }
   
   x.resize(t*t);
-  Eigen::Map< Eigen::VectorXd > Cov(&(x[0]),t,t);
+  Eigen::Map< Eigen::MatrixXd > Cov(&(x[0]),t,t);
   Cov = m_UncertaintyScales.asDiagonal();
   return true;
 }
