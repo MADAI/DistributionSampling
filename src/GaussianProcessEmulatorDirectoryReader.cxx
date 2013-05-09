@@ -470,12 +470,9 @@ inline bool parseParameterAndOutputValues(
   for ( size_t i = 0; i < runDirectories.size(); ++i ) {
     std::string directoryName( runDirectories[i] );
     if ( verbose )
-      std::cout << "Run directory name: '" << dir_name << "'\n";
-
-    if ( directoryName.substr( 0, 3 ) == "run" ) {
       std::cout << "Run directory name: '" << directoryName << "'\n";
 
-    if ( directoryName.find_first_of( "run" ) == 0 ) {
+    if ( directoryName.substr( 0, 3 ) == "run" ) {
       // Open the parameters file
       std::string parametersFileName = modelOutputDirectory +
         Paths::SEPARATOR + directoryName + Paths::SEPARATOR +
