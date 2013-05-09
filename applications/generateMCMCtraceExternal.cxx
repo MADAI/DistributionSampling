@@ -151,7 +151,12 @@ int main(int argc, char ** argv) {
     traceDirectory + madai::Paths::SEPARATOR + outputFileName;
 
   std::ofstream outFile(outputFilePath.c_str());
-  return madai::SamplerCSVWriter::GenerateSamplesAndSaveToFile(
+  if ( !outFile.good() ) {
+    std::cerr << "Could not open trace file '" << outputFilePath << "' for writing.\n";
+    return EXIT_FAILURE;
+  }
+
+  int returnCode = madai::SamplerCSVWriter::GenerateSamplesAndSaveToFile(
       &mcmc,
       &em,
       outFile,
@@ -159,4 +164,12 @@ int main(int argc, char ** argv) {
       numberOfBurnInSamples,
       useModelError,
       &(std::cerr));
+
+  if ( returnCode == EXIT_SUCCESS ) {
+    std::cout << "Succeeded writing trace file '" << outputFilePath << "'.\n";
+  } else {
+    std::cerr << "Could not write trace file '" << outputFilePath << "'.\n";
+  }
+
+  return returnCode;
 }

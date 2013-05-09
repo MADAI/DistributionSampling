@@ -157,11 +157,20 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  std::string outputFile = statisticsDirectory + madai::Paths::EMULATOR_STATE_FILE;
-  std::ofstream os( outputFile.c_str() );
+  std::string outputFileName = statisticsDirectory + madai::Paths::EMULATOR_STATE_FILE;
+  std::ofstream os( outputFileName.c_str() );
+
+  if ( !os.good() ) {
+    std::cerr << "Could not open emulator state file '" << outputFileName
+              << "' for writing.\n";
+    return EXIT_FAILURE;
+  }
 
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
   singleFileWriter.Write( &gpm, os );
+
+  std::cout << "Emulator training succeeded.\n";
+  std::cout << "Wrote emulator state file '" << outputFileName << "'.\n";
 
   return EXIT_SUCCESS;
 }

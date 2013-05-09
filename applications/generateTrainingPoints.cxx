@@ -271,9 +271,11 @@ int main( int argc, char * argv[] ) {
     sampleGenerator.Generate( numberOfTrainingPoints, parameters );
 
   if ( !WriteDirectories( modelOutputDirectory, parameters, samples, false ) ) {
-    std::cerr << "Could not write model output directory\n";
+    std::cerr << "Could not write model output directory '" << modelOutputDirectory << "'.\n";
     return EXIT_FAILURE;
   }
+
+  std::cout << "Write model output directory '" << modelOutputDirectory << "'.\n";
 
   return EXIT_SUCCESS;
 }

@@ -92,8 +92,17 @@ int main( int argc, char ** argv )
 
   std::ofstream os( outputFileName.c_str() );
 
+  if ( !os.good() ) {
+    std::cerr << "Could not open PCA decomposition file '" << outputFileName
+              << "' for writing.\n;";
+    return EXIT_FAILURE;
+  }
+
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
   singleFileWriter.WritePCA( &gpe, os );
+
+  std::cout << "PCA decomposition succeeded.\n";
+  std::cout << "Wrote PCA decomposition file '" << outputFileName << "'.\n";
 
   return EXIT_SUCCESS;
 }

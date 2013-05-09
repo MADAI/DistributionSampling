@@ -140,11 +140,17 @@ int main(int argc, char ** argv) {
   std::string traceDirectory = statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
   std::string outputFileName( argv[2] );
-  std::string outputFile = traceDirectory + Paths::SEPARATOR + outputFileName;
-  std::ofstream out( outputFile.c_str() );
+  std::string outputFilePath = traceDirectory + Paths::SEPARATOR + outputFileName;
+  std::ofstream out( outputFilePath.c_str() );
+  if ( !out.good() ) {
+    std::cerr << "Could not open output file '" << outputFilePath << "' for writing.\n";
+    return EXIT_FAILURE;
+  }
   trace.WriteCSVOutput( out,
                         em.GetParameters(),
                         em.GetScalarOutputNames() );
+
+  std::cout << "Wrote percentile grid trace to file '" << outputFilePath << "'.\n";
 
   return EXIT_SUCCESS;
 }
