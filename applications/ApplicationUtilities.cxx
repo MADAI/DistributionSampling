@@ -37,6 +37,14 @@ std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
   if ( settings.HasOption( "MODEL_OUTPUT_DIRECTORY" ) ) {
     modelOutputDirectory = settings.GetOption( "MODEL_OUTPUT_DIRECTORY" );
   }
+
+  // Check for quotes around directory name
+  if ( ( modelOutputDirectory[0] == '"'  && *(modelOutputDirectory.end()-1) == '"' ) ||
+       ( modelOutputDirectory[0] == '\'' && *(modelOutputDirectory.end()-1) == '\'' ) ) {
+    // Truncate path to remove quotes
+    modelOutputDirectory = modelOutputDirectory.substr( 1, modelOutputDirectory.size()-2 );
+  }
+
   if ( modelOutputDirectory[0] != Paths::SEPARATOR ) {
     modelOutputDirectory.insert( 0, statisticsDirectory );
   }
@@ -51,6 +59,17 @@ std::string GetExperimentalResultsDirectory( const std::string & statisticsDirec
   if ( settings.HasOption( "EXPERIMENTAL_RESULTS_DIRECTORY" ) ) {
     experimentalResultsDirectory = settings.GetOption( "EXPERIMENTAL_RESULTS_DIRECTORY" );
   }
+
+  // Check for quotes around directory name
+  if ( ( experimentalResultsDirectory[0] == '"' &&
+         *(experimentalResultsDirectory.end()-1) == '"' ) ||
+       ( experimentalResultsDirectory[0] == '\'' &&
+         *(experimentalResultsDirectory.end()-1) == '\'' ) ) {
+    // Truncate path to remove quotes
+    experimentalResultsDirectory =
+      experimentalResultsDirectory.substr( 1, experimentalResultsDirectory.size()-2 );
+  }
+
   if ( experimentalResultsDirectory[0] != Paths::SEPARATOR ) {
     experimentalResultsDirectory.insert( 0, statisticsDirectory );
   }

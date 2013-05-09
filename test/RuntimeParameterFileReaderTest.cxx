@@ -47,32 +47,58 @@ int main(int, char**) {
     = runtimeParameterFileReader.GetAllOptions();
 
   bool success = true;
-  if (runtimeParameterFileReader.GetOption("THING") != std::string("hello world")) {
-    std::cerr << "failed test 1\n";
+  std::string expectedString( "hello     world" );
+  std::string retrievedString( runtimeParameterFileReader.GetOption("THING") );
+  if ( retrievedString != expectedString ) {
+    std::cerr << "Expected option THING to have value '" << expectedString
+              << "' but got '" << retrievedString << "'\n";
     success = false;
   }
+
   std::map<std::string,std::string>::const_iterator find = map.find("THING");
   if (find == map.end()) {
-    std::cerr << "failed test 2\n";
+    std::cerr << "Could not find option 'THING' in map returned from "
+              << "RuntimeParameterFileReader\n";
     success = false;
-  } else if (find->second != "hello world") {
-    std::cerr << "failed test 3\n";
-    success = false;
-  }
-  if (runtimeParameterFileReader.GetOptionAsDouble("ADOUBLE") != 1.2e3) {
-    std::cerr << "failed test 4\n";
+  } else if (find->second != expectedString) {
+    std::cerr << "Option 'THING' was expected to have value '" << expectedString
+              << "' but got '" << find->second << "'\n";
     success = false;
   }
-  if (runtimeParameterFileReader.GetOptionAsInt("ITERATIONS") != 10000) {
-    std::cerr << "failed test 5\n";
+
+  double expectedDouble = 1.2e3;
+  double retrievedDouble = runtimeParameterFileReader.GetOptionAsDouble("ADOUBLE");
+  if ( retrievedDouble != expectedDouble ) {
+    std::cerr << "Option 'ADOUBLE' was expected to have value " << expectedDouble
+              << ", but got " << retrievedDouble << "\n";
+    success = false;
+  }
+
+  int expectedInt = 10000;
+  int retrievedInt = runtimeParameterFileReader.GetOptionAsInt("ITERATIONS");
+  if ( retrievedInt != expectedInt ) {
+    std::cerr << "Option 'ITERATIONS' was expected to have value " << expectedInt
+              << ", but got " << retrievedInt << "\n";
     success = false;
   }
   if (map.size() != 6) {
-    std::cerr << "failed test 6\n";
+    std::cerr << "There should be 6 options, but only " << map.size()
+              << " were in the map.\n";
     success = false;
   }
-  if (runtimeParameterFileReader.GetOption("MODEL_OUTPUT_DIRECTORY") != "../model_output") {
-    std::cerr << "failed test 7\n";
+
+  expectedString = "../model_output";
+  retrievedString = runtimeParameterFileReader.GetOption("MODEL_OUTPUT_DIRECTORY");
+  if ( retrievedString != expectedString ) {
+    std::cerr << "Option 'MODEL_OUTPUT_DIRECTORY' was expected to have value '"
+              << expectedString << "' but got '" << find->second << "'\n";
+
+    std::cerr << "Mapped values are: \n";
+    for ( std::map< std::string, std::string >::const_iterator iter = map.begin();
+          iter != map.end(); ++iter ) {
+      std::cerr << "name: '" << iter->first << "', value: '" << iter->second
+                << "'\n";
+    }
     success = false;
   }
 
