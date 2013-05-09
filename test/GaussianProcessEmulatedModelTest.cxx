@@ -175,7 +175,6 @@ int main( int, char *[] ) {
   trace.WriteCSVOutput( std::cout,
                    gpem.GetParameters(),
                    gpem.GetScalarOutputNames() );
-  //trace.WriteData( std::cout );
 
   return EXIT_SUCCESS;
 }

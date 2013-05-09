@@ -29,10 +29,6 @@
 #include "Paths.h"
 
 
-const char TRAINING_FILE[] = "/tmp/GaussianProcessEmulatorTestTraining.dat";
-const char MODEL_FILE[] = "/tmp/GaussianProcessEmulatorTestModel.dat";
-const char THETAS_FILE[] = "/tmp/GaussianProcessEmulatorTestThetas.dat";
-
 inline double LogisticFunction(double x) {
   return 1.0 / (1.0 + std::exp(-x));
 }
