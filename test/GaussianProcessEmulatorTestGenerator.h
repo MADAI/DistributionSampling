@@ -35,6 +35,8 @@ public:
     const std::vector< madai::Parameter > & parameters );
 
   void WriteTrainingFile(std::ostream & o);
+  
+  bool WriteDirectoryStructure(std::string StatisticsDirectory);
 
   static void LatinHypercube(
       int numberParameters,
@@ -48,7 +50,10 @@ public:
   int m_NumberParameters;
   int m_NumberOutputs;
   int m_NumberTrainingPoints;
+  std::vector< std::string > m_OutputNames;
   std::vector< madai::Parameter > m_Parameters;
+  std::vector< double > m_ObservedValues;
+  std::vector< double > m_ObservedVariances;
 };
 
 #endif /* madai_GaussianProcessEmulatorTestGenerator_h_included */

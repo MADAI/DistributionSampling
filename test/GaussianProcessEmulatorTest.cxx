@@ -24,8 +24,9 @@
 #include <Eigen/Dense>
 #include "GaussianProcessEmulatorTestGenerator.h"
 #include "GaussianProcessEmulator.h"
-#include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
+#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "Paths.h"
 
 
 const char TRAINING_FILE[] = "/tmp/GaussianProcessEmulatorTestTraining.dat";
@@ -59,28 +60,52 @@ int main( int, char *[] ) {
 
   GaussianProcessEmulatorTestGenerator generator( &model,2,2,N, parameters);
 
-  std::ofstream out(TRAINING_FILE);
-  generator.WriteTrainingFile(dynamic_cast<std::ostream &>(out));
-  out.close();
+  std::string TempDirectory = "/tmp/";
+  if ( !generator.WriteDirectoryStructure(TempDirectory) ) {
+    std::cerr << "Error writing directory structure\n";
+    return EXIT_FAILURE;
+  }
+  
+  std::string MOD = TempDirectory + madai::Paths::SEPARATOR + 
+                    madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+  std::string ERD = TempDirectory + madai::Paths::SEPARATOR +
+                    madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
 
   madai::GaussianProcessEmulator gpe;
-  std::ifstream ifs(TRAINING_FILE);
-  madai::GaussianProcessEmulatorSingleFileReader singleFileReader;
-  singleFileReader.LoadTrainingData(&gpe,ifs);
+  madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  if ( !directoryReader.LoadTrainingData( &gpe, MOD, TempDirectory, ERD ) ) {
+    std::cerr << "Error loading from created directory structure\n";
+    return EXIT_FAILURE;
+  } 
+  
+  if ( !gpe.PrincipalComponentDecompose() ) {
+    std::cerr << "Error decomposing model data.\n";
+    return EXIT_FAILURE;
+  }
+  
+  std::string PCAFileName = TempDirectory + madai::Paths::SEPARATOR
+      + madai::Paths::PCA_DECOMPOSITION_FILE;
+  std::ofstream PCAFile( PCAFileName.c_str() );
+  if ( !PCAFile ) {
+    std::cerr << "Could not open file '" << PCAFileName << "'\n";
+    return EXIT_FAILURE;
+  }
+  
+  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
+  singleFileWriter.WritePCA( &gpe, PCAFile );
+  PCAFile.close();
+  
   double fractionResolvingPower = 0.999;
   madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction
-    = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
+      = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
   int regressionOrder = 1;
   double defaultNugget = 1e-3;
   double amplitude = 1.0;
   double scale = 1e-2;
-
-  if (! gpe.PrincipalComponentDecompose() )
-    return EXIT_FAILURE;
-
+  
   if (! gpe.RetainPrincipalComponents( fractionResolvingPower ) )
     return EXIT_FAILURE;
-
+  
   if (! gpe.BasicTraining(
           covarianceFunction,
           regressionOrder,
@@ -88,12 +113,17 @@ int main( int, char *[] ) {
           amplitude,
           scale))
     return EXIT_FAILURE;
-
-  out.open(MODEL_FILE);
-
-  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
-  singleFileWriter.Write(&gpe,out);
-  out.close();
+  
+  std::string EmulatorStateFileName = TempDirectory + madai::Paths::SEPARATOR
+      + madai::Paths::EMULATOR_STATE_FILE;
+  std::ofstream EmulatorStateFile( EmulatorStateFileName.c_str() );
+  if ( !EmulatorStateFile ) {
+    std::cerr << "Could not open file '" << EmulatorStateFileName << "'\n";
+    return EXIT_FAILURE;
+  }
+  
+  singleFileWriter.Write( &gpe, EmulatorStateFile );
+  EmulatorStateFile.close();
 
   if (! gpe.MakeCache()) {
     std::cerr << "Error while makeing cache.\n";
@@ -131,12 +161,13 @@ int main( int, char *[] ) {
   }
   std::cout << "Maximum error over all space: " << error << '\n';
 
-  out.open(THETAS_FILE);
-  if(! singleFileWriter.PrintThetas(&gpe,out)) {
+  std::string ThetaFileName = TempDirectory + madai::Paths::SEPARATOR + "thetas.dat";
+  std::ofstream ThetaFile( ThetaFileName.c_str() );
+  if(! singleFileWriter.PrintThetas(&gpe,ThetaFile)) {
     std::cerr << "Error printing Thetas.\n";
     return EXIT_FAILURE;
   }
-  out.close();
+  ThetaFile.close();
 
   return EXIT_SUCCESS;
 }
