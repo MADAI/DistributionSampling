@@ -48,6 +48,8 @@ public:
 
 
   virtual double GetLogProbabilityDensity( double x ) const;
+  
+  virtual double GetGradientLogProbabilityDensity( double x ) const;
 
   virtual double GetProbabilityDensity( double x ) const;
 

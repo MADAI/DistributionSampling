@@ -155,6 +155,34 @@ GaussianProcessEmulatedModel
   return Model::NO_ERROR;
 }
 
+/**
+ * Get the gradient outputs from the model evaluated at a position in
+ * the parameter space.
+ */
+Model::ErrorType
+GaussianProcessEmulatedModel
+::GetGradientOfModelOutputs(
+  const std::vector< double > & parameters,
+  std::vector< double > & mean_gradients,
+  std::vector< Eigen::MatrixXd > & cov_gradients ) const
+{
+  if ( m_GPME.m_Status != GaussianProcessEmulator::READY )
+    return Model::OTHER_ERROR;
+  
+  if ( this->GetNumberOfParameters() != parameters.size() )
+    return Model::OTHER_ERROR;
+  
+  if ( m_UseModelCovarianceToCalulateLogLikelihood ) {
+    if ( !m_GPME.GetGradientsOfCovariances( parameters, cov_gradients ) )
+      return Model::OTHER_ERROR;
+  }
+  
+  if ( !m_GPME.GetGradientOfEmulatorOutputs( parameters, mean_gradients ) )
+    return Model::OTHER_ERROR;
+  
+  return Model::NO_ERROR;
+}
+
 bool
 GaussianProcessEmulatedModel
 ::GetConstantCovariance(std::vector< double > & x)  const

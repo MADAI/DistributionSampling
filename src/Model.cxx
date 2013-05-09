@@ -184,6 +184,123 @@ Model
   return NO_ERROR;
 }
 
+// Change this to coincide with changes in the GetLogLikelihood below!
+Model::ErrorType
+Model::GetAnalyticGradientOfLogLikelihood(
+  const std::vector< double > & parameters,
+  const std::vector< bool > & activeParameters,
+  std::vector< double > & gradient ) const
+{
+  if ( static_cast< unsigned int >( activeParameters.size() ) !=
+      this->GetNumberOfParameters() ) {
+    return INVALID_ACTIVE_PARAMETERS;
+  }
+  
+  // Make a copy of the parameters that we can work with
+  std::vector< double > parametersCopy( parameters );
+  
+  // Clear the output vector
+  gradient.clear();
+  
+  // Get the gradient of the model outputs
+  std::vector< double > mean_gradients;
+  std::vector< Eigen::MatrixXd > cov_gradients;
+  Model::ErrorType GetGradientsErrorType;
+  GetGradientsErrorType = this->GetGradientOfModelOutputs(
+    parameters, mean_gradients, cov_gradients );
+  
+  int p = parameters.size();
+  size_t t = this->GetNumberOfScalarOutputs();
+  assert(t > 0);
+  std::vector<double> scalarCovariance;
+  std::vector<double> scalars;
+  
+  std::vector<double> covariance(t * t);
+  Model::ErrorType result;
+  if ( m_UseModelCovarianceToCalulateLogLikelihood ) {
+    result = this->GetScalarOutputsAndCovariance(
+                                                 parameters, scalars, scalarCovariance );
+  } else {
+    result = this->GetScalarOutputs(parameters, scalars);
+  }
+  if (result != NO_ERROR)
+    return result;
+  if (scalars.size() != t)
+    return OTHER_ERROR;
+  
+  std::vector< double > scalarDifferences(t);
+  if (this->m_ObservedScalarValues.size() == 0) {
+    for (size_t i = 0; i < t; ++i) {
+      scalarDifferences[i] = scalars[i];
+    }
+  } else {
+    for (size_t i = 0; i < t; ++i) {
+      scalarDifferences[i] = scalars[i] - this->m_ObservedScalarValues[i];
+    }
+  }
+  
+  if ((scalarCovariance.size() == 0) &&
+      (this->m_ObservedScalarCovariance.size() == 0)) {
+    // Infinite precision makes no sense, so assume variance of 1.0
+    // for each variable. Set covariance to Identity.
+    covariance.resize(t*t);
+    for ( unsigned int i = 0; i < (t*t); i++ )
+      covariance[i] = 0.0;
+    for ( unsigned int i = 0; i < t; i++ )
+      covariance[i*(t+1)] = 1.0;
+  } else if (scalarCovariance.size() == 0) {
+    assert(this->m_ObservedScalarCovariance.size() == (t*t));
+    covariance = this->m_ObservedScalarCovariance;
+  } else if (this->m_ObservedScalarCovariance.size() == 0) {
+    assert(scalarCovariance.size() == (t*t));
+    covariance = scalarCovariance;
+  } else {
+    for (size_t i = 0; i < (t*t); ++i)
+      covariance[i]
+      = scalarCovariance[i] + this->m_ObservedScalarCovariance[i];
+  }
+  std::vector< double > LPGradient
+  = this->GetGradientOfLogPriorLikelihood( parameters );
+  
+  Eigen::Map< Eigen::VectorXd > diff(&(scalarDifferences[0]),t);
+  Eigen::Map< Eigen::MatrixXd > cov(&(covariance[0]),t,t);
+  Eigen::Map< Eigen::MatrixXd > MGrads(&(mean_gradients[0]),p,t);
+  Eigen::VectorXd LLGrad( p );
+  Eigen::VectorXd t1( p );
+  Eigen::VectorXd t2( p );
+  
+  if ((scalarCovariance.size() == 0) &&
+      (this->m_ObservedScalarCovariance.size() == 0)) {
+    // Assume variance of 1.0 for each output
+    t1 = t2 = diff;
+  } else {
+    // FIXME check for singular matrix -> return negative infinity!
+    //assert( cov.determinant() >= 0.0 ); // is there a better way?
+    
+    t1 = cov.colPivHouseholderQr().solve(diff);
+    t2 = cov.transpose().colPivHouseholderQr().solve(diff);
+  }
+  
+  LLGrad = -0.5*(MGrads*t1+t2.transpose()*MGrads);
+  if (scalarCovariance.size() == 0) {
+    // Derivatives of the covariance matrix are 0: Do Nothing
+  } else {
+    // Need to include derivative of covariance matrix
+    for ( unsigned int i = 0; i < p; i++ ) {
+      if ( activeParameters[i] ) {
+        LLGrad(i) += -0.5*t2.dot(cov_gradients[i]*t1);
+      }
+    }
+  }
+  for ( unsigned int i = 0; i < p; i++ ) {
+    if ( activeParameters[i] ) {
+      gradient.push_back( LLGrad(i) + LPGradient[i] );
+    }
+  }
+  
+  return NO_ERROR;
+}
+
 
 void
 Model
@@ -467,6 +584,23 @@ Model
       params[i].GetPriorDistribution()->GetLogProbabilityDensity(x[i]);
   }
   return logPriorLikelihood;
+}
+
+
+/** return the gradient of the LogPriorLikelihood at x */
+std::vector< double >
+Model
+::GetGradientOfLogPriorLikelihood(
+  const std::vector< double > & x) const
+{
+  const std::vector< Parameter > & params = this->GetParameters();
+  assert(x.size() == params.size());
+  std::vector< double > gradient;
+  for ( size_t i = 0; i < params.size(); i++ ) {
+    gradient.push_back(
+      params[i].GetPriorDistribution()->GetGradientOfLogProbabilityDensity(x]i]) );
+  }
+  return gradient;
 }
 
 

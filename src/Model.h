@@ -22,6 +22,8 @@
 #include "Parameter.h"
 #include "Random.h"
 
+#include <Eigen/Dense>
+
 #include <cfloat>
 #include <vector>
 #include <iostream>
@@ -89,6 +91,31 @@ public:
   virtual ErrorType GetScalarOutputs( const std::vector< double > & parameters,
                                       std::vector< double > & scalars ) const = 0;
 
+  /** Get the gradient outputs from the model evaluated at x.
+   *
+   * \param parameters Point in parameter space where the gradients of
+   * the model outputs will be evaluated.
+   * \param mean_gradients Output argument which will contain the
+   * gradients of the scalar outputs. This must be of length
+   * NumberOutputs * NumberParameters.
+   * \param cov_gradients Output argument which will contain the
+   * gradients of the model covariance. This must be of length
+   * NumberParameters*NumberOutputs*NumberOutputs. */
+  virtual ErrorType GetGradientOfModelOutputs(
+    const std::vector< double > & parameters,
+    std::vector< double > & mean_gradients,
+    std::vector< Eigen::MatrixXd > & cov_gradients ) const = 0;
+    
+  /** Get the gradient outputs from the priors evaluated at x.
+   *
+   * Outputs a vector containing the gradients of each parameter.
+   *
+   * \param x Point in parameter space where the gradient of the
+   * LogPriorLikelihood will be evaluated.
+   */
+  std::vector< double > GetGradientOfLogPriorLikelihood(
+    const std::vector< double > & x ) const;
+
   /** Get both scalar outputs and the gradient of active parameters.
    *
    * The gradient output parameter will contain gradient components of
@@ -110,6 +137,26 @@ public:
     const std::vector< double > & parameters,
     const std::vector< bool > & activeParameters,
     std::vector< double > & scalars,
+    std::vector< double > & gradient) const;
+  
+  /** Get the gradien outputs of active parameters analystically.
+   *
+   * The gradient output will contain the gradient components of the
+   * log likelihood for only the active parameters. That is, the first
+   * element in the vector will contain the gradient component for the
+   * first active parameter, the second element in the vector will
+   * contain the gradient component for the second active parameter,
+   * and so on.
+   *
+   * \param parameters Point in parameter space where Gradients will be
+   * evaluated.
+   * \param activeParameters List of parameters for which the gradient
+   * should be computed.
+   * \param gradient Output argument that will contain the gradient
+   * components requested via the activeParameters vector. */
+  virtual ErrorType GetAnalyticGradientOfLogLikelihood(
+    const std::vector< double > & parameters,
+    const std::vector< bool > & activeParameters,
     std::vector< double > & gradient) const;
 
   /** Expect vector of length GetNumberOfScalarOutputs().

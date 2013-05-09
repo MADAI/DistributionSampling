@@ -113,6 +113,18 @@ public:
     const std::vector< double > & x,
     std::vector< double > & y,
     std::vector< double > & ycov) const;
+    
+  /**
+    Get the gradients of the model outputs at x. */
+  bool GetGradientOfEmulatorOutputs(
+    const std::vector< double > & x,
+    std::vector< double > & gradients ) const;
+  
+  /**
+    Get the gradients of the elements of the output covaiance matrix. */
+  bool GetGradientsOfCovariances(
+    const std::vector< double > & x,
+    std::vector< Eigen::MatrixXd > & gradients) const;
 
   /**
      Check status; make sure that the emulator is in a good state. */
@@ -235,6 +247,13 @@ public:
     double CovarianceCalc(
         const Eigen::VectorXd &,
         const Eigen::VectorXd &) const;
+    /**
+       Get the gradient of the covariance function between two points
+       in parametespace using m_thetas and m_CovarianceFunction. */
+    bool GetGradientOfCovarianceCalc(
+        const Eigen::VectorXd &,
+        const Eigen::VectorXd &,
+        Eigen::VectorXd &) const;
     // /**
     //    Initialize a model and set hyperparameter values to default.* */
     // bool Initialize(
@@ -277,6 +296,16 @@ public:
     bool GetEmulatorOutputs(
         const std::vector< double > & x,
         double & mean) const;
+    /**
+       Get the gradient of the model outputs at an input point x. */
+    bool GetGradientOfEmulatorOutputs(
+        const std::vector< double > & x,
+        std::vector< double > & gradient ) const;
+    /**
+       Get the gradient of the variance at an input point x. */
+    bool GetGradientOfCovariance(
+        const std::vector< double > & x,
+        std::vector< double > & gradient ) const;
 
     // FIELDS
     /**

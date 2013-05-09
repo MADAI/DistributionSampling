@@ -76,6 +76,15 @@ class GaussianProcessEmulatedModel : public Model {
                                       std::vector< double > & scalars ) const;
 
   /**
+   * Get the gradient outputs from the model evaluated at point
+   * \c parameters.
+   */
+  virtual ErrorType GetGradientOfModelOutputs(
+      const std::vector< double > & parameters,
+      std::vector< double > & mean_gradients,
+      std::vector< Eigen::MatrixXd > & cov_gradients ) const;
+
+  /**
    * METHOD_NOT_IMPLEMENTED
    */
   virtual Model::ErrorType GetLikeAndPrior(

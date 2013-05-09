@@ -101,6 +101,26 @@ inline void MakeHVector(
       = hvec.segment(1+((i-1)*p),p).cwiseProduct(point);
   }
 }
+template < typename TDerived >
+inline void GetGradientOfHVector(
+  const Eigen::MatrixBase< TDerived > & point,
+  Eigen::MatrixXd & GradMatrix,
+  int regressionOrder)
+{
+  int p = point.size();
+  int numberRegressionFunctions = 1 + (regressionOrder * p);
+  GradMatrix.resize(p, numberRegressionFunctions);
+  for ( unsigned int i = 0; i < p; i++ ) {
+    GradMatrix(i,0) = 0.0;
+    if ( regressionOrder > 0 )
+      GradMatrix(i,i+1) = 1.0;
+  }
+  for ( unsigned int i = 1; i < regressionOrder; ++i ) {
+    for ( unsigned int j = 0; j < p; j++ ) {
+      GradMatrix(j,1+i*p+j) = double(i + 1) * std::pow(point(i), double(i));
+    }
+  }
+}
 
 } // anonymous namespace
 
@@ -170,6 +190,92 @@ double GaussianProcessEmulator::SingleModel::CovarianceCalc(
   default:
     assert(false);
     return 0.0;
+  }
+}
+
+
+bool GaussianProcessEmulator::SingleModel::GetGradientOfCovarianceCalc(
+    const Eigen::VectorXd & v1, const Eigen::VectorXd & v2,
+    Eigen::VectorXd & gradient) const
+{
+  int p = m_Parent->m_NumberParameters;
+  int numberThetas = m_Thetas.size();
+  int offset;
+  switch(m_CovarianceFunction) {
+    case POWER_EXPONENTIAL_FUNCTION:
+      offset = 3;
+      break;
+    case SQUARE_EXPONENTIAL_FUNCTION:
+    case MATERN_32_FUNCTION:
+    case MATERN_52_FUNCTION:
+      offset = 2;
+      break;
+    default:
+      assert(false);
+  }
+  assert(numberThetas == (p + offset));
+  const double & amplitude = m_Thetas(0);
+  
+  double distanceSquared = 0.0;
+  for (int i = 0; i < p; i++) {
+    double d = v1(i) - v2(i);
+    double l = m_Thetas(i + offset);
+    distanceSquared += std::pow( (d / l), 2);
+  }
+  
+  gradient.resize(p);
+  switch(m_CovarianceFunction) {
+  case POWER_EXPONENTIAL_FUNCTION:
+    {
+      const double & power = m_Thetas(2);
+      assert((power > 0.0) && (power <= 2.0));
+      double covariance = this->CovarianceCalc( v1, v2 );
+      for(int i = 0; i < p; i++ ) {
+        double sign;
+        if(v1(i) < v2(i)) {
+          sign = -1;
+        } else {
+          sign = 1;
+        }
+        gradient(i) = -sign*amplitude*power*covariance
+        *std::pow(std::abs(v1(i) - v2(i)),(power-1))
+        /(2.0*std::pow(m_Thetas(i+3),power));
+      }
+      return true;
+    }
+  case SQUARE_EXPONENTIAL_FUNCTION:
+    {
+      double covariance = this->CovarianceCalc( v1, v2 );
+      for(int i = 0; i < p; i++ ) {
+        gradient(i) = -amplitude*(v1(i) - v2(i))*covariance
+        /std::pow( m_Thetas(i+2), 2);
+      }
+      return true;
+    }
+  case MATERN_32_FUNCTION:
+    {
+      static const double ROOT3 = 1.7320508075688772;
+      double distance = std::sqrt(distanceSquared);
+      for(int i = 0; i < p; i++ ) {
+        gradient(i) = -3.0*amplitude*(v1(i) - v2(i))
+        *std::exp(-ROOT3*distance)
+        /std::pow(m_Thetas(i + 2), 2);
+      }
+      return true;
+    }
+  case MATERN_52_FUNCTION:
+    {
+      static const double ROOT5 = 2.23606797749979;
+      double distance = std::sqrt(distanceSquared);
+      for(int i = 0; i < p; i++ ) {
+        gradient(i) = -5.0*amplitude*(v1(i) - v2(i))
+        *(1.0-ROOT5*distance)*std::exp(-ROOT5*distance)
+        /(3.0*std::pow(m_Thetas(i + 2),2));
+      }
+    }
+  default:
+    assert(false);
+    return false;
   }
 }
 
@@ -789,6 +895,36 @@ bool GaussianProcessEmulator::SingleModel::GetEmulatorOutputs (
   return true;
 }
 /**
+   Get the gradient of the model output at an input point x. */
+bool GaussianProcessEmulator::SingleModel::GetGradientOfEmulatorOutputs(
+    const std::vector< double > & x,
+    std::vector< double > & gradient ) const
+{
+  assert(m_RegressionOrder >= 0);
+  gradient.clear();
+  // copy the point from vector<double> into VectorXd
+  Eigen::VectorXd point = Eigen::Map<const Eigen::VectorXd>(&(x[0]),x.size());
+  int N = m_Parent->m_NumberTrainingPoints;
+  int p = m_Parent->m_NumberParameters;
+  Eigen::Map< Eigen::VectorXd > ModelGradient(&(gradient[0]), p);
+  assert(p>0);
+  int F = 1 + (m_RegressionOrder * p);
+  Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
+  // Get Gradient of the covariance
+  Eigen::MatrixXd cov_grad(p, N);
+  for ( unsigned int i = 0; i < N; i++ ) {
+    Eigen::VectorXd Grad;
+    this->GetGradientOfCovarianceCalc( point, X.row(i), Grad  );
+    cov_grad.col(i) = Grad;
+  }
+  ModelGradient = cov_grad*m_GammaVector;
+  // Get gradients of h_vector
+  Eigen::MatrixXd h_v_Grad;
+  GetGradientOfHVector(point, h_v_Grad, m_RegressionOrder);
+  ModelGradient += h_v_Grad*m_BetaVector;
+  return true;
+}
+/**
    Execute the model at an input point x.  Save a lot of time by not
    calculating the covaraince error. */
 bool GaussianProcessEmulator::GetEmulatorOutputs (
@@ -820,6 +956,35 @@ bool GaussianProcessEmulator::GetEmulatorOutputs (
   Eigen::Map< Eigen::VectorXd > mean(&(y[0]),m_NumberOutputs);
   mean = m_TrainingOutputMeans +
     m_UncertaintyScales.cwiseProduct(m_RetainedPCAEigenvectors * mean_pca);
+  return true;
+}
+/**
+   Get the gradients of the model outputs at an input point x. */
+bool GaussianProcessEmulator::GetGradientOfEmulatorOutputs(
+    const std::vector< double > & x,
+    std::vector< double > & gradients ) const
+{
+  if ( m_Status != READY ) {
+    std::cerr << "GetGradientsOfEmulatorOutputs ERROR."
+    " GaussianProcessEmulator is not ready.\n";
+    return false;
+  }
+  gradients.clear();
+  
+  int p = m_NumberParameters;
+  int t = m_NumberPCAOutputs;
+  std::vector< double > grad;
+  Eigen::MatrixXd mean_pca_gradients( t, p );
+  for ( unsigned int i = 0; i < t; i++ ) {
+    if ( !m_PCADecomposedModels[i].GetGradientOfEmulatorOutputs( x, grad ) )
+      return false;
+    mean_pca_gradients.row(i) = Eigen::Map< Eigen::RowVectorXd >(&(grad[0]),p);
+  }
+  Eigen::Map< Eigen::VectorXd > OutputGradients(&(gradients[0]),(m_NumberOutputs*p));
+  for ( unsigned int i = 0; i < t; i++ ) {
+    OutputGradients.segment((i*t), t) = m_OutputUncertaintyScales.cwiseProduct(
+        m_PCAEigenvectors * mean_pca_gradients.col(i) );
+  }
   return true;
 }
 
@@ -879,6 +1044,52 @@ bool GaussianProcessEmulator::SingleModel
 }
 
 /**
+   Get the gradient of the error returned by the emulator. */
+bool GaussianProcessEmulator::SingleModel
+::GetGradientOfCovariance(
+    const std::vector< double > & x,
+    std::vector< double > & gradient) const
+{
+  assert(m_RegressionOrder >= 0);
+  gradient.clear();
+  // copy the point from vector<double> into VectorXd
+  Eigen::VectorXd point = Eigen::Map<const Eigen::VectorXd>(&(x[0]),x.size());
+  int N = m_Parent->m_NumberTrainingPoints;
+  int p = m_Parent->m_NumberParameters;
+  Eigen::Map< Eigen::VectorXd > ModelGradient(&(gradient[0]), p);
+  assert(p>0);
+  int F = 1 + (m_RegressionOrder * p);
+  Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
+  // Get Gradient of the covariance
+  Eigen::MatrixXd cov_grad(p, N);
+  for ( unsigned int i = 0; i < N; i++ ) {
+    Eigen::VectorXd Grad;
+    this->GetGradientOfCovarianceCalc( point, X.row(i), Grad  );
+    cov_grad.col(i) = Grad;
+  }
+  Eigen::VectorXd kplus(N);
+  for (int j = 0; j < N; ++j) {
+    double cov = this->CovarianceCalc( X.row(j), point);
+    if(cov < 1e-10)
+      cov = 0.0;
+    kplus(j) = cov;
+  }
+  // Get gradients of h_vector
+  Eigen::MatrixXd h_v_Grad; // p,(1+ro*p)
+  GetGradientOfHVector(point, h_v_Grad, m_RegressionOrder);
+  Eigen::VectorXd h_vector(F);
+  MakeHVector(point,h_vector,m_RegressionOrder);
+  // Calculate gradient of the variance
+  ModelGradient = -cov_grad*m_CInverse*kplus
+                  -kplus*m_CInverse*cov_grad.transpose();
+  Eigen::MatrixXd tm = h_v_Grad-m_RegressionMatrix2*cov_grad.transpose();
+  Eigen::VectorXd tv = h_vector-m_RegressionMatrix2*kplus;
+  ModelGradient += tm*m_RegressionMatrix1*tv
+                + tv.transpose()*m_RegressionMatrix1*tm.transpose();
+  return true;
+}
+
+/**
          Execute the model at an input point x.
          The covariance returned will be a flattened matrix */
 bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
@@ -914,6 +1125,37 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
         m_RetainedPCAEigenvectors * var_pca.asDiagonal() *
         m_RetainedPCAEigenvectors.transpose());
 
+  return true;
+}
+
+/**
+   Get the gradients of the error returned by the emulator. */
+bool GaussianProcessEmulator::GetGradientsOfCovariances(
+    const std::vector< double > & x,
+    std::vector< Eigen::MatrixXd > & gradients ) const 
+{
+  if (m_Status != READY)
+    return false;
+  
+  Eigen::Map<const Eigen::VectorXd> point(&(x[0]),x.size());
+  int t = m_NumberOutputs;
+  int p = m_NumberParameters;
+  
+  Eigen::MatrixXd var_grads(m_NumberPCAOutputs, p);
+  for ( unsigned int i = 0; i < m_NumberPCAOutputs; i++ ) {
+    std::vector< double > tg;
+    if (! m_PCADecomposedModels[i].GetGradientOfCovariance( x, tg ) );
+    return false;
+    var_grads.row(i) = Eigen::Map< Eigen::VectorXd >(&(tg[0]),p);
+  }
+  
+  Eigen::MatrixXd uncertaintyScales
+  = m_OutputUncertaintyScales * m_OutputUncertaintyScales.transpose();
+  
+  for ( unsigned int i = 0; i < p; i++ ) {
+    gradients.push_back( uncertaintyScales.cwiseProduct( m_PCAEigenvectors
+            * var_grads.col(i).asDiagonal() * m_PCAEigenvectors.transpose() ) );
+  }
   return true;
 }
 

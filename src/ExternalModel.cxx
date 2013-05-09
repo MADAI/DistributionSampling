@@ -465,4 +465,19 @@ ExternalModel
   return NO_ERROR;
 }
 
+
+/**
+ * Get the gradients of the model outputs.
+ * Method not implemented yet.
+ */
+ExternalModel::ErrorType
+ExternalModel
+::getGradientOfModelOutputs(
+  const std::vector< double > & parameters,
+  std::vector< double > & mean_gradients,
+  std::vector< Eigen::MatrixXd > & cov_gradients ) const
+{
+  return Model::OTHER_ERROR;
+}
+
 } // end namespace madai

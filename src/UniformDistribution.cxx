@@ -92,6 +92,15 @@ UniformDistribution
 
 double
 UniformDistribution
+::GetGradientLogProbabilityDensity( double x ) const
+{
+  return 0.0;
+}
+
+
+
+double
+UniformDistribution
 ::GetProbabilityDensity( double x ) const
 {
   if ( this->InRange( x ) ) {

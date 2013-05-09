@@ -98,6 +98,17 @@ GaussianDistribution
 
 double
 GaussianDistribution
+::GetGradientLogProbabilityDensity( double value ) const
+{
+  double diff = value - m_Mean;
+  double variance = m_StandardDeviation * m_StandardDeviation;
+  return ( - diff / variance );
+}
+
+
+
+double
+GaussianDistribution
 ::GetProbabilityDensity( double value ) const
 {
   //return this->GetNormalizationFactor() * exp( this->GetExponent( value ) );

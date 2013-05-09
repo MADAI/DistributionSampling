@@ -44,6 +44,14 @@ public:
    * \return The log of the probability density function evaluated at
    * x. */
   virtual double GetLogProbabilityDensity(double x) const = 0;
+  
+  /** Get the derivative of the log of the probability density function
+   * evaluated at x.
+   *
+   * \param x The argument to the probability density function.
+   * return The derivative of the log of the probability density.
+   */
+  virtual double GetGradientLogProbabilityDensity(double x) const = 0;
 
   /** Get the probability density function evaluated at x.
    *
