@@ -56,8 +56,8 @@ int main(int argc, char ** argv) {
               << "\n"
               << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
               << ":\n\n"
-              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
-              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE << ")\n"
               << "PERCENTILE_GRID_SAMPLES <value> (default: "
               << DEFAULT_PERCENTILE_GRID_NUMBER_OF_SAMPLES << ")\n"
               << "EXTERNAL_MODEL_EXECUTABLE <value> (default: none)\n"
@@ -83,8 +83,8 @@ int main(int argc, char ** argv) {
 
   std::string modelOutputDirectory =
     madai::GetModelOutputDirectory( statisticsDirectory, settings );
-  std::string experimentalResultsDirectory =
-    madai::GetExperimentalResultsDirectory( statisticsDirectory, settings );
+  std::string experimentalResultsFile =
+    madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
   int numberOfSamples = DEFAULT_PERCENTILE_GRID_NUMBER_OF_SAMPLES;
   if ( settings.HasOption( "PERCENTILE_GRID_NUMBER_OF_SAMPLES" ) ) {
@@ -112,7 +112,7 @@ int main(int argc, char ** argv) {
 
   em.SetUseModelCovarianceToCalulateLogLikelihood( false );
 
-  std::string observationsFile = experimentalResultsDirectory +
+  std::string observationsFile = experimentalResultsFile +
     madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
   std::ifstream observations( observationsFile.c_str() );
   if ( madai::Model::NO_ERROR != em.LoadObservations( observations ) ) {

@@ -21,6 +21,11 @@
 
 #include "Paths.h"
 
+#include <madaisys/SystemTools.hxx>
+
+using madaisys::SystemTools;
+
+
 namespace madai {
 
 void EnsurePathSeparatorAtEnd( std::string & path )
@@ -52,29 +57,51 @@ std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
   return modelOutputDirectory;
 }
 
-std::string GetExperimentalResultsDirectory( const std::string & statisticsDirectory,
-                                             const RuntimeParameterFileReader & settings )
+std::string GetExperimentalResultsFile( const std::string & statisticsDirectory,
+                                        const RuntimeParameterFileReader & settings )
 {
-  std::string experimentalResultsDirectory = Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
-  if ( settings.HasOption( "EXPERIMENTAL_RESULTS_DIRECTORY" ) ) {
-    experimentalResultsDirectory = settings.GetOption( "EXPERIMENTAL_RESULTS_DIRECTORY" );
+  std::string experimentalResultsFile = Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE;
+  if ( settings.HasOption( "EXPERIMENTAL_RESULTS_FILE" ) ) {
+    experimentalResultsFile = settings.GetOption( "EXPERIMENTAL_RESULTS_FILE" );
   }
 
   // Check for quotes around directory name
-  if ( ( experimentalResultsDirectory[0] == '"' &&
-         *(experimentalResultsDirectory.end()-1) == '"' ) ||
-       ( experimentalResultsDirectory[0] == '\'' &&
-         *(experimentalResultsDirectory.end()-1) == '\'' ) ) {
+  if ( ( experimentalResultsFile[0] == '"' &&
+         *(experimentalResultsFile.end()-1) == '"' ) ||
+       ( experimentalResultsFile[0] == '\'' &&
+         *(experimentalResultsFile.end()-1) == '\'' ) ) {
     // Truncate path to remove quotes
-    experimentalResultsDirectory =
-      experimentalResultsDirectory.substr( 1, experimentalResultsDirectory.size()-2 );
+    experimentalResultsFile =
+      experimentalResultsFile.substr( 1, experimentalResultsFile.size()-2 );
   }
 
-  if ( experimentalResultsDirectory[0] != Paths::SEPARATOR ) {
-    experimentalResultsDirectory.insert( 0, statisticsDirectory );
+  if ( experimentalResultsFile[0] != Paths::SEPARATOR ) {
+    experimentalResultsFile.insert( 0, statisticsDirectory );
   }
 
-  return experimentalResultsDirectory;
+  return experimentalResultsFile;
+}
+
+bool IsFile( const char * path )
+{
+  return ( SystemTools::FileExists( path ) &&
+           !SystemTools::FileIsDirectory( path ) );
+}
+
+bool IsFile( const std::string & path )
+{
+  return IsFile( path.c_str() );
+}
+
+bool IsDirectory( const char * path )
+{
+  return ( SystemTools::FileExists( path ) &&
+           SystemTools::FileIsDirectory( path ) );
+}
+
+bool IsDirectory( const std::string & path )
+{
+  return IsDirectory( path.c_str() );
 }
 
 std::string LowerCase( char * buffer )

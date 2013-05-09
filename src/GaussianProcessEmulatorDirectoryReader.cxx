@@ -34,6 +34,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+using madaisys::SystemTools;
+
 
 namespace madai {
 
@@ -176,7 +178,7 @@ inline bool getIndex(
    Read the parameter_priors.dat file in statistical_analysis. */
 bool parseExperimentalResults(
     GaussianProcessEmulator & gpe,
-    const std::string & experimentalResultsDirectory,
+    const std::string & experimentalResultsFileName,
     bool verbose )
 {
   const std::vector< std::string > & outputNames = gpe.m_OutputNames;
@@ -185,8 +187,6 @@ bool parseExperimentalResults(
     std::cerr << "numberOutputs != outputNames.size()";
     return false;
   }
-  std::string experimentalResultsFileName
-    = experimentalResultsDirectory + Paths::SEPARATOR + Paths::RESULTS_FILE;
 
   if ( verbose ) {
     std::cout << "Opening experimental results file '"
@@ -925,10 +925,10 @@ bool parseGaussianProcessEmulator(
   \returns true on success. */
 bool
 GaussianProcessEmulatorDirectoryReader
-::LoadTrainingData( GaussianProcessEmulator * gpe,
-                    const std::string & modelOutputDirectory,
-                    const std::string & statisticalAnalysisDirectory,
-                    const std::string & experimentalResultsDirectory)
+::LoadTrainingData(GaussianProcessEmulator * gpe,
+                    std::string modelOutputDirectory,
+                    std::string statisticalAnalysisDirectory,
+                    std::string experimentalResultsFileName)
 {
   if ( !parseModelDataDirectoryStructure(*gpe,
                                          modelOutputDirectory,
@@ -936,7 +936,7 @@ GaussianProcessEmulatorDirectoryReader
                                          m_Verbose ) )
     return false;
 
-  if (! parseExperimentalResults( *gpe, experimentalResultsDirectory,
+  if (! parseExperimentalResults( *gpe, experimentalResultsFileName,
                                   this->m_Verbose )) {
     std::cerr << "Error in parseExperimentalResults()\n";
     return false;

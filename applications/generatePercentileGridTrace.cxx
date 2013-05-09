@@ -58,8 +58,8 @@ int main(int argc, char ** argv) {
               << ":\n\n"
               << "MODEL_OUTPUT_DIRECTORY <value> (default: "
               << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
-              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
-              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE << ")\n"
               << "PERCENTILE_GRID_NUMBER_OF_SAMPLES <value> (default: "
               << DEFAULT_PERCENTILE_GRID_NUMBER_OF_SAMPLES << ")\n"
               << "VERBOSE <value> (default: false)\n";
@@ -77,8 +77,8 @@ int main(int argc, char ** argv) {
 
   std::string modelOutputDirectory =
     madai::GetModelOutputDirectory( statisticsDirectory, settings );
-  std::string experimentalResultsDirectory =
-    madai::GetExperimentalResultsDirectory( statisticsDirectory, settings );
+  std::string experimentalResultsFile =
+    madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
   int numberOfSamples = DEFAULT_PERCENTILE_GRID_NUMBER_OF_SAMPLES;
   if ( settings.HasOption( "PERCENTILE_GRID_NUMBER_OF_SAMPLES" ) ) {
@@ -88,14 +88,14 @@ int main(int argc, char ** argv) {
   madai::GaussianProcessEmulatedModel gpem;
   if ( gpem.LoadConfiguration( statisticsDirectory,
                                modelOutputDirectory,
-                               experimentalResultsDirectory ) != madai::Model::NO_ERROR ) {
+                               experimentalResultsFile ) != madai::Model::NO_ERROR ) {
     std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
     return EXIT_FAILURE;
   }
 
   gpem.SetUseModelCovarianceToCalulateLogLikelihood( false );
   
-  std::string observationsFile = experimentalResultsDirectory + Paths::SEPARATOR +
+  std::string observationsFile = experimentalResultsFile + Paths::SEPARATOR +
     Paths::RESULTS_FILE;
   std::ifstream observations( observationsFile.c_str() );
   if ( madai::Model::NO_ERROR != LoadObservations( &gpem, observations ) ) {

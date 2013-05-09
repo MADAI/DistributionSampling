@@ -60,8 +60,8 @@ int main(int argc, char ** argv) {
               << "\n"
               << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
               << ":\n\n"
-              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
-              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE << ")\n"
               << "MCMC_NUMBER_OF_SAMPLES <value> (default: "
               << DEFAULT_MCMC_NUMBER_OF_SAMPLES << ")\n"
               << "MCMC_NUMBER_OF_BURN_IN_SAMPLES <value> (default: "
@@ -89,8 +89,8 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  std::string experimentalResultsDirectory =
-    madai::GetExperimentalResultsDirectory( statisticsDirectory, settings );
+  std::string experimentalResultsFile =
+    madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
   int numberOfSamples = DEFAULT_MCMC_NUMBER_OF_SAMPLES;
   if ( settings.HasOption( "MCMC_NUMBER_OF_SAMPLES" ) ) {
@@ -130,7 +130,7 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  std::string observationsFile = experimentalResultsDirectory +
+  std::string observationsFile = experimentalResultsFile +
     madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
   std::ifstream observations( observationsFile.c_str() );
   if ( madai::Model::NO_ERROR != em.LoadObservations( observations ) ) {

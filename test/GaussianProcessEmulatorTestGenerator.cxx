@@ -161,9 +161,9 @@ GaussianProcessEmulatorTestGenerator
     ResultsFile.close();
   }
   
-  // Create the experimental results directory
+  // Create an experimental results directory
   std::string ExperimentalResultsDir = StatisticsDirectory + madai::Paths::SEPARATOR
-      + madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
+      + "experimental_results";
   directoryCreated = madaisys::SystemTools::MakeDirectory( ExperimentalResultsDir.c_str() );
   if ( !directoryCreated ) {
     std::cerr << "Could not create directory '" << ExperimentalResultsDir << "'\n";
@@ -172,7 +172,7 @@ GaussianProcessEmulatorTestGenerator
   
   // Write the experimental results file
   std::string ExperimentalResultsFile = ExperimentalResultsDir + madai::Paths::SEPARATOR
-      + madai::Paths::RESULTS_FILE;
+      + madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE;
   std::ofstream ExpResultsFile( ExperimentalResultsFile.c_str() );
   if ( !ExpResultsFile ) {
     std::cerr << "Could not open file '" << ExperimentalResultsFile << "'\n";

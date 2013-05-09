@@ -45,8 +45,8 @@ int main( int argc, char ** argv )
               << ":\n\n"
               << "MODEL_OUTPUT_DIRECTORY <value> (default: "
               << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
-              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
-              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE << ")\n"
               << "READER_VERBOSE <value> (default: false)\n"
               << "VERBOSE <value> (default: false)\n";
 
@@ -60,6 +60,13 @@ int main( int argc, char ** argv )
   madai::RuntimeParameterFileReader settings;
   std::string settingsFile = statisticsDirectory +
     madai::Paths::RUNTIME_PARAMETER_FILE;
+
+  if ( !madai::IsFile( settingsFile ) ) {
+    std::cerr << "Settings file '" << settingsFile << "' is either a directory or does not "
+              << "exist.\n";
+    return EXIT_FAILURE;
+  }
+
   if ( !settings.ParseFile( settingsFile ) ) {
     std::cerr << "Could not open runtime parameter file '" << settingsFile << "'\n";
     return EXIT_FAILURE;
@@ -67,8 +74,17 @@ int main( int argc, char ** argv )
 
   std::string modelOutputDirectory =
     madai::GetModelOutputDirectory( statisticsDirectory, settings );
-  std::string experimentalResultsDirectory =
-    madai::GetExperimentalResultsDirectory( statisticsDirectory, settings );
+  if ( !madai::IsDirectory( modelOutputDirectory ) ) {
+    std::cerr << "Could not read '" << modelOutputDirectory << "'.\n";
+    return EXIT_FAILURE;
+  }
+
+  std::string experimentalResultsFile =
+    madai::GetExperimentalResultsFile( statisticsDirectory, settings );
+  if ( !madai::IsFile( experimentalResultsFile ) ) {
+    std::cerr << "Could not read '" << experimentalResultsFile << "'.\n";
+    return EXIT_FAILURE;
+  }
 
   // Read in the training data
   madai::GaussianProcessEmulator gpe;
@@ -78,7 +94,7 @@ int main( int argc, char ** argv )
   if ( !directoryReader.LoadTrainingData( &gpe,
                                           modelOutputDirectory,
                                           statisticsDirectory,
-                                          experimentalResultsDirectory ) ) {
+                                          experimentalResultsFile ) ) {
     std::cerr << "Error loading training data.\n";
     return EXIT_FAILURE;
   }

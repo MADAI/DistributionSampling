@@ -427,15 +427,13 @@ bool checkOutputMeans( const madai::GaussianProcessEmulator & gpe )
 
 bool checkOutputUncertaintyScales( const madai::GaussianProcessEmulator & gpe,
                                    const std::string & modelOutputDirectory,
-                                   const std::string & experimentalResultsDirectory )
+                                   const std::string & experimentalResultsFileName )
 {
   // Read in the uncertainty from the experimental results
-  std::string resultsFileName = experimentalResultsDirectory +
-    madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
-  std::ifstream resultsFile( resultsFileName.c_str() );
+  std::ifstream resultsFile( experimentalResultsFileName.c_str() );
 
   if ( !resultsFile.good() ) {
-    std::cerr << "Could not open file '" << resultsFileName << "'\n";
+    std::cerr << "Could not open file '" << experimentalResultsFileName << "'\n";
     return false;
   }
 
@@ -449,7 +447,7 @@ bool checkOutputUncertaintyScales( const madai::GaussianProcessEmulator & gpe,
 
     if ( tokens.size() != 3 ) {
       std::cerr << "Too few tokens in line '" << line << "' in file '"
-                << resultsFileName << "'\n";
+                << experimentalResultsFileName << "'\n";
       std::cerr << "Format should be <name> <value> <uncertainty>\n";
       return false;
     }
@@ -531,10 +529,9 @@ bool checkOutputUncertaintyScales( const madai::GaussianProcessEmulator & gpe,
 }
 
 bool checkObservedOutputValues( const madai::GaussianProcessEmulator & gpe,
-                                const std::string & experimentalResultsDirectory )
+                                const std::string & experimentalResultsFileName )
 {
-  std::string resultsFileName = experimentalResultsDirectory +
-    madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
+  std::string resultsFileName( experimentalResultsFileName );
   std::ifstream resultsFile( resultsFileName.c_str() );
 
   if ( !resultsFile.good() ) {
@@ -602,8 +599,8 @@ int main( int argc, char *argv[] )
 
   std::string modelOutputDirectory =
     madai::GetModelOutputDirectory( statisticsDirectory, settings );
-  std::string experimentalResultsDirectory =
-    madai::GetExperimentalResultsDirectory( statisticsDirectory, settings );
+  std::string experimentalResultsFile =
+    madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
   // Read in the training data
   madai::GaussianProcessEmulator gpe;
@@ -613,7 +610,7 @@ int main( int argc, char *argv[] )
   if ( !directoryReader.LoadTrainingData( &gpe,
                                           modelOutputDirectory,
                                           statisticsDirectory,
-                                          experimentalResultsDirectory ) ) {
+                                          experimentalResultsFile ) ) {
     std::cerr << "Error loading training data.\n";
     return EXIT_FAILURE;
   }
@@ -650,12 +647,12 @@ int main( int argc, char *argv[] )
 
   if ( !checkOutputUncertaintyScales( gpe,
                                       modelOutputDirectory,
-                                      experimentalResultsDirectory ) ) {
+                                      experimentalResultsFile ) ) {
     std::cerr << "Error in checkOutputUncertaintyScales\n";
     return EXIT_FAILURE;
   }
 
-  if ( !checkObservedOutputValues( gpe, experimentalResultsDirectory ) ) {
+  if ( !checkObservedOutputValues( gpe, experimentalResultsFile ) ) {
     std::cerr << "Error in checkObservedOutputValues\n";
     return EXIT_FAILURE;
   }

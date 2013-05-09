@@ -64,12 +64,12 @@ int main( int, char *[] ) {
   
   std::string MOD = TempDirectory + madai::Paths::SEPARATOR + 
                     madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
-  std::string ERD = TempDirectory + madai::Paths::SEPARATOR +
-                    madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
+  std::string ERF = TempDirectory + madai::Paths::SEPARATOR +
+    "experimental_results" + madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
 
   madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-  if ( !directoryReader.LoadTrainingData( &gpe, MOD, TempDirectory, ERD ) ) {
+  if ( !directoryReader.LoadTrainingData( &gpe, MOD, TempDirectory, ERF ) ) {
     std::cerr << "Error loading from created directory structure\n";
     return EXIT_FAILURE;
   } 

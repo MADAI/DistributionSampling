@@ -40,10 +40,10 @@ public:
   /**
     This takes an empty GPEM and loads training data.
     \returns true on success. */
-  bool LoadTrainingData( GaussianProcessEmulator * gpe,
-                         const std::string & modelOutputDirectory,
-                         const std::string & statisticalAnalysisDirectory,
-                         const std::string & experimentalResultsDirectory);
+  bool LoadTrainingData(GaussianProcessEmulator * gpe,
+                        std::string modelOutputDirectory,
+                        std::string statisticalAnalysisDirectory,
+                        std::string experimentalResultsFileName);
 
   /**
     This takes a GPEM and loads PCA data.

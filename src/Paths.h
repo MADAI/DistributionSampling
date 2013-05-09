@@ -30,7 +30,7 @@ public:
 
   static const std::string DEFAULT_MODEL_OUTPUT_DIRECTORY;
 
-  static const std::string DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
+  static const std::string DEFAULT_EXPERIMENTAL_RESULTS_FILE;
   
   static const std::string TRACE_DIRECTORY;
 

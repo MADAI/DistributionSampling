@@ -147,8 +147,8 @@ int main(int argc, char ** argv) {
               << ":\n\n"
               << "MODEL_OUTPUT_DIRECTORY <value> (default: "
               << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
-              << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
-              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
+              << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
+              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE << ")\n"
               << "EMULATE_QUIET <value> (false)\n"
               << "READER_VERBOSE <value> (default: false)\n";
 
@@ -166,8 +166,8 @@ int main(int argc, char ** argv) {
 
   std::string modelOutputDirectory =
     madai::GetModelOutputDirectory( statisticsDirectory, settings );
-  std::string experimentalResultsDirectory =
-    madai::GetExperimentalResultsDirectory( statisticsDirectory, settings );
+  std::string experimentalResultsFile =
+    madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
   bool emulatorWriteHeader = DEFAULT_EMULATE_WRITE_HEADER;
   if ( settings.HasOption( "EMULATE_WRITE_HEADER" ) ) {
@@ -182,7 +182,7 @@ int main(int argc, char ** argv) {
   if ( !directoryReader.LoadTrainingData( &gpe,
                                           modelOutputDirectory,
                                           statisticsDirectory,
-                                          experimentalResultsDirectory ) ) {
+                                          experimentalResultsFile ) ) {
     std::cerr << "Error loading training data.\n";
     return EXIT_FAILURE;
   }

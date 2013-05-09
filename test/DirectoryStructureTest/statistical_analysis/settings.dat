@@ -1,7 +1,7 @@
  
 #comment  
   MODEL_OUTPUT_DIRECTORY ../model_output  # Comment # comment
-EXPERIMENTAL_RESULTS_DIRECTORY ../experimental_results
+EXPERIMENTAL_RESULTS_FILE ../experimental_results/results.dat
 ITERATIONS 10000
 BURN_IN 1000
 USE_EMULATED_ERROR false

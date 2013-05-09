@@ -35,8 +35,20 @@ void EnsurePathSeparatorAtEnd( std::string & path );
 std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
                                      const RuntimeParameterFileReader & settings );
 
-std::string GetExperimentalResultsDirectory( const std::string & statisticsDirectory,
-                                             const RuntimeParameterFileReader & settings );
+std::string GetExperimentalResultsFile( const std::string & statisticsDirectory,
+                                        const RuntimeParameterFileReader & settings );
+
+/** Returns true if the path points to a file, false if it doesn't exist, and
+ * false if it is a directory. */
+bool IsFile( const char * path );
+
+bool IsFile( const std::string & path );
+
+/** Returns true if the path points to a directory, false if it points
+* to a file, false if it doesn't exist. */
+bool IsDirectory( const char * path );
+
+bool IsDirectory( const std::string & path );
 
 std::string LowerCase( char * buffer );
 
