@@ -28,18 +28,16 @@ namespace madai {
 
 int SamplerCSVWriter
 ::GenerateSamplesAndSaveToFile(
-    Sampler * sampler,
-    Model * model,
+    Sampler & sampler,
+    Model & model,
     std::ostream & outFile,
     int NumberOfSamples,
     int NumberOfBurnInSamples,
     bool UseEmulatorCovariance,
     std::ostream * progress)
 {
-  assert(model != NULL);
-  assert(sampler != NULL);
-  model->SetUseModelCovarianceToCalulateLogLikelihood(UseEmulatorCovariance);
-  sampler->SetModel( model );
+  model.SetUseModelCovarianceToCalulateLogLikelihood(UseEmulatorCovariance);
+  sampler.SetModel( &model );
   int step = NumberOfBurnInSamples / 100, percent = 0;
   if ( step < 1 ) {
     step = 1; // avoid div-by-zero error
@@ -51,14 +49,14 @@ int SamplerCSVWriter
         progress->flush();
       }
     }
-    sampler->NextSample(); // Discard samples in the burn-in phase
+    sampler.NextSample(); // Discard samples in the burn-in phase
   }
   step = NumberOfSamples / 100, percent = 0;
   if ( step < 1 ) {
     step = 1; // avoid div-by-zero error
   }
 
-  WriteHeader( outFile, model->GetParameters(), model->GetScalarOutputNames() );
+  WriteHeader( outFile, model.GetParameters(), model.GetScalarOutputNames() );
 
   for (int count = 0; count < NumberOfSamples; count ++) {
     if (progress != NULL) {
@@ -66,7 +64,7 @@ int SamplerCSVWriter
         (*progress) <<  '\r' << "SAMPLER percent done: " << percent++ << "%";
       progress->flush();
     }
-    Sample sample = sampler->NextSample();
+    Sample sample = sampler.NextSample();
 
     WriteSample( outFile, sample );
   }

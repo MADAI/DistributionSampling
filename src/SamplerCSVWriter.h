@@ -42,8 +42,8 @@ public:
      If progress is not NULL, will print out a progrss bar.
    */
   static int GenerateSamplesAndSaveToFile(
-    Sampler * sampler,
-    Model * model,
+    Sampler & sampler,
+    Model & model,
     std::ostream & outFile,
     int NumberOfSamples,
     int NumberOfBurnInSamples=0,

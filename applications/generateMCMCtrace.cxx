@@ -147,8 +147,8 @@ int main(int argc, char ** argv) {
   }
 
   int returnCode = madai::SamplerCSVWriter::GenerateSamplesAndSaveToFile(
-      &mcmc,
-      &gpem,
+      mcmc,
+      gpem,
       outFile,
       numberOfSamples,
       numberOfBurnInSamples,
