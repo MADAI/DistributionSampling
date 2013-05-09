@@ -163,12 +163,7 @@ int main(int argc, char ** argv) {
               << "', should have been 'output'" << std::endl;
     return EXIT_FAILURE;
   }
-
-  madai::MetropolisHastingsSampler simple_mcmc;
-  simple_mcmc.SetModel( &externalModel );
-
-  simple_mcmc.SetStepSize(0.1);
-
+  
   int t = externalModel.GetNumberOfScalarOutputs();
   std::vector< double > observedScalarValues;
   for(int i = 0; i < t; ++i)
@@ -178,6 +173,11 @@ int main(int argc, char ** argv) {
   for(int i = 0; i < t; ++i)
     observedScalarCovariance[i + (t * i)] = 0.05;
   externalModel.SetObservedScalarCovariance(observedScalarCovariance);
+
+  madai::MetropolisHastingsSampler simple_mcmc;
+  simple_mcmc.SetModel( &externalModel );
+
+  simple_mcmc.SetStepSize(0.1);
 
   madai::Trace trace;
   unsigned int numberIter = 500;
