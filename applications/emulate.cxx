@@ -150,7 +150,7 @@ int main(int argc, char ** argv) {
               << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
               << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
               << "EMULATE_QUIET <value> (false)\n"
-              << "READER_VERBOSE <value> (default: false )\n";
+              << "READER_VERBOSE <value> (default: false)\n";
 
     return EXIT_FAILURE;
   }

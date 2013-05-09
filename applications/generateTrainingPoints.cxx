@@ -218,7 +218,8 @@ int main( int argc, char * argv[] ) {
               << "GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION <value> (default: "
               << DEFAULT_GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE << ")\n"
               << "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS <value> (default: "
-              << DEFAULT_GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS << ")\n";
+              << DEFAULT_GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS << ")\n"
+              << "VERBOSE <value> (default: false)\n";
 
     return EXIT_FAILURE;
   }
@@ -275,7 +276,9 @@ int main( int argc, char * argv[] ) {
     return EXIT_FAILURE;
   }
 
-  std::cout << "Write model output directory '" << modelOutputDirectory << "'.\n";
+  if ( settings.GetOptionAsBool( "VERBOSE", false ) ) {
+    std::cout << "Write model output directory '" << modelOutputDirectory << "'.\n";
+  }
 
   return EXIT_SUCCESS;
 }

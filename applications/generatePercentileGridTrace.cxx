@@ -61,7 +61,8 @@ int main(int argc, char ** argv) {
               << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
               << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
               << "PERCENTILE_GRID_NUMBER_OF_SAMPLES <value> (default: "
-              << DEFAULT_PERCENTILE_GRID_NUMBER_OF_SAMPLES << ")\n";
+              << DEFAULT_PERCENTILE_GRID_NUMBER_OF_SAMPLES << ")\n"
+              << "VERBOSE <value> (default: false)\n";
     return EXIT_FAILURE;
   }
   std::string statisticsDirectory( argv[1] );
@@ -113,10 +114,10 @@ int main(int argc, char ** argv) {
   int step = numberOfSamples / 100, percent = 0;
   for (int count = 0; count < numberOfSamples; count ++) {
     if (count % step == 0)
-      std::cout <<  '\r' << percent++ << "%";
+      std::cerr <<  '\r' << percent++ << "%";
     trace.Add(sampler.NextSample());
   }
-  std::cout << "\r" ;
+  std::cerr << "\r" ;
 
   std::string traceDirectory = statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
@@ -132,7 +133,9 @@ int main(int argc, char ** argv) {
                         gpem.GetParameters(),
                         gpem.GetScalarOutputNames() );
 
-  std::cout << "Wrote percentile grid trace to file '" << outputFilePath << "'.\n";
+  if ( settings.GetOptionAsBool( "VERBOSE", false ) ) {
+    std::cout << "Wrote percentile grid trace to file '" << outputFilePath << "'.\n";
+  }
 
   return EXIT_SUCCESS;
 }

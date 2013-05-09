@@ -68,7 +68,8 @@ int main(int argc, char ** argv) {
               << DEFAULT_EMULATOR_COVARIANCE_FUNCTION << ")\n"
               << "EMULATOR_REGRESSION_ORDER <value> (default: "
               << DEFAULT_EMULATOR_REGRESSION_ORDER << ")\n"
-              << "READER_VERBOSE <value> (default: false )\n";
+              << "READER_VERBOSE <value> (default: false)\n"
+              << "VERBOSE <value> (default: false)\n";
 
     return EXIT_FAILURE;
   }
@@ -146,8 +147,10 @@ int main(int argc, char ** argv) {
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
   singleFileWriter.Write( &gpe, os );
 
-  std::cout << "Emulator training succeeded.\n";
-  std::cout << "Wrote emulator state file '" << outputFileName << "'.\n";
+  if ( settings.GetOptionAsBool( "VERBOSE", false ) ) {
+    std::cout << "Emulator training succeeded.\n";
+    std::cout << "Wrote emulator state file '" << outputFileName << "'.\n";
+  }
   
   return EXIT_SUCCESS;
 }

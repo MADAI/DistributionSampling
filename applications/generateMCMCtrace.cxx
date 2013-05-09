@@ -73,7 +73,8 @@ int main(int argc, char ** argv) {
               << "MCMC_USE_EMULATOR_COVARIANCE <value> (default: "
               << DEFAULT_MCMC_USE_EMULATOR_COVARIANCE << ")\n"
               << "MCMC_STEP_SIZE <value> (default: "
-              << DEFAULT_MCMC_STEP_SIZE << ")\n";
+              << DEFAULT_MCMC_STEP_SIZE << ")\n"
+              << "VERBOSE <value> (default: false)\n";
 
     return EXIT_FAILURE;
   }
@@ -154,10 +155,12 @@ int main(int argc, char ** argv) {
       useEmulatorCovariance,
       &(std::cerr));
 
-  if ( returnCode == EXIT_SUCCESS ) {
-    std::cout << "Succeeded writing trace file '" << outputFilePath << "'.\n";
-  } else {
-    std::cerr << "Could not write trace file '" << outputFilePath << "'.\n";
+  if ( settings.GetOptionAsBool( "VERBOSE", false ) ) {
+    if ( returnCode == EXIT_SUCCESS ) {
+      std::cout << "Succeeded writing trace file '" << outputFilePath << "'.\n";
+    } else {
+      std::cerr << "Could not write trace file '" << outputFilePath << "'.\n";
+    }
   }
 
   return returnCode;

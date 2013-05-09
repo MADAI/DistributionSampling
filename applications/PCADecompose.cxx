@@ -47,7 +47,8 @@ int main( int argc, char ** argv )
               << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
               << "EXPERIMENTAL_RESULTS_DIRECTORY <value> (default: "
               << Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY << ")\n"
-              << "READER_VERBOSE <value> (default: false )\n";
+              << "READER_VERBOSE <value> (default: false)\n"
+              << "VERBOSE <value> (default: false)\n";
 
     return EXIT_FAILURE;
   }
@@ -101,8 +102,10 @@ int main( int argc, char ** argv )
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
   singleFileWriter.WritePCA( &gpe, os );
 
-  std::cout << "PCA decomposition succeeded.\n";
-  std::cout << "Wrote PCA decomposition file '" << outputFileName << "'.\n";
+  if ( settings.GetOptionAsBool( "VERBOSE", false ) ) {
+    std::cout << "PCA decomposition succeeded.\n";
+    std::cout << "Wrote PCA decomposition file '" << outputFileName << "'.\n";
+  }
 
   return EXIT_SUCCESS;
 }

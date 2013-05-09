@@ -66,7 +66,8 @@ int main(int argc, char ** argv) {
               << "<Argument2>\n"
               << "...\n"
               << "<LastAgument>\n"
-              << "ARGUMENTS_DONE\n";
+              << "ARGUMENTS_DONE\n"
+              << "VERBOSE\n";
 
     return EXIT_FAILURE;
   }
@@ -132,10 +133,10 @@ int main(int argc, char ** argv) {
   int step = numberOfSamples / 100, percent = 0;
   for (int count = 0; count < numberOfSamples; count ++) {
     if (count % step == 0)
-      std::cout <<  '\r' << percent++ << "%";
+      std::cerr <<  '\r' << percent++ << "%";
     trace.Add(sampler.NextSample());
   }
-  std::cout << "\r" ;
+  std::cerr << "\r" ;
 
   std::string traceDirectory = statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
@@ -150,7 +151,9 @@ int main(int argc, char ** argv) {
                         em.GetParameters(),
                         em.GetScalarOutputNames() );
 
-  std::cout << "Wrote percentile grid trace to file '" << outputFilePath << "'.\n";
+  if ( settings.GetOptionAsBool( "VERBOSE", false ) ) {
+    std::cout << "Wrote percentile grid trace to file '" << outputFilePath << "'.\n";
+  }
 
   return EXIT_SUCCESS;
 }
