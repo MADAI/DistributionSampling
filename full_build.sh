@@ -5,6 +5,12 @@
 # library, and installs it in the directory specified by the required
 # command-line argument. This script must be run from within the
 # DistributionSampling source directory root.
+#
+# WARNING: This script does not install Eigen and boost, so building
+# against the Distribution Sampling library installed by this script
+# may fail if headers in the Distribution Sampling library are
+# included which themselves include Eigen and Boost.
+
 
 BOOST_URL='http://sourceforge.net/projects/boost/files/latest/download?source=files'
 EIGEN3_URL='http://bitbucket.org/eigen/eigen/get/3.1.3.tar.bz2'
