@@ -3,7 +3,7 @@ configure_file( Doxyfile.in ${DistributionSampling_BINARY_DIR}/doc/Doxyfile @ONL
 
 add_custom_target( Documentation ALL
   COMMAND ${DOXYGEN_EXECUTABLE} ${DistributionSampling_BINARY_DIR}/doc/Doxyfile
-  SOURCES ${DistributionSampling_SOURCE_DIR}/doc/doxyfile
+  SOURCES ${DistributionSampling_SOURCE_DIR}/doc/html/index.html
   WORKING_DIRECTORY ${DistributionSampling_SOURCE_DIR}/doc
 )
 
