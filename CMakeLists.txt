@@ -51,6 +51,15 @@ if(USE_GPROF)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 endif() # USE_GPROF
 
+option( BUILD_DOCUMENTATION "Build Doxygen documentation." OFF )
+
+if ( BUILD_DOCUMENTATION )
+  find_package( Doxygen )
+  if ( DOXYGEN_FOUND )
+    add_subdirectory( doc )
+  endif()
+endif()
+
 ## Compile time checks for the existence of required headers
 set( try_compile_directory ${DistributionSampling_BINARY_DIR}/TryCompiles )
 try_compile( HAS_POSIX_PIPES ${try_compile_directory}
