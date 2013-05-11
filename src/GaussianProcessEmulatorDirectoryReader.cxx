@@ -217,13 +217,14 @@ bool parseExperimentalResults(
       std::cerr << "Too few tokens in line '" << line << "' in file '"
                 << experimentalResultsFileName << "'\n";
       std::cerr << formatMessage << "\n";
+      resultsFile.close();
       return false;
     }
 
-    if ( tokens.size() > 3 ) {
-      std::cerr << "Extra tokens in line '" << line << "' in file '"
+    if ( tokens.size() > 3 && verbose ) {
+      std::cout << "Extra tokens in line '" << line << "' in file '"
                 << experimentalResultsFileName << "'\n";
-      std::cerr << formatMessage << "\n";
+      std::cout << formatMessage << "\n";
     }
 
     std::string name( tokens[0] );
@@ -240,11 +241,12 @@ bool parseExperimentalResults(
 
       gpe.m_ObservedValues(index) = value;
       gpe.m_ObservedVariances(index) = uncertainty;
-    } else {
-      std::cerr << "Could not find output name '" << name << "'\n";
-      return false;
+    } else if ( verbose ) {
+      std::cout << "Ignoring value and uncertainty for unknown output name '" << name << "'\n";
     }
   }
+
+  resultsFile.close();
 
   return true;
 }
@@ -255,11 +257,17 @@ bool parseExperimentalResults(
 bool parseParameters(
     std::vector< madai::Parameter > & parameters,
     int & numberParameters,
-    const std::string & statisticalAnalysisDirectory )
+    const std::string & statisticalAnalysisDirectory,
+    bool verbose )
 {
   // First check to see if file exists
   std::string priorFileName = statisticalAnalysisDirectory + Paths::SEPARATOR +
     Paths::PARAMETER_PRIORS_FILE;
+
+  if ( verbose ) {
+    std::cout << "Opened parameter priors file '" << priorFileName << "'.\n";
+  }
+
   std::ifstream input( priorFileName.c_str() );
   if ( !input.good() ) {
     std::cerr << "Could not read parameter prior file '" <<
@@ -285,19 +293,20 @@ bool parseParameters(
       std::cerr << "Too few tokens in line '" << line << "' in file '"
                 << priorFileName << "'\n";
       std::cerr << formatMessage << "\n";
+      input.close();
       return false;
     }
 
-    if ( tokens.size() > 4 ) {
-      std::cerr << "Extra tokens in line '" << line << "' in file '"
+    if ( tokens.size() > 4 && verbose ) {
+      std::cout << "Extra tokens in line '" << line << "' in file '"
                 << priorFileName << "'\n";
-      std::cerr << formatMessage << "\n";
+      std::cout << formatMessage << "\n";
     }
 
     std::string type( tokens[0] );
     std::string name( tokens[1] );
-    boost::algorithm::to_lower( name );
-    
+    boost::algorithm::to_lower( type );
+
     // All supported distributions have two double parameters
     double distributionValues[2];
     distributionValues[0] = atof( tokens[2].c_str() );
@@ -310,6 +319,12 @@ bool parseParameters(
       priorDist.SetMaximum( distributionValues[1] );
       parameters.push_back( madai::Parameter( name, priorDist ) );
 
+      if ( verbose ) {
+        std::cout << "Parsed '" << type << "'-distributed parameter '"
+                  << name << " with minimum " << distributionValues[0]
+                  << " and maximum " << distributionValues[1] << std::endl;
+      }
+
     } else if ( type == "gaussian" ) {
 
       madai::GaussianDistribution priorDist;
@@ -317,14 +332,24 @@ bool parseParameters(
       priorDist.SetStandardDeviation( distributionValues[1] );
       parameters.push_back( madai::Parameter( name, priorDist ) );
 
+      if ( verbose ) {
+        std::cout << "Parsed '" << type << "'-distributed parameter '"
+                  << name << " with mean " << distributionValues[0]
+                  << " and standard deviation " << distributionValues[1]
+                  << std::endl;
+      }
+
     } else {
 
       std::cerr << "Expected uniform or gaussian, but got " <<
         type << "\n";
+      input.close();
       return false;
 
     }
   }
+
+  input.close();
 
   numberParameters = parameters.size();
 
@@ -359,16 +384,22 @@ bool parseCovarianceFunction(
 bool parseOutputs(
     std::vector< std::string > & outputNames,
     int & numberOutputs,
-    const std::string & statisticalAnalysisDirectory )
+    const std::string & statisticalAnalysisDirectory,
+    bool verbose)
 {
   // First check to see if file exists
   std::string observablesFileName = statisticalAnalysisDirectory +
     Paths::SEPARATOR + Paths::OBSERVABLE_NAMES_FILE;
+
   std::ifstream input( observablesFileName.c_str() );
   if ( !input.good() ) {
     std::cerr << "Could not read observables file '"
               << observablesFileName << "'\n";
     return false;
+  }
+
+  if ( verbose ) {
+    std::cout << "Opened file '" << observablesFileName << "'.\n";
   }
 
   outputNames.clear(); // Empty the output vector  
@@ -381,16 +412,24 @@ bool parseOutputs(
     if ( tokens.size() == 0 ) continue;
 
     // Warn if there is more than one token on a line
-    if ( tokens.size() > 1 ) {
-      std::cerr << "Extra tokens in line '" << line << "' in file "
+    if ( tokens.size() > 1 && verbose ) {
+      std::cout << "Extra tokens in line '" << line << "' in file "
                 << observablesFileName << "'\n";
-      std::cerr << "Format should be <observable name>\n";
+      std::cout << "Format should be <observable name>\n";
     }
 
     outputNames.push_back( tokens[0] );
+
+    if ( verbose ) {
+      std::cout << "Parsed output '" << tokens[0] << "'.\n";
+    }
+
   }
 
+  input.close();
+
   numberOutputs = outputNames.size();
+
   return (numberOutputs > 0);
 }
 
@@ -408,6 +447,8 @@ bool parseNumberOfModelRuns( int & x,
 
   for ( unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i ) {
     int dummy;
+    // \todo Remove restriction of requiring integer at end
+    // \todo Verify that the file staring with "run" is a directory
     if ( sscanf( directory.GetFile( i ), "run%d", &dummy ) == 1 ) {
       runCounter++;
     }
@@ -507,13 +548,14 @@ inline bool parseParameterAndOutputValues(
           std::cerr << "Too few tokens in line '" << line << "' in file '"
                     << parametersFileName << "'\n";
           std::cerr << formatString << "\n";
+          parametersFile.close();
           return false;
         }
 
-        if ( tokens.size() > 2 ) {
-          std::cerr << "Extra tokens in line '" << line << "' in file '"
+        if ( tokens.size() > 2 && verbose ) {
+          std::cout << "Extra tokens in line '" << line << "' in file '"
                     << parametersFileName << "' will be ignored.\n";
-          std::cerr << formatString << "\n";
+          std::cout << formatString << "\n";
         }
 
         std::string name( tokens[0] );
@@ -533,8 +575,8 @@ inline bool parseParameterAndOutputValues(
           }
         }
 
-        if ( !foundParameter ) {
-          std::cerr << "Unknown parameter name '" << name << "' in line '"
+        if ( !foundParameter && verbose ) {
+          std::cout << "Unknown parameter name '" << name << "' in line '"
                     << line << "' in file '" << parametersFileName
                     << "' will be ignored.\n";
         }
@@ -591,14 +633,15 @@ inline bool parseParameterAndOutputValues(
           std::cerr << "Too few tokens in line '" << line << "' in file '"
                     << resultsFileName << "'\n";
           std::cerr << formatString << "\n";
+          resultsFile.close();
           return false;
         }
 
         // Too many tokens
-        if ( tokens.size() > 4 ) {
-          std::cerr << "Extra tokens in line '" << line << "' in file '"
+        if ( tokens.size() > 4 && verbose ) {
+          std::cout << "Extra tokens in line '" << line << "' in file '"
                     << resultsFileName << "' will be ignored.\n";
-          std::cerr << formatString << "\n";
+          std::cout << formatString << "\n";
         }
 
         std::string name( tokens[0] );
@@ -616,13 +659,15 @@ inline bool parseParameterAndOutputValues(
           averageUncertainty[ outputIndex ] += uncertainty;
 
           outputsRemaining.erase( name );
-        } else {
+        } else if ( verbose ) {
           std::cout << "Unknown output name '" << name << "' in line '"
                     << line << "' in file '" << resultsFileName
                     << "' will be ignored.\n";
         }
     
       }
+
+      resultsFile.close();
 
       // Check that we have read values for all parameters
       if ( outputsRemaining.size() > 0 ) {
@@ -661,14 +706,16 @@ bool parseModelDataDirectoryStructure(
   if ( !parseParameters(
           gpme.m_Parameters,
           gpme.m_NumberParameters,
-          statisticalAnalysisDirectory ) ) {
+          statisticalAnalysisDirectory,
+          verbose ) ) {
     std::cerr << "Couldn't parse parameters\n";
     return false;
   }
   if ( !parseOutputs(
           gpme.m_OutputNames,
           gpme.m_NumberOutputs,
-          statisticalAnalysisDirectory ) ) {
+          statisticalAnalysisDirectory,
+          verbose) ) {
     std::cerr << "Couldn't parse outputs\n";
     return false;
   }
@@ -894,6 +941,7 @@ bool parseGaussianProcessEmulator(
       if (! parseInteger(gpme.m_NumberPCAOutputs, input)) {
         std::cerr << "Could not parse number of SUBMODELS when reading "
                   << "emulator state.\n";
+        input.close();
         return false;
       }
       gpme.m_PCADecomposedModels.resize(gpme.m_NumberPCAOutputs);
@@ -901,6 +949,7 @@ bool parseGaussianProcessEmulator(
         if (! parseSubmodels(gpme.m_PCADecomposedModels[i],i,input)) {
           std::cerr << "Could not parse submodels when reading emulator "
                     << "state.\n";
+          input.close();
           return false;
         }
         gpme.m_PCADecomposedModels[i].m_Parent = &gpme;
@@ -909,9 +958,12 @@ bool parseGaussianProcessEmulator(
       return true;
     } else {
       std::cerr << "Unexpected keyword: " << word << "\n";
+      input.close();
       return false;
     }
   }
+
+  input.close();
 
   return true;
 }
@@ -959,6 +1011,7 @@ GaussianProcessEmulatorDirectoryReader
   std::ifstream input( PCAFile.c_str() );
   if ( !parsePCADecomposition(*gpe, input) ) {
     std::cerr << "Error parsing PCA data.\n";
+    input.close();
     return false;
   }
 
