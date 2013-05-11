@@ -22,6 +22,7 @@
 #include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "RuntimeParameterFileReader.h"
 #include "Paths.h"
+#include "System.h"
 
 using madai::Paths;
 
@@ -61,7 +62,7 @@ int main( int argc, char ** argv )
   std::string settingsFile = statisticsDirectory +
     madai::Paths::RUNTIME_PARAMETER_FILE;
 
-  if ( !madai::IsFile( settingsFile ) ) {
+  if ( !madai::System::IsFile( settingsFile ) ) {
     std::cerr << "Settings file '" << settingsFile << "' is either a directory or does not "
               << "exist.\n";
     return EXIT_FAILURE;
@@ -74,14 +75,14 @@ int main( int argc, char ** argv )
 
   std::string modelOutputDirectory =
     madai::GetModelOutputDirectory( statisticsDirectory, settings );
-  if ( !madai::IsDirectory( modelOutputDirectory ) ) {
+  if ( !madai::System::IsDirectory( modelOutputDirectory ) ) {
     std::cerr << "Could not read '" << modelOutputDirectory << "'.\n";
     return EXIT_FAILURE;
   }
 
   std::string experimentalResultsFile =
     madai::GetExperimentalResultsFile( statisticsDirectory, settings );
-  if ( !madai::IsFile( experimentalResultsFile ) ) {
+  if ( !madai::System::IsFile( experimentalResultsFile ) ) {
     std::cerr << "Could not read '" << experimentalResultsFile << "'.\n";
     return EXIT_FAILURE;
   }

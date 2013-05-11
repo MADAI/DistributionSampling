@@ -446,10 +446,10 @@ bool parseNumberOfModelRuns( int & x,
   unsigned int runCounter = 0;
 
   for ( unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i ) {
-    int dummy;
-    // \todo Remove restriction of requiring integer at end
+
     // \todo Verify that the file staring with "run" is a directory
-    if ( sscanf( directory.GetFile( i ), "run%d", &dummy ) == 1 ) {
+    std::string directoryName( directory.GetFile( i ) );
+    if ( directoryName.substr( 0, 3 ) == "run" ) {
       runCounter++;
     }
   }

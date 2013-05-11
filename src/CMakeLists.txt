@@ -23,6 +23,7 @@ set( SRC_FILES
   UniformDistribution.cxx
   PercentileGridSampler.cxx
   SamplerCSVWriter.cxx
+  System.cxx
 )
 
 add_library( DistributionSampling ${SRC_FILES} )
