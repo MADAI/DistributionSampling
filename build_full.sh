@@ -3,44 +3,52 @@
 # This script downloads all dependencies, puts them in a temporary
 # build location, configures and builds the DistributionSampling
 # library, and installs it in the directory specified by the required
-# command-line argument. This script must be run from within the
-# DistributionSampling source directory root.
+# command-line argument.
 
 BOOST_URL='http://sourceforge.net/projects/boost/files/latest/download?source=files'
 EIGEN3_URL='http://bitbucket.org/eigen/eigen/get/3.1.3.tar.bz2'
 
-die() { echo "$@"; exit 1; }
+die() { echo "$@" >&2; exit 1; }
+check_command() { command -v "$1" >/dev/null 2>&1 ; }
 
 if [ -z "$1" ] ; then
-    echo "Usage:"
-    echo "  $0 INSTALL_PREFIX"
-    echo "Examples:"
-    echo "  $0 \"\${HOME}/local\""
-    echo "  $0 \"\${HOME}/madai\""
-    echo "  $0 /usr/local"
+    echo "Usage:" >&2;
+    echo "  $0 INSTALL_PREFIX" >&2;
+    echo "Examples:" >&2;
+    echo "  $0 \"\${HOME}/local\"" >&2;
+    echo "  $0 \"\${HOME}/madai\"" >&2;
+    echo "  $0 /usr/local" >&2;
     exit 1
 fi
 
+# Check prerequisites (curl, CMake, make )
+check_command curl  || \
+	die "curl is required but it is not installed. Exiting."
+check_command cmake || \
+	die "cmake is required but it is not installed. Exiting."
+check_command make  || \
+	die "make is required but it is not installed. Exiting."
+
+cd "`dirname "$0"`"
 SRC_DIR="`pwd`"
 BUILD_DIR="/tmp/DSL"
-mkdir -p ${BUILD_DIR}
-pushd ${BUILD_DIR}
-
-# Check prerequisites (curl, CMake, make )
-command -v curl >/dev/null 2>&1 || { echo "curl is required but it is not installed. Exiting." >&2; exit 1; }
-command -v cmake >/dev/null 2>&1 || { echo "cmake is required but it is not installed. Exiting." >&2; exit 1; }
-command -v make >/dev/null 2>&1 || { echo "make is required but it is not installed. Exiting." >&2; exit 1; }
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
 
 echo "Downloading Boost"
 echo "  $BOOST_URL"
-curl --location "$BOOST_URL" | tar --extract --bzip2 || die "Error downloading Boost"
-mv `find . -maxdepth 1 -name boost\* -type d` boost || die "Error finding Boost"
+curl --location "$BOOST_URL" | tar --extract --bzip2 || \
+	die "Error downloading Boost"
+mv `find . -maxdepth 1 -name boost\* -type d` boost || \
+	die "Error finding Boost"
 Boost_INCLUDE_DIRS="`pwd`/boost"
 
 echo "Downloading Eigen"
 echo "  $EIGEN3_URL"
-curl --location "$EIGEN3_URL" | tar --extract --bzip2 || die "Error downloading Eigen3"
-mv `find . -maxdepth 1 -name eigen\* -type d` eigen3 || die "Error finding Eigen3"
+curl --location "$EIGEN3_URL" | tar --extract --bzip2 || \
+	die "Error downloading Eigen3"
+mv `find . -maxdepth 1 -name eigen\* -type d` eigen3 || \
+	die "Error finding Eigen3"
 EIGEN3_INCLUDE_DIR="`pwd`/eigen3"
 
 INSTALL_PREFIX="$1"
@@ -64,7 +72,6 @@ echo "Running make install"
 make install || die "Error in 'make install'"
 
 # Clean up
-popd
 rm -rf ${BUILD_DIR}
 
 echo "SUCCESS"
