@@ -110,13 +110,13 @@ inline void GetGradientOfHVector(
   int p = point.size();
   int numberRegressionFunctions = 1 + (regressionOrder * p);
   GradMatrix.resize(p, numberRegressionFunctions);
-  for ( unsigned int i = 0; i < p; i++ ) {
+  for ( int i = 0; i < p; i++ ) {
     GradMatrix(i,0) = 0.0;
     if ( regressionOrder > 0 )
       GradMatrix(i,i+1) = 1.0;
   }
-  for ( unsigned int i = 1; i < regressionOrder; ++i ) {
-    for ( unsigned int j = 0; j < p; j++ ) {
+  for ( int i = 1; i < regressionOrder; ++i ) {
+    for ( int j = 0; j < p; j++ ) {
       GradMatrix(j,1+i*p+j) = double(i + 1) * std::pow(point(i), double(i));
     }
   }
@@ -908,11 +908,10 @@ bool GaussianProcessEmulator::SingleModel::GetGradientOfEmulatorOutputs(
   int p = m_Parent->m_NumberParameters;
   Eigen::Map< Eigen::VectorXd > ModelGradient(&(gradient[0]), p);
   assert(p>0);
-  int F = 1 + (m_RegressionOrder * p);
-  Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
+  const Eigen::MatrixXd & X = m_Parent->m_TrainingParameterValues;
   // Get Gradient of the covariance
   Eigen::MatrixXd cov_grad(p, N);
-  for ( unsigned int i = 0; i < N; i++ ) {
+  for ( int i = 0; i < N; i++ ) {
     Eigen::VectorXd Grad;
     this->GetGradientOfCovarianceCalc( point, X.row(i), Grad  );
     cov_grad.col(i) = Grad;
@@ -975,14 +974,14 @@ bool GaussianProcessEmulator::GetGradientOfEmulatorOutputs(
   int t = m_NumberPCAOutputs;
   std::vector< double > grad;
   Eigen::MatrixXd mean_pca_gradients( t, p );
-  for ( unsigned int i = 0; i < t; i++ ) {
+  for ( int i = 0; i < t; i++ ) {
     if ( !m_PCADecomposedModels[i].GetGradientOfEmulatorOutputs( x, grad ) )
       return false;
     mean_pca_gradients.row(i) = Eigen::Map< Eigen::RowVectorXd >(&(grad[0]),p);
   }
   Eigen::Map< Eigen::VectorXd > OutputGradients(&(gradients[0]),(m_NumberOutputs*p));
-  for ( unsigned int i = 0; i < t; i++ ) {
-    OutputGradients.segment((i*t), t) = m_OutputUncertaintyScales.cwiseProduct(
+  for ( int i = 0; i < t; i++ ) {
+    OutputGradients.segment((i*t), t) = m_UncertaintyScales.cwiseProduct(
         m_PCAEigenvectors * mean_pca_gradients.col(i) );
   }
   return true;
@@ -1059,10 +1058,10 @@ bool GaussianProcessEmulator::SingleModel
   Eigen::Map< Eigen::VectorXd > ModelGradient(&(gradient[0]), p);
   assert(p>0);
   int F = 1 + (m_RegressionOrder * p);
-  Eigen::MatrixXd & X = m_Parent->m_ParameterValues;
+  const Eigen::MatrixXd & X = m_Parent->m_TrainingParameterValues;
   // Get Gradient of the covariance
   Eigen::MatrixXd cov_grad(p, N);
-  for ( unsigned int i = 0; i < N; i++ ) {
+  for ( int i = 0; i < N; i++ ) {
     Eigen::VectorXd Grad;
     this->GetGradientOfCovarianceCalc( point, X.row(i), Grad  );
     cov_grad.col(i) = Grad;
@@ -1138,21 +1137,20 @@ bool GaussianProcessEmulator::GetGradientsOfCovariances(
     return false;
   
   Eigen::Map<const Eigen::VectorXd> point(&(x[0]),x.size());
-  int t = m_NumberOutputs;
   int p = m_NumberParameters;
   
   Eigen::MatrixXd var_grads(m_NumberPCAOutputs, p);
-  for ( unsigned int i = 0; i < m_NumberPCAOutputs; i++ ) {
+  for ( int i = 0; i < m_NumberPCAOutputs; i++ ) {
     std::vector< double > tg;
-    if (! m_PCADecomposedModels[i].GetGradientOfCovariance( x, tg ) );
-    return false;
+    if (! m_PCADecomposedModels[i].GetGradientOfCovariance( x, tg ) )
+      return false;
     var_grads.row(i) = Eigen::Map< Eigen::VectorXd >(&(tg[0]),p);
   }
   
   Eigen::MatrixXd uncertaintyScales
-  = m_OutputUncertaintyScales * m_OutputUncertaintyScales.transpose();
+  = m_UncertaintyScales * m_UncertaintyScales.transpose();
   
-  for ( unsigned int i = 0; i < p; i++ ) {
+  for ( int i = 0; i < p; i++ ) {
     gradients.push_back( uncertaintyScales.cwiseProduct( m_PCAEigenvectors
             * var_grads.col(i).asDiagonal() * m_PCAEigenvectors.transpose() ) );
   }

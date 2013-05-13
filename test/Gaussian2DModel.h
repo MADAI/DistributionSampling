@@ -48,6 +48,11 @@ public:
                                          const std::vector< bool > & activeParameters,
                                          std::vector< double > & scalars,
                                          std::vector< double > & gradient) const;
+                                         
+  /** Get the gradient of the outputs of the model. */
+  virtual ErrorType GetGradientOfModelOutputs( const std::vector< double > & parameters,
+                                               std::vector< double > & mean_gradients,
+                                               std::vector< Eigen::MatrixXd > & cov_gradients ) const;
 
   /** Override this to ignore any observed values.
    *

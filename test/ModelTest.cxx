@@ -46,6 +46,13 @@ public:
   {
     return Model::NO_ERROR;
   }
+  
+  virtual Model::ErrorType GetGradientOfModelOutputs( const std::vector< double > &,
+                                                      std::vector< double > &,
+                                                      std::vector< Eigen::MatrixXd > & ) const
+  {
+    return Model::NO_ERROR;
+  }
 
   virtual ErrorType GetLikeAndPrior( const std::vector< double > &,
                                      double &,

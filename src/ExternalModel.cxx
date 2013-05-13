@@ -472,10 +472,10 @@ ExternalModel
  */
 ExternalModel::ErrorType
 ExternalModel
-::getGradientOfModelOutputs(
-  const std::vector< double > & parameters,
-  std::vector< double > & mean_gradients,
-  std::vector< Eigen::MatrixXd > & cov_gradients ) const
+::GetGradientOfModelOutputs(
+  const std::vector< double > &,
+  std::vector< double > &,
+  std::vector< Eigen::MatrixXd > & ) const
 {
   return Model::OTHER_ERROR;
 }

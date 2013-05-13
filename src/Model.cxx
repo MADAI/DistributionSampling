@@ -286,13 +286,13 @@ Model::GetAnalyticGradientOfLogLikelihood(
     // Derivatives of the covariance matrix are 0: Do Nothing
   } else {
     // Need to include derivative of covariance matrix
-    for ( unsigned int i = 0; i < p; i++ ) {
+    for ( int i = 0; i < p; i++ ) {
       if ( activeParameters[i] ) {
         LLGrad(i) += -0.5*t2.dot(cov_gradients[i]*t1);
       }
     }
   }
-  for ( unsigned int i = 0; i < p; i++ ) {
+  for ( int i = 0; i < p; i++ ) {
     if ( activeParameters[i] ) {
       gradient.push_back( LLGrad(i) + LPGradient[i] );
     }
@@ -598,7 +598,7 @@ Model
   std::vector< double > gradient;
   for ( size_t i = 0; i < params.size(); i++ ) {
     gradient.push_back(
-      params[i].GetPriorDistribution()->GetGradientOfLogProbabilityDensity(x]i]) );
+      params[i].GetPriorDistribution()->GetGradientLogProbabilityDensity( x[i]) );
   }
   return gradient;
 }
