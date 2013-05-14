@@ -14,7 +14,7 @@ set( APPLICATIONS
   generatePercentileGridTraceExternal
   generateTrainingPoints
   trainEmulator
-  madai_default_options
+  printDefaultSettings
 )
 
 foreach( application ${APPLICATIONS} )
