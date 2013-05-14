@@ -38,7 +38,7 @@ class Random {
 public:
   /** Constructor
    *
-   * Uses time() for seed. */
+   * Uses time() and current process id for seed. */
   Random();
 
   /** Constructor
@@ -56,7 +56,7 @@ public:
    */
   virtual void Reseed(unsigned long int seed);
 
-  /** Reseed with the current time. */
+  /** Reseed with the current time and current process id. */
   virtual void Reseed();
 
   /** Returns an integer < N and >= 0 */

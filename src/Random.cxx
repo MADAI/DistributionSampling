@@ -17,6 +17,8 @@
  *=========================================================================*/
 #include <time.h>
 
+#include <madaisys/SystemInformation.hxx>
+
 #include "Random.h"
 
 namespace madai {
@@ -55,11 +57,12 @@ void Random::Reseed(unsigned long int seed)
 }
 
 /**
- * reseed with time()
+ * reseed with time() and current process id.
  */
 void Random::Reseed()
 {
-  this->Reseed(time(NULL));
+  madaisys::SystemInformation systemInformation;
+  this->Reseed(time(NULL) ^ (systemInformation.GetProcessId() << 16));
 }
 
 /**
