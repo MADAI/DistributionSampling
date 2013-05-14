@@ -30,6 +30,9 @@
 #include "Trace.h"
 #include "Paths.h"
 
+const char DEFAULT_MODEL_OUTPUT_DIRECTORY[] = "model_output";
+const char DEFAULTS_EXPERIMENTAL_RESULTS_FILE[] = "experimental_results.dat";
+
 inline double LogisticFunction(double x) {
   return 1.0 / (1.0 + std::exp(-x));
 }
@@ -68,18 +71,17 @@ int main( int, char *[] ) {
   }
 
   std::string MOD = TempDirectory + madai::Paths::SEPARATOR +
-                    madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+    DEFAULT_MODEL_OUTPUT_DIRECTORY;
   std::string ERF = TempDirectory + madai::Paths::SEPARATOR +
-    "experimental_results" + madai::Paths::SEPARATOR +
-    madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE;
-                    
+    DEFAULTS_EXPERIMENTAL_RESULTS_FILE;
+
   madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
   if ( !directoryReader.LoadTrainingData( &gpe, MOD, TempDirectory, ERF ) ) {
     std::cerr << "error loading from created directory structure\n";
     return EXIT_FAILURE;
   }
-  
+
   double fractionResolvingPower = 0.999;
   madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction
     = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
@@ -92,7 +94,7 @@ int main( int, char *[] ) {
     std::cerr << "Error in GaussianProcessEmulator::PrincipalComponentDecompose\n";
     return EXIT_FAILURE;
   }
-  
+
   std::string PCAFileName = TempDirectory + madai::Paths::SEPARATOR
       + madai::Paths::PCA_DECOMPOSITION_FILE;
   std::ofstream PCAFile( PCAFileName.c_str() );
@@ -100,7 +102,7 @@ int main( int, char *[] ) {
     std::cerr << "Could not open file '" << PCAFileName << "'\n";
     return EXIT_FAILURE;
   }
-  
+
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
   singleFileWriter.WritePCA( &gpe, PCAFile );
   PCAFile.close();
@@ -119,7 +121,7 @@ int main( int, char *[] ) {
     std::cerr << "Error in GaussianProcessEmulator::BasicTraining";
     return EXIT_FAILURE;
   }
-  
+
   std::string EmulatorStateFileName = TempDirectory + madai::Paths::SEPARATOR
       + madai::Paths::EMULATOR_STATE_FILE;
   std::ofstream EmulatorStateFile( EmulatorStateFileName.c_str() );
@@ -127,7 +129,7 @@ int main( int, char *[] ) {
     std::cerr << "Could not open file '" << EmulatorStateFileName << "'\n";
     return EXIT_FAILURE;
   }
-  
+
   singleFileWriter.Write( &gpe, EmulatorStateFile );
   EmulatorStateFile.close();
 

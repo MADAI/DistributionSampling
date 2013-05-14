@@ -35,41 +35,39 @@ ACKNOWLEDGMENTS:
 #include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "RuntimeParameterFileReader.h"
 #include "Paths.h"
+#include "Defaults.h"
 
 using madai::Paths;
-
-static const std::string DEFAULT_EMULATOR_COVARIANCE_FUNCTION( "SQUARE_EXPONENTIAL_FUNCTION" );
-static const int         DEFAULT_EMULATOR_REGRESSION_ORDER = 1;
-
 
 int main(int argc, char ** argv) {
 
   if ( argc < 2 ) {
-    std::cerr << "Usage:\n"
-              << "    trainEmulator <StatisticsDirectory>\n"
-              << "\n"
-              << "This loads the model data and PCA information computed with\n"
-              << "PCADecompose and performs a refined training of the emulator.\n"
-              << "It stores the results in <StatisticsDirectory>" << Paths::SEPARATOR
-              << Paths::EMULATOR_STATE_FILE << "\n"
-              << "\n"
-              << "<StatisticsDirectory> is the directory in which all \n"
-              << "statistics data are stored. It contains the parameter file "
-              << Paths::RUNTIME_PARAMETER_FILE << "\n"
-              << "\n"
-              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
-               << ":\n\n"
-              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
-              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
-              << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
-              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE << ")\n"
-              << "PCA_FRACTION_RESOLVING_POWER <value> (default: 0.95)\n"
-              << "EMULATOR_COVARIANCE_FUNCTION <value> (default: "
-              << DEFAULT_EMULATOR_COVARIANCE_FUNCTION << ")\n"
-              << "EMULATOR_REGRESSION_ORDER <value> (default: "
-              << DEFAULT_EMULATOR_REGRESSION_ORDER << ")\n"
-              << "READER_VERBOSE <value> (default: false)\n"
-              << "VERBOSE <value> (default: false)\n";
+    std::cerr
+      << "Usage:\n"
+      << "    trainEmulator <StatisticsDirectory>\n"
+      << "\n"
+      << "This loads the model data and PCA information computed with\n"
+      << "PCADecompose and performs a refined training of the emulator.\n"
+      << "It stores the results in <StatisticsDirectory>" << Paths::SEPARATOR
+      << Paths::EMULATOR_STATE_FILE << "\n"
+      << "\n"
+      << "<StatisticsDirectory> is the directory in which all \n"
+      << "statistics data are stored. It contains the parameter file "
+      << Paths::RUNTIME_PARAMETER_FILE << "\n"
+      << "\n"
+      << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+      << ":\n\n"
+      << "MODEL_OUTPUT_DIRECTORY <value> (default: "
+      << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"
+      << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
+      << madai::Defaults::EXPERIMENTAL_RESULTS_FILE << ")\n"
+      << "PCA_FRACTION_RESOLVING_POWER <value> (default: 0.95)\n"
+      << "EMULATOR_COVARIANCE_FUNCTION <value> (default: "
+      << madai::Defaults::EMULATOR_COVARIANCE_FUNCTION << ")\n"
+      << "EMULATOR_REGRESSION_ORDER <value> (default: "
+      << madai::Defaults::EMULATOR_REGRESSION_ORDER << ")\n"
+      << "READER_VERBOSE <value> (default: false)\n"
+      << "VERBOSE <value> (default: false)\n";
 
     return EXIT_FAILURE;
   }
@@ -88,7 +86,7 @@ int main(int argc, char ** argv) {
   std::string experimentalResultsFile =
     madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
-  std::string covarianceFunctionString = DEFAULT_EMULATOR_COVARIANCE_FUNCTION;
+  std::string covarianceFunctionString = madai::Defaults::EMULATOR_COVARIANCE_FUNCTION;
   if ( settings.HasOption( "EMULATOR_COVARIANCE_FUNCTION" ) ) {
     covarianceFunctionString = settings.GetOption( "EMULATOR_COVARIANCE_FUNCTION" );
   }
@@ -106,7 +104,7 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  int emulatorRegressionOrder = DEFAULT_EMULATOR_REGRESSION_ORDER;
+  int emulatorRegressionOrder = madai::Defaults::EMULATOR_REGRESSION_ORDER;
   if ( settings.HasOption( "EMULATOR_REGRESSION_ORDER" ) ) {
     emulatorRegressionOrder = atoi( settings.GetOption( "EMULATOR_REGRESSION_ORDER" ).c_str() );
   }
@@ -129,13 +127,13 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
   std::string outputFileName = statisticsDirectory + madai::Paths::EMULATOR_STATE_FILE;
-  
+
   if (! gpe.Train( emulatorCovarianceFunction,
                    emulatorRegressionOrder ) ) {
     std::cerr << "Error while training emulator.\n";
     return EXIT_FAILURE;
   }
-  
+
   std::ofstream os( outputFileName.c_str() );
 
   if ( !os.good() ) {
@@ -143,14 +141,14 @@ int main(int argc, char ** argv) {
               << "' for writing.\n";
     return EXIT_FAILURE;
   }
-  
+
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
   singleFileWriter.Write( &gpe, os );
 
-  if ( settings.GetOptionAsBool( "VERBOSE", false ) ) {
+  if ( settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE ) ) {
     std::cout << "Emulator training succeeded.\n";
     std::cout << "Wrote emulator state file '" << outputFileName << "'.\n";
   }
-  
+
   return EXIT_SUCCESS;
 }

@@ -30,6 +30,8 @@
 
 #include "madaisys/SystemTools.hxx"
 
+const char DEFAULT_MODEL_OUTPUT_DIRECTORY[] = "model_output";
+const char DEFAULT_EXPERIMENTAL_RESULTS_FILE[] = "experimental_results.dat";
 
 GaussianProcessEmulatorTestGenerator
 ::GaussianProcessEmulatorTestGenerator(
@@ -55,7 +57,7 @@ GaussianProcessEmulatorTestGenerator
 
   std::vector< double > x(numberParameters+4,0.0);
   std::vector< double > y(numberOutputs+4,0.0);
-  
+
   for ( int i = 0; i < m_NumberOutputs; ++i ) {
     std::stringstream ss;
     ss << "output_" << i;
@@ -89,10 +91,10 @@ GaussianProcessEmulatorTestGenerator
 
   for ( int i = 0; i < m_NumberParameters; ++i ) {
     const madai::Distribution * distribution = m_Parameters[i].GetPriorDistribution();
-    const madai::UniformDistribution * uniformDistribution = 
+    const madai::UniformDistribution * uniformDistribution =
       dynamic_cast< const madai::UniformDistribution * >( distribution );
     ParametersPriorFile << "uniform " << m_Parameters[ i ].m_Name << " "
-                        << uniformDistribution->GetMinimum() << " " 
+                        << uniformDistribution->GetMinimum() << " "
                         << uniformDistribution->GetMaximum() << "\n";
   }
   ParametersPriorFile.close();
@@ -105,21 +107,21 @@ GaussianProcessEmulatorTestGenerator
     std::cerr << "Could not open file '" << observablesFileName << "'\n";
     return false;
   }
-  
+
   for ( int i = 0; i < m_NumberOutputs; ++i ) {
     ObservablesFile << m_OutputNames[i] << "\n";
   }
   ObservablesFile.close();
-  
+
   // Create the model output directory
   std::string modelOutputDirectory = StatisticsDirectory + madai::Paths::SEPARATOR
-      + madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+      + DEFAULT_MODEL_OUTPUT_DIRECTORY;
   bool directoryCreated = madaisys::SystemTools::MakeDirectory( modelOutputDirectory.c_str() );
   if ( !directoryCreated ) {
     std::cerr << "Could not create directory '" << modelOutputDirectory << "'\n";
     return false;
   }
-  
+
   // Create the run directories and write the results.dat and parameters.dat files
   assert( m_Y.rows() == m_X.rows() );
   for ( int i = 0; i < m_Y.rows(); ++i ) {
@@ -127,13 +129,13 @@ GaussianProcessEmulatorTestGenerator
     buffer << modelOutputDirectory << "/run"
       << std::setw( 4) << std::setfill( '0' ) << i;
     std::string runDirectory(buffer.str());
-    
+
     directoryCreated = madaisys::SystemTools::MakeDirectory( runDirectory.c_str() );
     if ( !directoryCreated ) {
       std::cerr << "Could not create directory '" << runDirectory << "\n";
       return false;
     }
-    
+
     std::string parametersFile( runDirectory + madai::Paths::SEPARATOR +
                                 madai::Paths::PARAMETERS_FILE );
     std::ofstream ParameterOutfile ( parametersFile.c_str() );
@@ -146,7 +148,7 @@ GaussianProcessEmulatorTestGenerator
       ParameterOutfile << m_Parameters[j].m_Name << ' ' << m_X( i, j ) << "\n";
     }
     ParameterOutfile.close();
-    
+
     std::string modelOutputFile( runDirectory + madai::Paths::SEPARATOR +
                                  madai::Paths::RESULTS_FILE );
     std::ofstream ResultsFile ( modelOutputFile.c_str() );
@@ -154,35 +156,36 @@ GaussianProcessEmulatorTestGenerator
       std::cerr << "Coul not open file '" << modelOutputFile << "'\n";
       return false;
     }
-    
+
     for ( int j = 0; j < m_NumberOutputs; ++j ) {
       ResultsFile << m_OutputNames[j] << ' ' << m_Y( i, j ) << "\n";
     }
     ResultsFile.close();
   }
-  
-  // Create an experimental results directory
-  std::string ExperimentalResultsDir = StatisticsDirectory + madai::Paths::SEPARATOR
-      + "experimental_results";
-  directoryCreated = madaisys::SystemTools::MakeDirectory( ExperimentalResultsDir.c_str() );
-  if ( !directoryCreated ) {
-    std::cerr << "Could not create directory '" << ExperimentalResultsDir << "'\n";
-    return false;
-  }
-  
+
+  // // Create an experimental results directory
+  // std::string ExperimentalResultsDir = StatisticsDirectory + madai::Paths::SEPARATOR
+  //     + "experimental_results";
+  // directoryCreated = madaisys::SystemTools::MakeDirectory( ExperimentalResultsDir.c_str() );
+  // if ( !directoryCreated ) {
+  //   std::cerr << "Could not create directory '" << ExperimentalResultsDir << "'\n";
+  //   return false;
+  // }
+
   // Write the experimental results file
-  std::string ExperimentalResultsFile = ExperimentalResultsDir + madai::Paths::SEPARATOR
-      + madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE;
+  std::string ExperimentalResultsFile =
+    StatisticsDirectory + madai::Paths::SEPARATOR +
+    + DEFAULT_EXPERIMENTAL_RESULTS_FILE;
   std::ofstream ExpResultsFile( ExperimentalResultsFile.c_str() );
   if ( !ExpResultsFile ) {
     std::cerr << "Could not open file '" << ExperimentalResultsFile << "'\n";
     return false;
   }
-  
+
   // Simply put the values to the middle of the range
   for ( int i = 0; i < m_NumberOutputs; ++i ) {
     const madai::Distribution * distribution = m_Parameters[i].GetPriorDistribution();
-    const madai::UniformDistribution * uniformDistribution = 
+    const madai::UniformDistribution * uniformDistribution =
       dynamic_cast< const madai::UniformDistribution * >( distribution );
     double min = uniformDistribution->GetMinimum();
     double max = uniformDistribution->GetMaximum();
@@ -190,7 +193,7 @@ GaussianProcessEmulatorTestGenerator
     ExpResultsFile << m_OutputNames[i] << " " << value << " " << 0.01 << "\n";
   }
   ExpResultsFile.close();
-  
+
   return true;
 }
 

@@ -27,6 +27,7 @@
 #include "RuntimeParameterFileReader.h"
 #include "ApplicationUtilities.h"
 #include "Paths.h"
+#include "Defaults.h"
 #include "Trace.h"
 
 #include "madaisys/SystemTools.hxx"
@@ -34,35 +35,34 @@
 using madai::Model;
 using madai::Paths;
 
-static const int DEFAULT_PERCENTILE_GRID_NUMBER_OF_SAMPLES = 100;
-
-
 int main(int argc, char ** argv) {
 
   if (argc < 3) {
-    std::cerr << "Usage:\n"
-              << "    generatePercentileGridTrace <StatisticsDirectory> <OutputFileName>\n"
-              << "\n"
-              << "This file generates a sampling of an emulated model on a\n"
-              << "regular lattice of sample points.\n"
-              << "\n"
-              << "<StatisticsDirectory> is the directory in which all \n"
-              << "statistics data are stored. It contains the parameter file "
-              << Paths::RUNTIME_PARAMETER_FILE << "\n"
-              << "\n"
-              << "<OutputFileName> is the name of the comma-separated value-format \n"
-              << "file in which the trace will be written. This file will be \n"
-              << "written in the directory <StatisticsDirectory>/trace/.\n"
-              << "\n"
-              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
-              << ":\n\n"
-              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
-              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
-              << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
-              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE << ")\n"
-              << "PERCENTILE_GRID_NUMBER_OF_SAMPLES <value> (default: "
-              << DEFAULT_PERCENTILE_GRID_NUMBER_OF_SAMPLES << ")\n"
-              << "VERBOSE <value> (default: false)\n";
+    std::cerr
+      << "Usage:\n"
+      << "    generatePercentileGridTrace <StatisticsDirectory> <OutputFileName>\n"
+      << "\n"
+      << "This file generates a sampling of an emulated model on a\n"
+      << "regular lattice of sample points.\n"
+      << "\n"
+      << "<StatisticsDirectory> is the directory in which all \n"
+      << "statistics data are stored. It contains the parameter file "
+      << Paths::RUNTIME_PARAMETER_FILE << "\n"
+      << "\n"
+      << "<OutputFileName> is the name of the comma-separated value-format \n"
+      << "file in which the trace will be written. This file will be \n"
+      << "written in the directory <StatisticsDirectory>/trace/.\n"
+      << "\n"
+      << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+      << ":\n\n"
+      << "MODEL_OUTPUT_DIRECTORY <value> (default: "
+      << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"
+      << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
+      << madai::Defaults::EXPERIMENTAL_RESULTS_FILE << ")\n"
+      << "PERCENTILE_GRID_NUMBER_OF_SAMPLES <value> (default: "
+      << madai::Defaults::PERCENTILE_GRID_NUMBER_OF_SAMPLES << ")\n"
+      << "VERBOSE <value> (default: "
+      << madai::Defaults::VERBOSE << ")\n";
     return EXIT_FAILURE;
   }
   std::string statisticsDirectory( argv[1] );
@@ -80,11 +80,11 @@ int main(int argc, char ** argv) {
   std::string experimentalResultsFile =
     madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
-  int numberOfSamples = DEFAULT_PERCENTILE_GRID_NUMBER_OF_SAMPLES;
+  int numberOfSamples = madai::Defaults::PERCENTILE_GRID_NUMBER_OF_SAMPLES;
   if ( settings.HasOption( "PERCENTILE_GRID_NUMBER_OF_SAMPLES" ) ) {
     numberOfSamples = atoi( settings.GetOption( "PERCENTILE_GRID_NUMBER_OF_SAMPLES" ).c_str() );
   }
-  
+
   madai::GaussianProcessEmulatedModel gpem;
   if ( gpem.LoadConfiguration( statisticsDirectory,
                                modelOutputDirectory,
@@ -94,7 +94,7 @@ int main(int argc, char ** argv) {
   }
 
   gpem.SetUseModelCovarianceToCalulateLogLikelihood( false );
-  
+
   std::string observationsFile = experimentalResultsFile + Paths::SEPARATOR +
     Paths::RESULTS_FILE;
   std::ifstream observations( observationsFile.c_str() );
@@ -133,7 +133,7 @@ int main(int argc, char ** argv) {
                         gpem.GetParameters(),
                         gpem.GetScalarOutputNames() );
 
-  if ( settings.GetOptionAsBool( "VERBOSE", false ) ) {
+  if ( settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE ) ) {
     std::cout << "Wrote percentile grid trace to file '" << outputFilePath << "'.\n";
   }
 

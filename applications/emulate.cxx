@@ -35,10 +35,9 @@ ACKNOWLEDGMENTS:
 #include "RuntimeParameterFileReader.h"
 #include "UniformDistribution.h"
 #include "Paths.h"
+#include "Defaults.h"
 
 using madai::Paths;
-
-bool DEFAULT_EMULATE_WRITE_HEADER = true;
 
 std::ostream & operator <<(std::ostream & o, const madai::Distribution * d) {
   const madai::UniformDistribution * uniformPriorDist
@@ -146,11 +145,13 @@ int main(int argc, char ** argv) {
               << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
               << ":\n\n"
               << "MODEL_OUTPUT_DIRECTORY <value> (default: "
-              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
+              << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"
               << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
-              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE << ")\n"
-              << "EMULATE_QUIET <value> (false)\n"
-              << "READER_VERBOSE <value> (default: false)\n";
+              << madai::Defaults::EXPERIMENTAL_RESULTS_FILE << ")\n"
+              << "EMULATE_QUIET <value> ("
+              << madai::Defaults::EMULATE_QUIET << ")\n"
+              << "READER_VERBOSE <value> (default: "
+              << madai::Defaults::READER_VERBOSE << ")\n";
 
     return EXIT_FAILURE;
   }
@@ -169,14 +170,15 @@ int main(int argc, char ** argv) {
   std::string experimentalResultsFile =
     madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
-  bool emulatorWriteHeader = DEFAULT_EMULATE_WRITE_HEADER;
+  bool emulatorWriteHeader = madai::Defaults::EMULATE_WRITE_HEADER;
   if ( settings.HasOption( "EMULATE_WRITE_HEADER" ) ) {
     emulatorWriteHeader = ( settings.GetOption( "EMULATE_WRITE_HEADER" ) == "true" );
   }
 
   madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-  bool verbose = settings.GetOptionAsBool( "READER_VERBOSE", false );
+  bool verbose = settings.GetOptionAsBool(
+      "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
   directoryReader.SetVerbose( verbose );
 
   if ( !directoryReader.LoadTrainingData( &gpe,
@@ -196,7 +198,7 @@ int main(int argc, char ** argv) {
     std::cerr << "Error loading the emulator state data.\n";
     return EXIT_FAILURE;
   }
-  
+
   if ( gpe.GetStatus() != madai::GaussianProcessEmulator::READY ) {
     return EXIT_FAILURE;
   }

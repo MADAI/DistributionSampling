@@ -27,6 +27,7 @@
 #include "ExternalModel.h"
 #include "MetropolisHastingsSampler.h"
 #include "Paths.h"
+#include "Defaults.h"
 #include "RuntimeParameterFileReader.h"
 #include "Trace.h"
 #include "SamplerCSVWriter.h"
@@ -35,45 +36,41 @@
 
 using madai::Paths;
 
-static const int    DEFAULT_MCMC_NUMBER_OF_SAMPLES         = 100;
-static const int    DEFAULT_MCMC_NUMBER_OF_BURN_IN_SAMPLES = 0;
-static const bool   DEFAULT_MCMC_USE_MODEL_ERROR           = false;
-static const double DEFAULT_MCMC_STEP_SIZE                 = 0.1;
-
-
 int main(int argc, char ** argv) {
 
   if ( argc < 3 ) {
-    std::cerr << "Usage:\n"
-              << "    generateMCMCtraceExternal <StatisticsDirectory> <OutputFileName>\n"
-              << "\n"
-              << "This program produces a Markov Chain Monte Carlo trace from \n"
-              << "by evaluating an model defined in an external process. \n"
-              << "\n"
-              << "<StatisticsDirectory> is the directory in which all \n"
-              << "statistics data are stored. It contains the parameter file "
-              << Paths::RUNTIME_PARAMETER_FILE << "\n"
-              << "\n"
-              << "<OutputFileName> is the name of the comma-separated value-format \n"
-              << "file in which the trace will be written. This file will be \n"
-              << "written in the directory <StatisticsDirectory>/trace/.\n"
-              << "\n"
-              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
-              << ":\n\n"
-              << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
-              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE << ")\n"
-              << "MCMC_NUMBER_OF_SAMPLES <value> (default: "
-              << DEFAULT_MCMC_NUMBER_OF_SAMPLES << ")\n"
-              << "MCMC_NUMBER_OF_BURN_IN_SAMPLES <value> (default: "
-              << DEFAULT_MCMC_NUMBER_OF_BURN_IN_SAMPLES << ")\n"
-              << "MCMC_USE_MODEL_ERROR <value> (default: "
-              << DEFAULT_MCMC_USE_MODEL_ERROR << ")\n"
-              << "MCMC_STEP_SIZE <value> (default: "
-              << DEFAULT_MCMC_STEP_SIZE << ")\n"
-              << "EXTERNAL_MODEL_EXECUTABLE <value> (default: none)\n"
-              << "EXTERNAL_MODEL_ARGUMENTS <Argument1> <Argument2> ... <LastArgument>\n"
-              << "VERBOSE <value> (default: false)\n";
-
+    std::cerr
+      << "Usage:\n"
+      << "    generateMCMCtraceExternal <StatisticsDirectory> <OutputFileName>\n"
+      << "\n"
+      << "This program produces a Markov Chain Monte Carlo trace from \n"
+      << "by evaluating an model defined in an external process. \n"
+      << "\n"
+      << "<StatisticsDirectory> is the directory in which all \n"
+      << "statistics data are stored. It contains the parameter file "
+      << Paths::RUNTIME_PARAMETER_FILE << "\n"
+      << "\n"
+      << "<OutputFileName> is the name of the comma-separated value-format \n"
+      << "file in which the trace will be written. This file will be \n"
+      << "written in the directory <StatisticsDirectory>/trace/.\n"
+      << "\n"
+      << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+      << ":\n\n"
+      << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
+      << madai::Defaults::EXPERIMENTAL_RESULTS_FILE << ")\n"
+      << "MCMC_NUMBER_OF_SAMPLES <value> (default: "
+      << madai::Defaults::MCMC_NUMBER_OF_SAMPLES << ")\n"
+      << "MCMC_NUMBER_OF_BURN_IN_SAMPLES <value> (default: "
+      << madai::Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES << ")\n"
+      << "MCMC_USE_MODEL_ERROR <value> (default: "
+      << madai::Defaults::MCMC_USE_MODEL_ERROR << ")\n"
+      << "MCMC_STEP_SIZE <value> (default: "
+      << madai::Defaults::MCMC_STEP_SIZE << ")\n"
+      << "EXTERNAL_MODEL_EXECUTABLE <value> (default: \""
+      << madai::Defaults::EXTERNAL_MODEL_EXECUTABLE << "\")\n"
+      << "EXTERNAL_MODEL_ARGUMENTS <Argument1> <Argument2> ... <LastArgument>\n"
+      << "VERBOSE <value> (default: "
+      << madai::Defaults::VERBOSE << ")\n";
     return EXIT_FAILURE;
   }
 
@@ -92,21 +89,21 @@ int main(int argc, char ** argv) {
   std::string experimentalResultsFile =
     madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
-  int numberOfSamples = DEFAULT_MCMC_NUMBER_OF_SAMPLES;
+  int numberOfSamples = madai::Defaults::MCMC_NUMBER_OF_SAMPLES;
   if ( settings.HasOption( "MCMC_NUMBER_OF_SAMPLES" ) ) {
     numberOfSamples =
       atoi( settings.GetOption( "MCMC_NUMBER_OF_SAMPLES" ).c_str() );
   }
-  int numberOfBurnInSamples = DEFAULT_MCMC_NUMBER_OF_BURN_IN_SAMPLES;
+  int numberOfBurnInSamples = madai::Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES;
   if ( settings.HasOption( "MCMC_NUMBER_OF_BURN_IN_SAMPLES" ) ) {
     numberOfBurnInSamples =
       atoi( settings.GetOption( "MCMC_NUMBER_OF_BURN_IN_SAMPLES" ).c_str() );
   }
-  bool useModelError = DEFAULT_MCMC_USE_MODEL_ERROR;
+  bool useModelError = madai::Defaults::MCMC_USE_MODEL_ERROR;
   if ( settings.HasOption( "MCMC_USE_MODEL_ERROR" ) ) {
     useModelError = ( settings.GetOption( "MCMC_USE_MODEL_ERROR" ) == "true" );
   }
-  double stepSize = DEFAULT_MCMC_STEP_SIZE;
+  double stepSize = madai::Defaults::MCMC_STEP_SIZE;
   if ( settings.HasOption( "MCMC_STEP_SIZE" ) ) {
     stepSize = atof( settings.GetOption( "MCMC_STEP_SIZE" ).c_str() );
   }
@@ -166,7 +163,7 @@ int main(int argc, char ** argv) {
       useModelError,
       &(std::cerr));
 
-  if ( settings.GetOptionAsBool( "VERBOSE", false ) ) {
+  if ( settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE ) ) {
     if ( returnCode == EXIT_SUCCESS ) {
       std::cout << "Succeeded writing trace file '" << outputFilePath << "'.\n";
     } else {

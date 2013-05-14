@@ -1,6 +1,7 @@
 # Add utility library
 add_library( ApplicationUtilities
   ApplicationUtilities.cxx
+  Defaults.cxx
 )
 
 set( APPLICATIONS

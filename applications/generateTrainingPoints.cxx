@@ -27,16 +27,13 @@
 #include "LatinHypercubeGenerator.h"
 #include "Parameter.h"
 #include "Paths.h"
+#include "Defaults.h"
 #include "RuntimeParameterFileReader.h"
 #include "UniformDistribution.h"
 
 #include "madaisys/SystemTools.hxx"
 
 using madai::Paths;
-
-static const double DEFAULT_GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS     = 3.0;
-static const bool   DEFAULT_GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE = true;
-static const int    DEFAULT_GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS        = 100;
 
 static void discard_comments( std::istream & i, char comment_character ) {
   int c;
@@ -190,36 +187,39 @@ bool WriteDirectories( const std::string modelOutputDirectory,
 
 int main( int argc, char * argv[] ) {
   if ( argc < 2 ) {
-    std::cerr << "Useage:\n"
-              << "    generateTrainingPoints <StatisticsDirectory>\n"
-              << "\n"
-              << "This program reads from <StatisticsDirectory>/"
-              << Paths::PARAMETER_PRIORS_FILE << " in\n"
-              << "and uses the parameter prior distribution to generate a series of\n"
-              << "parameter files on which to run a model according to a latin hypercube\n"
-              << "sampling pattern.\n"
-              << "\n"
-              << "The format of the " << Paths::PARAMETER_PRIORS_FILE << " file is:\n"
-              << "uniform name min max\n"
-              << "gaussian name mean std_dev\n"
-              << "\n"
-              << "Only uniform and gaussian distributions are available.\n"
-              << "\n"
-              << "<StatisticsDirectory> is the directory in which all \n"
-              << "statistics data are stored. It contains the parameter file "
-              << Paths::RUNTIME_PARAMETER_FILE << "\n"
-              << "\n"
-              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
-              << ":\n\n"
-              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
-              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
-              << "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS <values> (default: "
-              << DEFAULT_GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS << ")\n"
-              << "GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION <value> (default: "
-              << DEFAULT_GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE << ")\n"
-              << "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS <value> (default: "
-              << DEFAULT_GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS << ")\n"
-              << "VERBOSE <value> (default: false)\n";
+    std::cerr
+      << "Useage:\n"
+      << "    generateTrainingPoints <StatisticsDirectory>\n"
+      << "\n"
+      << "This program reads from <StatisticsDirectory>/"
+      << Paths::PARAMETER_PRIORS_FILE << " in\n"
+      << "and uses the parameter prior distribution to generate a series of\n"
+      << "parameter files on which to run a model according to a latin hypercube\n"
+      << "sampling pattern.\n"
+      << "\n"
+      << "The format of the " << Paths::PARAMETER_PRIORS_FILE << " file is:\n"
+      << "uniform name min max\n"
+      << "gaussian name mean std_dev\n"
+      << "\n"
+      << "Only uniform and gaussian distributions are available.\n"
+      << "\n"
+      << "<StatisticsDirectory> is the directory in which all \n"
+      << "statistics data are stored. It contains the parameter file "
+      << Paths::RUNTIME_PARAMETER_FILE << "\n"
+      << "\n"
+      << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+      << ":\n\n"
+      << "MODEL_OUTPUT_DIRECTORY <value> (default: "
+      << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"
+      << "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS <values> (default: "
+      << madai::Defaults::GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS << ")\n"
+      << "GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION <value> (default: "
+      << madai::Defaults::GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE
+      << ")\n"
+      << "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS <value> (default: "
+      << madai::Defaults::GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS << ")\n"
+      << "VERBOSE <value> (default: "
+      << madai::Defaults::VERBOSE << ")\n";
 
     return EXIT_FAILURE;
   }
@@ -247,17 +247,17 @@ int main( int argc, char * argv[] ) {
     return EXIT_FAILURE;
   }
 
-  double standardDeviations = DEFAULT_GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS;
+  double standardDeviations = madai::Defaults::GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS;
   if ( settings.HasOption( "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS" ) ) {
     standardDeviations =
       atof( settings.GetOption( "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS" ).c_str() );
   }
-  bool partitionByPercentile = DEFAULT_GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE;
+  bool partitionByPercentile = madai::Defaults::GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE;
   if ( settings.HasOption( "GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE" ) ) {
     partitionByPercentile =
       ( settings.GetOption( "GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE" ) == "true" );
   }
-  int numberOfTrainingPoints = DEFAULT_GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS;
+  int numberOfTrainingPoints = madai::Defaults::GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS;
   if ( settings.HasOption( "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS" ) ) {
     numberOfTrainingPoints =
       atoi( settings.GetOption( "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS" ).c_str() );
@@ -276,7 +276,7 @@ int main( int argc, char * argv[] ) {
     return EXIT_FAILURE;
   }
 
-  if ( settings.GetOptionAsBool( "VERBOSE", false ) ) {
+  if ( settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE ) ) {
     std::cout << "Write model output directory '" << modelOutputDirectory << "'.\n";
   }
 

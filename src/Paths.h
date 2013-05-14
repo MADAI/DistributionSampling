@@ -28,16 +28,12 @@ public:
 
   static const char SEPARATOR;
 
-  static const std::string DEFAULT_MODEL_OUTPUT_DIRECTORY;
-
-  static const std::string DEFAULT_EXPERIMENTAL_RESULTS_FILE;
-  
   static const std::string TRACE_DIRECTORY;
 
   static const std::string OBSERVABLE_NAMES_FILE;
 
   static const std::string PARAMETERS_FILE;
-  
+
   static const std::string RUNTIME_PARAMETER_FILE;
 
   static const std::string RESULTS_FILE;

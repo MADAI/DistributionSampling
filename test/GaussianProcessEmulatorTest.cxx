@@ -28,6 +28,8 @@
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "Paths.h"
 
+const char DEFAULT_MODEL_OUTPUT_DIRECTORY[] = "model_output";
+const char DEFAULT_EXPERIMENTAL_RESULTS_FILE[] = "experimental_results.dat";
 
 inline double LogisticFunction(double x) {
   return 1.0 / (1.0 + std::exp(-x));
@@ -61,24 +63,24 @@ int main( int, char *[] ) {
     std::cerr << "Error writing directory structure\n";
     return EXIT_FAILURE;
   }
-  
-  std::string MOD = TempDirectory + madai::Paths::SEPARATOR + 
-                    madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+
+  std::string MOD = TempDirectory + madai::Paths::SEPARATOR +
+    DEFAULT_MODEL_OUTPUT_DIRECTORY;
   std::string ERF = TempDirectory + madai::Paths::SEPARATOR +
-    "experimental_results" + madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
+    DEFAULT_EXPERIMENTAL_RESULTS_FILE;
 
   madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
   if ( !directoryReader.LoadTrainingData( &gpe, MOD, TempDirectory, ERF ) ) {
     std::cerr << "Error loading from created directory structure\n";
     return EXIT_FAILURE;
-  } 
-  
+  }
+
   if ( !gpe.PrincipalComponentDecompose() ) {
     std::cerr << "Error decomposing model data.\n";
     return EXIT_FAILURE;
   }
-  
+
   std::string PCAFileName = TempDirectory + madai::Paths::SEPARATOR
       + madai::Paths::PCA_DECOMPOSITION_FILE;
   std::ofstream PCAFile( PCAFileName.c_str() );
@@ -86,11 +88,11 @@ int main( int, char *[] ) {
     std::cerr << "Could not open file '" << PCAFileName << "'\n";
     return EXIT_FAILURE;
   }
-  
+
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
   singleFileWriter.WritePCA( &gpe, PCAFile );
   PCAFile.close();
-  
+
   double fractionResolvingPower = 0.999;
   madai::GaussianProcessEmulator::CovarianceFunctionType covarianceFunction
       = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
@@ -98,10 +100,10 @@ int main( int, char *[] ) {
   double defaultNugget = 1e-3;
   double amplitude = 1.0;
   double scale = 1e-2;
-  
+
   if (! gpe.RetainPrincipalComponents( fractionResolvingPower ) )
     return EXIT_FAILURE;
-  
+
   if (! gpe.BasicTraining(
           covarianceFunction,
           regressionOrder,
@@ -109,7 +111,7 @@ int main( int, char *[] ) {
           amplitude,
           scale))
     return EXIT_FAILURE;
-  
+
   std::string EmulatorStateFileName = TempDirectory + madai::Paths::SEPARATOR
       + madai::Paths::EMULATOR_STATE_FILE;
   std::ofstream EmulatorStateFile( EmulatorStateFileName.c_str() );
@@ -117,7 +119,7 @@ int main( int, char *[] ) {
     std::cerr << "Could not open file '" << EmulatorStateFileName << "'\n";
     return EXIT_FAILURE;
   }
-  
+
   singleFileWriter.Write( &gpe, EmulatorStateFile );
   EmulatorStateFile.close();
 

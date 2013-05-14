@@ -22,6 +22,7 @@
 #include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "RuntimeParameterFileReader.h"
 #include "Paths.h"
+#include "Defaults.h"
 #include "System.h"
 
 using madai::Paths;
@@ -30,26 +31,29 @@ using madai::Paths;
 int main( int argc, char ** argv )
 {
   if ( argc < 2 ) {
-    std::cerr << "Usage:\n"
-              << "    PCADecompose <StatisticsDirectory>\n"
-              << "\n"
-              << "This program performs a principal components analysis on \n"
-              << "experimental data. It stores the results in \n"
-              << "<StatisticsDirectory>" << Paths::SEPARATOR
-              << Paths::PCA_DECOMPOSITION_FILE << "\n"
-              << "\n"
-              << "<StatisticsDirectory> is the directory in which all \n"
-              << "statistics data are stored. It contains the parameter file "
-              << Paths::RUNTIME_PARAMETER_FILE << "\n"
-              << "\n"
-              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
-              << ":\n\n"
-              << "MODEL_OUTPUT_DIRECTORY <value> (default: "
-              << Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY << ")\n"
-              << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
-              << Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE << ")\n"
-              << "READER_VERBOSE <value> (default: false)\n"
-              << "VERBOSE <value> (default: false)\n";
+    std::cerr
+      << "Usage:\n"
+      << "    PCADecompose <StatisticsDirectory>\n"
+      << "\n"
+      << "This program performs a principal components analysis on \n"
+      << "experimental data. It stores the results in \n"
+      << "<StatisticsDirectory>" << Paths::SEPARATOR
+      << Paths::PCA_DECOMPOSITION_FILE << "\n"
+      << "\n"
+      << "<StatisticsDirectory> is the directory in which all \n"
+      << "statistics data are stored. It contains the parameter file "
+      << Paths::RUNTIME_PARAMETER_FILE << "\n"
+      << "\n"
+      << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+      << ":\n\n"
+      << "MODEL_OUTPUT_DIRECTORY <value> (default: "
+      << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"
+      << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
+      << madai::Defaults::EXPERIMENTAL_RESULTS_FILE << ")\n"
+      << "READER_VERBOSE <value> (default: "
+      << madai::Defaults::READER_VERBOSE << ")\n"
+      << "VERBOSE <value> (default: "
+      << madai::Defaults::VERBOSE << ")\n";
 
     return EXIT_FAILURE;
   }
@@ -90,7 +94,8 @@ int main( int argc, char ** argv )
   // Read in the training data
   madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-  bool verbose = settings.GetOptionAsBool( "READER_VERBOSE", false );
+  bool verbose = settings.GetOptionAsBool(
+      "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
   directoryReader.SetVerbose( verbose );
   if ( !directoryReader.LoadTrainingData( &gpe,
                                           modelOutputDirectory,
@@ -119,7 +124,7 @@ int main( int argc, char ** argv )
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
   singleFileWriter.WritePCA( &gpe, os );
 
-  if ( settings.GetOptionAsBool( "VERBOSE", false ) ) {
+  if ( settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE ) ) {
     std::cout << "PCA decomposition succeeded.\n";
     std::cout << "Wrote PCA decomposition file '" << outputFileName << "'.\n";
   }

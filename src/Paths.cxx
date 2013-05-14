@@ -26,10 +26,6 @@ const char Paths::SEPARATOR = '\\';
 const char Paths::SEPARATOR = '/';
 #endif
 
-const std::string Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY( "model_output" );
-
-const std::string Paths::DEFAULT_EXPERIMENTAL_RESULTS_FILE( "experimental_results.dat" );
-
 const std::string Paths::TRACE_DIRECTORY( "trace" );
 
 const std::string Paths::OBSERVABLE_NAMES_FILE( "observable_names.dat" );
