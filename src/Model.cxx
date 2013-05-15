@@ -219,7 +219,7 @@ Model::GetAnalyticGradientOfLogLikelihood(
   Model::ErrorType result;
   if ( m_UseModelCovarianceToCalulateLogLikelihood ) {
     result = this->GetScalarOutputsAndCovariance(
-                                                 parameters, scalars, scalarCovariance );
+      parameters, scalars, scalarCovariance );
   } else {
     result = this->GetScalarOutputs(parameters, scalars);
   }
@@ -259,6 +259,7 @@ Model::GetAnalyticGradientOfLogLikelihood(
       covariance[i]
       = scalarCovariance[i] + this->m_ObservedScalarCovariance[i];
   }
+  
   std::vector< double > LPGradient
   = this->GetGradientOfLogPriorLikelihood( parameters );
   
@@ -266,29 +267,27 @@ Model::GetAnalyticGradientOfLogLikelihood(
   Eigen::Map< Eigen::MatrixXd > cov(&(covariance[0]),t,t);
   Eigen::Map< Eigen::MatrixXd > MGrads(&(mean_gradients[0]),p,t);
   Eigen::VectorXd LLGrad( p );
-  Eigen::VectorXd t1( p );
-  Eigen::VectorXd t2( p );
+  Eigen::VectorXd t1( t );
   
   if ((scalarCovariance.size() == 0) &&
       (this->m_ObservedScalarCovariance.size() == 0)) {
     // Assume variance of 1.0 for each output
-    t1 = t2 = diff;
+    t1 = diff;
   } else {
     // FIXME check for singular matrix -> return negative infinity!
     //assert( cov.determinant() >= 0.0 ); // is there a better way?
     
     t1 = cov.colPivHouseholderQr().solve(diff);
-    t2 = cov.transpose().colPivHouseholderQr().solve(diff);
   }
   
-  LLGrad = -0.5*(MGrads*t1+t2.transpose()*MGrads);
+  LLGrad = -MGrads*t1;
   if (scalarCovariance.size() == 0) {
     // Derivatives of the covariance matrix are 0: Do Nothing
   } else {
     // Need to include derivative of covariance matrix
     for ( int i = 0; i < p; i++ ) {
       if ( activeParameters[i] ) {
-        LLGrad(i) += -0.5*t2.dot(cov_gradients[i]*t1);
+        LLGrad(i) += -0.5*t1.dot(cov_gradients[i]*t1);
       }
     }
   }

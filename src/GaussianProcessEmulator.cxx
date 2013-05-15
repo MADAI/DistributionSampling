@@ -906,6 +906,7 @@ bool GaussianProcessEmulator::SingleModel::GetGradientOfEmulatorOutputs(
   Eigen::VectorXd point = Eigen::Map<const Eigen::VectorXd>(&(x[0]),x.size());
   int N = m_Parent->m_NumberTrainingPoints;
   int p = m_Parent->m_NumberParameters;
+  gradient.resize(p);
   Eigen::Map< Eigen::VectorXd > ModelGradient(&(gradient[0]), p);
   assert(p>0);
   const Eigen::MatrixXd & X = m_Parent->m_TrainingParameterValues;
@@ -972,6 +973,7 @@ bool GaussianProcessEmulator::GetGradientOfEmulatorOutputs(
   
   int p = m_NumberParameters;
   int t = m_NumberPCAOutputs;
+  int o = m_NumberOutputs;
   std::vector< double > grad;
   Eigen::MatrixXd mean_pca_gradients( t, p );
   for ( int i = 0; i < t; i++ ) {
@@ -979,9 +981,10 @@ bool GaussianProcessEmulator::GetGradientOfEmulatorOutputs(
       return false;
     mean_pca_gradients.row(i) = Eigen::Map< Eigen::RowVectorXd >(&(grad[0]),p);
   }
-  Eigen::Map< Eigen::VectorXd > OutputGradients(&(gradients[0]),(m_NumberOutputs*p));
-  for ( int i = 0; i < t; i++ ) {
-    OutputGradients.segment((i*t), t) = m_UncertaintyScales.cwiseProduct(
+  gradients.resize(o*p);
+  Eigen::Map< Eigen::VectorXd > OutputGradients(&(gradients[0]),(o*p));
+  for ( int i = 0; i < p; i++ ) {
+    OutputGradients.segment((i*o), o) = m_UncertaintyScales.cwiseProduct(
         m_PCAEigenvectors * mean_pca_gradients.col(i) );
   }
   return true;
@@ -1055,6 +1058,7 @@ bool GaussianProcessEmulator::SingleModel
   Eigen::VectorXd point = Eigen::Map<const Eigen::VectorXd>(&(x[0]),x.size());
   int N = m_Parent->m_NumberTrainingPoints;
   int p = m_Parent->m_NumberParameters;
+  gradient.resize(p);
   Eigen::Map< Eigen::VectorXd > ModelGradient(&(gradient[0]), p);
   assert(p>0);
   int F = 1 + (m_RegressionOrder * p);
@@ -1080,11 +1084,11 @@ bool GaussianProcessEmulator::SingleModel
   MakeHVector(point,h_vector,m_RegressionOrder);
   // Calculate gradient of the variance
   ModelGradient = -cov_grad*m_CInverse*kplus
-                  -kplus*m_CInverse*cov_grad.transpose();
-  Eigen::MatrixXd tm = h_v_Grad-m_RegressionMatrix2*cov_grad.transpose();
+                  -(kplus.transpose()*m_CInverse*cov_grad.transpose()).transpose();
+  Eigen::MatrixXd tm = h_v_Grad.transpose()-m_RegressionMatrix2*cov_grad.transpose();
   Eigen::VectorXd tv = h_vector-m_RegressionMatrix2*kplus;
-  ModelGradient += tm*m_RegressionMatrix1*tv
-                + tv.transpose()*m_RegressionMatrix1*tm.transpose();
+  ModelGradient += tm.transpose()*m_RegressionMatrix1*tv
+                + (tv.transpose()*m_RegressionMatrix1*tm).transpose();
   return true;
 }
 
