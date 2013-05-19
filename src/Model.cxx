@@ -208,6 +208,10 @@ Model::GetAnalyticGradientOfLogLikelihood(
   Model::ErrorType GetGradientsErrorType;
   GetGradientsErrorType = this->GetGradientOfModelOutputs(
     parameters, mean_gradients, cov_gradients );
+  if ( GetGradientsErrorType != NO_ERROR ) {
+    std::cerr << "Error in Model::GetGradientOfModelOutputs.\n";
+    return GetGradientsErrorType;
+  }
   
   int p = parameters.size();
   size_t t = this->GetNumberOfScalarOutputs();

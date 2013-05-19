@@ -985,7 +985,7 @@ bool GaussianProcessEmulator::GetGradientOfEmulatorOutputs(
   Eigen::Map< Eigen::VectorXd > OutputGradients(&(gradients[0]),(o*p));
   for ( int i = 0; i < p; i++ ) {
     OutputGradients.segment((i*o), o) = m_UncertaintyScales.cwiseProduct(
-        m_PCAEigenvectors * mean_pca_gradients.col(i) );
+        m_RetainedPCAEigenvectors * mean_pca_gradients.col(i) );
   }
   return true;
 }
@@ -1155,8 +1155,8 @@ bool GaussianProcessEmulator::GetGradientsOfCovariances(
   = m_UncertaintyScales * m_UncertaintyScales.transpose();
   
   for ( int i = 0; i < p; i++ ) {
-    gradients.push_back( uncertaintyScales.cwiseProduct( m_PCAEigenvectors
-            * var_grads.col(i).asDiagonal() * m_PCAEigenvectors.transpose() ) );
+    gradients.push_back( uncertaintyScales.cwiseProduct( m_RetainedPCAEigenvectors
+            * var_grads.col(i).asDiagonal() * m_RetainedPCAEigenvectors.transpose() ) );
   }
   return true;
 }
