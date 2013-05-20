@@ -1,0 +1,17 @@
+#!/bin/sh
+if [ $# -lt 3 ] ; then
+  echo "Usage:"
+  echo "  madai_subsample_text_file RATIO INFILE OUTFILE"
+  echo "Example:"
+  echo "  madai_subsample_text_file 20 mcmc-2000.csv mcmc-100.csv"
+  exit 1;
+fi
+RATIO="$1"
+INFILE="$2"
+OUTFILE="$3"
+if [ ${RATIO} != 1 ]
+then
+    exec awk "NR % ${RATIO} == 1" "$INFILE" > "$OUTFILE"
+else
+    cp "$INFILE" "$OUTFILE"
+fi

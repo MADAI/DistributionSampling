@@ -28,7 +28,12 @@ foreach( application ${APPLICATIONS} )
     )
 endforeach()
 
-
+# Install binary executables
 install( TARGETS ${APPLICATIONS}
+  RUNTIME DESTINATION bin
+)
+
+# Install scripts
+install( TARGETS madai_subsample_text_file
   RUNTIME DESTINATION bin
 )
