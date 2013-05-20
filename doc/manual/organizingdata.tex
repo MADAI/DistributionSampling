@@ -13,6 +13,7 @@ First create a new directory, e.g., \path{my\_analysis}. Once in that directory,
 \commandline{mkdir my\_analysis/experimental\_results}\\
 \commandline{mkdir my\_analysis/model\_output}\\
 \commandline{mkdir my\_analysis/stat1}\\
+
 The directory \path{my\_analysis} could have any name, and the three subdirectories could be located anywhere. The \path{experimental\_results} directory is where data from observations are stored. The \path{model\_output} directory contains output from different runs of the computational model. The names \path{model\_output} and \path{experimental\_results} can be changed in the parameters file, \path{stat1/stat\_parameters.dat}, so that they point to the data locations should they be different than what was set in this example.
 
 The \path{stat1/} directory contains all the files relevant to a particular statistical analysis. This includes the parameter files, the intermediate output, and the results. If you wish to repeat an analysis with something changed, e.g., different experimental results, just make a new directory, e.g. \path{stat2/}. The parameters related to the statistical analysis are stored in the file \path{stat1/stat\_parameters.dat}, which would have the form:
@@ -27,12 +28,16 @@ All parameters related to the statistical analysis will be stored in \path{stat\
 \begin{quote}{\tt
 EXPERIMENTAL\_RESULTS\_DIRECTORY "/Users/my\_home/other\_data"}
 \end{quote}
-MADAI programs for statistical analysis will usually use the form\\
-\commandline{{\it command\_name~~stat\_directory\_location}}\\
-For example, if one is in the \path{my\_analysis/} directory, one would perform the statistical analysis by entering\\
-\commandline{PCADecompose stat1}\\
+MADAI programs for statistical analysis will usually use the form
+
+\commandline{{\it command\_name~~stat\_directory\_location}}
+
+For example, if one is in the \path{my\_analysis/} directory, one would perform the statistical analysis by entering
+
+\commandline{madai\_pca\_decompose stat1}
+
 The command will parse the file \path{stat1/stat\_parameters.dat} to determine the location of the model and observational data. If one wanted to perform a statistical analysis without overwriting results from a previous analysis, a new directory, e.g. \path{stat2/}, could be created with a new parameters file. The analysis would then proceed via\\
-\commandline{PCADecompose stat2}
+\commandline{madai\_pca\_decompose stat2}
 
 \subsection{Observational Data}
 The \path{experimental\_results} directory will contain the observables to which you wish to compare. This directory should contain a file \path{results.dat} which lists the observations or measurements from a real experiment. \path{results.dat} is a text file. Each line should have the format:
@@ -123,7 +128,7 @@ The \path{results.dat} file is in exactly the same format as the experimental re
 
 If you wish, the parameters used to run the model can be created to be consistent with the ranges described in \path{stat1/parameter\_priors.dat}. If you wish a set of parameters consistent with latin hyper-cube sampling (LHS), you can go to the main working directory and enter the command
 
-\commandline{generateTrainingPoints stat1}\\
+\commandline{madai\_generate\_training\_points stat1}\\
 where $N$ is the number of points in parameter space to be sampled. The program will read the \path{stat1/parameter\_priors.dat} file and create files \path{model\_output/run}$n$\path{/parameters.dat} in the format described in the next section. Here $n$ runs from 1 to $N$, where $N$ is set in the parameters file via the line,
 \vspace*{-8pt}\begin{quote}
 N\_SAMPLE $N$

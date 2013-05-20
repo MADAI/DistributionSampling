@@ -5,16 +5,16 @@ add_library( ApplicationUtilities
 )
 
 set( APPLICATIONS
-  PCADecompose
-  basicTrain
-  emulate
-  generateMCMCtrace
-  generateMCMCtraceExternal
-  generatePercentileGridTrace
-  generatePercentileGridTraceExternal
-  generateTrainingPoints
-  trainEmulator
-  printDefaultSettings
+  madai_pca_decompose
+  madai_basic_train
+  madai_emulate
+  madai_generate_mcmc_trace
+  madai_generate_mcmc_trace_external
+  madai_generate_percentile_grid_trace
+  madai_generate_percentile_grid_trace_external
+  madai_generate_training_points
+  madai_train_emulator
+  madai_print_default_settings
 )
 
 foreach( application ${APPLICATIONS} )
@@ -34,7 +34,6 @@ install( TARGETS ${APPLICATIONS}
 )
 
 # Install scripts
-install( FILES madai_subsample_text_file
-  PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+install( PROGRAMS madai_subsample_text_file
   DESTINATION bin
 )

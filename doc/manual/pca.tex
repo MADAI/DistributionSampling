@@ -5,9 +5,9 @@ The emulator is dependent on the principal component analysis (PCA). PCA also pr
 
 PCA is performed by the following command,
 
-\commandline{PCADecompose stat1}  
+\commandline{madai\_pca\_decompose stat1}
 
-When running, \path{PCADecompose} will read the parameters file \path{stat1/settings.dat}. The PCA analysis uses the following parameters:
+When running, \path{madai\_pca\_decompose} will read the parameters file \path{stat1/settings.dat}. The PCA analysis uses the following parameters:
 
 \vspace*{-8pt}\begin{quote}
 {\tt MODEL\_OUTPUT\_DIR "./model\_output"}\\
@@ -23,9 +23,9 @@ $\vdots$
 \end{quote}\vspace*{-8pt}
 The PCA analysis uses the experimental information only in calculating the error for comparing a model value to the experimental value, each of which has its own error.
 
-\path{PCADecompose} produces a file \path{stat1/PCADecomposition.dat}. This file holds the eigenvalues of $\Xi$ (the strength of the principal components) and the eigenvectors of $\Xi$ (which define the rotation of $\tilde{y}$ into the principal components, $z$. If $M$ experimental values are written down, the PCA analysis will determine and record the information recorded to rotate the vector $y_1\cdots y_M$ to $z_1\cdots z_M$. The emulator will in turn use only those components $z_1\cdots z_{M_Z}$ that correspond to the largest eigenvalues, $\lambda_i$, of the matrix $\Xi$. The number of components retained, $M_Z$, can be chosen during the emulator tuning or initialization.
+\path{madai\_pca\_decompose} produces a file \path{stat1/PCADecomposition.dat}. This file holds the eigenvalues of $\Xi$ (the strength of the principal components) and the eigenvectors of $\Xi$ (which define the rotation of $\tilde{y}$ into the principal components, $z$. If $M$ experimental values are written down, the PCA analysis will determine and record the information recorded to rotate the vector $y_1\cdots y_M$ to $z_1\cdots z_M$. The emulator will in turn use only those components $z_1\cdots z_{M_Z}$ that correspond to the largest eigenvalues, $\lambda_i$, of the matrix $\Xi$. The number of components retained, $M_Z$, can be chosen during the emulator tuning or initialization.
 
-The \path{PCADecompose} file has the following format:
+The \path{madai\_pca\_decompose} file has the following format:
 \begin{quote}
 {\tt OUTPUT\_MEANS}\\
 $M~~\leftarrow$ Number of observables.\\
@@ -66,5 +66,3 @@ Before building an emulator, the experimental observables and the corresponding 
 z_a=U_{ab}y_b,~~y_a=U^{-1}_{ab}z_b.
 \]
 As described in Eq. (\ref{eq:pcarotation}), the rotation matrix is comprised of eigenvectors of the matrix $\Xi_{ab}=\langle \tilde{y}_a\tilde{y}_b\rangle$, where $\tilde{y}_a\equiv (y_a-\langle y_a\rangle)/\sigma_a$, with $\langle y_a\rangle$ denoting $y_a({\bf x})$ averaged over model values calculated from the parameters taken from the prior distribution.
-
-
