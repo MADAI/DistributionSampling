@@ -184,7 +184,7 @@ int main( int, char*[] ) {
       AnalyticNormSquared += grad[j] * grad[j];
       DiffNormSquared += diff[j] * diff[j];
     }
-    double ratio = DiffNormSquared/AnalyticNormSquared;
+    double ratio = std::sqrt(DiffNormSquared/AnalyticNormSquared);
     if ( ratio < 0.01 ) {
       Count++;
     }
