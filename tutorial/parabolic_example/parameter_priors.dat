@@ -1,0 +1,3 @@
+UNIFORM  X0   -2.0   2.0
+UNIFORM  K     0.5   4.0
+UNIFORM  TEMP  0.5  10.0

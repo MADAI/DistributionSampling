@@ -8,6 +8,9 @@ div.column { color:black; background-color:white; margin-left:auto;
 	margin-right:auto; margin-top:0px; margin-bottom:0px;
 	max-width:872px; text-align:left; padding:8px 8px 8px 8px;
 	border:1px solid #56A0D3; }
+div.box { margin: 0.5ex 2em;; border:2px solid #56A0D3;
+		padding:0 0.5ex;  }
+div.box p { margin: 0.5ex 0;  }
 div.wide { color:black; background-color:white; margin-left:0.5em;
 	margin-right:0.5em; padding:0.5em; }
 body { color:#000000; background-color:#56A0D3; padding:0; margin:0;
@@ -65,10 +68,30 @@ function toggleViz(name) {
 <div class="column">
 <!--=========================================================================-->
 <h1>MADAI Distribution-Sampling Tutorial</h1>
+
+<hr>
+<p><strong>Contents</strong></p>
+<ul style="list-style-type:none;">
+<li>0. <a href="#Introduction">Introduction</a></li>
+<li>1. <a href="#Installing">Installing Software</a></li>
+		<ul style="list-style-type:none;">
+
+		<li>a. <a href="#DST">The Distribution-Sampling Tools</a></li>
+		<li>b. <a href="#other">Other software</a></li>
+		</ul>
+<li>2. <a href="#Running">Running the Software </a></li>
+		<ul style="list-style-type:none;">
+		<li>a. <a href="#Fast">Markov chain Monte Carlo with a Fast 			Model</a></li>
+		<li>b. <a href="#Slow">Use an Emulator to  With a Slow 			Model</a></li>
+		</ul>
+<li>3. <a href="#Visualizing">Visualizing the Results</a></li>
+
+</ul>
+
 <hr>
 
 <!--=========================================================================-->
-<h2>0. Introduction</h2>
+<h2 id="Introduction">0. Introduction</h2>
 
 <p>This software will enable you to determine model parameters from
 comparing model outputs to a set of experimental measurements to
@@ -89,24 +112,9 @@ numbers which can be readily compared to your experimental/
 <!-- \todo insert background for what we want to accomplish -->
 
 <!--=========================================================================-->
-<h2>1. Installing The Software</h2>
+<h2 id="Installing">1. Installing Software</h2>
 
-<!-- <p> Pre-compiled versions of this software can be found here:</p> -->
-<!-- <ul> -->
-<!-- <\!-- \todo insert apropriate URLs -\-> -->
-<!--   <li> MaxOS 32-bit: -->
-<!--        <u>href://.....</u></li> -->
-<!--   <li> MaxOS 64-bit: -->
-<!--        <u>href://.....</u></li> -->
-<!--   <li> RedHat 64-bit: -->
-<!--        <u>href://.....</u></li> -->
-<!--   <li> Ubuntu 64-bit: -->
-<!--        <u>href://.....</u></li> -->
-<!--   <li> ... </li> -->
-<!-- </ul> -->
-
-<!-- <p>If you can not use one of those sources, you will have to compile -->
-<!--   it yourself.</p> -->
+<h3 id="DST">1a. The Distribution-Sampling Tools</h3>
 
 <ol>
   <li>Install the prerequisite packages
@@ -135,41 +143,46 @@ $ <span class="input">sudo yum -y install \
 	  </li>
 	</ul>
   </li>
-  <li>Download <a href="http://cs.unc.edu/~hal/pub/DistributionSampling.tar.gz">DistributionSampling.tar.gz</a></li>
+  <li>Download the file <code>DistributionSampling-VERSION.tgz</code> from <a href="https://madai-public.cs.unc.edu/statistical-tools/distribution-sampling-library/">the MADAI web site</a>.</li>
   <li>Extract
-<!-- $ <span class="input">mkdir ~/src</span> -->
-<!-- $ <span class="input">cd ~/src</span> -->
+
 <pre>
 $ <span class="input">tar -x -z -f .../DistributionSampling.tar.gz</span></pre></li>
   <li>Build and install.  In this example, we will install in <code>${HOME}/local</code>.
 <pre>
 $ <span class="input">DistributionSampling/build.sh "${HOME}/local"</span></pre>
   </li>
-
-<!-- <li>Make a build directory: -->
-<!-- <pre> -->
-<!-- $ <span class="input">mkdir ~/build/DistributionSampling</span> -->
-<!-- $ <span class="input">cd ~/build/DistributionSampling</span></pre></li> -->
-<!--   <li>Build: -->
-<!-- <pre> -->
-<!-- $ <span class="input">cmake ~/src/DistributionSampling \ -->
-<!--     -DCMAKE_INSTALL_PREFIX:PATH="${HOME}/local"</span> <\!-- -->
-<!-- $ <span class="input">make</span> -->
-<!-- $ <span class="input">make install</span></pre></li> -->
 </ol>
+
+<div class="box">
+<p><em>Aside:</em> MacOS 10.x users who do not have macports and need Boost or Eigen3 can still install this library.  You must get CMake
+from <a href="http://www.cmake.org/cmake/resources/software.html#latest">www.cmake.org</a>. Then run the command:</p>
+<pre>
+$ <span class="input">DistributionSampling/full_build.sh "${HOME}/local"</span></pre>
+<p>This will download the necessary Boost and Eigen3 headers into a temporary directory for the compilation. </p>
+</div>
+
 <p>Your executables will be in the
 directory <code>${HOME}/local/bin</code>. You can
 make these executables available by including this directory in your
 path:</p>
 <pre>$ <span class="input">PATH=&quot;${PATH}:${HOME}/local/bin&quot;</span></pre>
+<p></p>
+<div class="box">
+<p><em>Aside:</em> csh/tcsh users:</p>
+<pre>&gt; <span class="input">set path = ($path &quot;${HOME}/local/bin&quot;)</span></pre>
+</div>
+<p></p>
 
-<p>If you wish to compile your own software that links against the
-library, the include files are in <code>${HOME}/local/include</code> and
-the library is in <code>${HOME}/local/lib/madai</code> .  </p>
+<div class="box">
+<p><em>Aside:</em> If you wish to compile your own software that links against the library, the include files are in <code>${HOME}/local/include</code> and the library is in <code>${HOME}/local/lib/madai</code> . </p></div>
 
-<h3>Other software</h3>
+<h3 id="other">1b. Other software</h3>
 
 <ul>
+<li>Python (used in tutorial examples) &mdash;
+	<a href="http://www.python.org/">python.org/</a>
+
 <li>MADAI Workbench (customized ParaView) <a href="https://madai-public.cs.unc.edu/visualization/madai-workbench/">madai.us</a></li>
 
 <li>ParaView &mdash; <a href="http://www.paraview.org/paraview/resources/software.php">paraview.org</a>
@@ -182,34 +195,32 @@ the library is in <code>${HOME}/local/lib/madai</code> .  </p>
 <pre>$ <span class="input">sudo yum -y install ggobi</span></pre>
 </li>
 
-<li>Python (used in tutorial examples) &mdash;
-	<a href="http://www.python.org/">python.org/</a>
-
 </ul>
 
 
 <!--=========================================================================-->
-<h2>2. Running the Software</h2>
-<h3>2a. With a Fast Model</h3>
+<h2 id="Running">2. Running the Software</h2>
+<h3 id="Fast">2a. Markov chain Monte Carlo with a Fast Model</h3>
 
 <p>By a "fast model" we mean that you can wait while it runs millions
 of times.</p>
 
 <p>You will need to build an executable program to interface with
-  the <code>generateMCMCtraceExternal</code> program.</p>
+  the <code>madai_generate_mcmc_trace_external</code> program.</p>
 
-<p><code>generateMCMCtraceExternal</code> will call your executable
+<p><code>madai_generate_mcmc_trace_external</code> will call your executable
 and interactively query it for model outputs at given parameter
-vectors.  <code>generateMCMCtraceExternal</code> expects a certain
+vectors.  <code>madai_generate_mcmc_trace_external</code> expects a certain
 format, which we will describe.</p>
 
+<div class="box">
+<p><em>Aside:</em> The Interactive Model Language.</p>
 <ol>
-<li>First your program (which we will call the &ldquo;external model&rdquo;) will
-output on stdout a list of comments (each beginning with a '#' and
-endin with a '\n').</li>
+<li>First the <strong>external model</strong> (your program) will
+output on standard output (stdout) a list of comments (each beginning with a '#' and ending with a '\n').</li>
 <li>Then it will output the string &quot;VERSION 1 \n&quot;</li>
-<li>Then it will output the string &quot;PARAMETERS <em>N</em>
-\n&quot;, where <em>N</em> is the number of parameters.</li>
+<li>Then it will output the string &quot;PARAMETERS <em>Nparam</em>
+\n&quot;, where <em>Nparam</em> is the number of parameters.</li>
 <li>Then, for each parameter, it will output the name of the parameter
 (a string without whitespace), whitespace, the prior distribution, and
 '\n'
@@ -217,16 +228,21 @@ endin with a '\n').</li>
 <li>A uniform prior distribution is in the format &quot;UNIFORM <em>MIN</em> <em>MAX</em>&quot;</li>
 <li>A Gaussian prior distribution is in the format &quot;GAUSSIAN <em>MEAN</em> <em>STDDEV</em>&quot;</li>
 </ul></li>
-<li>Then the string &quot;OUTPUTS <em>N</em> \n&quot;, where <em>N</em> is the number of outputs.</li>
+<li>Then the string &quot;OUTPUTS <em>Nouts</em> \n&quot;, where <em>Nouts</em> is the number of outputs.</li>
 <li>Then, for each parameter, it will output the name of the output (a string without whitespace), followed by a '\n'</li>
 <li>Then it either outputs:
 <ul>
-  <li>&quot;VARIANCE <em>N</em> \n&quot;, where <em>N</em> is the number of outputs, <br>or</li>
-  <li>&quot;COVARIANCE TRIANGULAR_MATRIX <em>M</em> \n&quot;, where <em>M</em>=<em>N</em>&times;(<em>N</em>+1)/2)<br>or</li>
-  <li>&quot;COVARIANCE FULL_MATRIX <em>K</em> \n&quot;, where <em>K</em>=<em>N</em>^<sup>2</sup></li>
+  <li>&quot;VARIANCE <em>Nouts</em> \n&quot; (<em>Nouts</em> is still the number of outputs), <br>or</li>
+  <li>&quot;COVARIANCE TRIANGULAR_MATRIX <em>M</em> \n&quot;, where <em>M</em>=<em>Nouts</em>&times;(<em>Nouts</em>+1)/2)<br>or</li>
+  <li>&quot;COVARIANCE FULL_MATRIX <em>K</em> \n&quot;, where <em>K</em>=<em>Nouts</em>^<sup>2</sup></li>
 </ul></li>
-<li>&quot;END_OF_HEADER \n&quot; </li>
+<li>The external model them prints &quot;END_OF_HEADER \n&quot; </li>
+<li>The external model will then wait for <em>Nparam</em> ASCII-encode floating-point numbers on standard input.  These will be interpreted as a set of parameter values.</li>
+<li>The external model should calculate model outputs at that point in parameter space, as well as (co)variance.  It will then print those numbers (ASCII-encoded) onto standard output.  Remember to flush standard out after writing.</li>
+<li>The external model should then wait for the next set of parameters and repeat the output calculation</li>
+<li>The external model should exit when it reads the string &quot;STOP&quot; or end-of-file or received an interrupt signal.</li>
 </ol>
+</div>
 
 <p>Our example will be the parabolic potential model.  This
 model has the parameters <code>X0</code>, <code>K</code>, and <code>TEMP</code>;
@@ -260,63 +276,52 @@ followed by the model covariances.  For example:
 1.0801234497346435 1.6499158227686113 3.712310601229375
 </pre>
 
-<ul>
-<li><a href="../parabolic/parabolic_interactive.py">parabolic_interactive.py</a></li>
-<li><a href="../parabolic/ParabolicPotentialModel.py">ParabolicPotentialModel.py</a></li>
-</ul>
 
-<p>First, choose a working directory:</p>
+<p>The <code>parabolic_interactive.py</code> program can be found in the directory <code>MADAIExamples/parabolic_example/</code></p>
 
-<pre>
-$ <span class="input">DIR=&quot;${HOME}/data/parabolic_ext&quot;</span>
-$ <span class="input">mkdir -p &quot;$DIR&quot;</span>
-$ <span class="input">cd &quot;$DIR&quot;</span></pre>
+<p>First move into the MADAIExamples directory.</p>
+<pre>$ <span class="input">cd ..../MADAIExamples</span></pre>
+<p>Then make a working directory:</p>
+<pre>$ <span class="input">mkdir -p parabolic_ext</span></pre>
+<pre>$ <span class="input">cd parabolic_ext</span></pre>
 
-<p>From here on out, we will assume that you are in your working
-directory and will refer to it as <code>.</code></p>
+<p>(From here on out, we will assume that you are in your working
+directory and will refer to it as <code>.</code> (a single dot).)</p>
 
-<p>Next, we  will create a <code>setting.dat</code> file in
-  this directory with some default values in it. All of the
-  DistributionSampling utilities will look for this file.</p>
-<pre>
-$ <span class="input">cat &gt; &quot;settings.dat&quot; &lt;&lt;EOF
-EXPERIMENTAL_RESULTS_DIRECTORY experimental_results
-MCMC_NUMBER_OF_SAMPLES 100
-MCMC_NUMBER_OF_BURN_IN_SAMPLES 0
-MCMC_USE_MODEL_ERROR 0
-MCMC_STEP_SIZE 0.1
-EXTERNAL_MODEL_EXECUTABLE <span style="font-family:sans-serif">(path to)</span>/parabolic_interactive.py
-EXTERNAL_MODEL_ARGUMENTS
-EOF</span></pre>
-
-<p>Next we will specify all of the experimentally observed measurements and errors:</p>
-
-<pre>
-$ <span class="input">mkdir &quot;experimental_results&quot;</span>
-$ <span class="input">cat &gt; &quot;experimental_results/results.dat&quot; &lt;&lt;EOF
-MEAN_X         1.14           0.1
-MEAN_X_SQUARED 2.77634418605  0.1
-MEAN_ENERGY    3.4925         0.1
-EOF</span>
+<p>Next, copy the “experimental” results file into the working directory.  This specifies all of the experimentally observed measurements and errors. (If you skip that step, it assumes that the measurements are 0.0 and the error is 1.0.)
+</p>
+<pre>$ <span class="input">cp ../parabolic_example/experimental_results.dat .</span>
+$ <span class="input">cat experimental_results.dat</span>
+MEAN_X         1.0          0.6
+MEAN_X_SQUARED 1.411764706  1.4
+MEAN_ENERGY    2.8          1.9
 </pre>
 
-<p>If you skip that step, it assumes that the measurements are 0.0 and
-the error is 1.0.  </p>
+<p>Next, we  will create a <code>settings.dat</code> file in
+  this directory with some default values in it. All of the
+  DistributionSampling utilities will look for this file.</p>
+<pre>$ <span class="input">madai_default_options &gt; settings.dat</span></pre>
+
+<p>Now use you favorite text editor to edit the settings.dat file. Set the variable EXTERNAL_MODEL_EXECUTABLE to ../parabolic_example/parabolic_interactive.py . My favorite text editor is sed:</p>
+
+<pre>$ <span class="input">sed -i \
+  '/^EXTERNAL_MODEL_EXECUTABLE/s|$| ../parabolic_example/parabolic_interactive.py|' \
+  settings.dat</span></pre>
+
 
 <p>The final step is to run the Markov chain Monte Carlo (MCMC)
-routine on your model.  The <code>generateMCMCtraceExternal</code> program
+routine on your model.  The <code>madai_generate_mcmc_trace_external</code> program
 uses the external model to produce model outputs for points in
 parameter space.  These model outputs are compared to the experimental
 values to calculate likelihood.</p>
 
-<p class="centered"><em>L</em> &#8733; exp((-0.5) &times; sum(
+<p class="centered"><em>L</em> &#8733; exp((-0.5) &times; sum((
 (<em>Y<sub>_observed</sub></em>[<em>i</em>] - <em>Y<sub>_model</sub></em>[<em>i</em>]) /
-&sigma;[<em>i</em>] ))</p>
+&sigma;[<em>i</em>] ))^<sup>2</sup>)</p>
 
-<p class="centered">ln(<em>L</em>) = C - 0.5 &times; sum(
+<p class="centered">ln(<em>L</em>) = C - 0.5 &times; sum((
 (<em>Y<sub>_observed</sub></em>[<em>i</em>] - <em>Y<sub>_model</sub></em>[<em>i</em>]) /
-&sigma;[<em>i</em>] )</p>
-
+&sigma;[<em>i</em>] )^<sup>2</sup>)</p>
 
 <p>The Metropolis-Hastings MCMC algorithm is used to draw a large
 number of samples from the distribution proportional to likelihood.
@@ -324,7 +329,7 @@ These values are stored in a comma-separated-value (csv) file
 specified in the arguments.</p>
 
 <pre>
-$ <span class="input">generateMCMCtraceExternal . &quot;mcmc.csv&quot;</span>
+$ <span class="input">madai_generate_mcmc_trace_external . &quot;mcmc.csv&quot;</span>
 </pre>
 
 <p>The output file is left in the <code>trace</code> directory:</p>
@@ -343,98 +348,26 @@ $ <span class="input">head trace/mcmc.csv</span>
 -0.542122,3.93226,3.24617,-0.542122,0.706659,3.24617,-10.5558
 </pre>
 
-<p>The <code>generateMCMCtraceExternal</code> program will produce the
+<p>The <code>madai_generate_mcmc_trace_external</code> program will produce the
  number of points specified in the <code>settings.dat</code> under in
  the <code>MCMC_NUMBER_OF_SAMPLES</code> variable.  Depending on the
  number of the parameters, a larger or smaller number of samples will
  need to be drawn.  Once you are sure that the program is working
  correctly, set <code>MCMC_NUMBER_OF_SAMPLES</code> to a large number
- (10<sup>6</sup> or 10<sup>7</sup>) and let the program run for a
+ (a million or ten million) and let the program run for a
  while.</p>
 
+<p>Suppose we set <code>MCMC_NUMBER_OF_SAMPLES</code> to <code>1000000</code> and wish to sub-sample the distribution for analysis or visualization.  The <code>madai_subsample_text_file</code> will sample every <em>N</em>th point from a csv file into a new csv file.
+
+<pre>$ <span class="input">madai_subsample_text_file 20 trace/mcmc.csv trace/mcmc_50000.csv</span></pre>
+<p></p>
+<div class="box">
+<p><em>Aside:</em> A faster way to interface with the DistributionSampling library is to link directly to it. For a complete example, look in the <code>DistributionSampling/tutorial/examples/ParabolicPotentialModelCxx</code> directory.</p>
+<p>A skeleton for your own C++ model can be found in <code>DistributionSampling/tutorial/examples/MCMC_Example</code> .
+</div>
 
 <!--=========================================================================-->
-<h3>2b. (Advanced) Linking to the Library</h3>
-
-<p>Another way to interface with the DistributionSampling library is
-to link directly to it.  In this example, your model is implemented as
-a subclass of the madai::Model class.
-
-<p>MyModel.cxx</p>
-
-
-<pre><!-- Generator: GNU source-highlight 3.1.5 -->
-<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;iostream&gt;</span>
-<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;fstream&gt;</span>
-<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/Model.h&gt;</span>
-<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/MetropolisHastingsSampler.h&gt;</span>
-<span class="preproc">#include</span><span class="normal"> </span><span class="string">&lt;madai/DistributionSampling/SamplerCSVWriter.h&gt;</span>
-
-<span class="keyword">class</span><span class="normal"> </span><span class="classname">MyModel</span><span class="normal"> </span><span class="symbol">:</span><span class="normal"> </span><span class="keyword">public</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model </span><span class="cbracket">{</span>
-<span class="keyword">public</span><span class="symbol">:</span>
-<span class="normal">  </span><span class="function">MyModel</span><span class="symbol">();</span>
-<span class="normal">  </span><span class="keyword">virtual</span><span class="normal"> </span><span class="symbol">~</span><span class="function">MyModel</span><span class="symbol">()</span><span class="normal"> </span><span class="cbracket">{}</span>
-<span class="normal">  </span><span class="keyword">virtual</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> </span><span class="function">GetScalarOutputsAndCovariance</span><span class="symbol">(</span>
-<span class="normal">      </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;,</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;,</span>
-<span class="normal">       std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;)</span><span class="normal"> </span><span class="keyword">const</span><span class="symbol">;</span>
-<span class="normal">  </span><span class="keyword">virtual</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> </span><span class="function">GetScalarOutputs</span><span class="symbol">(</span>
-<span class="normal">      </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;,</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;)</span><span class="normal"> </span><span class="keyword">const</span><span class="symbol">;</span>
-<span class="cbracket">}</span><span class="symbol">;</span>
-
-<span class="normal">MyModel</span><span class="symbol">::</span><span class="function">MyModel</span><span class="symbol">()</span><span class="normal"> </span><span class="cbracket">{</span>
-<span class="normal">  </span><span class="comment">// Insert your code here. This constructor calls:</span>
-<span class="normal">  </span><span class="comment">//   this-&gt;AddParameter(),</span>
-<span class="normal">  </span><span class="comment">//   this-&gt;AddScalarOutputName(),</span>
-<span class="normal">  </span><span class="comment">//   this-&gt;SetObservedScalarValues(), and</span>
-<span class="normal">  </span><span class="comment">//   this-&gt;SetObservedScalarCovariance().</span>
-<span class="cbracket">}</span>
-
-<span class="normal">madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> MyModel</span><span class="symbol">::</span><span class="function">GetScalarOutputsAndCovariance</span><span class="symbol">(</span>
-<span class="normal">    </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> parameters</span><span class="symbol">,</span>
-<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> outputs</span><span class="symbol">,</span>
-<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> outputCovariance</span><span class="symbol">)</span><span class="normal"> </span><span class="keyword">const</span><span class="normal"> </span><span class="cbracket">{</span>
-<span class="normal">  </span><span class="symbol">(</span><span class="type">void</span><span class="symbol">)</span><span class="normal">parameters</span><span class="symbol">;</span><span class="normal"> </span><span class="symbol">(</span><span class="type">void</span><span class="symbol">)</span><span class="normal">outputs</span><span class="symbol">;</span><span class="normal"> </span><span class="symbol">(</span><span class="type">void</span><span class="symbol">)</span><span class="normal">outputCovariance</span><span class="symbol">;</span>
-<span class="normal">  </span><span class="comment">// Insert your code here.</span>
-<span class="normal">  </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">NO_ERROR</span><span class="symbol">;</span>
-<span class="cbracket">}</span>
-
-<span class="normal">madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="usertype">ErrorType</span><span class="normal"> MyModel</span><span class="symbol">::</span><span class="function">GetScalarOutputs</span><span class="symbol">(</span>
-<span class="normal">    </span><span class="keyword">const</span><span class="normal"> std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> parameters</span><span class="symbol">,</span>
-<span class="normal">    std</span><span class="symbol">::</span><span class="normal">vector</span><span class="symbol">&lt;</span><span class="normal"> </span><span class="type">double</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal"> outputs </span><span class="symbol">)</span><span class="normal"> </span><span class="keyword">const</span><span class="normal"> </span><span class="cbracket">{</span>
-<span class="normal">  </span><span class="symbol">(</span><span class="type">void</span><span class="symbol">)</span><span class="normal">parameters</span><span class="symbol">;</span><span class="normal"> </span><span class="symbol">(</span><span class="type">void</span><span class="symbol">)</span><span class="normal">outputs</span><span class="symbol">;</span>
-<span class="normal">  </span><span class="comment">// Insert your code here.</span>
-<span class="normal">  </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">Model</span><span class="symbol">::</span><span class="normal">NO_ERROR</span><span class="symbol">;</span>
-<span class="cbracket">}</span>
-
-<span class="type">int</span><span class="normal"> </span><span class="function">main</span><span class="symbol">(</span><span class="type">int</span><span class="symbol">,</span><span class="normal"> </span><span class="type">char</span><span class="symbol">**)</span><span class="normal"> </span><span class="cbracket">{</span>
-<span class="normal">  </span><span class="usertype">MyModel</span><span class="normal"> model</span><span class="symbol">;</span>
-<span class="normal">  madai</span><span class="symbol">::</span><span class="usertype">MetropolisHastingsSampler</span><span class="normal"> mcmc</span><span class="symbol">;</span>
-<span class="normal">  mcmc</span><span class="symbol">.</span><span class="function">SetStepSize</span><span class="symbol">(</span><span class="normal"> </span><span class="number">0.1</span><span class="normal"> </span><span class="symbol">);</span>
-<span class="normal">  std</span><span class="symbol">::</span><span class="usertype">ofstream</span><span class="normal"> </span><span class="function">output</span><span class="symbol">(</span><span class="string">"output.csv"</span><span class="symbol">);</span>
-<span class="normal">  </span><span class="keyword">return</span><span class="normal"> madai</span><span class="symbol">::</span><span class="normal">SamplerCSVWriter</span><span class="symbol">::</span><span class="function">GenerateSamplesAndSaveToFile</span><span class="symbol">(</span>
-<span class="normal">      </span><span class="symbol">&amp;</span><span class="normal">mcmc</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">model</span><span class="symbol">,</span><span class="normal"> output</span><span class="symbol">,</span><span class="normal"> </span><span class="number">1000000</span><span class="symbol">,</span><span class="normal"> </span><span class="number">0</span><span class="symbol">,</span><span class="normal"> </span><span class="keyword">false</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;(</span><span class="normal">std</span><span class="symbol">::</span><span class="normal">cerr</span><span class="symbol">));</span>
-<span class="cbracket">}</span></pre>
-
-<p>Assuming <code>CMAKE_INSTALL_PREFIX</code> was set
-to <code>${HOME}/local</code>, here is the Makefile:</p>
-
-<pre><span class="symbol">all:</span><span class="normal"> MyModel</span>
-<span class="type">MADAI_PREFIX =</span><span class="normal"> </span><span class="string">${HOME}/local</span>
-<span class="type">CXXFLAGS =</span><span class="normal"> -O</span><span class="number">3</span><span class="normal"> -Wall -Wextra -pedantic -I</span><span class="string">"${MADAI_PREFIX}/include"</span>
-<span class="type">LDFLAGS =</span><span class="normal"> -L</span><span class="string">"${MADAI_PREFIX}/lib/madai"</span><span class="normal"> -lDistributionSampling</span>
-<span class="symbol">%</span><span class="normal">.o </span><span class="symbol">:</span><span class="normal"> </span><span class="symbol">%</span><span class="normal">.cxx</span>
-<span class="normal">	</span><span class="variable">$(CXX)</span><span class="normal"> -c </span><span class="variable">$(CXXFLAGS)</span><span class="normal"> </span><span class="variable">$&lt;</span><span class="normal"> -o </span><span class="variable">$@</span>
-<span class="symbol">%</span><span class="normal"> </span><span class="symbol">:</span><span class="normal"> </span><span class="symbol">%</span><span class="normal">.o</span>
-<span class="normal">	</span><span class="variable">$(CXX)</span><span class="normal"> </span><span class="variable">$&lt;</span><span class="normal"> </span><span class="variable">$(LDFLAGS)</span><span class="normal"> -o </span><span class="variable">$@</span>
-<span class="preproc">.PHONY :</span><span class="normal"> all</span></pre>
-
-<p>This can run significantly faster than the external model.</p>
-
-<p>Here is an example of <a href="ParabolicPotentialModel.html">implementing
-the Parabolic Potential in C++</a></p>
-
-<!--=========================================================================-->
-<h3>2c. With a Slow Model</h3>
+<h3 id="Slow">2b. Use an Emulator to  With a Slow Model</h3>
 
 <p>The DistributionSampling library uses a Gaussian Process Emulator
 to emulate a slow model much more quickly.  To train the Emulator, the
@@ -446,156 +379,160 @@ you will need the parameter values and the model outputs.</p>
   and <code>TEMP</code>; and the observables <code>MEAN_X</code>,
   <code>MEAN_X_SQUARED</code>, and <code>MEAN_ENERGY</code>.</p>
 
-<p>Begin by choosing a working directory:</p>
 
-<pre>
-$ <span class="input">DIR=&quot;${HOME}/data/parabolic_emulated&quot;</span>
-$ <span class="input">mkdir -p &quot;$DIR&quot;</span>
-$ <span class="input">cd &quot;$DIR&quot;</span></pre>
+<p>The <code>parabolic_evaluate.py</code> program can be found in the directory <code>MADAIExamples/parabolic_example/</code></p>
+
+<p>First move into the MADAIExamples directory.</p>
+<pre>$ <span class="input">cd ..../MADAIExamples</span></pre>
+<p>Then make a working directory:</p>
+<pre>$ <span class="input">mkdir -p parabolic_emu</span></pre>
+<pre>$ <span class="input">cd parabolic_emu</span></pre>
 
 <p>From here on out, we will assume that you are in your working
-directory and will refer to it as <code>.</code></p>
+directory and will refer to it as <code>.</code> (a single dot).</p>
 
-<p>The first thing we will do is create a <code>setting.dat</code> file in
-  this directory with some default values in it. All of the
-  DistributionSampling utilities will look for this file.</p>
-<pre>
-$ <span class="input">cat &gt; &quot;settings.dat&quot; &lt;&lt;EOF
-MODEL_OUTPUT_DIRECTORY model_output
-EXPERIMENTAL_RESULTS_DIRECTORY experimental_results
-GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS 100
-GENERATE_TRAINING_POINTS_PERCENTILE_PARTITION 1
-GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS 3
-PCA_FRACTION_RESOLVING_POWER 0.95
-EMULATOR_COVARIANCE_FUNCTION SQUARE_EXPONENTIAL_FUNCTION
-EMULATOR_REGRESSION_ORDER 1
-EMULATOR_NUGGET 0.001
-EMULATOR_AMPLITUDE 1
-EMULATOR_SCALE 0.01
-MCMC_NUMBER_OF_SAMPLES 100
-MCMC_NUMBER_OF_BURN_IN_SAMPLES 0
-MCMC_USE_EMULATOR_COVARIANCE 0
-MCMC_STEP_SIZE 0.1
-EOF</span>
-</pre>
-<p><a href="settings.html">A detailed description of options in <code>settings.dat</code></a></p>
+<p>The first thing we will do is create a <code>setting.dat</code>
+file in this directory with some default values in it. All of the
+DistributionSampling utilities will look for this file.</p>
+
+<pre>$ <span class="input">madai_default_options &gt; ./settings.dat</span></pre>
 
 <p>Next, we need to create a parameter_priors.dat file that contains
-our assumptions about prior probability distribution for the values for
-the parameters.
-<pre>
-$ <span class="input">cat &gt; &quot;parameter_priors.dat&quot; &lt;&lt;EOF
+our assumptions about prior probability distribution for the values
+for the parameters.
+
+<pre>$ <span class="input">cp ../parabolic_example/parameter_priors.dat .</span>
+$ <span class="input">cat parameter_priors.dat</span>
 uniform X0   &#0045;2.0 2.0
 uniform K    0.5  4.0
 uniform TEMP 0.5  10.0
-EOF</span>
 </pre>
 
-<p>Next we will specify all of the experimentally observed measurements and errors:</p>
-<pre>
-$ <span class="input">mkdir &quot;experimental_results&quot;</span>
-$ <span class="input">cat &gt; &quot;experimental_results/results.dat&quot; &lt;&lt;EOF
+<p>Next we will specify all of the experimentally observed
+measurements and errors:</p>
+
+<pre>$ <span class="input">cp ../parabolic_example/experimental_results.dat .</span>
+$ <span class="input">cat experimental_results.dat</span>
 MEAN_X         1.14           0.1
 MEAN_X_SQUARED 2.77634418605  0.1
 MEAN_ENERGY    3.4925         0.1
-EOF</span>
 </pre>
 
 <p>Finally, we create a file that contains the list of observables
 that we want to make use of.  This should be a subset
 of <code>results.dat</code>.</p>
-<pre>
-$ <span class="input">cat &gt; &quot;observable_names.dat&quot; &lt;&lt;EOF
+
+<pre>$ <span class="input">cp ../parabolic_example/observable_names.dat .</span>
+$ <span class="input">cat observable_names.dat</span>
 MEAN_X
 MEAN_X_SQUARED
 MEAN_ENERGY
-EOF</span>
 </pre>
 
+
 <p>We are now ready to run the first Distribution-Sampling
-utility, <code>generateTrainingPoints</code>.  This program will generate
-a Latin hypercube in the parameter space.  The number of sample points
-is set by the <code>GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS</code>
+utility, <code>madai_generate_training_points</code>.  This program
+will generate a Latin hypercube in the parameter space.  The number of
+sample points is set by
+the <code>GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS</code>
 variable. (The command-line argument is the name of the working
 directory.)</p>
 <pre>
-$ <span class="input">generateTrainingPoints .</span>
+$ <span class="input">madai_generate_training_points .</span>
 </pre>
 
 <p>The output of <code>generateTrainingPoints</code> is a series of
 files <code>model_output/run*/parameters.dat</code>.  For example:</p>
 
 <pre>$ <span class="input">cat ./model_output/run0001/parameters.dat</span>
-X0 1.18
-K 2.6875
-TEMP 9.2875</pre>
+X0 0.94
+K 2.3025
+TEMP 5.0125</pre>
 
 <p>The next task is to actually evaluate the model at this point in
-parameter space.  To that end, we have written a little Python program
-  to do just that.</p>
+parameter space.  We have written a little Python program to do just
+that.</p>
 
-<ul>
-<li><a href="../parabolic/parabolic_evaluate.py">parabolic_evaluate.py</a></li>
-<li><a href="../parabolic/ParabolicPotentialModel.py">ParabolicPotentialModel.py</a></li>
-</ul>
+<pre>$ <span class="input">../parabolic_example/parabolic_evaluate.py model_output/run*</span></pre>
 
-<p><code>parabolic_evaluate.py</code> takes as command-line arguments the names of
-a directory that contains a file <code>parameters.dat</code> and write a
-file called <code>results.dat</code>.</p>
 
-<pre>
-$ <span class="input">python parabolic_evaluate.py &quot;model_output&quot;/run*</span>
-</pre>
+<p><code>parabolic_evaluate.py</code> takes as command-line arguments
+the names of a directory that contains a
+file <code>parameters.dat</code> and write a file
+called <code>results.dat</code>.</p>
+
+Verify that it works
+
+<pre>$ <span class="input">cat ./model_output/run0001/results.dat</span>
+MEAN_X 0.94 1.04330761087
+MEAN_X_SQUARED 1.9720907709 2.49334837063
+MEAN_ENERGY 5.0125 3.5443727407</pre>
+
+<div class="box">
+<p><em>Aside:</em> It doesn't matter how you populate
+the <code>results.dat</code> files.  We expect that you may be running
+the full model on a supercomputer or on a dozen nodes of a
+cluster.</p> <p>Also, the <code>parameters.dat</code> files don't have
+to be a Latin hypercube.  You are free to select them using any
+method.</p></div>
 
 <p>After generating the training points, we generate the principal
 component analysis decomposition of the outputs.</p>
-<pre>$ <span class="input">PCADecompose .</span></pre>
+<pre>$ <span class="input">madai_pca_decompose .</span></pre>
 
-<p>The file <code>pca_decomposition.dat</code> contains the PCA data.  The
-eigenvalues are sorted in increasing order.</p>
+<p>The file <code>pca_decomposition.dat</code> contains the PCA
+data. The eigenvalues are sorted in increasing order.</p>
 
 <p>The next step is to generate a Gaussian Process Emulator on the
 training points.  The hyper-parameters of the emulator are the
 hyper-parameters of the covariance (kernel) functions on the parameter
-space and the regression function.  The <code>basicTrain</code> program
-that generates &ldquo;okay&rdquo; values for the hyper-parameters.  The
-  default is a square exponential function:</p>
+space and the regression function.  The <code>madai_basic_train</code>
+program generates &ldquo;okay&rdquo; values for the
+hyper-parameters.</p>
 
-<p class="centered">dist(<em>u</em>,<em>v</em>) = sqrt(sum( ((<em>u</em>[<em>i</em>]-<em>v</em>[<em>i</em>]) / &theta;[<em>i</em>+2])^<sup>2</sup> ))</p>
-<p class="centered">Cov(<em>u</em>,<em>v</em>) = &theta;[0] exp( (-0.5) dist(<em>u</em>,<em>v</em>)^<sup>2</sup>) + &theta;[1] &delta;[<em>u</em>,<em>v</em>]</p>
+<div class="box">
+<p><em>Aside:</em> The default covariance function is a square
+exponential function:</p>
 
-<p>Where <em>u</em> and <em>v</em> are points in parameter space, &theta; is a list of hyper-parameters and &delta; is the Kronecker delta.</p>
+<p class="centered">dist(<em>u</em>,<em>v</em>) = sqrt(sum(
+((<em>u</em>[<em>i</em>]-<em>v</em>[<em>i</em>]) /
+&theta;[<em>i</em>+2])^<sup>2</sup> ))</p>
+<p class="centered">Cov(<em>u</em>,<em>v</em>) = &theta;[0] exp(
+(-0.5) dist(<em>u</em>,<em>v</em>)^<sup>2</sup>) + &theta;[1]
+&delta;[<em>u</em>,<em>v</em>]</p>
 
-<p>By default, the nugget (&theta;[1]) is 0.001 and the amplitude
-(&theta;[0]) is 1.0.  We define the characteristic length scale of a
-parameter value as the difference between the 75th percentile and the
-25th percentile of the prior distribution.  For a uniform prior, this
-is half the range.  The default value for &theta;[2+<em>i</em>] the
-characteristic length scale of the <em>i</em>th parameter times
-  the <code>EMULATOR_SCALE</code> option.</p>
+<p>Where <em>u</em> and <em>v</em> are points in parameter space,
+&theta; is a list of hyper-parameters and &delta; is the Kronecker
+delta.</p>
 
-<p>(In the future we plan on providing robust software to search for more
-  optimal hyper-parameters.)</p>
+<p>By default, the nugget (&theta;[1]) is <code>EMULATOR_NUGGET</code>
+and the amplitude (&theta;[0]) is <code>EMULATOR_AMPLITUDE</code>. We
+define the characteristic length scale of a parameter value as the
+difference between the 75th percentile and the 25th percentile of the
+prior distribution.  For a uniform prior, this is half the range.  The
+default value for &theta;[2+<em>i</em>] the characteristic length
+scale of the <em>i</em>th parameter times
+the <code>EMULATOR_SCALE</code> option.</p></div>
 
 <p>To run the basic training program:</p>
 
 <pre>
-$ <span class="input">basicTrain .</span>
+$ <span class="input">madai_basic_train .</span>
 </pre>
 
-<p><code>basicTrain</code> writes out a file <code>emulator_state.dat</code>
-which contains hyper-parameters for each of the retained pca-decomposed
-sub-models.
+<p><code>basicTrain</code> writes out a
+file <code>emulator_state.dat</code> which contains hyper-parameters
+for each of the retained pca-decomposed sub-models.
 
 <p>The final step is to run the Markov chain Monte Carlo (MCMC)
-routine on the code.  The <code>generateMCMCtrace</code> program uses the
-trained Gaussian Process model emulator to produce model outputs for
-points in parameter space.  These model outputs are compared to
-  observed values to calculate likelihood.</p>
+routine on the code.  The <code>madai_generate_mcmc_trace</code>
+program uses the trained Gaussian Process model emulator to produce
+model outputs for points in parameter space.  These model outputs are
+compared to observed values to calculate likelihood.</p>
 
 <p class="centered"><em>L</em> &#8733; exp((-0.5) sum(
-(<em>Y<sub>_observed</sub></em>[<em>i</em>] - <em>Y<sub>_model</sub></em>[<em>i</em>]) /
-&sigma;[<em>i</em>] ))</p>
+((<em>Y<sub>_observed</sub></em>[<em>i</em>] - <em>Y<sub>_model</sub></em>[<em>i</em>]) /
+&sigma;[<em>i</em>] ))^<sup>2</sup>)</p>
 
 <p>The Metropolis-Hastings MCMC algorithm is used to draw a large
 number of samples from the distribution proportional to likelihood.
@@ -603,7 +540,7 @@ These values are stored in a comma-separated-value (csv) file
 specified in the arguments.</p>
 
 <pre>
-$ <span class="input">generateMCMCtrace . &quot;mcmc.csv&quot;</span>
+$ <span class="input">madai_generate_mcmc_trace . &quot;mcmc.csv&quot;</span>
 </pre>
 
 <p>The output file is left in the <code>trace</code> directory:</p>
@@ -622,52 +559,56 @@ $ <span class="input">head trace/mcmc.csv</span>
 -0.19968,1.6921,0.574281,-0.19968,1.75331,0.574281,-6.61224
 </pre>
 
-<p>The <code>generateMCMCtrace</code> program will produce the number of
- points specified in the <code>settings.dat</code> under in
- the <code>MCMC_NUMBER_OF_SAMPLES</code> variable.  Depending on the
- number of the parameters, a larger or smaller number of samples will
- need to be drawn.  Once you are sure that the program is working
- correctly, set <code>MCMC_NUMBER_OF_SAMPLES</code> to a large number
- (10<sup>6</sup> or 10<sup>7</sup>) and let the program run for a
-  while.</p>
-
-<h2>3. Visualizing the Results</h2>
+<p>The <code>madai_generate_mcmc_trace</code> program will produce the
+number of points specified in the <code>settings.dat</code> under in
+the <code>MCMC_NUMBER_OF_SAMPLES</code> variable.  Depending on the
+number of the parameters, a larger or smaller number of samples will
+need to be drawn.  Once you are sure that the program is working
+correctly, set <code>MCMC_NUMBER_OF_SAMPLES</code> to a large number
+(a million or more) and let the program run for a while.</p>
 
 <p>While visualization software is capable of displaying ten million
 points in space, for analysis you may need to reduce the number of
 points.  To keep the same random distribution, it may be easiest to
-pick out every <em>N</em>th line.  For example, to reduce ten million
-points down to a hundred thousand, pick out every 100th line:</p>
+pick out every <em>N</em>th line.  For example, to reduce one million
+points down to a fifty thousand, pick out every 20th line:</p>
 
 <pre>
-$ <span class="input">awk 'NR % 100 == 1' &lt; trace/mcmc.csv &gt; trace/mcmc-subsample.csv</span>
+$ <span class="input">madai_subsample_text_file 20 trace/mcmc.csv trace/mcmc_50000.csv</span>
 </pre>
 
+<h2 id="Visualizing">3. Visualizing the Results</h2>
 
-<h3>3a. ParaView</h3>
-<p>CSV files can be opened in ParaView or the MADAI Workbench.</p>
+<p>TO BE FIXED BEFORE THE TUTORIAL</p>
 
-<p><img src="images/screenshot_001.png" alt=""></p>
-<p><img src="images/screenshot_002.png" alt=""></p>
+<!-- <h3>3a. ParaView</h3> -->
+<!-- <p>CSV files can be opened in ParaView or the MADAI Workbench.</p> -->
 
-<h3>3b. Scatterplot Matrix</h3>
+<p><a href="images/screenshot_001.png">
+<img src="images/screenshot_001.png" alt="" width="218" height="209"></a>
+<a href="images/screenshot_002.png">
+<img src="images/screenshot_002.png" alt="" width="218" height="209"></a>
+<a href="images/scatterplot.png"><img src="images/scatterplot.png" alt="" width="218" height="189"></a>
+<a href="images/screenshot_003.png"><img src="images/screenshot_003.png" alt="" width="218" height="187"></a>
+<a href="images/screenshot_004.png"><img src="images/screenshot_004.png" alt="" width="178" height="141"></a></p>
 
-<p>This image was created via <a href="http://matplotlib.org/">Matplotlib</a>.</p>
-<p><img src="images/scatterplot.png" alt=""></p>
+<!-- <h3>3b. Scatterplot Matrix</h3> -->
+
+<!-- <p>This image was created via <a href="http://matplotlib.org/">Matplotlib</a>.</p> -->
 
 
-<h3>3c. GGobi</h3>
-<p>CSV files can be directly loaded by GGobi.</p>
+<!-- <h3>3c. GGobi</h3> -->
+<!-- <p>CSV files can be directly loaded by GGobi.</p> -->
 
-<h3>3d. Percentile Surface</h3>
-<p>This is a stand-alone program that links against VTK.  Compiling
-  instructions are located inside the file.</p>
-<p><a href="../pub/PercentileSurface.tgz">PercentileSurface.tgz</a></p>
-<p>This is the 95% surface</p>
-<p><img src="images/screenshot_003.png" alt=""></p>
-<p>This is a comparison of the the 95% surface to a scatterplot of the
-samples.</p>
-<p><img src="images/screenshot_004.png" alt=""></p>
+<!-- <h3>3d. Percentile Surface</h3> -->
+<!-- <p>This is a stand-alone program that links against VTK. Compiling -->
+<!--   instructions are located inside the file.</p> -->
+<!-- <p><a href="/~hal/pub/PercentileSurface.tgz">PercentileSurface.tgz</a></p> -->
+<!-- <p>This is the 95% surface</p> -->
+<!-- <p><img src="images/screenshot_003.png" alt=""></p> -->
+<!-- <p>This is a comparison of the the 95% surface to a scatterplot of the -->
+<!-- samples.</p> -->
+<!-- <p><img src="images/screenshot_004.png" alt=""></p> -->
 
 <hr>
 
@@ -683,7 +624,7 @@ samples.</p>
       LocalWords:  GetGaussianIntegral MeanX MeanE ErrorX ErrorE dat
       LocalWords:  rundir params IOError len argv arg tt ffffff th td
       LocalWords:  DistributionSampling cbracket preproc specialchar
-      LocalWords:  generateMCMCtraceExternal stdout endin whitespace
+      LocalWords:  madai_generate_mcmc_trace_external stdout endin
       LocalWords:  STDDEV ParabolicPotentialModel stdin LogLikelihood
       LocalWords:  pca Cov awk ln MyModel cxx iostream fstream madai
       LocalWords:  ErrorType GetScalarOutputsAndCovariance const cerr
@@ -692,5 +633,5 @@ samples.</p>
       LocalWords:  SetObservedScalarCovariance SetStepSize Makefile
       LocalWords:  MetropolisHastingsSampler SamplerCSVWriter Wextra
       LocalWords:  GenerateSamplesAndSaveToFile CXXFLAGS LDFLAGS
-      LocalWords:  lDistributionSampling
+      LocalWords:  lDistributionSampling subsample whitespace
  -->
