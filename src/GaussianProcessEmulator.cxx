@@ -110,14 +110,14 @@ inline void GetGradientOfHVector(
   int p = point.size();
   int numberRegressionFunctions = 1 + (regressionOrder * p);
   GradMatrix.resize(p, numberRegressionFunctions);
-  for ( int i = 0; i < p; i++ ) {
-    GradMatrix(i,0) = 0.0;
-    if ( regressionOrder > 0 )
+  GradMatrix = Eigen::MatrixXd::Zero(p, numberRegressionFunctions);
+  if ( regressionOrder > 0 ) {
+    for ( int i = 0; i < p; i++ )
       GradMatrix(i,i+1) = 1.0;
-  }
-  for ( int i = 1; i < regressionOrder; ++i ) {
-    for ( int j = 0; j < p; j++ ) {
-      GradMatrix(j,1+i*p+j) = double(i + 1) * std::pow(point(i), double(i));
+    for ( int i = 1; i < regressionOrder; ++i ) {
+      for ( int j = 0; j < p; j++ ) {
+        GradMatrix(j,1+i*p+j) = double(i + 1) * std::pow(point(i), double(i));
+      }
     }
   }
 }

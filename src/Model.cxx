@@ -243,8 +243,15 @@ Model::GetAnalyticGradientOfLogLikelihood(
     }
   }
   
+  std::vector< double > constantCovariance;
+  if ( !this->GetConstantCovariance(constantCovariance) ) {
+    std::cerr << "Error getting the constant covariance matrix from the model\n";
+    return OTHER_ERROR;
+  }
+  
   if ((scalarCovariance.size() == 0) &&
-      (this->m_ObservedScalarCovariance.size() == 0)) {
+      (constantCovariance.size() == 0)) {
+    std::cerr << "Using Identity matrix for covariance.\n";
     // Infinite precision makes no sense, so assume variance of 1.0
     // for each variable. Set covariance to Identity.
     covariance.resize(t*t);
@@ -253,15 +260,15 @@ Model::GetAnalyticGradientOfLogLikelihood(
     for ( unsigned int i = 0; i < t; i++ )
       covariance[i*(t+1)] = 1.0;
   } else if (scalarCovariance.size() == 0) {
-    assert(this->m_ObservedScalarCovariance.size() == (t*t));
-    covariance = this->m_ObservedScalarCovariance;
-  } else if (this->m_ObservedScalarCovariance.size() == 0) {
+    assert(constantCovariance.size() == (t*t));
+    covariance = constantCovariance;
+  } else if (constantCovariance.size() == 0) {
     assert(scalarCovariance.size() == (t*t));
     covariance = scalarCovariance;
   } else {
     for (size_t i = 0; i < (t*t); ++i)
       covariance[i]
-      = scalarCovariance[i] + this->m_ObservedScalarCovariance[i];
+      = scalarCovariance[i] + constantCovariance[i];
   }
   
   std::vector< double > LPGradient
@@ -269,12 +276,12 @@ Model::GetAnalyticGradientOfLogLikelihood(
   
   Eigen::Map< Eigen::VectorXd > diff(&(scalarDifferences[0]),t);
   Eigen::Map< Eigen::MatrixXd > cov(&(covariance[0]),t,t);
-  Eigen::Map< Eigen::MatrixXd > MGrads(&(mean_gradients[0]),p,t);
+  Eigen::Map< Eigen::MatrixXd > MGrads(&(mean_gradients[0]),t,p);
   Eigen::VectorXd LLGrad( p );
   Eigen::VectorXd t1( t );
   
   if ((scalarCovariance.size() == 0) &&
-      (this->m_ObservedScalarCovariance.size() == 0)) {
+      (constantCovariance.size() == 0)) {
     // Assume variance of 1.0 for each output
     t1 = diff;
   } else {
@@ -284,7 +291,7 @@ Model::GetAnalyticGradientOfLogLikelihood(
     t1 = cov.colPivHouseholderQr().solve(diff);
   }
   
-  LLGrad = -MGrads*t1;
+  LLGrad = -MGrads.transpose()*t1;
   if (scalarCovariance.size() == 0) {
     // Derivatives of the covariance matrix are 0: Do Nothing
   } else {
