@@ -41,7 +41,7 @@ int main(int argc, char ** argv) {
   if ( argc < 3 ) {
     std::cerr
       << "Usage:\n"
-      << "    generateMCMCtraceExternal <StatisticsDirectory> <OutputFileName>\n"
+      << "    " << argv[0] << " <StatisticsDirectory> <OutputFileName>\n"
       << "\n"
       << "This program produces a Markov Chain Monte Carlo trace from \n"
       << "by evaluating an model defined in an external process. \n"

@@ -44,10 +44,10 @@ int main(int argc, char ** argv) {
   if ( argc < 2 ) {
     std::cerr
       << "Usage:\n"
-      << "    trainEmulator <StatisticsDirectory>\n"
+      << "    " << argv[0] << " <StatisticsDirectory>\n"
       << "\n"
       << "This loads the model data and PCA information computed with\n"
-      << "PCADecompose and performs a refined training of the emulator.\n"
+      << "madai_pca_decompose and performs a refined training of the emulator.\n"
       << "It stores the results in <StatisticsDirectory>" << Paths::SEPARATOR
       << Paths::EMULATOR_STATE_FILE << "\n"
       << "\n"

@@ -33,7 +33,7 @@ int main( int argc, char ** argv )
   if ( argc < 2 ) {
     std::cerr
       << "Usage:\n"
-      << "    PCADecompose <StatisticsDirectory>\n"
+      << "    " << argv[0] << " <StatisticsDirectory>\n"
       << "\n"
       << "This program performs a principal components analysis on \n"
       << "experimental data. It stores the results in \n"

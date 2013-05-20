@@ -41,7 +41,7 @@ int main(int argc, char ** argv) {
   if (argc < 3) {
     std::cerr
       << "Usage:\n"
-      << "    generatePercentileGridTraceExternal <StatisticsDirectory> <OutputFileName>\n"
+      << "    " << argv[0] << " <StatisticsDirectory> <OutputFileName>\n"
       << "\n"
       << "This file generates a sampling of an external model on a\n"
       << "regular lattice of sample points.\n"

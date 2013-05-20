@@ -188,8 +188,8 @@ bool WriteDirectories( const std::string modelOutputDirectory,
 int main( int argc, char * argv[] ) {
   if ( argc < 2 ) {
     std::cerr
-      << "Useage:\n"
-      << "    generateTrainingPoints <StatisticsDirectory>\n"
+      << "Usage:\n"
+      << "    " << argv[0] << " <StatisticsDirectory>\n"
       << "\n"
       << "This program reads from <StatisticsDirectory>/"
       << Paths::PARAMETER_PRIORS_FILE << " in\n"

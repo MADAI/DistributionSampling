@@ -133,7 +133,7 @@ bool Interact(
 int main(int argc, char ** argv) {
   if ( argc < 2 ) {
     std::cerr << "Usage:\n"
-              << "    emulate <StatisticsDirectory>\n"
+              << "    " << argv[0] << " <StatisticsDirectory>\n"
               << "\n"
               << "This program provides a pipe interface to a trained \n"
               << "emulator. \n"

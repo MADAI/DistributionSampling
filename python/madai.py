@@ -31,7 +31,7 @@ except ImportError:
     scipy = None
 
 # modify this variable if exe is somewhere else.
-GenerateTrainingPointsExecutable = 'generateTrainingPoints'
+GenerateTrainingPointsExecutable = 'madai_generate_training_points'
 
 def GenerateTrainingPoints(parameter_priors_file, directory, N):
     subprocess.call(
