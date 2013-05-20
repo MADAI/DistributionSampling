@@ -34,6 +34,7 @@ install( TARGETS ${APPLICATIONS}
 )
 
 # Install scripts
-install( TARGETS madai_subsample_text_file
-  RUNTIME DESTINATION bin
+install( FILES madai_subsample_text_file
+  PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+  DESTINATION bin
 )
