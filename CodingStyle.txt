@@ -52,3 +52,9 @@ Code should adhere to this handful of formatting rules:
   that defines it's own string type. This will confuse the compiler
   and cause all kinds of headaches. To be safe, always use
   "std::string".
+
+- Shell scripts should be used only for the convenience of
+  Unix/MacOS10.x/Linux/POSIX users.  Shell scripts should adhere to
+  the POSIX portability standards defined here:
+    http://pubs.opengroup.org/onlinepubs/009695399/utilities/sh.html
+    http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html

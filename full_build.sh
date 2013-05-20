@@ -15,7 +15,19 @@
 BOOST_URL='http://sourceforge.net/projects/boost/files/latest/download?source=files'
 EIGEN3_URL='http://bitbucket.org/eigen/eigen/get/3.1.3.tar.bz2'
 
-die() { echo "$@"; exit 1; }
+Boost_INCLUDE_DIRS="/usr/include" # Change this if you already have
+                                  # Boost somewhere else.
+EIGEN3_INCLUDE_DIR="/usr/include/eigen3" # Change this if you already
+                                         # have Eigen3 somewhere else.
+
+die() { echo "$@" >&2; exit 1; }
+
+require() {
+    for arg; do
+        command -v "$arg" >/dev/null 2>&1 || \
+            die "${arg} is required but it is not installed. Exiting."
+    done
+}
 
 if [ -z "$1" ] ; then
     echo "Usage:"
@@ -27,27 +39,36 @@ if [ -z "$1" ] ; then
     exit 1
 fi
 
+# Check prerequisites (curl, CMake, make )
+require curl
+require cmake
+require make
+
+cd `dirname "$0"`
 SRC_DIR="`pwd`"
 BUILD_DIR="/tmp/DSL"
-mkdir -p ${BUILD_DIR}
-pushd ${BUILD_DIR}
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
 
-# Check prerequisites (curl, CMake, make )
-command -v curl >/dev/null 2>&1 || { echo "curl is required but it is not installed. Exiting." >&2; exit 1; }
-command -v cmake >/dev/null 2>&1 || { echo "cmake is required but it is not installed. Exiting." >&2; exit 1; }
-command -v make >/dev/null 2>&1 || { echo "make is required but it is not installed. Exiting." >&2; exit 1; }
+if ! [ -d "${Boost_INCLUDE_DIRS}/boost" ] ; then
+    echo "Downloading Boost"
+    echo "  $BOOST_URL"
+    curl --location "$BOOST_URL" | tar --extract --bzip2 || \
+        die "Error downloading Boost"
+    mv `find . -maxdepth 1 -name boost\* -type d` boost || \
+        die "Error finding Boost"
+    Boost_INCLUDE_DIRS="`pwd`/boost"
+fi
 
-echo "Downloading Boost"
-echo "  $BOOST_URL"
-curl --location "$BOOST_URL" | tar --extract --bzip2 || die "Error downloading Boost"
-mv `find . -maxdepth 1 -name boost\* -type d` boost || die "Error finding Boost"
-Boost_INCLUDE_DIRS="`pwd`/boost"
-
-echo "Downloading Eigen"
-echo "  $EIGEN3_URL"
-curl --location "$EIGEN3_URL" | tar --extract --bzip2 || die "Error downloading Eigen3"
-mv `find . -maxdepth 1 -name eigen\* -type d` eigen3 || die "Error finding Eigen3"
-EIGEN3_INCLUDE_DIR="`pwd`/eigen3"
+if ! [ -d "${EIGEN3_INCLUDE_DIR}/Eigen" ] ; then
+    echo "Downloading Eigen"
+    echo "  $EIGEN3_URL"
+    curl --location "$EIGEN3_URL" | tar --extract --bzip2 || \
+        die "Error downloading Eigen3"
+    mv `find . -maxdepth 1 -name eigen\* -type d` eigen3 || \
+        die "Error finding Eigen3"
+    EIGEN3_INCLUDE_DIR="`pwd`/eigen3"
+fi
 
 INSTALL_PREFIX="$1"
 
@@ -67,10 +88,16 @@ echo "Running make"
 make || die "Error in make"
 
 echo "Running make install"
-make install || die "Error in 'make install'"
+make install || {
+    echo "Error in 'make install'." >&2
+    echo "Try this:" >&2
+    echo "  $ sudo make -C \"`pwd`\" install" >&2
+    echo "  $ rm -rf \"$BUILD_DIR\"" >&2
+    die
+}
 
 # Clean up
-popd
-rm -rf ${BUILD_DIR}
+cd "$SRC_DIR"
+rm -rf "$BUILD_DIR"
 
 echo "SUCCESS"
