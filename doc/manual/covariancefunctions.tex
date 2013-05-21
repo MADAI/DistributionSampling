@@ -3,7 +3,7 @@
 \section{Covariance Functions Recognized by the Emulator}
 \label{sec:CovarianceFunctions}
 
-$u$ and $v$ are zero-indexed vectors that represent a point in parameter space.  $p$ is the number of parameters. $\Theta=(\theta_0, \theta_1,\theta_2,\ldots)$ is a list of $p+2$ or $p+3$ hyperparameters. $\theta_0$ is called \emph{amplitude}; $\theta_1$ is called the \emph{nugget}.  $\Vert\,\cdotp\Vert{}_\Theta$ is a distance function parametrized by $\Theta$.  $C_\Theta{}(u, v)$ is the covariance between $u$ and $v$, as parametrized by $\Theta$.  
+$u$ and $v$ are zero-indexed vectors that represent a point in parameter space.  $p$ is the number of parameters. $\Theta=(\theta_0, \theta_1,\theta_2,\ldots)$ is a list of $p+2$ or $p+3$ hyperparameters. $\theta_0$ is called \emph{amplitude}; $\theta_1$ is called the \emph{nugget}.  $\Vert\,\cdotp\Vert{}_\Theta$ is a distance function parametrized by $\Theta$.  $\epsilon$ is $10^{-5}$. $C_\Theta{}(u, v)$ is the covariance between $u$ and $v$, as parametrized by $\Theta$.
 
 
 \begin{figure}[b]
@@ -14,6 +14,31 @@ $C_\Theta{}(0, x)$ for a one-dimensional parameter space with each covariance fu
 \vspace*{30pt}
 }}
 \end{figure}
+
+%% FIGURE SOURCE CODE:
+%%
+%% #!/usr/bin/env python
+%% import matplotlib.pyplot
+%% import numpy
+%% x = numpy.arange(-4,4,0.01)
+%% SE = numpy.exp(-0.5 * (x ** 2))
+%% alpha = 1.75
+%% PE = numpy.exp(-0.5 * (numpy.power(numpy.abs(x),alpha)))
+%% M52 = (1 + numpy.sqrt(5) * numpy.abs(x) + 5/3.0 * (
+%%     (numpy.abs(x))**2) ) * numpy.exp(- numpy.sqrt(5) *
+%%     numpy.abs(x))
+%% M32 = (1 + numpy.sqrt(3) * numpy.abs(x) ) * numpy.exp(
+%%     - numpy.sqrt(3) * numpy.abs(x))
+%% matplotlib.pyplot.plot(x, SE,  '-',  label=u'Squared\nExponential')
+%% matplotlib.pyplot.plot(x, M32, '--', label=u'Mat\u00e9rn 3/2')
+%% matplotlib.pyplot.plot(x, M52, '-.', label=u'Mat\u00e9rn 5/2')
+%% matplotlib.pyplot.plot(x, PE, ':',
+%%     label=u'Power\nExponential\n(\u03b1=%g)'%alpha)
+%% matplotlib.pyplot.legend()
+%% matplotlib.pyplot.axes().set_aspect(3)
+%% matplotlib.pyplot.savefig('kernel_functions.pdf',
+%%     bbox_inches='tight')
+
 
 \begin{itemize}
 \item Squared-Exponential [\variable{SQUARE\_EXPONENTIAL\_FUNCTION}]
