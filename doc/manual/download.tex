@@ -1,23 +1,34 @@
 % !TEX root =  manual.tex
 \section{Download and Installation Instructions}
 
+\subsection{Downloading the Distribution Sampling Library}
 
-\subsection{Downloading Madai????Lib and Compilation}
-Tarheels write here.
+The Distribution Sampling Library can be retrieved from: \\
+\href{https://madai-public.cs.unc.edu/statistical-tools/distribution-sampling-library/}{madai-public.cs.unc.edu/statistical-tools/distribution-sampling-library}
+
+\subsection{Installing the Distribution Sampling Library}
+
+To compile the Distribution Sampling Library, you will need:
+\begin{itemize}
+\item CMake [package cmake] \href{http://www.cmake.org/cmake/resources/software.html}{cmake.org}
+\item Boost (headers only) [package libboost-dev, boost-devel, or boost] \href{http://www.boost.org/users/download/}{boost.org}
+\item Eigen3 (headers only) [package libeigen3-dev, eigen3-devel, or eigen3]
+\href{http://eigen.tuxfamily.org/}{eigen.tuxfamily.org}
+\end{itemize}
+
+\begin{verbatim}
+$ tar -xzf DistributionSampling-[VERSION].tgz
+$ DistributionSampling/build.sh [INSTALL_PREFIX]
+\end{verbatim}
 
 
-Install boost and eigen (on osX, macports works for boost, eigen is too old of version)
 
-sudo port install boost
-
-%sudo port install eigen
-
-download eigen from eigen.tuxfamily.org
-bunzip and tar -xf the file
-cd to download directory, call e.g. ../eigen-eigen-5097c01bcdc4/
-mkdir build\_dir
-cd build\_dir
-cmake .. -DCMAKE\_INSTALL\_PREFIX=/usr/local
-sudo make install
-
-cd ~/build/DistributionSampling/
+%% download eigen from eigen.tuxfamily.org
+%% bunzip and tar -xf the file
+%% cd to download directory, call e.g. ../eigen-eigen-5097c01bcdc4/
+%% mkdir build\_dir
+%% cd build\_dir
+%% cmake .. -DCMAKE\_INSTALL\_PREFIX=/usr/local
+%% sudo make install
+%% cd ~/build/DistributionSampling/
+%%  LocalWords:  Eigen
