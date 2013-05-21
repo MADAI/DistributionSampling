@@ -8,11 +8,11 @@ As part of training the emulator, \path{madai\_basic\_train} determines the hype
 When training the emulator, \path{madai\_basic\_train} looks for parameters defined in a file named\\ \path{stat1/settings.dat}, which is a text file describing parameters used in the emulator construction and tuning and for the MCMC procedure. The file has a simple form, 
 
 \begin{quote}
-{\tt GPE\_USE\_EMULATOR\_ERROR false}\\
-{\tt PCA\_PRINCIPAL\_COMPONENTS 6}\\
-{\tt MCMC\_BURN\_IN 100000}\\
-{\tt MCMC\_ITERATIONS 1000000}\\
-{\tt MCMC\_STEP\_SIZE 0.1}
+{\tt MCMC\_USE\_MODEL\_ERROR             false}\\
+{\tt PCA\_FRACTION\_RESOLVING\_POWER     0.99}\\
+{\tt MCMC\_NUMBER\_OF\_BURN\_IN\_SAMPLES 100000}\\
+{\tt MCMC\_NUMBER\_OF\_SAMPLES           1000000}\\
+{\tt MCMC\_STEP\_SIZE                    0.1}
 \end{quote}
 
 \path{madai\_basic\_train} produces a file called \path{stat1/EmulatorState.dat}. This file has the following format:
@@ -41,18 +41,4 @@ $\vdots$\\
 
 The $\Theta_i$ values can be modified in these files to tune the emulator.
 
-There are several supported choices for the \variable{COVARIANCE\_FUNCTION}. (Fill in equations from \path{stat.git/DistributionSampling/doc/CovarianceFunctions/CovarianceFunctions.tex})
-
-\begin{description}
-
-\item \variable{SQUARE\_EXPONENTIAL\_FUNCTION}
-
-
-
-\item \variable{POWER\_EXPONENTIAL\_FUNCTION}
-
-\item \variable{MATERN\_32\_FUNCTION}
-
-\item \variable{MATERN\_52\_FUNCTION}
-
-\end{description}
+There are several supported choices for the \variable{COVARIANCE\_FUNCTION}. See section \ref{CovarianceFunctions}.

@@ -3,6 +3,8 @@
 \section{Covariance Functions Recognized by the Emulator}
 \label{CovarianceFunctions}
 
+$u$ and $v$ are zero-indexed vectors that represent a point in parameter space.  $p$ is the number of parameters. $\Theta=(\theta_0, \theta_1,\theta_2,\ldots)$ is a list of $p+2$ or $p+3$ hyperparameters. $\theta_0$ is called \emph{amplitude}; $\theta_1$ is called the \emph{nugget}.  $\Vert\,\cdotp\Vert{}_\Theta$ is a distance function parametrized by $\Theta$.  $C_\Theta{}(u, v)$ is the covariance between $u$ and $v$, as parametrized by $\Theta$.  
+
 \subsection*{Squared-Exponential}
 \variable{SQUARE\_EXPONENTIAL\_FUNCTION}
 \[ \Vert{}u-v\Vert{}_\Theta{} = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(\theta{}_{2+i})^2}} \qquad
@@ -19,8 +21,8 @@
 \variable{MATERN\_32\_FUNCTION}
 \[ \Vert{}u-v\Vert{}_\Theta{} = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(\theta{}_{2+i})^2}} \qquad
  \delta{}_{uv} = 1 \text{ if } (\Vert{}u-v\Vert{}_\Theta{} < \epsilon{}) \textrm{ else } \delta{}_{uv} = 0 \]
-\[ C_\Theta{}(u, v) = {\theta{}_0} \left({ 1 + \theta{}_2 \sqrt{3} \Vert{}u-v\Vert{}_\Theta{} }\right)
-\exp \left({ - \theta{}_2 \sqrt{3} \Vert{}u-v\Vert{}_\Theta{} }\right) + \theta{}_1\delta{}_{uv} \]
+\[ C_\Theta{}(u, v) = {\theta{}_0} \left({ 1 + \sqrt{3} \Vert{}u-v\Vert{}_\Theta{} }\right)
+\exp \left({ - \sqrt{3} \Vert{}u-v\Vert{}_\Theta{} }\right) + \theta{}_1\delta{}_{uv} \]
 
 
 \subsection*{Mat\'{e}rn 5/2}
@@ -28,4 +30,6 @@
 \[ \Vert{}u-v\Vert{}_\Theta{} = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(\theta{}_{2+i})^2}} \qquad
  \delta{}_{uv} = 1 \text{ if } (\Vert{}u-v\Vert{}_\Theta{} < \epsilon{}) \textrm{ else } \delta{}_{uv} = 0 \]
 \[ C_\Theta{}(u, v) = {\theta{}_0} \left({ 1 + \sqrt{5} \Vert{}u-v\Vert{}_\Theta{}
- + \dfrac{5}{3} \left({\Vert{}u-v\Vert{}_\Theta{}}\right)^2  }\right) + \theta{}_1\delta{}_{uv} \]
+ + \tfrac{5}{3} \left({\Vert{}u-v\Vert{}_\Theta{}}\right)^2  }\right) + \theta{}_1\delta{}_{uv} \]
+
+%%  LocalWords:  hyperparameters

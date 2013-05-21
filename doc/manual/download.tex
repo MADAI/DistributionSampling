@@ -21,6 +21,24 @@ $ tar -xzf DistributionSampling-[VERSION].tgz
 $ DistributionSampling/build.sh [INSTALL_PREFIX]
 \end{verbatim}
 
+Alternatively, for more control over the build process:
+
+\begin{verbatim}
+$ tar -xzf DistributionSampling-[VERSION].tgz
+$ mkdir DistributionSampling_Build
+$ cd DistributionSampling_Build
+$ cmake "../DistributionSampling" \
+    -DCMAKE_INSTALL_PREFIX:PATH="/usr/local" \
+    -DBoost_INCLUDE_DIR:PATH="/usr/include" \
+    -DEIGEN3_INCLUDE_DIR:PATH="/usr/include/eigen3" \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DBUILD_TESTING:BOOL=0 \
+    -DUSE_OPENMP:BOOL=0 \
+    -DUSE_GPROF:BOOL=0
+$ make
+$ make install
+\end{verbatim}
+
 
 
 %% download eigen from eigen.tuxfamily.org

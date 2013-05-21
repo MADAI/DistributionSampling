@@ -11,15 +11,8 @@ When running, \path{madai\_pca\_decompose} will read the parameters file \path{s
 
 \vspace*{-8pt}\begin{quote}
 {\tt MODEL\_OUTPUT\_DIR "./model\_output"}\\
-{\tt EXPERIMENTAL\_RESULTS\_DIR "./experimental\_results"}\\
-{\tt N\_SAMPLE} $N$\\
+{\tt EXPERIMENTAL\_RESULTS\_FILE "../experimental\_results/results.dat"}\\
 $\vdots$
-%{\tt PCA\_NCOMPONENTS} $M_Z$\\
-%{\tt PCA\_LAMBDA\_PERCENTAGE} {\it percentage}\\
-%{\tt USE\_EMULATOR\_ERROR false}\\
-%{\tt MCMC\_BURN\_IN 100000}\\
-%{\tt MCMC\_ITERATIONS 1000000}\\
-%{\tt MCMC\_STEP\_SIZE 0.1}
 \end{quote}\vspace*{-8pt}
 The PCA analysis uses the experimental information only in calculating the error for comparing a model value to the experimental value, each of which has its own error.
 
