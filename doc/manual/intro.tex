@@ -3,12 +3,12 @@
 
 Numerous problems in both the natural and social sciences now involve large scale models characterized by numerous parameters and assumptions. These models are then often compared to heterogenous data sets, which in some cases are distilled from peta-scale observations. In addition to the investment usually required in obtaining such data sets, running the models is often expensive and time-consuming. 
 
-Perhaps the most common method for determining model parameters, $x_1\cdots x_P$ from comparing to a set of measurements $y_1\cdots y_M$ is to calculate the $\chi^2$ as a function of ${\bf x}$ where $\chi^2({\bf x})$ describes the ``goodness'' of the fit for a specific point in parameter space,
+Perhaps the most common method for determining model parameters, $x_1\cdots x_P$ from comparing to a set of measurements $y_1\cdots y_M$ is to calculate the implausibility, $\chi^2$, as a function of ${\bf x}$ where $\chi^2({\bf x})\ge 0$ describes the ``goodness'' of the fit for a specific point in parameter space and is zero for a perfect fit,
 \begin{equation}
 \chi^2({\bf x})\equiv
-\sum_i \frac{\left(y_i^{\rm(mod)}({\bf x})-y_i^{\rm(exp)}\right)^2}{\sigma_i^2}
+\sum_a \frac{\left(y_a^{\rm(mod)}({\bf x})-y_a^{\rm(exp)}\right)^2}{\sigma_a^2},
 \end{equation}
-If the uncertainty involved in comparing the model to the data is normally distributed, and if there is no prior information about the parameters (a flat prior distribution), Bayes theorem tells us that the likelihood that the point in parameter space could reproduce the data is
+where $\sigma_a$ is a measure for the uncertainty for comparing the model to the experiment, and can come from uncertainties from either the model or from the experiment. If the uncertainty involved in comparing the model to the data is normally distributed, and if there is no prior information about the parameters (a flat prior distribution), Bayes theorem tells us that the likelihood that the point in parameter space could reproduce the data is
 \begin{equation}
 \mathcal{L}({\bf x})\sim \exp\left\{-\frac{\chi^2({\bf x})}{2}\right\}.
 \end{equation}
