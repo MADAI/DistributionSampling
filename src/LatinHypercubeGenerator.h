@@ -68,6 +68,21 @@ public:
   std::vector< Sample > Generate( int numberOfTrainingPoints,
                                   const std::vector< Parameter > parameters );
 
+  /** Generates a list of parameters distributed in a high-dimensional
+   * parameter space according to a Latin hypercube sampling pattern.
+   * http://en.wikipedia.org/wiki/Latin_hypercube_sampling
+   *
+   * Note that the output Samples have only parameter values, no
+   * output values nor log likelihoods.
+   *
+   * Repeat the process @param number_of_tries times, and return the
+   * LHC witht he best spacing.
+   */
+  std::vector< Sample > GenerateMaxiMin(
+      int numberOfTrainingPoints,
+      const std::vector< Parameter > parameters,
+      int number_of_tries);
+
 protected:
   Random * m_Random;
 

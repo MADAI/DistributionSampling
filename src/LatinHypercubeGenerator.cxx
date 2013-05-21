@@ -148,5 +148,45 @@ LatinHypercubeGenerator
   return samples;
 }
 
+std::vector< Sample >
+LatinHypercubeGenerator
+::GenerateMaxiMin(
+    int numberOfTrainingPoints,
+    const std::vector< Parameter > parameters,
+    int number_of_tries)
+{
+  assert(number_of_tries > 1);
+  std::vector< Sample > bestLHC;
+  std::vector< double > lengthScales(parameters.size());
+  for (size_t i = 0; i < parameters.size(); ++i) {
+    const Distribution * dist = parameters[i].GetPriorDistribution();
+    lengthScales[i] = 1.0 / (
+        dist->GetPercentile(0.75) - dist->GetPercentile(0.25));
+    }
+  double bestValue = - std::numeric_limits< double >::infinity();
+  for (int i = 0; i < number_of_tries; ++i) {
+    std::vector< Sample > lhc =
+      this->Generate(numberOfTrainingPoints, parameters);
+    double minDist2 = std::numeric_limits< double >::infinity();
+    for (size_t j = 0; j < lhc.size(); ++j) {
+      const std::vector< double > & u = lhc[j].m_ParameterValues;
+      for (size_t k = 0; k < j; ++k) {
+        const std::vector< double > & v = lhc[k].m_ParameterValues;
+        double dist2 = 0.0;
+        for (size_t l = 0; l < parameters.size(); ++l) {
+          dist2 += std::pow( (u[l] - v[l]) * lengthScales[i], 2 );
+        }
+        if (dist2 < minDist2)
+          minDist2 = dist2;
+      }
+    }
+    if (minDist2 > bestValue) {
+      bestValue = minDist2;
+      bestLHC = lhc;
+    }
+  }
+  assert(numberOfTrainingPoints == static_cast< int >(bestLHC.size()));
+  return bestLHC;
+}
 
 } // end namespace madai
