@@ -161,6 +161,26 @@ from <a href="http://www.cmake.org/cmake/resources/software.html#latest">www.cma
 $ <span class="input">DistributionSampling/full_build.sh "${HOME}/local"</span></pre>
 <p>This will download the necessary Boost and Eigen3 headers into a temporary directory for the compilation. </p>
 </div>
+<p></p>
+<div class="box">
+<p><em>Aside:</em> The <code>build.sh</code>
+and <code>full_build.sh</code> scripts simply call CMake.  You can
+also run CMake directly.</p>
+<pre>
+$ <span class="input">mkdir build</span>
+$ <span class="input">cd build</span>
+$ <span class="input">cmake "../DistributionSampling" \
+    -DCMAKE_INSTALL_PREFIX:PATH="${HOME}/local" \
+    -DBoost_INCLUDE_DIR:PATH="/usr/include" \
+    -DEIGEN3_INCLUDE_DIR:PATH="/usr/include/eigen3" \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DBUILD_TESTING:BOOL=0 \
+    -DUSE_OPENMP:BOOL=0 \
+    -DUSE_GPROF:BOOL=0</span>
+$ <span class="input">make</span>
+$ <span class="input">make install</span>
+$ <span class="input">PATH=&quot;${PATH}:${HOME}/local/bin&quot;</span>
+</pre></div>
 
 <p>Your executables will be in the
 directory <code>${HOME}/local/bin</code>. You can
@@ -210,8 +230,7 @@ of times.</p>
 
 <p><code>madai_generate_mcmc_trace_external</code> will call your executable
 and interactively query it for model outputs at given parameter
-vectors.  <code>madai_generate_mcmc_trace_external</code> expects a certain
-format, which we will describe.</p>
+vectors.</p>
 
 <div class="box">
 <p><em>Aside:</em> The Interactive Model Language.</p>
