@@ -277,10 +277,10 @@ followed by the model covariances.  For example:
 </pre>
 
 
-<p>The <code>parabolic_interactive.py</code> program can be found in the directory <code>MADAIExamples/parabolic_example/</code></p>
+<p>The <code>parabolic_interactive.py</code> program can be found in the directory <code>DistributionSampling/tutorial/parabolic_example/</code></p>
 
-<p>First move into the MADAIExamples directory.</p>
-<pre>$ <span class="input">cd ..../MADAIExamples</span></pre>
+<p>First move into the <code>DistributionSampling/tutorial</code> directory.</p>
+<pre>$ <span class="input">cd ..../DistributionSampling/tutorial</span></pre>
 <p>Then make a working directory:</p>
 <pre>$ <span class="input">mkdir -p parabolic_ext</span></pre>
 <pre>$ <span class="input">cd parabolic_ext</span></pre>
@@ -301,6 +301,9 @@ MEAN_ENERGY    2.8          1.9
   this directory with some default values in it. All of the
   DistributionSampling utilities will look for this file.</p>
 <pre>$ <span class="input">madai_default_options &gt; settings.dat</span></pre>
+
+<div class="box">
+<p><em>Aside:</em> A detailed description of the options in     <code>settings.dat</code> can be found in the manual.</p></div>
 
 <p>Now use you favorite text editor to edit the settings.dat file. Set the variable EXTERNAL_MODEL_EXECUTABLE to ../parabolic_example/parabolic_interactive.py . My favorite text editor is sed:</p>
 
@@ -380,10 +383,10 @@ you will need the parameter values and the model outputs.</p>
   <code>MEAN_X_SQUARED</code>, and <code>MEAN_ENERGY</code>.</p>
 
 
-<p>The <code>parabolic_evaluate.py</code> program can be found in the directory <code>MADAIExamples/parabolic_example/</code></p>
+<p>The <code>parabolic_evaluate.py</code> program can be found in the directory <code>DistributionSampling/tutorial/parabolic_example/</code></p>
 
-<p>First move into the MADAIExamples directory.</p>
-<pre>$ <span class="input">cd ..../MADAIExamples</span></pre>
+<p>First move into the <code>DistributionSampling/tutorial</code> directory.</p>
+<pre>$ <span class="input">cd ..../DistributionSampling/tutorial</span></pre>
 <p>Then make a working directory:</p>
 <pre>$ <span class="input">mkdir -p parabolic_emu</span></pre>
 <pre>$ <span class="input">cd parabolic_emu</span></pre>
@@ -396,6 +399,9 @@ file in this directory with some default values in it. All of the
 DistributionSampling utilities will look for this file.</p>
 
 <pre>$ <span class="input">madai_default_options &gt; ./settings.dat</span></pre>
+
+<div class="box">
+<p><em>Aside:</em> A detailed description of the options in     <code>settings.dat</code> can be found in the manual.</p></div>
 
 <p>Next, we need to create a parameter_priors.dat file that contains
 our assumptions about prior probability distribution for the values
