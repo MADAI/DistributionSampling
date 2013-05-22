@@ -8,9 +8,9 @@ div.column { color:black; background-color:white; margin-left:auto;
 	margin-right:auto; margin-top:0px; margin-bottom:0px;
 	max-width:872px; text-align:left; padding:8px 8px 8px 8px;
 	border:1px solid #56A0D3; }
-div.box { margin: 0.5ex 2em;; border:2px solid #56A0D3;
+div.box { margin: 16px 2em;; border:2px solid #56A0D3;
 		padding:0 0.5ex;  }
-div.box p { margin: 0.5ex 0;  }
+div.box p { margin: 0px 0; padding: 8px 0; }
 div.wide { color:black; background-color:white; margin-left:0.5em;
 	margin-right:0.5em; padding:0.5em; }
 body { color:#000000; background-color:#56A0D3; padding:0; margin:0;
@@ -82,7 +82,7 @@ function toggleViz(name) {
 <li>2. <a href="#Running">Running the Software </a></li>
 		<ul style="list-style-type:none;">
 		<li>a. <a href="#Fast">Markov chain Monte Carlo with a Fast 			Model</a></li>
-		<li>b. <a href="#Slow">Use an Emulator to  With a Slow 			Model</a></li>
+		<li>b. <a href="#Slow">Use an Emulator for a Slow Model</a></li>
 		</ul>
 <li>3. <a href="#Visualizing">Visualizing the Results</a></li>
 
@@ -161,7 +161,7 @@ from <a href="http://www.cmake.org/cmake/resources/software.html#latest">www.cma
 $ <span class="input">DistributionSampling/full_build.sh "${HOME}/local"</span></pre>
 <p>This will download the necessary Boost and Eigen3 headers into a temporary directory for the compilation. </p>
 </div>
-<p></p>
+
 <div class="box">
 <p><em>Aside:</em> The <code>build.sh</code>
 and <code>full_build.sh</code> scripts simply call CMake.  You can
@@ -187,12 +187,11 @@ directory <code>${HOME}/local/bin</code>. You can
 make these executables available by including this directory in your
 path:</p>
 <pre>$ <span class="input">PATH=&quot;${PATH}:${HOME}/local/bin&quot;</span></pre>
-<p></p>
+
 <div class="box">
 <p><em>Aside:</em> csh/tcsh users:</p>
 <pre>&gt; <span class="input">set path = ($path &quot;${HOME}/local/bin&quot;)</span></pre>
 </div>
-<p></p>
 
 <div class="box">
 <p><em>Aside:</em> If you wish to compile your own software that links against the library, the include files are in <code>${HOME}/local/include</code> and the library is in <code>${HOME}/local/lib/madai</code> . </p></div>
@@ -216,7 +215,6 @@ path:</p>
 </li>
 
 </ul>
-
 
 <!--=========================================================================-->
 <h2 id="Running">2. Running the Software</h2>
@@ -295,7 +293,6 @@ followed by the model covariances.  For example:
 1.0801234497346435 1.6499158227686113 3.712310601229375
 </pre>
 
-
 <p>The <code>parabolic_interactive.py</code> program can be found in the directory <code>DistributionSampling/tutorial/parabolic_example/</code></p>
 
 <p>First move into the <code>DistributionSampling/tutorial</code> directory.</p>
@@ -319,17 +316,27 @@ MEAN_ENERGY    2.8          1.9
 <p>Next, we  will create a <code>settings.dat</code> file in
   this directory with some default values in it. All of the
   DistributionSampling utilities will look for this file.</p>
-<pre>$ <span class="input">madai_default_options &gt; settings.dat</span></pre>
+<pre>$ <span class="input">madai_default_options &gt; ./settings.dat</span></pre>
 
 <div class="box">
-<p><em>Aside:</em> A detailed description of the options in     <code>settings.dat</code> can be found in the manual.</p></div>
+<p><em>Aside:</em> A detailed description of the options in <code>settings.dat</code> can be found in the manual.</p></div>
 
-<p>Now use you favorite text editor to edit the settings.dat file. Set the variable EXTERNAL_MODEL_EXECUTABLE to ../parabolic_example/parabolic_interactive.py . My favorite text editor is sed:</p>
+<p>Now use you favorite text editor to edit the settings.dat file. Set
+the variable EXTERNAL_MODEL_EXECUTABLE to
+../parabolic_example/parabolic_interactive.py .
+<!--
+Alternatively, use the <code>madai_set_variable</code> program:
+</p>
 
-<pre>$ <span class="input">sed -i \
-  '/^EXTERNAL_MODEL_EXECUTABLE/s|$| ../parabolic_example/parabolic_interactive.py|' \
-  settings.dat</span></pre>
+<pre>
+$ <span class="input">madai_set_variable . EXTERNAL_MODEL_EXECUTABLE \
+    &quot;../parabolic_example/parabolic_interactive.py&quot;</span></pre>
+-->
 
+<pre>
+$ <span class="input">KEY=&quot;EXTERNAL_MODEL_EXECUTABLE&quot;</span>
+$ <span class="input">VAL=&quot;../parabolic_example/parabolic_interactive.py&quot;</span>
+$ <span class="input">sed -i &quot;s#^[[:space:]]*${KEY}\([[:space:]].*\)*\$#${KEY} ${VAL}#&quot; ./settings.dat</span></pre>
 
 <p>The final step is to run the Markov chain Monte Carlo (MCMC)
 routine on your model.  The <code>madai_generate_mcmc_trace_external</code> program
@@ -382,14 +389,14 @@ $ <span class="input">head trace/mcmc.csv</span>
 <p>Suppose we set <code>MCMC_NUMBER_OF_SAMPLES</code> to <code>1000000</code> and wish to sub-sample the distribution for analysis or visualization.  The <code>madai_subsample_text_file</code> will sample every <em>N</em>th point from a csv file into a new csv file.
 
 <pre>$ <span class="input">madai_subsample_text_file 20 trace/mcmc.csv trace/mcmc_50000.csv</span></pre>
-<p></p>
+
 <div class="box">
 <p><em>Aside:</em> A faster way to interface with the DistributionSampling library is to link directly to it. For a complete example, look in the <code>DistributionSampling/tutorial/examples/ParabolicPotentialModelCxx</code> directory.</p>
 <p>A skeleton for your own C++ model can be found in <code>DistributionSampling/tutorial/examples/MCMC_Example</code> .
 </div>
 
 <!--=========================================================================-->
-<h3 id="Slow">2b. Use an Emulator to  With a Slow Model</h3>
+<h3 id="Slow">2b. Use an Emulator for a Slow Model</h3>
 
 <p>The DistributionSampling library uses a Gaussian Process Emulator
 to emulate a slow model much more quickly.  To train the Emulator, the
@@ -400,7 +407,6 @@ you will need the parameter values and the model outputs.</p>
   This model has the parameters <code>X0</code>, <code>K</code>,
   and <code>TEMP</code>; and the observables <code>MEAN_X</code>,
   <code>MEAN_X_SQUARED</code>, and <code>MEAN_ENERGY</code>.</p>
-
 
 <p>The <code>parabolic_evaluate.py</code> program can be found in the directory <code>DistributionSampling/tutorial/parabolic_example/</code></p>
 
@@ -420,7 +426,7 @@ DistributionSampling utilities will look for this file.</p>
 <pre>$ <span class="input">madai_default_options &gt; ./settings.dat</span></pre>
 
 <div class="box">
-<p><em>Aside:</em> A detailed description of the options in     <code>settings.dat</code> can be found in the manual.</p></div>
+<p><em>Aside:</em> A detailed description of the options in <code>settings.dat</code> can be found in the manual.</p></div>
 
 <p>Next, we need to create a parameter_priors.dat file that contains
 our assumptions about prior probability distribution for the values
@@ -454,7 +460,6 @@ MEAN_X_SQUARED
 MEAN_ENERGY
 </pre>
 
-
 <p>We are now ready to run the first Distribution-Sampling
 utility, <code>madai_generate_training_points</code>.  This program
 will generate a Latin hypercube in the parameter space.  The number of
@@ -479,7 +484,6 @@ parameter space.  We have written a little Python program to do just
 that.</p>
 
 <pre>$ <span class="input">../parabolic_example/parabolic_evaluate.py model_output/run*</span></pre>
-
 
 <p><code>parabolic_evaluate.py</code> takes as command-line arguments
 the names of a directory that contains a
@@ -537,7 +541,10 @@ difference between the 75th percentile and the 25th percentile of the
 prior distribution.  For a uniform prior, this is half the range.  The
 default value for &theta;[2+<em>i</em>] the characteristic length
 scale of the <em>i</em>th parameter times
-the <code>EMULATOR_SCALE</code> option.</p></div>
+the <code>EMULATOR_SCALE</code> option.</p>
+
+<p>For more information, see the manual.</p>
+</div>
 
 <p>To run the basic training program:</p>
 
@@ -620,7 +627,6 @@ $ <span class="input">madai_subsample_text_file 20 trace/mcmc.csv trace/mcmc_500
 <!-- <h3>3b. Scatterplot Matrix</h3> -->
 
 <!-- <p>This image was created via <a href="http://matplotlib.org/">Matplotlib</a>.</p> -->
-
 
 <!-- <h3>3c. GGobi</h3> -->
 <!-- <p>CSV files can be directly loaded by GGobi.</p> -->
