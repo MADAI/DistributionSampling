@@ -1,0 +1,23 @@
+#!/bin/sh
+if [ $# -ne 3 ] ; then
+  echo "Usage:"
+  echo "  madai_set_variable DIRECTORY NAME VALUE"
+  echo "Example:"
+  echo "  madai_set_variable . VERBOSE 1"
+  exit 1;
+fi
+DIR="$1"
+KEY="$2"
+VAL="$3"
+FILE="${DIR}/settings.dat"
+# $PATTERN matches only lines with this key.
+PATTERN="^[[:space:]]*${KEY}\([[:space:]].*\)*\$"
+if [ -f "$FILE" ] && grep -q "$PATTERN" "$FILE" ; then
+  echo "old:" `grep "$PATTERN" "$FILE"`
+  sed -i "s#${PATTERN}#${KEY} ${VAL}#" "$FILE"
+  echo "new:" `grep "$PATTERN" "$FILE"`
+else
+  # Assume $FILE empty or ends in newline.
+  echo "${KEY} ${VAL}" >> "$FILE"
+  echo "new:" `grep "$PATTERN" "$FILE"`
+fi

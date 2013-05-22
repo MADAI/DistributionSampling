@@ -324,19 +324,19 @@ MEAN_ENERGY    2.8          1.9
 <p>Now use you favorite text editor to edit the settings.dat file. Set
 the variable EXTERNAL_MODEL_EXECUTABLE to
 ../parabolic_example/parabolic_interactive.py .
-<!--
 Alternatively, use the <code>madai_set_variable</code> program:
 </p>
 
 <pre>
 $ <span class="input">madai_set_variable . EXTERNAL_MODEL_EXECUTABLE \
     &quot;../parabolic_example/parabolic_interactive.py&quot;</span></pre>
--->
 
+<!--
 <pre>
 $ <span class="input">KEY=&quot;EXTERNAL_MODEL_EXECUTABLE&quot;</span>
 $ <span class="input">VAL=&quot;../parabolic_example/parabolic_interactive.py&quot;</span>
 $ <span class="input">sed -i &quot;s#^[[:space:]]*${KEY}\([[:space:]].*\)*\$#${KEY} ${VAL}#&quot; ./settings.dat</span></pre>
+-->
 
 <p>The final step is to run the Markov chain Monte Carlo (MCMC)
 routine on your model.  The <code>madai_generate_mcmc_trace_external</code> program
