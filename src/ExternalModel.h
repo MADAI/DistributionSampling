@@ -75,11 +75,6 @@ public:
    * the parameter space. */
   virtual ErrorType GetScalarOutputs( const std::vector< double > & parameters,
                                       std::vector< double > & scalars ) const;
-  
-  virtual ErrorType GetGradientOfModelOutputs(
-      const std::vector< double > & parameters,
-      std::vector< double > & mean_gradients,
-      std::vector< Eigen::MatrixXd > & cov_gradients ) const;
 
 private:
   /** Container for process-related information */

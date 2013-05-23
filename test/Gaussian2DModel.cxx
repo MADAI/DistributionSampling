@@ -129,31 +129,6 @@ Gaussian2DModel
 
 Model::ErrorType
 Gaussian2DModel
-::GetGradientOfModelOutputs(
-  const std::vector< double > & parameters,
-  std::vector< double > & mean_gradients,
-  std::vector< Eigen::MatrixXd > & cov_gradients ) const
-{
-  mean_gradients.clear();
-  cov_gradients.clear();
-  
-  std::vector< double > scalars;
-  ErrorType error = this->GetScalarOutputs( parameters, scalars );
-  if ( error != NO_ERROR ) {
-    return error;
-  }
-  
-  double functionValue = scalars[0];
-  for ( unsigned int i = 0; i < 2; i++ ) {
-    mean_gradients.push_back( this->PartialX( parameters[i], functionValue ) );
-  }
-  
-  return NO_ERROR;
-}
-
-
-Model::ErrorType
-Gaussian2DModel
 ::SetObservedScalarValues( const std::vector< double > & )
 {
   // Do nothing. The values are set internally.

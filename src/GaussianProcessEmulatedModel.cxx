@@ -155,32 +155,144 @@ GaussianProcessEmulatedModel
   return Model::NO_ERROR;
 }
 
-/**
- * Get the gradient outputs from the model evaluated at a position in
- * the parameter space.
- */
+// Overwirte numeric gradient with analytic gradient
 Model::ErrorType
 GaussianProcessEmulatedModel
-::GetGradientOfModelOutputs(
+::GetScalarAndGradientOutputs(
   const std::vector< double > & parameters,
-  std::vector< double > & mean_gradients,
-  std::vector< Eigen::MatrixXd > & cov_gradients ) const
+  const std::vector< bool > & activeParameters,
+  std::vector< double > & scalars,
+  std::vector< double > & gradient ) const
 {
-  if ( m_GPME.m_Status != GaussianProcessEmulator::READY )
-    return Model::OTHER_ERROR;
-  
-  if ( this->GetNumberOfParameters() != parameters.size() )
-    return Model::OTHER_ERROR;
-  
-  if ( m_UseModelCovarianceToCalulateLogLikelihood ) {
-    if ( !m_GPME.GetGradientsOfCovariances( parameters, cov_gradients ) )
-      return Model::OTHER_ERROR;
+  if ( static_cast< unsigned int >( activeParameters.size() ) !=
+      this->GetNumberOfParameters() ) {
+    return INVALID_ACTIVE_PARAMETERS;
   }
   
-  if ( !m_GPME.GetGradientOfEmulatorOutputs( parameters, mean_gradients ) )
+  // Make a copy of the parameters that we can work with
+  std::vector< double > parametersCopy( parameters );
+  
+  // Clear the output vector
+  gradient.clear();
+  
+  // Get the gradient of the model outputs
+  std::vector< double > mean_gradients;
+  std::vector< Eigen::MatrixXd > cov_gradients;
+  if ( m_GPME.m_Status != GaussianProcessEmulator::READY ) {
+    std::cerr << "Error: Emulator not ready.\n";
+    return Model::OTHER_ERROR;
+  }
+  if ( this->GetNumberOfParameters() != parameters.size() ) {
+    std::cerr << "Error: Size of parameters vector is invalid with '" << parameters.size()
+              << "' parameters, it should be of size '" << this->GetNumberOfParameters() << "\n";
+    return Model::OTHER_ERROR;
+  }
+  if ( m_UseModelCovarianceToCalulateLogLikelihood )
+    if ( !m_GPME.GetGradientsOfCovariances( parameters, cov_gradients ) ) {
+      std::cerr << "Error in GaussianProcessEmulator::GetGradientsOfCovariances.\n";
+      return Model::OTHER_ERROR;
+    }
+  if ( !m_GPME.GetGradientOfEmulatorOutputs( parameters, mean_gradients ) ) {
+    std::cerr << "Error in GaussianProcessEmulator::GetGradientOfEmulatorOutputs.\n";
+    return Model::NO_ERROR;
+  }
+  
+  int p = parameters.size();
+  size_t t = this->GetNumberOfScalarOutputs();
+  assert( t > 0 );
+  std::vector< double > scalarCovariance;
+  std::vector< double > covariance( t * t );
+  Model::ErrorType result;
+  if ( m_UseModelCovarianceToCalulateLogLikelihood ) {
+    result = this->GetScalarOutputsAndCovariance(
+        parameters, scalars, scalarCovariance );
+  } else {
+    result = this->GetScalarOutputs( parameters, scalars );
+  }
+  if ( result != Model::NO_ERROR )
+    return result;
+  if ( scalars.size() != t )
     return Model::OTHER_ERROR;
   
-  return Model::NO_ERROR;
+  std::vector< double > scalarDifferences(t);
+  if ( this->m_ObservedScalarValues.size() == 0 ) {
+    for ( size_t i = 0; i < t; ++i ) {
+      scalarDifferences[i] = scalars[i];
+    }
+  } else {
+    for ( size_t i = 0; i < t; ++i ) {
+      scalarDifferences[i] = scalars[i] - this->m_ObservedScalarValues[i];
+    }
+  }
+  
+  // Get the constant covariance matrix
+  std::vector< double > constantCovariance;
+  if ( !this->GetConstantCovariance(constantCovariance) ) {
+    std::cerr << "Error getting the constant covariance matrix from the model.\n";
+    return Model::OTHER_ERROR;
+  }
+  
+  if ( scalarCovariance.size() == 0 && 
+      constantCovariance.size() == 0 ) {
+    // Infinite precision makes no sense, so assume variance of 1.0
+    // for each variable. Set covariance to Identity.
+    covariance.resize(t*t);
+    for ( unsigned int i = 0; i < (t*t); i++ )
+      covariance[i] = 0.0;
+    for ( unsigned int i = 0; i < t; i++ )
+      covariance[i*(t+1)] = 1.0; 
+  } else if (scalarCovariance.size() == 0) {
+    assert(constantCovariance.size() == (t*t));
+    covariance = constantCovariance;
+  } else if (constantCovariance.size() == 0) {
+    assert(scalarCovariance.size() == (t*t));
+    covariance = scalarCovariance;
+  } else {
+    for (size_t i = 0; i < (t*t); ++i)
+      covariance[i]
+        = scalarCovariance[i] + constantCovariance[i];
+  }
+  
+  // Get gradient of the log prior likelihood
+  std::vector< double > LPGradient
+  = this->GetGradientOfLogPriorLikelihood( parameters );
+  
+  Eigen::Map< Eigen::VectorXd > diff(&(scalarDifferences[0]),t);
+  Eigen::Map< Eigen::MatrixXd > cov(&(covariance[0]),t,t);
+  Eigen::Map< Eigen::MatrixXd > MGrads(&(mean_gradients[0]),t,p);
+  Eigen::VectorXd LLGrad( p );
+  Eigen::VectorXd t1( t );
+  
+  if ( scalarCovariance.size() == 0 &&
+      constantCovariance.size() == 0 ) {
+    // Assume variance of 1.0 for each output
+    t1 = diff;
+  } else {
+    // FIXME check for singular matrix -> return negative infinity!
+    //assert( cov.determinant() >= 0.0 ); // is there a better way?
+    
+    t1 = cov.colPivHouseholderQr().solve(diff);
+  }
+  
+  LLGrad = -MGrads.transpose()*t1;
+  if ( scalarCovariance.size() == 0 ) {
+    // emulator error not used, do nothing
+  } else {
+    // Need to include derivative of covariance matrix
+    for ( int i = 0; i < p; i++ ) {
+      if ( activeParameters[i] ) {
+        LLGrad(i) += -0.5*t1.dot(cov_gradients[i]*t1);
+      }
+    }
+  }
+  
+  for ( int i = 0; i < p; i++ ) {
+    if ( activeParameters[i] ) {
+      gradient.push_back( LLGrad(i) + LPGradient[i] );
+    }
+  }
+  
+  return NO_ERROR;
 }
 
 bool

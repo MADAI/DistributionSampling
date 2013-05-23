@@ -161,16 +161,16 @@ int main( int, char*[] ) {
     // Get the analytic gradient
     gpem.SetUseModelCovarianceToCalulateLogLikelihood(false);
     std::vector< double > grad;
-    if ( gpem.GetAnalyticGradientOfLogLikelihood( currentParameters, 
-             activeParameters, grad ) != madai::Model::NO_ERROR ) {
+    std::vector< double > scalars;
+    if ( gpem.GetScalarAndGradientOutputs( currentParameters, 
+             activeParameters, scalars, grad ) != madai::Model::NO_ERROR ) {
       std::cerr << "Error in Model::GetAnalyticGradientOfLogLikelihood.\n";
       return EXIT_FAILURE;
     }
     
     // Get the numeric gradient
     std::vector< double > grad2;
-    std::vector< double > scalars;
-    if ( gpem.GetScalarAndGradientOutputs(currentParameters,
+    if ( gpem.Model::GetScalarAndGradientOutputs(currentParameters,
              activeParameters, scalars, grad2) != madai::Model::NO_ERROR ) {
       std::cerr << "Error in Model:GetScalarAndGradientOutputs.\n";
       return EXIT_FAILURE;
