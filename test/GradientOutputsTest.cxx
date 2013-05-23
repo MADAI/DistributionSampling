@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+#include "Defaults.h"
 #include "GaussianProcessEmulatorTestGenerator.h"
 #include "GaussianProcessEmulatedModel.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
@@ -67,9 +68,9 @@ int main( int, char*[] ) {
   }
   
   std::string MOD = TempDirectory + madai::Paths::SEPARATOR +
-                    madai::Paths::DEFAULT_MODEL_OUTPUT_DIRECTORY;
+    madai::Defaults::MODEL_OUTPUT_DIRECTORY;
   std::string ERD = TempDirectory + madai::Paths::SEPARATOR +
-                    madai::Paths::DEFAULT_EXPERIMENTAL_RESULTS_DIRECTORY;
+    madai::Defaults::EXPERIMENTAL_RESULTS_FILE;
                     
   madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;

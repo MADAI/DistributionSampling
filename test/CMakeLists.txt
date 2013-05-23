@@ -9,7 +9,9 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ )
 
 include_directories( ${DistributionSampling_SOURCE_DIR}/applications )
 
-add_library( DistributionSamplingTest STATIC Gaussian2DModel.cxx )
+add_library( DistributionSamplingTest STATIC
+  Gaussian2DModel.cxx
+)
 target_link_libraries( DistributionSamplingTest ${LIBRARIES} )
 
 foreach( test
@@ -73,5 +75,5 @@ add_test( GaussianProcessEmulatorDirectoryReaderTest
 add_executable( GradientOutputsTest
   GradientOutputsTest.cxx
   GaussianProcessEmulatorTestGenerator.cxx )
-target_link_libraries( GradientOutputsTest ${LIBRARIES} )
+target_link_libraries( GradientOutputsTest ${LIBRARIES} ApplicationUtilities )
 add_test( GradientOutputsTest GradientOutputsTest )
