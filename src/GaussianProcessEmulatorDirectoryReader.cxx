@@ -22,6 +22,7 @@
 #include "GaussianProcessEmulator.h"
 #include "Paths.h"
 #include "RuntimeParameterFileReader.h"
+#include "System.h"
 #include "UniformDistribution.h"
 
 #include <madaisys/Directory.hxx>
@@ -193,6 +194,12 @@ bool parseExperimentalResults(
               << experimentalResultsFileName << "'\n";
   }
 
+  if ( !System::IsFile( experimentalResultsFileName ) ) {
+    std::cerr << "Expected '" << experimentalResultsFileName
+              << "' to be a file, but it does not exist or is a directory.\n";
+    return false;
+  }
+
   std::ifstream resultsFile( experimentalResultsFileName.c_str() );
   if ( !resultsFile.good() ) {
     std::cerr << "Error opening " << experimentalResultsFileName << '\n';
@@ -266,6 +273,12 @@ bool parseParameters(
 
   if ( verbose ) {
     std::cout << "Opened parameter priors file '" << priorFileName << "'.\n";
+  }
+
+  if ( !System::IsFile( priorFileName ) ) {
+    std::cerr << "Expected '" << priorFileName
+              << "' to be a file, but it does not exist or is a directory.\n";
+    return false;
   }
 
   std::ifstream input( priorFileName.c_str() );
@@ -391,6 +404,12 @@ bool parseOutputs(
   std::string observablesFileName = statisticalAnalysisDirectory +
     Paths::SEPARATOR + Paths::OBSERVABLE_NAMES_FILE;
 
+  if ( !System::IsFile( observablesFileName ) ) {
+    std::cerr << "Expected '" << observablesFileName
+              << "' to be a file, but it does not exist or is a directory.\n";
+    return false;
+  }
+
   std::ifstream input( observablesFileName.c_str() );
   if ( !input.good() ) {
     std::cerr << "Could not read observables file '"
@@ -402,7 +421,7 @@ bool parseOutputs(
     std::cout << "Opened file '" << observablesFileName << "'.\n";
   }
 
-  outputNames.clear(); // Empty the output vector  
+  outputNames.clear(); // Empty the output vector
 
   while ( input.good() ) {
     std::string line;
@@ -518,6 +537,13 @@ inline bool parseParameterAndOutputValues(
       std::string parametersFileName = modelOutputDirectory +
         Paths::SEPARATOR + directoryName + Paths::SEPARATOR +
         Paths::PARAMETERS_FILE;
+
+      if ( !System::IsFile( parametersFileName ) ) {
+        std::cerr << "Expected '" << parametersFileName
+                  << "' to be a file, but it does not exist or is a directory.\n";
+        return false;
+      }
+
       std::ifstream parametersFile( parametersFileName.c_str() );
       if ( !parametersFile.good() ) {
         std::cerr << "Could not read parameter file '" << parametersFileName
@@ -580,7 +606,7 @@ inline bool parseParameterAndOutputValues(
                     << line << "' in file '" << parametersFileName
                     << "' will be ignored.\n";
         }
-        
+
       }
       parametersFile.close();
 
@@ -602,6 +628,13 @@ inline bool parseParameterAndOutputValues(
       std::string resultsFileName = modelOutputDirectory +
         Paths::SEPARATOR + directoryName + Paths::SEPARATOR +
         Paths::RESULTS_FILE;
+
+      if ( !System::IsFile( resultsFileName ) ) {
+        std::cerr << "Expected '" << resultsFileName
+                  << "' to be a file, but it does not exist or is a directory.\n";
+        return false;
+      }
+
       std::ifstream resultsFile ( resultsFileName.c_str() );
       if ( !resultsFile.good() ) {
         std::cerr << "Could not read results file '" << resultsFileName
@@ -627,7 +660,7 @@ inline bool parseParameterAndOutputValues(
 
         std::string formatString( "Format should be <output name> "
                                   "<output value> [output uncertainty]\n" );
-    
+
         // Check for two few tokens
         if ( tokens.size() < 2 ) {
           std::cerr << "Too few tokens in line '" << line << "' in file '"
@@ -664,7 +697,7 @@ inline bool parseParameterAndOutputValues(
                     << line << "' in file '" << resultsFileName
                     << "' will be ignored.\n";
         }
-    
+
       }
 
       resultsFile.close();
@@ -683,7 +716,7 @@ inline bool parseParameterAndOutputValues(
         return false;
       }
 
-    
+
       runCounter++;
     }
   }
@@ -692,7 +725,7 @@ inline bool parseParameterAndOutputValues(
   for ( unsigned int i = 0; i < numberOutputs; i++ ) {
     outputUncertainty( i, 0 ) = averageUncertainty[i] / double( runCounter );
   }
-  
+
   return true;
 }
 
@@ -931,6 +964,13 @@ bool parseGaussianProcessEmulator(
     const std::string & statisticalAnalysisDirectory) {
   std::string emulatorFile = statisticalAnalysisDirectory + Paths::SEPARATOR +
     Paths::EMULATOR_STATE_FILE;
+
+  if ( !System::IsFile( emulatorFile ) ) {
+    std::cerr << "Expected '" << emulatorFile
+              << "' to be a file, but it does not exist or is a directory.\n";
+    return false;
+  }
+
   std::ifstream input( emulatorFile.c_str() );
   parseComments(gpme.m_Comments,input);
   std::string word;
@@ -1008,6 +1048,13 @@ GaussianProcessEmulatorDirectoryReader
 {
   std::string PCAFile = statisticsDirectory + Paths::SEPARATOR +
     Paths::PCA_DECOMPOSITION_FILE;
+
+  if ( !System::IsFile( PCAFile ) ) {
+    std::cerr << "Expected '" << PCAFile
+              << "' to be a file, but it does not exist or is a directory.\n";
+    return false;
+  }
+
   std::ifstream input( PCAFile.c_str() );
   if ( !parsePCADecomposition(*gpe, input) ) {
     std::cerr << "Error parsing PCA data.\n";
