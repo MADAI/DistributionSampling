@@ -75,13 +75,13 @@ public:
    * Note that the output Samples have only parameter values, no
    * output values nor log likelihoods.
    *
-   * Repeat the process @param number_of_tries times, and return the
-   * LHC witht he best spacing.
+   * Repeat the process @param numberOfTries times, and return the
+   * Latin hypercube sampling with the best spacing.
    */
   std::vector< Sample > GenerateMaxiMin(
       int numberOfTrainingPoints,
       const std::vector< Parameter > parameters,
-      int number_of_tries);
+      int numberOfTries);
 
 protected:
   Random * m_Random;
