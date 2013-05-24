@@ -43,6 +43,10 @@ public:
 
   static const double GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS;
 
+  static const bool GENERATE_TRAINING_POINTS_USE_MAXIMIN;
+
+  static const int GENERATE_TRAINING_POINTS_MAXIMIN_TRIES;
+
   static const int PERCENTILE_GRID_NUMBER_OF_SAMPLES;
 
   /**
