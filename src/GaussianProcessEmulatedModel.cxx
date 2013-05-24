@@ -176,8 +176,8 @@ GaussianProcessEmulatedModel
   gradient.clear();
   
   // Get the gradient of the model outputs
-  std::vector< double > mean_gradients;
-  std::vector< Eigen::MatrixXd > cov_gradients;
+  std::vector< double > meanGradients;
+  std::vector< Eigen::MatrixXd > covarianceGradients;
   if ( m_GPME.m_Status != GaussianProcessEmulator::READY ) {
     std::cerr << "Error: Emulator not ready.\n";
     return Model::OTHER_ERROR;
@@ -188,11 +188,11 @@ GaussianProcessEmulatedModel
     return Model::OTHER_ERROR;
   }
   if ( m_UseModelCovarianceToCalulateLogLikelihood )
-    if ( !m_GPME.GetGradientsOfCovariances( parameters, cov_gradients ) ) {
+    if ( !m_GPME.GetGradientsOfCovariances( parameters, covarianceGradients ) ) {
       std::cerr << "Error in GaussianProcessEmulator::GetGradientsOfCovariances.\n";
       return Model::OTHER_ERROR;
     }
-  if ( !m_GPME.GetGradientOfEmulatorOutputs( parameters, mean_gradients ) ) {
+  if ( !m_GPME.GetGradientOfEmulatorOutputs( parameters, meanGradients ) ) {
     std::cerr << "Error in GaussianProcessEmulator::GetGradientOfEmulatorOutputs.\n";
     return Model::NO_ERROR;
   }
@@ -215,13 +215,13 @@ GaussianProcessEmulatedModel
     return Model::OTHER_ERROR;
   
   std::vector< double > scalarDifferences(t);
-  if ( this->m_ObservedScalarValues.size() == 0 ) {
+  if ( m_ObservedScalarValues.size() == 0 ) {
     for ( size_t i = 0; i < t; ++i ) {
       scalarDifferences[i] = scalars[i];
     }
   } else {
     for ( size_t i = 0; i < t; ++i ) {
-      scalarDifferences[i] = scalars[i] - this->m_ObservedScalarValues[i];
+      scalarDifferences[i] = scalars[i] - m_ObservedScalarValues[i];
     }
   }
   
@@ -259,7 +259,7 @@ GaussianProcessEmulatedModel
   
   Eigen::Map< Eigen::VectorXd > diff(&(scalarDifferences[0]),t);
   Eigen::Map< Eigen::MatrixXd > cov(&(covariance[0]),t,t);
-  Eigen::Map< Eigen::MatrixXd > MGrads(&(mean_gradients[0]),t,p);
+  Eigen::Map< Eigen::MatrixXd > MGrads(&(meanGradients[0]),t,p);
   Eigen::VectorXd LLGrad( p );
   Eigen::VectorXd t1( t );
   
@@ -281,7 +281,7 @@ GaussianProcessEmulatedModel
     // Need to include derivative of covariance matrix
     for ( int i = 0; i < p; i++ ) {
       if ( activeParameters[i] ) {
-        LLGrad(i) += -0.5*t1.dot(cov_gradients[i]*t1);
+        LLGrad(i) += -0.5*t1.dot(covarianceGradients[i]*t1);
       }
     }
   }
