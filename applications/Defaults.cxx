@@ -70,4 +70,40 @@ const bool Defaults::EMULATE_QUIET = false;
 
 const bool Defaults::EMULATE_WRITE_HEADER = true;
 
+void Defaults::PrintAllDefaults(std::ostream & o) {
+  o << "#\n"
+    << "MODEL_OUTPUT_DIRECTORY "                           << Defaults::MODEL_OUTPUT_DIRECTORY << '\n'
+    << "EXPERIMENTAL_RESULTS_FILE "                        << Defaults::EXPERIMENTAL_RESULTS_FILE << '\n'
+    << "#\n"
+    << "VERBOSE "                                          << Defaults::VERBOSE << '\n'
+    << "READER_VERBOSE "                                   << Defaults::READER_VERBOSE << '\n'
+    << "#\n"
+    << "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS "        << Defaults::GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS << '\n'
+    << "GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE " << Defaults::GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE << '\n'
+    << "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS "     << Defaults::GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS << '\n'
+    << "GENERATE_TRAINING_POINTS_USE_MAXIMIN "             << Defaults::GENERATE_TRAINING_POINTS_USE_MAXIMIN << '\n'
+    << "GENERATE_TRAINING_POINTS_MAXIMIN_TRIES "           << Defaults::GENERATE_TRAINING_POINTS_MAXIMIN_TRIES << '\n'
+    << "#\n"
+    << "PERCENTILE_GRID_NUMBER_OF_SAMPLES "                << Defaults::PERCENTILE_GRID_NUMBER_OF_SAMPLES << '\n'
+    << "#\n"
+    << "PCA_FRACTION_RESOLVING_POWER "                     << Defaults::PCA_FRACTION_RESOLVING_POWER << '\n'
+    << "EMULATOR_COVARIANCE_FUNCTION "                     << Defaults::EMULATOR_COVARIANCE_FUNCTION << '\n'
+    << "EMULATOR_REGRESSION_ORDER "                        << Defaults::EMULATOR_REGRESSION_ORDER << '\n'
+    << "EMULATOR_NUGGET "                                  << Defaults::EMULATOR_NUGGET << '\n'
+    << "EMULATOR_AMPLITUDE "                               << Defaults::EMULATOR_AMPLITUDE << '\n'
+    << "EMULATOR_SCALE "                                   << Defaults::EMULATOR_SCALE << '\n'
+    << "#\n"
+    << "MCMC_USE_MODEL_ERROR "                             << Defaults::MCMC_USE_MODEL_ERROR << '\n'
+    << "MCMC_NUMBER_OF_SAMPLES "                           << Defaults::MCMC_NUMBER_OF_SAMPLES << '\n'
+    << "MCMC_NUMBER_OF_BURN_IN_SAMPLES "                   << Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES << '\n'
+    << "MCMC_STEP_SIZE "                                   << Defaults::MCMC_STEP_SIZE << '\n'
+    << "#\n"
+    << "EXTERNAL_MODEL_EXECUTABLE "                        << Defaults::EXTERNAL_MODEL_EXECUTABLE << '\n'
+    << "EXTERNAL_MODEL_ARGUMENTS "                         << Defaults::EXTERNAL_MODEL_ARGUMENTS << '\n'
+    << "#\n"
+    << "EMULATE_QUIET "                                    << Defaults::EMULATE_QUIET << '\n'
+    << "EMULATE_WRITE_HEADER "                             << Defaults::EMULATE_WRITE_HEADER << '\n'
+    << "#\n";
+}
+
 } // end namespace madai

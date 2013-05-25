@@ -20,6 +20,7 @@
 #define madai_Defaults_h_included
 
 #include <string>
+#include <iostream>
 
 namespace madai {
 
@@ -85,6 +86,9 @@ public:
 
   static const bool EMULATE_WRITE_HEADER;
 
+  /**
+    Print All Defaults */
+  static void PrintAllDefaults(std::ostream & output);
 };
 
 
