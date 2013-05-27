@@ -402,7 +402,7 @@ bool parseOutputs(
     std::cout << "Opened file '" << observablesFileName << "'.\n";
   }
 
-  outputNames.clear(); // Empty the output vector  
+  outputNames.clear(); // Empty the output vector
 
   while ( input.good() ) {
     std::string line;
@@ -580,7 +580,7 @@ inline bool parseParameterAndOutputValues(
                     << line << "' in file '" << parametersFileName
                     << "' will be ignored.\n";
         }
-        
+
       }
       parametersFile.close();
 
@@ -627,7 +627,7 @@ inline bool parseParameterAndOutputValues(
 
         std::string formatString( "Format should be <output name> "
                                   "<output value> [output uncertainty]\n" );
-    
+
         // Check for two few tokens
         if ( tokens.size() < 2 ) {
           std::cerr << "Too few tokens in line '" << line << "' in file '"
@@ -664,7 +664,7 @@ inline bool parseParameterAndOutputValues(
                     << line << "' in file '" << resultsFileName
                     << "' will be ignored.\n";
         }
-    
+
       }
 
       resultsFile.close();
@@ -683,7 +683,7 @@ inline bool parseParameterAndOutputValues(
         return false;
       }
 
-    
+
       runCounter++;
     }
   }
@@ -692,7 +692,7 @@ inline bool parseParameterAndOutputValues(
   for ( unsigned int i = 0; i < numberOutputs; i++ ) {
     outputUncertainty( i, 0 ) = averageUncertainty[i] / double( runCounter );
   }
-  
+
   return true;
 }
 
@@ -1023,11 +1023,11 @@ GaussianProcessEmulatorDirectoryReader
     std::cerr << "Error parsing runtime parameters.\n" << std::endl;
   }
 
-  double fractionalResolvingPower = 0.95;
-  if (runtimeParameterReader.HasOption("PCA_FRACTION_RESOLVING_POWER")) {
-    fractionalResolvingPower = runtimeParameterReader.GetOptionAsDouble(
-        "PCA_FRACTION_RESOLVING_POWER");
-  }
+  double DEFAULT_PCA_FRACTION_RESOLVING_POWER = 0.95;
+  // \todo should use madai::Defaults::PCA_FRACTION_RESOLVING_POWER
+  double fractionalResolvingPower = runtimeParameterReader.GetOptionAsDouble(
+      "PCA_FRACTION_RESOLVING_POWER",
+      DEFAULT_PCA_FRACTION_RESOLVING_POWER);
 
   gpe->RetainPrincipalComponents( fractionalResolvingPower );
 
