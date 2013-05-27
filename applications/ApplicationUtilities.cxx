@@ -39,10 +39,8 @@ void EnsurePathSeparatorAtEnd( std::string & path )
 std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
                                      const RuntimeParameterFileReader & settings )
 {
-  std::string modelOutputDirectory = Defaults::MODEL_OUTPUT_DIRECTORY ;
-  if ( settings.HasOption( "MODEL_OUTPUT_DIRECTORY" ) ) {
-    modelOutputDirectory = settings.GetOption( "MODEL_OUTPUT_DIRECTORY" );
-  }
+  std::string modelOutputDirectory = settings.GetOption(
+      "MODEL_OUTPUT_DIRECTORY", Defaults::MODEL_OUTPUT_DIRECTORY);
 
   // Check for quotes around directory name
   if ( ( modelOutputDirectory[0] == '"'  && *(modelOutputDirectory.end()-1) == '"' ) ||
@@ -61,10 +59,8 @@ std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
 std::string GetExperimentalResultsFile( const std::string & statisticsDirectory,
                                         const RuntimeParameterFileReader & settings )
 {
-  std::string experimentalResultsFile = Defaults::EXPERIMENTAL_RESULTS_FILE;
-  if ( settings.HasOption( "EXPERIMENTAL_RESULTS_FILE" ) ) {
-    experimentalResultsFile = settings.GetOption( "EXPERIMENTAL_RESULTS_FILE" );
-  }
+  std::string experimentalResultsFile = settings.GetOption(
+      "EXPERIMENTAL_RESULTS_FILE", Defaults::EXPERIMENTAL_RESULTS_FILE);
 
   // Check for quotes around directory name
   if ( ( experimentalResultsFile[0] == '"' &&
