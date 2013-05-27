@@ -170,10 +170,9 @@ int main(int argc, char ** argv) {
   std::string experimentalResultsFile =
     madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
-  bool emulatorWriteHeader = madai::Defaults::EMULATE_WRITE_HEADER;
-  if ( settings.HasOption( "EMULATE_WRITE_HEADER" ) ) {
-    emulatorWriteHeader = ( settings.GetOption( "EMULATE_WRITE_HEADER" ) == "true" );
-  }
+  bool emulatorWriteHeader = settings.GetOptionAsBool(
+      "EMULATE_WRITE_HEADER",
+      madai::Defaults::EMULATE_WRITE_HEADER);
 
   madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
