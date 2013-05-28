@@ -53,6 +53,10 @@ Code should adhere to this handful of formatting rules:
   and cause all kinds of headaches. To be safe, always use
   "std::string".
 
+- Listen to the compiler warnings.  Make sure that the GCC's
+  "-Wall -Wextra -pedantic -Wno-long-long" settings don't trigger
+  warnings.
+
 - Shell scripts should be used only for the convenience of
   Unix/MacOS10.x/Linux/POSIX users.  Shell scripts should adhere to
   the POSIX portability standards defined here:

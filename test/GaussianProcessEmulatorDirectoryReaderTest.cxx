@@ -389,6 +389,7 @@ bool checkOutputValues( const madai::GaussianProcessEmulator & gpe,
         if ( tokens.size() >= 3 ) {
           uncertainty = atof( tokens[2].c_str() );
         }
+        (void)uncertainty; // warning: variable 'uncertainty' set but not used
 
         for ( size_t j = 0; j < gpe.m_OutputNames.size(); ++j ) {
           if ( gpe.m_OutputNames[j] == name ) {
