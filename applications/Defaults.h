@@ -20,6 +20,7 @@
 #define madai_Defaults_h_included
 
 #include <string>
+#include <iostream>
 
 namespace madai {
 
@@ -42,6 +43,10 @@ public:
   static const bool GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE;
 
   static const double GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS;
+
+  static const bool GENERATE_TRAINING_POINTS_USE_MAXIMIN;
+
+  static const int GENERATE_TRAINING_POINTS_MAXIMIN_TRIES;
 
   static const int PERCENTILE_GRID_NUMBER_OF_SAMPLES;
 
@@ -81,6 +86,9 @@ public:
 
   static const bool EMULATE_WRITE_HEADER;
 
+  /**
+    Print All Defaults */
+  static void PrintAllDefaults(std::ostream & output);
 };
 
 

@@ -218,6 +218,10 @@ int main( int argc, char * argv[] ) {
       << ")\n"
       << "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS <value> (default: "
       << madai::Defaults::GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS << ")\n"
+      << "GENERATE_TRAINING_POINTS_USE_MAXIMIN <value> (default: "
+      << madai::Defaults::GENERATE_TRAINING_POINTS_USE_MAXIMIN << ")\n"
+      << "GENERATE_TRAINING_POINTS_MAXIMIN_TRIES <value> (default: "
+      << madai::Defaults::GENERATE_TRAINING_POINTS_MAXIMIN_TRIES << ")\n"
       << "VERBOSE <value> (default: "
       << madai::Defaults::VERBOSE << ")\n";
 
@@ -250,17 +254,30 @@ int main( int argc, char * argv[] ) {
   double standardDeviations = madai::Defaults::GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS;
   if ( settings.HasOption( "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS" ) ) {
     standardDeviations =
-      atof( settings.GetOption( "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS" ).c_str() );
+      settings.GetOptionAsDouble( "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS" );
   }
+
   bool partitionByPercentile = madai::Defaults::GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE;
   if ( settings.HasOption( "GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE" ) ) {
     partitionByPercentile =
-      ( settings.GetOption( "GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE" ) == "true" );
+      settings.GetOptionAsBool( "GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE" );
   }
+
   int numberOfTrainingPoints = madai::Defaults::GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS;
   if ( settings.HasOption( "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS" ) ) {
     numberOfTrainingPoints =
-      atoi( settings.GetOption( "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS" ).c_str() );
+      settings.GetOptionAsInt( "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS" );
+  }
+
+  bool useMaxiMin = madai::Defaults::GENERATE_TRAINING_POINTS_USE_MAXIMIN;
+  if ( settings.HasOption( "GENERATE_TRAINING_POINTS_USE_MAXIMIN" ) ) {
+    useMaxiMin =
+      settings.GetOptionAsBool( "GENERATE_TRAINING_POINTS_USE_MAXIMIN" );
+  }
+
+  int numberOfMaxiMinTries = madai::Defaults::GENERATE_TRAINING_POINTS_MAXIMIN_TRIES;
+  if ( settings.HasOption( "GENERATE_TRAINING_POINTS_MAXIMIN_TRIES" ) ) {
+    numberOfMaxiMinTries = settings.GetOptionAsInt( "GENERATE_TRAINING_POINTS_MAXIMIN_TRIES" );
   }
 
   // Create the Latin hypercube sampling
@@ -268,8 +285,16 @@ int main( int argc, char * argv[] ) {
   sampleGenerator.SetStandardDeviations( standardDeviations );
   sampleGenerator.SetPartitionSpaceByPercentile( partitionByPercentile );
 
-  std::vector< madai::Sample > samples =
-    sampleGenerator.Generate( numberOfTrainingPoints, parameters );
+  std::vector< madai::Sample > samples;
+
+  if ( useMaxiMin ) {
+    samples =
+      sampleGenerator.GenerateMaxiMin( numberOfTrainingPoints, parameters,
+                                       numberOfMaxiMinTries );
+  } else {
+    samples =
+      sampleGenerator.Generate( numberOfTrainingPoints, parameters );
+  }
 
   if ( !WriteDirectories( modelOutputDirectory, parameters, samples, false ) ) {
     std::cerr << "Could not write model output directory '" << modelOutputDirectory << "'.\n";
