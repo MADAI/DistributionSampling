@@ -20,12 +20,14 @@
 #define madai_GaussianProcessEmulatorDirectoryReader_h_included
 
 #include <string>
+#include <vector>
 
 
 namespace madai {
 
 // Forward declarations
 class GaussianProcessEmulator;
+class Parameter;
 
 class GaussianProcessEmulatorDirectoryReader {
 public:
@@ -57,6 +59,13 @@ public:
     \returns true on success. */
   bool LoadEmulator( GaussianProcessEmulator * gpe,
                      const std::string & statisticalAnalysisDirectory);
+
+  /**
+    Parses a file describing the parameter prior distributions. */
+  static bool ParseParameters( std::vector< madai::Parameter > & parameters,
+                               int & numberParameters,
+                               const std::string & statisticalAnalysisDirectory,
+                               bool verbose );
 
 protected:
   bool m_Verbose;
