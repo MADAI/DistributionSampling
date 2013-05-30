@@ -79,7 +79,7 @@ bool
 RuntimeParameterFileReader
 ::HasOption(const std::string & key) const
 {
-  return (m_Options.count(key) > 0);
+  return ( m_Options.count( key ) > 0 );
 }
 
 const std::string &
@@ -87,7 +87,7 @@ RuntimeParameterFileReader
 ::GetOption(const std::string & key) const
 {
   static const std::string empty("");
-  if (m_Options.count(key) > 0) {
+  if (this->HasOption( key )) {
     //return m_Options[key]; doesn't work because operator [] isn't const
     return m_Options.find( key )->second;
   } else {
@@ -99,7 +99,7 @@ const std::string &
 RuntimeParameterFileReader
 ::GetOption( const std::string & key, const std::string & defaultValue) const
 {
-  if (m_Options.count(key) > 0)
+  if (this->HasOption( key ))
     return m_Options.find( key )->second;
   else
     return defaultValue;
@@ -109,7 +109,7 @@ bool
 RuntimeParameterFileReader
 ::GetOptionAsBool(const std::string & key, bool defaultValue) const
 {
-  if (! (m_Options.count(key) > 0))
+  if (! (this->HasOption( key )))
     return defaultValue;
   const std::string & Option = m_Options.find( key )->second;
   if (Option == "1") // for fastest results, use 0 and 1.
@@ -129,32 +129,49 @@ double
 RuntimeParameterFileReader
 ::GetOptionAsDouble(const std::string & key) const
 {
-  return std::atof(m_Options.find( key )->second.c_str());
+  return std::atof(this->GetOption( key ).c_str());
 }
 
 double
 RuntimeParameterFileReader
 ::GetOptionAsDouble(const std::string & key, double defaultValue) const
 {
-  if (m_Options.count(key) > 0)
-    return std::atof(m_Options.find( key )->second.c_str());
+  if (this->HasOption( key ))
+    return std::atof(this->GetOption( key ).c_str());
+  else
+    return defaultValue;
+}
+
+int
+RuntimeParameterFileReader
+::GetOptionAsInt(const std::string & key) const
+{
+  return std::atoi(this->GetOption( key ).c_str());
+}
+
+int
+RuntimeParameterFileReader
+::GetOptionAsInt(const std::string & key, int defaultValue) const
+{
+  if (this->HasOption( key ))
+    return std::atoi(this->GetOption( key ).c_str());
   else
     return defaultValue;
 }
 
 long
 RuntimeParameterFileReader
-::GetOptionAsInt(const std::string & key) const
+::GetOptionAsLong(const std::string & key) const
 {
-  return std::atol(m_Options.find( key )->second.c_str());
+  return std::atol(this->GetOption( key ).c_str());
 }
 
 long
 RuntimeParameterFileReader
-::GetOptionAsInt(const std::string & key, long defaultValue) const
+::GetOptionAsLong(const std::string & key, long defaultValue) const
 {
-  if (m_Options.count(key) > 0)
-    return std::atol(m_Options.find( key )->second.c_str());
+  if (this->HasOption( key ))
+    return std::atol(this->GetOption( key ).c_str());
   else
     return defaultValue;
 }
