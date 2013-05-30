@@ -94,6 +94,7 @@ double
 UniformDistribution
 ::GetGradientLogProbabilityDensity( double x ) const
 {
+  (void)x;
   return 0.0;
 }
 
