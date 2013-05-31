@@ -147,10 +147,9 @@ int main( int argc, char * argv[] ) {
   std::vector< madai::Parameter > parameters;
   std::string parametersFile = statisticsDirectory + madai::Paths::PARAMETER_PRIORS_FILE;
 
-  bool verbose = madai::Defaults::READER_VERBOSE;
-  if ( settings.HasOption( "READER_VERBOSE" ) ) {
-    verbose = settings.GetOptionAsBool( "READER_VERBOSE" );
-  }
+  bool verbose = settings.GetOptionAsBool(
+    "READER_VERBOSE",
+    madai::Defaults::READER_VERBOSE );
 
   int numberOfParameters = 0;
   bool parametersRead = madai::GaussianProcessEmulatorDirectoryReader::
