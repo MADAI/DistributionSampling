@@ -66,8 +66,16 @@ int main(int argc, char ** argv) {
       << madai::Defaults::EMULATOR_COVARIANCE_FUNCTION << ")\n"
       << "EMULATOR_REGRESSION_ORDER <value> (default: "
       << madai::Defaults::EMULATOR_REGRESSION_ORDER << ")\n"
-      << "READER_VERBOSE <value> (default: false)\n"
-      << "VERBOSE <value> (default: false)\n";
+      << "EMULATOR_NUGGET <value> (default: "
+      << madai::Defaults::EMULATOR_NUGGET << ")\n"
+      << "EMULATOR_AMPLITUDE <value> (default: "
+      << madai::Defaults::EMULATOR_AMPLITUDE << ")\n"
+      << "EMULATOR_SCALE <value> (default: "
+      << madai::Defaults::EMULATOR_SCALE << ")\n"
+      << "READER_VERBOSE <value> (default: "
+      << madai::Defaults::READER_VERBOSE << ")\n"
+      << "VERBOSE <value> (default: "
+      << madai::Defaults::VERBOSE << ")\n";
 
     return EXIT_FAILURE;
   }
