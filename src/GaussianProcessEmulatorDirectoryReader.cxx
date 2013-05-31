@@ -258,10 +258,13 @@ bool parseExperimentalResults(
   return true;
 }
 
+} // end anonymous namespace
 
 /**
    Read the parameter_priors.dat file in statistical_analysis. */
-bool parseParameters(
+bool
+GaussianProcessEmulatorDirectoryReader
+::ParseParameters(
     std::vector< madai::Parameter > & parameters,
     int & numberParameters,
     const std::string & statisticalAnalysisDirectory,
@@ -369,6 +372,8 @@ bool parseParameters(
   return ( numberParameters > 0 );
 }
 
+// anonymous namespace
+namespace {
 
 /**
    Read the CovarianceFunctionType from the command line. */
@@ -736,7 +741,7 @@ bool parseModelDataDirectoryStructure(
     const std::string & statisticalAnalysisDirectory,
     bool verbose )
 {
-  if ( !parseParameters(
+  if ( !GaussianProcessEmulatorDirectoryReader::ParseParameters(
           gpme.m_Parameters,
           gpme.m_NumberParameters,
           statisticalAnalysisDirectory,

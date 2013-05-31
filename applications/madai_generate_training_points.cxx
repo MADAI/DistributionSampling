@@ -24,6 +24,7 @@
 
 #include "ApplicationUtilities.h"
 #include "GaussianDistribution.h"
+#include "GaussianProcessEmulatorDirectoryReader.h"
 #include "LatinHypercubeGenerator.h"
 #include "Parameter.h"
 #include "Paths.h"
@@ -34,105 +35,6 @@
 #include "madaisys/SystemTools.hxx"
 
 using madai::Paths;
-
-static void discard_comments( std::istream & i, char comment_character ) {
-  int c;
-  while (i.good() && ((c = i.peek()) != EOF)) {
-    if ((c == ' ') || (c == '\t') || ( c == '\n' )) {
-      char ch;
-      i.get(ch); // discard whitespace at beginning of line;
-    } else if (c == comment_character) {
-      std::string s;
-      std::getline( i, s );
-    } else {
-      return; // line begins with some non-comment, non-whitespace character.
-    }
-  }
-}
-
-bool ReadParameters( std::string parametersFile,
-                     std::vector< madai::Parameter > & parameters,
-                     bool verbose )
-{
-  parameters.clear();
-
-  std::ifstream parameterFile(parametersFile.c_str());
-  if (! parameterFile.good()) {
-    std::cerr << "[ReadParameters] Unable to open file " << parametersFile << ".";
-    return false;
-  }
-
-  if ( verbose ) {
-    std::cout << "Opened file '" << parametersFile << "'\n";
-  }
-
-  // Parse each parameter as it is listed on a line
-  std::string parameterName;
-  std::string distributionType;
-  discard_comments(parameterFile, '#');
-  while (parameterFile >> distributionType >> parameterName) {
-    if (! parameterFile.good()) {
-      parameterFile.close();
-      break;
-    }
-    distributionType = madai::LowerCase(distributionType);
-    if ( verbose ) {
-      std::cout << "Read parameter '" << parameterName << "' "
-                << "which is of type '" << distributionType << "' ";
-    }
-
-    madai::Distribution *distribution = NULL;
-    madai::UniformDistribution uniform;
-    madai::GaussianDistribution gaussian;
-
-    if ( distributionType == "uniform" ) {
-      // Parse minimum and maximum values
-      double minimum, maximum;
-      parameterFile >> minimum >> maximum;
-      if (! parameterFile.good()) {
-        std::cerr << "Could not read uniform distribution minimum and maximum\n";
-        parameterFile.close();
-        return false;
-      }
-      if ( verbose ) {
-        std::cout << "with range [" << minimum << ", " << maximum << "]\n";
-      }
-      uniform.SetMinimum( minimum );
-      uniform.SetMaximum( maximum );
-      distribution = &uniform;
-
-    } else if ( distributionType == "gaussian" ) {
-      // Parse mean and standard deviation
-      double mean, standardDeviation;
-      parameterFile >> mean >> standardDeviation;
-      if (! parameterFile.good()) {
-        std::cerr << "Could not read Gaussian distribution mean and standard deviation\n";
-        parameterFile.close();
-        return false;
-      }
-
-      if ( verbose ) {
-        std::cout << "with mean " << mean << " and standard deviation "
-                  << standardDeviation << "\n";
-      }
-
-      gaussian.SetMean( mean );
-      gaussian.SetStandardDeviation( standardDeviation );
-      distribution = &gaussian;
-    } else {
-      std::cerr << "Unknown distribution type '" << distributionType << "'\n";
-      parameterFile.close();
-      return false;
-    }
-    parameters.push_back( madai::Parameter( parameterName, *distribution ) );
-    discard_comments(parameterFile, '#');
-  }
-
-  parameterFile.close();
-  // Everything went okay
-  return true;
-}
-
 
 bool WriteDirectories( const std::string modelOutputDirectory,
                        const std::vector< madai::Parameter > & parameters,
@@ -244,7 +146,15 @@ int main( int argc, char * argv[] ) {
   // Read in parameter priors
   std::vector< madai::Parameter > parameters;
   std::string parametersFile = statisticsDirectory + madai::Paths::PARAMETER_PRIORS_FILE;
-  bool parametersRead = ReadParameters( parametersFile, parameters, false );
+
+  bool verbose = madai::Defaults::READER_VERBOSE;
+  if ( settings.HasOption( "READER_VERBOSE" ) ) {
+    verbose = settings.GetOptionAsBool( "READER_VERBOSE" );
+  }
+
+  int numberOfParameters = 0;
+  bool parametersRead = madai::GaussianProcessEmulatorDirectoryReader::
+    ParseParameters( parameters, numberOfParameters, statisticsDirectory, false );
   if ( !parametersRead ) {
     std::cerr << "Could not read parameters from prior file '"
               << parametersFile << "'" << std::endl;
