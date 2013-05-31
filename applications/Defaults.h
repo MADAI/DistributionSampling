@@ -64,6 +64,8 @@ public:
 
   static const double EMULATOR_SCALE;
 
+  static const std::string EMULATOR_TRAINING_RIGOR;
+
   /**
    MCMC Variables */
   static const bool MCMC_USE_MODEL_ERROR;

@@ -105,12 +105,28 @@ int main(int argc, char ** argv) {
   }
 
   int emulatorRegressionOrder = settings.GetOptionAsInt(
-      "EMULATOR_REGRESSION_ORDER", madai::Defaults::EMULATOR_REGRESSION_ORDER);
+    "EMULATOR_REGRESSION_ORDER", madai::Defaults::EMULATOR_REGRESSION_ORDER);
+
+  double emulatorNugget = settings.GetOptionAsDouble(
+    "EMULATOR_NUGGET", madai::Defaults::EMULATOR_NUGGET);
+
+  double emulatorAmplitude = settings.GetOptionAsDouble(
+    "EMULATOR_AMPLITUDE", madai::Defaults::EMULATOR_AMPLITUDE);
+
+  double emulatorScale = settings.GetOptionAsDouble(
+    "EMULATOR_SCALE", madai::Defaults::EMULATOR_SCALE);
+
+  std::string emulatorTrainingRigor = settings.GetOption(
+    "EMULATOR_TRAINING_RIGOR",  madai::Defaults::EMULATOR_TRAINING_RIGOR );
+  std::transform( emulatorTrainingRigor.begin(), emulatorTrainingRigor.end(),
+                  emulatorTrainingRigor.begin(), ::tolower );
+
+  bool readerVerbose = settings.GetOptionAsBool(
+      "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
 
   madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-  bool verbose = settings.GetOptionAsBool( "READER_VERBOSE", false );
-  directoryReader.SetVerbose( verbose );
+  directoryReader.SetVerbose( readerVerbose );
 
   if ( !directoryReader.LoadTrainingData( &gpe,
                                           modelOutputDirectory,
@@ -126,10 +142,22 @@ int main(int argc, char ** argv) {
   }
   std::string outputFileName = statisticsDirectory + madai::Paths::EMULATOR_STATE_FILE;
 
-  if (! gpe.Train( emulatorCovarianceFunction,
-                   emulatorRegressionOrder ) ) {
-    std::cerr << "Error while training emulator.\n";
-    return EXIT_FAILURE;
+  // Switch between full and basic training
+  if ( emulatorTrainingRigor == "full" ) {
+    if (! gpe.Train( emulatorCovarianceFunction,
+                     emulatorRegressionOrder ) ) {
+      std::cerr << "Error while performing full emulator training.\n";
+      return EXIT_FAILURE;
+    }
+  } else { /* Basic training */
+    if (! gpe.BasicTraining( emulatorCovarianceFunction,
+                             emulatorRegressionOrder,
+                             emulatorNugget,
+                             emulatorAmplitude,
+                             emulatorScale ) ) {
+      std::cerr << "Error while performing basic emulator training\n";
+      return EXIT_FAILURE;
+    }
   }
 
   std::ofstream os( outputFileName.c_str() );

@@ -45,7 +45,7 @@ int main(int argc, char ** argv) {
       << "    " << argv[0] << " <StatisticsDirectory> <OutputFileName>\n"
       << "\n"
       << "This program produces a Markov Chain Monte Carlo trace from \n"
-      << "a trained emulator. The programs madai_pca_decompose and madai_basic_train \n"
+      << "a trained emulator. The programs madai_pca_decompose and madai_train_emulator \n"
       << "must have been run on <StatisticsDirectory> prior to running \n"
       << "this program.\n"
       << "\n"

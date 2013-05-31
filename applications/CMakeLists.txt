@@ -10,7 +10,6 @@ target_link_libraries( ApplicationUtilities
 
 set( APPLICATIONS
   madai_pca_decompose
-  madai_basic_train
   madai_emulate
   madai_generate_mcmc_trace
   madai_generate_mcmc_trace_external

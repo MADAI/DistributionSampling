@@ -1,11 +1,11 @@
 % !TEX root =  manual.tex
 \section{Emulator Tuning}\label{sec:emulatortuning}
 
-As part of training the emulator, \path{madai\_basic\_train} determines the hyper-parameters ($\Theta_k$ in Eq. \eqref{eq:hyperform}) to be used by the emulator. In many cases, these parameters are simply chosen \emph{ad hoc}, but \path{madai\_basic\_train} initializes them to reasonable values. To train the emulator, run the command
+As part of training the emulator, \path{madai\_train\_emulator} determines the hyper-parameters ($\Theta_k$ in Eq. \eqref{eq:hyperform}) to be used by the emulator. In many cases, these parameters are simply chosen \emph{ad hoc}, but \path{madai\_train\_emulator} initializes them to reasonable values. To train the emulator, run the command
 
-\commandline{madai\_basic\_train stat1}
+\commandline{madai\_train\_emulator stat1}
 
-When training the emulator, \path{madai\_basic\_train} looks for parameters defined in a file named\\ \path{stat1/settings.dat}, which is a text file describing parameters used in the emulator construction and tuning and for the MCMC procedure. The file has a simple form, 
+When training the emulator, \path{madai\_train\_emulator} looks for parameters defined in a file named\\ \path{stat1/settings.dat}, which is a text file describing parameters used in the emulator construction and tuning and for the MCMC procedure. The file has a simple form, 
 
 \begin{quote}
 {\tt MCMC\_USE\_MODEL\_ERROR             false}\\
@@ -15,7 +15,7 @@ When training the emulator, \path{madai\_basic\_train} looks for parameters defi
 {\tt MCMC\_STEP\_SIZE                    0.1}
 \end{quote}
 
-\path{madai\_basic\_train} produces a file called \path{stat1/EmulatorState.dat}. This file has the following format:
+\path{madai\_train\_emulator} produces a file called \path{stat1/EmulatorState.dat}. This file has the following format:
 \begin{quote}
 {\tt SUBMODELS}~$M_Z$~~~$\leftarrow$Each principal component is modeled separately.\\
 {\tt MODEL~~~0}~~~~~~~~~$\leftarrow$ The submodels are numbered zero through $M_z-1$.\\
