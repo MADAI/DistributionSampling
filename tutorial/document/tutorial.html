@@ -224,9 +224,9 @@ path:</p>
 of times.</p>
 
 <p>You will need to build an executable program to interface with
-  the <code>madai_generate_mcmc_trace_external</code> program.</p>
+  the <code>madai_generate_mcmc_trace</code> program.</p>
 
-<p><code>madai_generate_mcmc_trace_external</code> will call your executable
+<p><code>madai_generate_mcmc_trace</code> will call your executable
 and interactively query it for model outputs at given parameter
 vectors.</p>
 
@@ -339,7 +339,7 @@ $ <span class="input">sed -i &quot;s#^[[:space:]]*${KEY}\([[:space:]].*\)*\$#${K
 -->
 
 <p>The final step is to run the Markov chain Monte Carlo (MCMC)
-routine on your model.  The <code>madai_generate_mcmc_trace_external</code> program
+routine on your model.  The <code>madai_generate_mcmc_trace</code> program
 uses the external model to produce model outputs for points in
 parameter space.  These model outputs are compared to the experimental
 values to calculate likelihood.</p>
@@ -358,7 +358,7 @@ These values are stored in a comma-separated-value (csv) file
 specified in the arguments.</p>
 
 <pre>
-$ <span class="input">madai_generate_mcmc_trace_external . &quot;mcmc.csv&quot;</span>
+$ <span class="input">madai_generate_mcmc_trace . &quot;mcmc.csv&quot;</span>
 </pre>
 
 <p>The output file is left in the <code>trace</code> directory:</p>
@@ -377,7 +377,7 @@ $ <span class="input">head trace/mcmc.csv</span>
 -0.542122,3.93226,3.24617,-0.542122,0.706659,3.24617,-10.5558
 </pre>
 
-<p>The <code>madai_generate_mcmc_trace_external</code> program will produce the
+<p>The <code>madai_generate_mcmc_trace</code> program will produce the
  number of points specified in the <code>settings.dat</code> under in
  the <code>MCMC_NUMBER_OF_SAMPLES</code> variable.  Depending on the
  number of the parameters, a larger or smaller number of samples will
@@ -655,7 +655,7 @@ $ <span class="input">madai_subsample_text_file 20 trace/mcmc.csv trace/mcmc_500
       LocalWords:  GetGaussianIntegral MeanX MeanE ErrorX ErrorE dat
       LocalWords:  rundir params IOError len argv arg tt ffffff th td
       LocalWords:  DistributionSampling cbracket preproc specialchar
-      LocalWords:  madai_generate_mcmc_trace_external stdout endin
+      LocalWords:  madai_generate_mcmc_trace stdout endin
       LocalWords:  STDDEV ParabolicPotentialModel stdin LogLikelihood
       LocalWords:  pca Cov awk ln MyModel cxx iostream fstream madai
       LocalWords:  ErrorType GetScalarOutputsAndCovariance const cerr

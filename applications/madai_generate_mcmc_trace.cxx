@@ -24,6 +24,7 @@
 #include <algorithm>
 
 #include "ApplicationUtilities.h"
+#include "ExternalModel.h"
 #include "MetropolisHastingsSampler.h"
 #include "GaussianProcessEmulatedModel.h"
 #include "RuntimeParameterFileReader.h"
@@ -44,10 +45,12 @@ int main(int argc, char ** argv) {
       << "Usage:\n"
       << "    " << argv[0] << " <StatisticsDirectory> <OutputFileName>\n"
       << "\n"
-      << "This program produces a Markov Chain Monte Carlo trace from \n"
-      << "a trained emulator. The programs madai_pca_decompose and madai_train_emulator \n"
-      << "must have been run on <StatisticsDirectory> prior to running \n"
-      << "this program.\n"
+      << "This program produces a Markov Chain Monte Carlo trace by either \n"
+      << "evaluating a model defined in an external process or evaluating a \n"
+      << "trained emulator. The program madai_pca_decompose must have been \n"
+      << "run on <StatisticsDirectory> prior to running this program and if \n"
+      << "no EXTERNAL_MODEL_EXECUTABLE is specified in the settings file, \n"
+      << "madai_train_emulator must have been run as well.\n"
       << "\n"
       << "<StatisticsDirectory> is the directory in which all \n"
       << "statistics data are stored. It contains the parameter file "
@@ -71,6 +74,9 @@ int main(int argc, char ** argv) {
       << madai::Defaults::MCMC_USE_MODEL_ERROR << ")\n"
       << "MCMC_STEP_SIZE <value> (default: "
       << madai::Defaults::MCMC_STEP_SIZE << ")\n"
+      << "EXTERNAL_MODEL_EXECUTABLE <value> (default: \""
+      << madai::Defaults::EXTERNAL_MODEL_EXECUTABLE << "\")\n"
+      << "EXTERNAL_MODEL_ARGUMENTS <Argument1> <Argument2> ... <LastArgument>\n"
       << "VERBOSE <value> (default: "
       << madai::Defaults::VERBOSE << ")\n";
 
@@ -106,13 +112,63 @@ int main(int argc, char ** argv) {
   double stepSize = settings.GetOptionAsDouble(
       "MCMC_STEP_SIZE", madai::Defaults::MCMC_STEP_SIZE);
 
+  std::string executable = settings.GetOption(
+      "EXTERNAL_MODEL_EXECUTABLE",
+      madai::Defaults::EXTERNAL_MODEL_EXECUTABLE);
+
+  bool verbose = settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE );
+
+  madai::ExternalModel externalModel;
   madai::GaussianProcessEmulatedModel gpem;
-  if ( gpem.LoadConfiguration(
-           statisticsDirectory,
-           modelOutputDirectory,
-           experimentalResultsFile ) != madai::Model::NO_ERROR ) {
-    std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
-    return EXIT_FAILURE;
+
+  madai::Model * model;
+  if ( executable == "" ) { // Use emulator
+
+    if ( gpem.LoadConfiguration(
+             statisticsDirectory,
+             modelOutputDirectory,
+             experimentalResultsFile ) != madai::Model::NO_ERROR ) {
+      std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
+      return EXIT_FAILURE;
+    }
+
+    model = &gpem;
+
+    if ( verbose ) {
+      std::cout << "Using emulator to generate trace.\n";
+    }
+  } else { // Use external model
+
+    // Split arguments into vector of strings
+    std::vector< std::string > arguments;
+    if ( settings.HasOption( "EXTERNAL_MODEL_ARGUMENTS" ) ) {
+      std::string argumentsString =
+        settings.GetOption( "EXTERNAL_MODEL_ARGUMENTS" );
+      arguments = madai::SplitString( argumentsString, ' ' );
+    }
+
+    if ( verbose ) {
+      std::cout << "Using external model executable '" << executable << "'.\n";
+    }
+
+    externalModel.StartProcess( executable, arguments );
+    if (! externalModel.IsReady()) {
+      std::cerr << "Something is wrong with the external model\n";
+      return EXIT_FAILURE;
+    }
+
+    std::string observationsFile = experimentalResultsFile +
+      madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
+    std::ifstream observations( observationsFile.c_str() );
+    if ( madai::Model::NO_ERROR != externalModel.LoadObservations( observations ) ) {
+      std::cerr << "Error loading observations.\n";
+      externalModel.StopProcess();
+
+      return EXIT_FAILURE;
+    }
+    observations.close();
+
+    model = &externalModel;
   }
 
   madai::MetropolisHastingsSampler mcmc;
@@ -133,14 +189,14 @@ int main(int argc, char ** argv) {
 
   int returnCode = madai::SamplerCSVWriter::GenerateSamplesAndSaveToFile(
       mcmc,
-      gpem,
+      *model,
       outFile,
       numberOfSamples,
       numberOfBurnInSamples,
       useModelError,
       &(std::cerr));
 
-  if ( settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE ) ) {
+  if ( verbose ) {
     if ( returnCode == EXIT_SUCCESS ) {
       std::cout << "Succeeded writing trace file '" << outputFilePath << "'.\n";
     } else {

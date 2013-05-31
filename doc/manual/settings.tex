@@ -28,7 +28,7 @@ Distribution Sampling Programs.
     \item[MCMC\_NUMBER\_OF\_SAMPLES] (default: 100) How many samples should generateMCMCtrace produce. The default is small for testing purposes. Values around $10^6$ are recommended.
     \item[MCMC\_NUMBER\_OF\_BURN\_IN\_SAMPLES] (default: 0) The number of MCMC samples to be discarded at the beginning of the MCMC run.
     \item[MCMC\_STEP\_SIZE] (default: 0.1) How big should each step be in the Metropolis Hastings algorithm? (This will be scaled by the characteristic length of each parameter's prior distribution)
-    \item[EXTERNAL\_MODEL\_EXECUTABLE] (default: none) Path to an external executable that follows the protocol for writing to stdout and reading from stdin assumed by the madai\_generate\_mcmc\_trace\_external program.
+    \item[EXTERNAL\_MODEL\_EXECUTABLE] (default: none) Path to an external executable that follows the protocol for writing to stdout and reading from stdin assumed by the madai\_generate\_mcmc\_trace program. If this option is not set, madai\_generate\_mcmc\_trace uses a trained emulator to generate the trace.
     \item[EXTERNAL\_MODEL\_ARGUMENTS] (default: none) Arguments to pass to the executable pointed to by EXTERNAL\_MODEL\_EXECUTABLE.
     \item[EMULATE\_QUIET] (default: 0)
     \item[EMULATE\_WRITE\_HEADER] (default: 1)
