@@ -46,14 +46,40 @@ public:
   const std::string & GetOption(const std::string & key) const;
 
   /**
+   Get an option value.
+   If (! this->HasOption(key)) return defaultValue; */
+  const std::string & GetOption(
+      const std::string & key, const std::string & defaultValue) const;
+
+  /**
    Get an option value cast to double
    It is up to the user to call HasOption(key) before calling this.  */
   double GetOptionAsDouble(const std::string & key) const;
 
   /**
-   Get an option value cast to integer
+   Get an option value cast to double.
+   If (! this->HasOption(key)) return defaultValue; */
+  double GetOptionAsDouble(const std::string & key, double defaultValue) const;
+
+  /**
+   Get an option value cast to integer.
    It is up to the user to call HasOption(key) before calling this.  */
-  long GetOptionAsInt(const std::string & key) const;
+  int GetOptionAsInt(const std::string & key) const;
+
+  /**
+   Get an option value cast to integer.
+   It is up to the user to call HasOption(key) before calling this.  */
+  int GetOptionAsInt(const std::string & key, int defaultValue) const;
+
+  /**
+   Get an option value cast to long.
+   It is up to the user to call HasOption(key) before calling this.  */
+  long GetOptionAsLong(const std::string & key) const;
+
+  /**
+   Get an option value cast to long.
+   It is up to the user to call HasOption(key) before calling this.  */
+  long GetOptionAsLong(const std::string & key, long defaultValue) const;
 
   /**
    Get an option value as a bool.

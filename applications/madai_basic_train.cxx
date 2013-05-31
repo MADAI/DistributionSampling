@@ -93,11 +93,10 @@ int main(int argc, char ** argv) {
   std::string experimentalResultsFile =
     madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
-  std::string covarianceFunctionString =
-    madai::Defaults::EMULATOR_COVARIANCE_FUNCTION;
-  if ( settings.HasOption( "EMULATOR_COVARIANCE_FUNCTION" ) ) {
-    covarianceFunctionString = settings.GetOption( "EMULATOR_COVARIANCE_FUNCTION" );
-  }
+  std::string covarianceFunctionString = settings.GetOption(
+      "EMULATOR_COVARIANCE_FUNCTION",
+      madai::Defaults::EMULATOR_COVARIANCE_FUNCTION);
+
   madai::GaussianProcessEmulator::CovarianceFunctionType emulatorCovarianceFunction;
   if ( covarianceFunctionString == "POWER_EXPONENTIAL_FUNCTION" ) {
     emulatorCovarianceFunction = madai::GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
@@ -112,31 +111,24 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  int emulatorRegressionOrder = madai::Defaults::EMULATOR_REGRESSION_ORDER;
-  if ( settings.HasOption( "EMULATOR_REGRESSION_ORDER" ) ) {
-    emulatorRegressionOrder = atoi( settings.GetOption( "EMULATOR_REGRESSION_ORDER" ).c_str() );
-  }
+  int emulatorRegressionOrder = settings.GetOptionAsInt(
+      "EMULATOR_REGRESSION_ORDER", madai::Defaults::EMULATOR_REGRESSION_ORDER);
 
-  double emulatorNugget = madai::Defaults::EMULATOR_NUGGET;
-  if ( settings.HasOption( "EMULATOR_NUGGET" ) ) {
-    emulatorNugget = atof( settings.GetOption( "EMULATOR_NUGGET" ).c_str() );
-  }
+  double emulatorNugget = settings.GetOptionAsDouble(
+      "EMULATOR_NUGGET", madai::Defaults::EMULATOR_NUGGET);
 
-  double emulatorAmplitude = madai::Defaults::EMULATOR_AMPLITUDE;
-  if ( settings.HasOption( "EMULATOR_AMPLITUDE" ) ) {
-    emulatorAmplitude = atof( settings.GetOption( "EMULATOR_AMPLITUDE" ).c_str() );
-  }
+  double emulatorAmplitude = settings.GetOptionAsDouble(
+      "EMULATOR_AMPLITUDE", madai::Defaults::EMULATOR_AMPLITUDE);
 
-  double emulatorScale = madai::Defaults::EMULATOR_SCALE;
-  if ( settings.HasOption( "EMULATOR_SCALE" ) ) {
-    emulatorScale = atof( settings.GetOption( "EMULATOR_SCALE" ).c_str() );
-  }
+  double emulatorScale = settings.GetOptionAsDouble(
+      "EMULATOR_SCALE", madai::Defaults::EMULATOR_SCALE);
+
+  bool readerVerbose = settings.GetOptionAsBool(
+      "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
 
   madai::GaussianProcessEmulator gpm;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
-  bool verbose = settings.GetOptionAsBool(
-      "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
-  directoryReader.SetVerbose( verbose );
+  directoryReader.SetVerbose( readerVerbose );
 
   if ( !directoryReader.LoadTrainingData( &gpm,
                                           modelOutputDirectory,

@@ -80,10 +80,9 @@ int main(int argc, char ** argv) {
   std::string experimentalResultsFile =
     madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
-  int numberOfSamples = madai::Defaults::PERCENTILE_GRID_NUMBER_OF_SAMPLES;
-  if ( settings.HasOption( "PERCENTILE_GRID_NUMBER_OF_SAMPLES" ) ) {
-    numberOfSamples = atoi( settings.GetOption( "PERCENTILE_GRID_NUMBER_OF_SAMPLES" ).c_str() );
-  }
+  int numberOfSamples = settings.GetOptionAsInt(
+      "PERCENTILE_GRID_NUMBER_OF_SAMPLES",
+      madai::Defaults::PERCENTILE_GRID_NUMBER_OF_SAMPLES);
 
   madai::GaussianProcessEmulatedModel gpem;
   if ( gpem.LoadConfiguration( statisticsDirectory,

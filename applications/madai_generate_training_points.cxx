@@ -251,34 +251,25 @@ int main( int argc, char * argv[] ) {
     return EXIT_FAILURE;
   }
 
-  double standardDeviations = madai::Defaults::GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS;
-  if ( settings.HasOption( "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS" ) ) {
-    standardDeviations =
-      settings.GetOptionAsDouble( "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS" );
-  }
+  double standardDeviations = settings.GetOptionAsDouble(
+      "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS",
+      madai::Defaults::GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS);
 
-  bool partitionByPercentile = madai::Defaults::GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE;
-  if ( settings.HasOption( "GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE" ) ) {
-    partitionByPercentile =
-      settings.GetOptionAsBool( "GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE" );
-  }
+  bool partitionByPercentile = settings.GetOptionAsBool(
+      "GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE",
+      madai::Defaults::GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE);
 
-  int numberOfTrainingPoints = madai::Defaults::GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS;
-  if ( settings.HasOption( "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS" ) ) {
-    numberOfTrainingPoints =
-      settings.GetOptionAsInt( "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS" );
-  }
+  int numberOfTrainingPoints = settings.GetOptionAsInt(
+      "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS",
+      madai::Defaults::GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS);
 
-  bool useMaxiMin = madai::Defaults::GENERATE_TRAINING_POINTS_USE_MAXIMIN;
-  if ( settings.HasOption( "GENERATE_TRAINING_POINTS_USE_MAXIMIN" ) ) {
-    useMaxiMin =
-      settings.GetOptionAsBool( "GENERATE_TRAINING_POINTS_USE_MAXIMIN" );
-  }
+  bool useMaxiMin = settings.GetOptionAsBool(
+    "GENERATE_TRAINING_POINTS_USE_MAXIMIN",
+    madai::Defaults::GENERATE_TRAINING_POINTS_USE_MAXIMIN );
 
-  int numberOfMaxiMinTries = madai::Defaults::GENERATE_TRAINING_POINTS_MAXIMIN_TRIES;
-  if ( settings.HasOption( "GENERATE_TRAINING_POINTS_MAXIMIN_TRIES" ) ) {
-    numberOfMaxiMinTries = settings.GetOptionAsInt( "GENERATE_TRAINING_POINTS_MAXIMIN_TRIES" );
-  }
+  int numberOfMaxiMinTries = settings.GetOptionAsInt(
+    "GENERATE_TRAINING_POINTS_MAXIMIN_TRIES",
+    madai::Defaults::GENERATE_TRAINING_POINTS_MAXIMIN_TRIES );
 
   // Create the Latin hypercube sampling
   madai::LatinHypercubeGenerator sampleGenerator;

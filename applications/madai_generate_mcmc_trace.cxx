@@ -91,23 +91,20 @@ int main(int argc, char ** argv) {
   std::string experimentalResultsFile =
     madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
-  int numberOfSamples = madai::Defaults::MCMC_NUMBER_OF_SAMPLES;
-  if ( settings.HasOption( "MCMC_NUMBER_OF_SAMPLES" ) ) {
-    numberOfSamples = atoi( settings.GetOption( "MCMC_NUMBER_OF_SAMPLES" ).c_str() );
-  }
-  int numberOfBurnInSamples = madai::Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES;
-  if ( settings.HasOption( "MCMC_NUMBER_OF_BURN_IN_SAMPLES" ) ) {
-    numberOfBurnInSamples =
-      atoi( settings.GetOption( "MCMC_NUMBER_OF_BURN_IN_SAMPLES" ).c_str() );
-  }
-  bool useModelError = madai::Defaults::MCMC_USE_MODEL_ERROR;
-  if ( settings.HasOption( "MCMC_USE_MODEL_ERROR" ) ) {
-    useModelError = ( settings.GetOption( "MCMC_USE_MODEL_ERROR" ) == "true" );
-  }
-  double stepSize = madai::Defaults::MCMC_STEP_SIZE;
-  if ( settings.HasOption( "MCMC_STEP_SIZE" ) ) {
-    stepSize = atof( settings.GetOption( "MCMC_STEP_SIZE" ).c_str() );
-  }
+  int numberOfSamples = settings.GetOptionAsInt(
+      "MCMC_NUMBER_OF_SAMPLES",
+      madai::Defaults::MCMC_NUMBER_OF_SAMPLES);
+
+  int numberOfBurnInSamples = settings.GetOptionAsInt(
+      "MCMC_NUMBER_OF_BURN_IN_SAMPLES",
+      madai::Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES);
+
+  bool useModelError = settings.GetOptionAsBool(
+      "MCMC_USE_MODEL_ERROR",
+      madai::Defaults::MCMC_USE_MODEL_ERROR);
+
+  double stepSize = settings.GetOptionAsDouble(
+      "MCMC_STEP_SIZE", madai::Defaults::MCMC_STEP_SIZE);
 
   madai::GaussianProcessEmulatedModel gpem;
   if ( gpem.LoadConfiguration(

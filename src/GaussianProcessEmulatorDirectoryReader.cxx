@@ -1070,11 +1070,11 @@ GaussianProcessEmulatorDirectoryReader
     std::cerr << "Error parsing runtime parameters.\n" << std::endl;
   }
 
-  double fractionalResolvingPower = 0.95;
-  if (runtimeParameterReader.HasOption("PCA_FRACTION_RESOLVING_POWER")) {
-    fractionalResolvingPower = runtimeParameterReader.GetOptionAsDouble(
-        "PCA_FRACTION_RESOLVING_POWER");
-  }
+  double DEFAULT_PCA_FRACTION_RESOLVING_POWER = 0.95;
+  // \todo should use madai::Defaults::PCA_FRACTION_RESOLVING_POWER
+  double fractionalResolvingPower = runtimeParameterReader.GetOptionAsDouble(
+      "PCA_FRACTION_RESOLVING_POWER",
+      DEFAULT_PCA_FRACTION_RESOLVING_POWER);
 
   gpe->RetainPrincipalComponents( fractionalResolvingPower );
 

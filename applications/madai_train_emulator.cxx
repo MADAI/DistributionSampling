@@ -86,10 +86,10 @@ int main(int argc, char ** argv) {
   std::string experimentalResultsFile =
     madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
-  std::string covarianceFunctionString = madai::Defaults::EMULATOR_COVARIANCE_FUNCTION;
-  if ( settings.HasOption( "EMULATOR_COVARIANCE_FUNCTION" ) ) {
-    covarianceFunctionString = settings.GetOption( "EMULATOR_COVARIANCE_FUNCTION" );
-  }
+  std::string covarianceFunctionString = settings.GetOption(
+      "EMULATOR_COVARIANCE_FUNCTION",
+      madai::Defaults::EMULATOR_COVARIANCE_FUNCTION);
+
   madai::GaussianProcessEmulator::CovarianceFunctionType emulatorCovarianceFunction;
   if ( covarianceFunctionString == "POWER_EXPONENTIAL_FUNCTION" ) {
     emulatorCovarianceFunction = madai::GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
@@ -104,10 +104,8 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  int emulatorRegressionOrder = madai::Defaults::EMULATOR_REGRESSION_ORDER;
-  if ( settings.HasOption( "EMULATOR_REGRESSION_ORDER" ) ) {
-    emulatorRegressionOrder = atoi( settings.GetOption( "EMULATOR_REGRESSION_ORDER" ).c_str() );
-  }
+  int emulatorRegressionOrder = settings.GetOptionAsInt(
+      "EMULATOR_REGRESSION_ORDER", madai::Defaults::EMULATOR_REGRESSION_ORDER);
 
   madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
