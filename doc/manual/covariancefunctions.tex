@@ -3,7 +3,7 @@
 \section{Covariance Functions Recognized by the Emulator}
 \label{sec:CovarianceFunctions}
 
-$u$ and $v$ are zero-indexed vectors that represent a point in parameter space.  $p$ is the number of parameters. $\Theta=(\theta_0, \theta_1,\theta_2,\ldots)$ is a list of $p+2$ or $p+3$ hyperparameters. $\theta_0$ is called \emph{amplitude}; $\theta_1$ is called the \emph{nugget}.  $\Vert\,\cdotp\Vert{}_\Theta$ is a distance function parametrized by $\Theta$.  $\epsilon$ is $10^{-5}$. $C_\Theta{}(u, v)$ is the covariance between $u$ and $v$, as parametrized by $\Theta$.
+$u$ and $v$ are zero-indexed vectors that represent a point in parameter space.  $P$ is the number of parameters. $\Theta=(\theta_0, \theta_1,\theta_2,\ldots)$ is a list of $P+2$ or $P+3$ hyperparameters. $\theta_0$ is called \emph{amplitude}; $\theta_1$ is called the \emph{nugget}.  $\Vert\,\cdotp\Vert{}_\Theta$ is a distance function parametrized by $\Theta$.  $\epsilon$ is $10^{-5}$. $c_\Theta{}(u, v)$ is the covariance between $u$ and $v$, as parametrized by $\Theta$.
 
 
 \begin{figure}[b]
@@ -42,29 +42,29 @@ $C_\Theta{}(0, x)$ for a one-dimensional parameter space with each covariance fu
 
 \begin{itemize}
 \item Squared-Exponential [\variable{SQUARE\_EXPONENTIAL\_FUNCTION}]
-\[ \Vert{}u-v\Vert{}_\Theta{} = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(\theta{}_{2+i})^2}} \qquad
+\[ \Vert{}u-v\Vert{}_\Theta{} = \sqrt{\sum_{i=0}^{P-1} \frac{(u_i - v_i)^2}{(\theta{}_{2+i})^2}} \qquad
  \delta{}_{uv} = 1 \text{ if } (\Vert{}u-v\Vert{}_\Theta{} < \epsilon{}) \textrm{ else } \delta{}_{uv} = 0 \]
-\[ C_\Theta{}(u, v) = \theta{}_0 \exp\left({-\tfrac{1}{2} \Vert{}u-v\Vert{}_\Theta{}^2}\right) + \theta{}_1\delta{}_{uv} \]
+\[ c_\Theta{}(u, v) = \theta{}_0 \exp\left({-\tfrac{1}{2} \Vert{}u-v\Vert{}_\Theta{}^2}\right) + \theta{}_1\delta{}_{uv} \]
 
 \item {Power-Exponential}
 [\variable{POWER\_EXPONENTIAL\_FUNCTION}]
-\[ \Vert{}u-v\Vert{}_\Theta{} = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(\theta{}_{3+i})^2}} \qquad
+\[ \Vert{}u-v\Vert{}_\Theta{} = \sqrt{\sum_{i=0}^{P-1} \frac{(u_i - v_i)^2}{(\theta{}_{3+i})^2}} \qquad
  \delta{}_{uv} = 1 \text{ if } (\Vert{}u-v\Vert{}_\Theta{} < \epsilon{}) \textrm{ else } \delta{}_{uv} = 0 \]
-\[ C_\Theta{}(u, v) = \theta{}_0 \exp\left({-\tfrac{1}{2} \Vert{}u-v\Vert{}_\Theta{}^{\theta{}_2}}\right) + \theta{}_1\delta{}_{uv} \]
+\[ c_\Theta{}(u, v) = \theta{}_0 \exp\left({-\tfrac{1}{2} \Vert{}u-v\Vert{}_\Theta{}^{\theta{}_2}}\right) + \theta{}_1\delta{}_{uv} \]
 
 \item {Mat\'{e}rn 3/2}
 [\variable{MATERN\_32\_FUNCTION}]
-\[ \Vert{}u-v\Vert{}_\Theta{} = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(\theta{}_{2+i})^2}} \qquad
+\[ \Vert{}u-v\Vert{}_\Theta{} = \sqrt{\sum_{i=0}^{P-1} \frac{(u_i - v_i)^2}{(\theta{}_{2+i})^2}} \qquad
  \delta{}_{uv} = 1 \text{ if } (\Vert{}u-v\Vert{}_\Theta{} < \epsilon{}) \textrm{ else } \delta{}_{uv} = 0 \]
-\[ C_\Theta{}(u, v) = {\theta{}_0} \left({ 1 + \sqrt{3} \Vert{}u-v\Vert{}_\Theta{} }\right)
+\[ c_\Theta{}(u, v) = {\theta{}_0} \left({ 1 + \sqrt{3} \Vert{}u-v\Vert{}_\Theta{} }\right)
 \exp \left({ - \sqrt{3} \Vert{}u-v\Vert{}_\Theta{} }\right) + \theta{}_1\delta{}_{uv} \]
 
 
 \item {Mat\'{e}rn 5/2}
 [\variable{MATERN\_52\_FUNCTION}]
-\[ \Vert{}u-v\Vert{}_\Theta{} = \sqrt{\sum_{i=0}^{p-1} \frac{(u_i - v_i)^2}{(\theta{}_{2+i})^2}} \qquad
+\[ \Vert{}u-v\Vert{}_\Theta{} = \sqrt{\sum_{i=0}^{P-1} \frac{(u_i - v_i)^2}{(\theta{}_{2+i})^2}} \qquad
  \delta{}_{uv} = 1 \text{ if } (\Vert{}u-v\Vert{}_\Theta{} < \epsilon{}) \textrm{ else } \delta{}_{uv} = 0 \]
-\[ C_\Theta{}(u, v) = {\theta{}_0} \left({ 1 + \sqrt{5} \Vert{}u-v\Vert{}_\Theta{}
+\[ c_\Theta{}(u, v) = {\theta{}_0} \left({ 1 + \sqrt{5} \Vert{}u-v\Vert{}_\Theta{}
  + \tfrac{5}{3} \left({\Vert{}u-v\Vert{}_\Theta{}}\right)^2  }\right) + \theta{}_1\delta{}_{uv} \]
 \end{itemize}
 
