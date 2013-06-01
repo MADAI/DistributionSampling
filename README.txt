@@ -1,7 +1,7 @@
 Project: DistributionSampling
 README.txt author: Cory Quammen <cquammen@cs.unc.edu>,
     Hal Canary <cs.unc.edu/~hal>
-Last updated: 2013-03-10
+Last updated: 2013-06-01
 
 *** BUILD INSTRUCTIONS FOR LINUX AND MAC ***
 
@@ -33,7 +33,7 @@ Last updated: 2013-03-10
 
     $HOME/madai/stat/DistributionSampling
 
-    a good build directory might be
+    A good build directory might be
 
     $HOME/madai/build/stat/DistributionSampling-build
 
@@ -58,12 +58,20 @@ Last updated: 2013-03-10
 
     $ make
 
-    The various source files will compile, producing a library
-    libDistributionSampling.a in a directory called "lib" in the root
-    level of the build directory.
+    The various source files will compile, producing two libraries
+    libDistributionSampling.a and libmadaisys.a in a directory called
+    "lib" in the root level of the build directory.
 
 5.  (optional) Type
 
     $ ctest
 
     This runs the tests defined in the project.
+
+6. (optional) Generate documentation by typing
+
+    $ cmake "$HOME/madai/stat/DistributionSampling" \
+          -DBUILD_DOCUMENTATION:BOOL="1"
+    $ make Documentation
+
+    This generates HTML documentation of the library with doxygen.
