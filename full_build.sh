@@ -82,10 +82,17 @@ cmake "$SRC_DIR" \
   -DCMAKE_BUILD_TYPE:STRING=Release \
   -DBUILD_TESTING:BOOL=0 \
   -DUSE_OPENMP:BOOL=0 \
-  -DUSE_GPROF:BOOL=0  || die "Error in CMake"
+  -DUSE_GPROF:BOOL=0 \
+  -DBUILD_DOCUMENTATION:BOOL=1  || die "Error in CMake"
 
 echo "Running make"
 make || die "Error in make"
+
+if [ `command -v doxygen` ]
+then
+    echo "Making documentation"
+    make Documentation
+fi
 
 echo "Running make install"
 make install || {
