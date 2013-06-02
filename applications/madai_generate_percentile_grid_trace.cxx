@@ -22,12 +22,13 @@
 #include <vector>
 #include <algorithm>
 
-#include "PercentileGridSampler.h"
-#include "GaussianProcessEmulatedModel.h"
-#include "RuntimeParameterFileReader.h"
 #include "ApplicationUtilities.h"
-#include "Paths.h"
 #include "Defaults.h"
+#include "ExternalModel.h"
+#include "GaussianProcessEmulatedModel.h"
+#include "Paths.h"
+#include "PercentileGridSampler.h"
+#include "RuntimeParameterFileReader.h"
 #include "Trace.h"
 
 #include "madaisys/SystemTools.hxx"
@@ -42,8 +43,8 @@ int main(int argc, char ** argv) {
       << "Usage:\n"
       << "    " << argv[0] << " <StatisticsDirectory> <OutputFileName>\n"
       << "\n"
-      << "This file generates a sampling of an emulated model on a\n"
-      << "regular lattice of sample points.\n"
+      << "This file generates a sampling of either an external model or an\n"
+      << "emulated model on a regular lattice of sample points.\n"
       << "\n"
       << "<StatisticsDirectory> is the directory in which all \n"
       << "statistics data are stored. It contains the parameter file "
@@ -61,6 +62,8 @@ int main(int argc, char ** argv) {
       << madai::Defaults::EXPERIMENTAL_RESULTS_FILE << ")\n"
       << "PERCENTILE_GRID_NUMBER_OF_SAMPLES <value> (default: "
       << madai::Defaults::PERCENTILE_GRID_NUMBER_OF_SAMPLES << ")\n"
+      << "EXTERNAL_MODEL_EXECUTABLE <value> (default: none)\n"
+      << "EXTERNAL_MODEL_ARGUMENTS <Argument1> <Argument2> ..."
       << "VERBOSE <value> (default: "
       << madai::Defaults::VERBOSE << ")\n";
     return EXIT_FAILURE;
@@ -84,29 +87,69 @@ int main(int argc, char ** argv) {
       "PERCENTILE_GRID_NUMBER_OF_SAMPLES",
       madai::Defaults::PERCENTILE_GRID_NUMBER_OF_SAMPLES);
 
+  std::string executable = settings.GetOption(
+      "EXTERNAL_MODEL_EXECUTABLE",
+      madai::Defaults::EXTERNAL_MODEL_EXECUTABLE);
+
+  bool verbose = settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE );
+
+  madai::ExternalModel externalModel;
   madai::GaussianProcessEmulatedModel gpem;
-  if ( gpem.LoadConfiguration( statisticsDirectory,
-                               modelOutputDirectory,
-                               experimentalResultsFile ) != madai::Model::NO_ERROR ) {
-    std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
-    return EXIT_FAILURE;
-  }
 
-  gpem.SetUseModelCovarianceToCalulateLogLikelihood( false );
+  madai::Model * model;
+  if ( executable == "" ) { // Use emulator
 
-  std::string observationsFile = experimentalResultsFile + Paths::SEPARATOR +
-    Paths::RESULTS_FILE;
-  std::ifstream observations( observationsFile.c_str() );
-  if ( madai::Model::NO_ERROR != LoadObservations( &gpem, observations ) ) {
-    std::cerr << "Error loading observations.\n";
-    return EXIT_FAILURE;
+    if ( gpem.LoadConfiguration( statisticsDirectory,
+                                 modelOutputDirectory,
+                                 experimentalResultsFile ) != madai::Model::NO_ERROR ) {
+      std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
+      return EXIT_FAILURE;
+    }
+
+    gpem.SetUseModelCovarianceToCalulateLogLikelihood( false );
+
+    model = &gpem;
+
+    if ( verbose ) {
+      std::cout << "Using emulator to generate trace.\n";
+    }
+  } else { // Use external model
+
+    // Split arguments into vector of strings
+    std::vector< std::string > arguments;
+    if ( settings.HasOption( "EXTERNAL_MODEL_ARGUMENTS" ) ) {
+      std::string argumentsString = settings.GetOption( "EXTERNAL_MODEL_ARGUMENTS" );
+      arguments = madai::SplitString( argumentsString, ' ' );
+    }
+
+    if ( verbose ) {
+      std::cout << "Using external model executable '" << executable << "'.\n";
+    }
+
+    externalModel.StartProcess( executable, arguments );
+    if (! externalModel.IsReady()) {
+      std::cerr << "Something is wrong with the external model\n";
+      return EXIT_FAILURE;
+    }
+
+    std::string observationsFile = experimentalResultsFile +
+      madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
+    std::ifstream observations( observationsFile.c_str() );
+    if ( madai::Model::NO_ERROR != externalModel.LoadObservations( observations ) ) {
+      std::cerr << "Error loading observations.\n";
+      externalModel.StopProcess();
+
+      return EXIT_FAILURE;
+    }
+    observations.close();
+
+    model = &externalModel;
   }
-  observations.close();
 
   madai::PercentileGridSampler sampler;
-  sampler.SetModel( &gpem );
-  sampler.SetNumberOfSamples( numberOfSamples );
-  numberOfSamples = sampler.GetNumberOfSamples();
+  sampler.SetModel( model );
+  sampler.SetNumberSamples( numberOfSamples );
+  numberOfSamples = sampler.GetNumberSamples();
 
   madai::Trace trace;
 
@@ -129,10 +172,10 @@ int main(int argc, char ** argv) {
   }
 
   trace.WriteCSVOutput( out,
-                        gpem.GetParameters(),
-                        gpem.GetScalarOutputNames() );
+                        model->GetParameters(),
+                        model->GetScalarOutputNames() );
 
-  if ( settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE ) ) {
+  if ( verbose ) {
     std::cout << "Wrote percentile grid trace to file '" << outputFilePath << "'.\n";
   }
 
