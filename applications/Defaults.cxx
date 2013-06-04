@@ -56,6 +56,8 @@ const double Defaults::EMULATOR_SCALE  = 0.01;
 
 const std::string Defaults::EMULATOR_TRAINING_RIGOR = "basic";
 
+const std::string Defaults::SAMPLER = "MetropolisHastings";
+
 const bool Defaults::MCMC_USE_MODEL_ERROR = false;
 
 const int Defaults::MCMC_NUMBER_OF_SAMPLES = 100;
@@ -95,6 +97,8 @@ void Defaults::PrintAllDefaults(std::ostream & o) {
     << "EMULATOR_AMPLITUDE "                               << Defaults::EMULATOR_AMPLITUDE << '\n'
     << "EMULATOR_SCALE "                                   << Defaults::EMULATOR_SCALE << '\n'
     << "EMULATOR_TRAINING_RIGOR "                          << Defaults::EMULATOR_TRAINING_RIGOR << '\n'
+    << "#\n"
+    << "SAMPLER "                                          << Defaults::SAMPLER << '\n'
     << "#\n"
     << "MCMC_USE_MODEL_ERROR "                             << Defaults::MCMC_USE_MODEL_ERROR << '\n'
     << "MCMC_NUMBER_OF_SAMPLES "                           << Defaults::MCMC_NUMBER_OF_SAMPLES << '\n'

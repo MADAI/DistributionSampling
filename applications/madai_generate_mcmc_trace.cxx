@@ -24,12 +24,13 @@
 #include <algorithm>
 
 #include "ApplicationUtilities.h"
+#include "Defaults.h"
 #include "ExternalModel.h"
 #include "MetropolisHastingsSampler.h"
 #include "GaussianProcessEmulatedModel.h"
 #include "RuntimeParameterFileReader.h"
 #include "Paths.h"
-#include "Defaults.h"
+#include "PercentileGridSampler.h"
 #include "Trace.h"
 #include "SamplerCSVWriter.h"
 
@@ -97,9 +98,7 @@ int main(int argc, char ** argv) {
   std::string experimentalResultsFile =
     madai::GetExperimentalResultsFile( statisticsDirectory, settings );
 
-  int numberOfSamples = settings.GetOptionAsInt(
-      "MCMC_NUMBER_OF_SAMPLES",
-      madai::Defaults::MCMC_NUMBER_OF_SAMPLES);
+  std::string samplerType = settings.GetOption( "SAMPLER", madai::Defaults::SAMPLER );
 
   int numberOfBurnInSamples = settings.GetOptionAsInt(
       "MCMC_NUMBER_OF_BURN_IN_SAMPLES",
@@ -171,8 +170,45 @@ int main(int argc, char ** argv) {
     model = &externalModel;
   }
 
-  madai::MetropolisHastingsSampler mcmc;
-  mcmc.SetStepSize( stepSize );
+  madai::Sampler * sampler;
+
+  int numberOfSamples = 0;
+
+  madai::PercentileGridSampler pgs;
+  madai::MetropolisHastingsSampler mhs;
+  if ( samplerType == "PercentileGrid" ) {
+    numberOfSamples = settings.GetOptionAsInt(
+        "PERCENTILE_GRID_NUMBER_OF_SAMPLES",
+        madai::Defaults::PERCENTILE_GRID_NUMBER_OF_SAMPLES);
+    pgs.SetModel( model );
+
+    pgs.SetNumberSamples(numberOfSamples);
+    numberOfSamples = pgs.GetNumberSamples();
+    if ( verbose ) {
+      std::cout << "Number of grid samples: " << numberOfSamples << "\n";
+    }
+
+    // Burn-in samples don't exist for a percentile grid sampling
+    numberOfBurnInSamples = 0;
+
+    sampler = &pgs;
+
+    if ( verbose ) {
+      std::cout << "Using PercentileGridSampler for sampling\n";
+    }
+  } else { // Default to Metropolis Hastings
+    numberOfSamples = settings.GetOptionAsInt(
+        "MCMC_NUMBER_OF_SAMPLES",
+        madai::Defaults::MCMC_NUMBER_OF_SAMPLES);
+
+    mhs.SetStepSize( stepSize );
+
+    sampler = &mhs;
+
+    if ( verbose ) {
+      std::cout << "Using MetropolisHastingsSampler for sampling\n";
+    }
+  }
 
   std::string traceDirectory =
     statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
@@ -188,7 +224,7 @@ int main(int argc, char ** argv) {
   }
 
   int returnCode = madai::SamplerCSVWriter::GenerateSamplesAndSaveToFile(
-      mcmc,
+      *sampler,
       *model,
       outFile,
       numberOfSamples,

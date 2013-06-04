@@ -67,6 +67,10 @@ public:
   static const std::string EMULATOR_TRAINING_RIGOR;
 
   /**
+   Sampler variables */
+  static const std::string SAMPLER;
+
+  /**
    MCMC Variables */
   static const bool MCMC_USE_MODEL_ERROR;
 
