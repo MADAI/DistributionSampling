@@ -146,7 +146,8 @@ double
 UniformDistribution
 ::GetStandardDeviation() const
 {
-  return 0.5 * std::pow(m_Maximum - m_Minimum, 2);
+  // .28867513459481288224 == sqrt(1/12)
+  return .28867513459481288224 * (m_Maximum - m_Minimum);
 }
 
 
