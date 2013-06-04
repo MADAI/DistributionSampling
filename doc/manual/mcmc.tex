@@ -49,13 +49,25 @@ Once the sampling of points are generated from the continuum, the user can use t
 
 \subsection{Publication Quality Plots of the Posterior Distribution}
 
-One useful representation of the trace is that of one- or two-dimensional projections of the posterior distribution. Simply stated, these plots represent the probability of either a single parameter integrated over all values of the remaining parameters, or of two parameters integrated over the remaining $P-2$ parameters. These distributions are easily extracted from the csv file by making a distribution of the sampling points binned by a single parameter $x_i$ or of a pair of parameters $x_i$ and $x_j$. The command
+One useful representation of the trace is that of one- or two-dimensional projections of the posterior distribution. Simply stated, these plots represent the probability of either a single parameter integrated over all values of the remaining parameters, or of two parameters integrated over the remaining $P-2$ parameters. These distributions are easily extracted from the csv file by making a distribution of the sampling points binned by a single parameter $x_i$ or of a pair of parameters $x_i$ and $x_j$. 
 
-\commandline{madai\_gnuplot\_scatterplot\_matrix stat1}
+creates a $P\times P$ matrix of scatterplots as exemplified in Fig. \ref{fig:scatterplot}. The off-diagonal plots represent two-dimensional projections of the posterior distribution, while the diagonal plots show one-dimensional projections. The output of the command is gnuplot source file stores in \path{stat1/figs/scatter.gplt}, which can be edited by hand if the user wishes. To generate the PDF file, the user must first create a {\it gnuplot} source file along with some data files in the format gnuplot requires for density plots. The command requires three arguments,
 
-creates a $P\times P$ matrix of scatterplots as exemplified in Fig. \ref{fig:scatterplot}. The off-diagonal plots represent two-dimensional projections of the posterior distribution, while the diagonal plots show one-dimensional projections. The output of the command is gnuplot source file stores in \path{stat1/figs/scatter.gplt}, which can be edited by hand if the user wishes. To generate the PDF file, the user can go into the \path{stat1/figs} directory and enter
+\commandline{madai\_gnuplot\_scatterplot\_matrix} {\it csv\_filename} {\it parameter\_description\_filename} $N_{\rm bins}$
 
-\commandline{gnuplot scatter.gplt}
+Let's assume the user has created and entered the directory \path{stat1/figs}. In that directory, the user has created a file \path{parameter\_description.dat}, which is similar in format to \path{parameter\_priors.dat}. It lists the range of the parameters to be plotted and the variable names which will label the axes. For example, a file with graph with three parameters could be:
+\begin{quote}
+{\tt UNIFORM X0~~~-2.0~~2.0~~~~X\_0~(cm)}\\
+{\tt UNIFORM K~~~~~0.5~~4.0~~~~K~(ergs/cm\^2)}\\
+{\tt UNIFORM TEMP~~0.5~~10.0~~~T~(deg.)}
+\end{quote}
+The first four columns are identical to what is found in \path{parameter\_priors.dat} file, but everything past the last column describes the axis label. The variable names in the second column need to match the names in the header line of the csv file describing the trace. The axis labels can be written in the format gnuplot uses for labels. For instance, the character $\alpha$ can be accesses as \path{\{/Symbol a\}}. A subset of the parameters can be chosen by commenting out the line with \path{\#}. The ranges for the plots can also be chosen to differ from what is in the prior. From within the figs directory, the command might look like
+
+\commandline{madai\_gnuplot\_scatterplot\_matrix ../trace/mcmc.csv parameter\_description.dat 50}
+
+The density plots would have a resolution of 50$\times$50. The command will produce a file \path{posterior\_distributions.gplt}. Some temporary data files are also created in the subdirectory \path{temporary\_data\_files}. One can now make the pdf file, \path{posterior\_distributions.pdf}, by entering:
+
+\commandline{gnuplot posterior\_distributions.gplt}
 
 The user should have installed gnuplot, version 4.4 or later. 
 
