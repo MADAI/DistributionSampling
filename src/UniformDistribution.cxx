@@ -133,4 +133,21 @@ UniformDistribution
   return ( x >= m_Minimum && x <= m_Maximum );
 }
 
+
+double
+UniformDistribution
+::GetExpectedValue() const
+{
+  return 0.5 * (m_Minimum + m_Maximum);
+}
+
+
+double
+UniformDistribution
+::GetStandardDeviation() const
+{
+  return 0.5 * std::pow(m_Maximum - m_Minimum, 2);
+}
+
+
 } // end namespace madai

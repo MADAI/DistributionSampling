@@ -49,13 +49,17 @@ public:
   void SetStandardDeviation( double standardDeviation );
 
   /** Get the standard deviation of the Gaussian distribution. */
-  double GetStandardDeviation() const;
+  virtual double GetStandardDeviation() const;
 
   virtual double GetLogProbabilityDensity( double value ) const;
   virtual double GetGradientLogProbabilityDensity( double value ) const;
   virtual double GetProbabilityDensity( double value ) const;
   virtual double GetPercentile( double percentile ) const;
   virtual double GetSample(madai::Random & r) const;
+
+  /**
+     Returns E[x] */
+  virtual double GetExpectedValue() const;
 
 protected:
   /** Mean of the distribution. */

@@ -44,7 +44,7 @@ public:
    * \return The log of the probability density function evaluated at
    * x. */
   virtual double GetLogProbabilityDensity(double x) const = 0;
-  
+
   /** Get the derivative of the log of the probability density function
    * evaluated at x.
    *
@@ -75,6 +75,14 @@ public:
    * \param r An instance of the Random generator class.
    * \return The random sample from the distribution. */
   virtual double GetSample(madai::Random & r) const = 0;
+
+  /**
+     Returns E[x] */
+  virtual double GetExpectedValue() const = 0;
+
+  /**
+     Returns sqrt(E[(x - E[x])^2]) */
+  virtual double GetStandardDeviation() const = 0;
 
 protected:
 

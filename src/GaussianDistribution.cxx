@@ -151,4 +151,11 @@ GaussianDistribution
 }
 
 
+double
+GaussianDistribution
+::GetExpectedValue() const
+{
+  return m_Mean;
+}
+
 } // end namespace madai

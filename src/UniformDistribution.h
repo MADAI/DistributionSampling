@@ -48,7 +48,7 @@ public:
 
 
   virtual double GetLogProbabilityDensity( double x ) const;
-  
+
   virtual double GetGradientLogProbabilityDensity( double x ) const;
 
   virtual double GetProbabilityDensity( double x ) const;
@@ -56,6 +56,14 @@ public:
   virtual double GetPercentile( double percentile ) const;
 
   virtual double GetSample(madai::Random & r) const;
+
+  /**
+     Returns E[x] */
+  virtual double GetExpectedValue() const;
+
+  /**
+     Returns sqrt(E[(x - E[x])^2]) */
+  virtual double GetStandardDeviation() const;
 
 protected:
   /** Minimum value at which the probability density is non-zero. */
