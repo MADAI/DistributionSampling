@@ -15,7 +15,7 @@ set( APPLICATIONS
   madai_generate_training_points
   madai_train_emulator
   madai_print_default_settings
-  madai_mcmc_analyze_trace
+  madai_analyze_trace
 )
 
 foreach( application ${APPLICATIONS} )
