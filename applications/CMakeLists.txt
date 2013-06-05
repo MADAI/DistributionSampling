@@ -36,6 +36,7 @@ install( TARGETS ${APPLICATIONS}
 
 # Install scripts
 install( PROGRAMS
+  madai_gnuplot_scatterplot_matrix
   madai_subsample_text_file
   madai_set_variable
   DESTINATION bin

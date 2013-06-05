@@ -1,0 +1,371 @@
+#!/usr/bin/env python
+
+###########################################################################
+#
+#  Copyright 2011-2013 The University of North Carolina at Chapel Hill
+#  and Michigan State University. All rights reserved.
+#
+#  Licensed under the MADAI Software License. You may obtain a copy of
+#  this license at
+#
+#      https://madai-public.cs.unc.edu/visualization/software-license/
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+###########################################################################
+
+## This has been tested to work with python 2.4.6.
+
+import sys,os,csv,tempfile,subprocess,stat
+
+def madai_gnuplot_scatterplot_matrix(
+	parameter_list,
+	input_file_name,
+	output_file_name='out.pdf',
+	number_of_bins=50,
+	gnuplot_command='gnuplot'
+	):
+	"""
+	\param parameter_list a list of tuples.  Each tuple is of the form
+	('csvName', 'displayName', min, max)
+	\param input_file_name filename of a CSV file to read
+	\param output_file_name filename of a PDF file to be written
+	\param number_of_bins number of bins
+	\param gnuplot_command location of gnuplot executable, if not in PATH.
+	\author Scott Pratt http://www.pa.msu.edu/~pratts/
+	\author Hal Canary http://cs.unc.edu
+	"""
+	removeTempFiles = False
+
+	# EXAMPLE Parameter_List
+	# Parameter_List = [
+	#     # csvName  displayName      min  max
+	#     ("X0",     "X0 (cm)",       -2.0,  2.0),
+	#     ("K",      "K (ergs/cm^2)",  0.5, 4.0),
+	#     ("TEMP",   "T (deg.)",       0.5, 10.0)]
+	class Parameter(object):
+		def __init__(self,a,b,c,d):
+			self.shortname, self.name, self.minv, self.maxv = a,b,c,d
+			self.range = float(self.maxv) - float(self.minv)
+			self.invr = 1.0 / self.range
+
+	# canonicalize names for posterity
+	input_file_name = os.path.abspath(input_file_name)
+	output_file_name = os.path.abspath(output_file_name)
+	output_directory = os.path.dirname(output_file_name)
+	if not os.path.exists(output_directory):
+		os.makedirs(output_directory)
+
+	params = [Parameter(*p) for p in parameter_list]
+	Npars = len(params)
+	deadspace = 0.03  # increase this number to get more space between graphs
+	margin = deadspace/Npars;
+	totalsizex = 3.1 * Npars;
+	totalsizey = 3 * Npars;
+	fsizey = (1.0 - deadspace) / Npars;
+	fsizex = (1.0 - deadspace) * (3.0 / 3.1) / Npars;
+	bfont = 'Helvetica,14'
+	sfont = 'Helvetica,12'
+
+	twoDBins = lambda : [[0 for ib in xrange(number_of_bins)]
+	                     for jb in xrange(number_of_bins)]
+
+	histograms = [[0 for j in xrange(number_of_bins)] for i in xrange(Npars)];
+	densities = [[twoDBins() for j in xrange(i)] for i in xrange(Npars)];
+
+	probability = 'PROBABILITY'
+	probability = 'likelihood'
+
+	# Using the generator pattern (an iterable)
+	class CSVRead(object):
+		def __init__(self, csvfile):
+			self.f = open(csvfile,'r')
+			self.r = csv.reader(self.f)
+			self.header = self.r.next()
+		def __iter__(self):
+			return self
+		def next(self):
+			try:
+				return dict(zip(self.header,map(float, self.r.next())))
+			except:
+				del self.r
+				self.f.close()
+				raise
+	print 'input:  ', input_file_name
+	for point in CSVRead(input_file_name):
+		bins = [int((point[parameter.shortname] - parameter.minv)
+					* parameter.invr * number_of_bins)
+				for parameter in params]
+		for i,parameter in enumerate(params):
+			if bins[i] >= 0 and bins[i] < number_of_bins:
+				histograms[i][bins[i]] += 1
+				for j in xrange(i):
+					if bins[j] >= 0 and bins[j] < number_of_bins:
+						densities[i][j][bins[i]][bins[j]] += 1
+
+	densityfilenames = [[None for j in xrange(i)] for i in xrange(Npars)]
+	histogramfilenames = [None for i in xrange(Npars)]
+	maxdensity = [[0 for j in xrange(i)] for i in xrange(Npars)]
+	maxhistogram = [0 for j in xrange(Npars)]
+
+	gnuplot_directory = tempfile.mkdtemp(
+		prefix='madai_gnuplot_scatterplot_matrix_')
+
+	for i in xrange(Npars):
+		parameteri = params[i]
+		scalei = (parameteri.range) / float(number_of_bins)
+		starti = parameteri.minv + (0.5 * scalei)
+		for j in xrange(i):
+			parameterj = params[j]
+			scalej = (parameterj.range) / float(number_of_bins)
+			startj = parameterj.minv + (0.5 * scalej)
+
+			densityfilenames[i][j] = os.path.join(
+				gnuplot_directory,'density_%d_%d.dat'%(i,j))
+			o = open(densityfilenames[i][j], 'w')
+			density = densities[i][j]
+			maxdensity[i][j] = max(max(x) for x in density)
+			for ib in xrange(number_of_bins):
+				param_i_value = (ib * scalei) + starti
+				for jb in xrange(number_of_bins):
+					param_j_value = (jb * scalej) + startj
+					assert param_j_value - (((jb-1) * scalej) + startj)
+					o.write('%r\t%r\t%g\n' % (
+							param_i_value, param_j_value, density[ib][jb]))
+			o.close()
+		histogramfilenames[i] = os.path.join(
+			gnuplot_directory,'histogram_%d.dat'%(i))
+		o = open(histogramfilenames[i], 'w')
+		maxhistogram[i] = max(histograms[i])
+		for ib in xrange(number_of_bins):
+			param_i_value = (ib * scalei) + starti
+			o.write('%r\t%g\n' % (
+				param_i_value, histograms[i][ib]))
+		o.close()
+
+	print 'output: ', output_file_name
+
+	gnuplot_filename = os.path.join(gnuplot_directory,'scatterplot_matrix.gplt')
+	gnuplot_fileobject = open(gnuplot_filename,'w')
+	w = gnuplot_fileobject.write
+	## w is the function to call to write to gnuplot
+
+	w('#!/usr/bin/env gnuplot\n')
+	w('#\n')
+	w('# generated by madai_gnuplot_scatterplot_matrix\n')
+	w('# input = %s\n' % input_file_name)
+	w('# output = %s\n' % output_file_name)
+	w('# bincount = %d\n' % number_of_bins)
+	w('# gnuplot_command = %s\n' % gnuplot_command)
+	w('# parameters:\n')
+	for param in parameter_list:
+		w('#   %r\n' % (param,))
+	w('# \n')
+	w('set term pdf enh font "%s" size %g,%g\n' % (bfont,totalsizex,totalsizey))
+	w('set output "%s"\n' % output_file_name)
+	w('set multiplot;\n')	# get into multiplot mode
+	w('unset key;\n')
+	w('unset colorbox;\n')
+	#set key box at 42,0.69;
+	w('set border lw 4;\n')
+	w('set lmargin 0.0;\n')
+	w('set rmargin 0.0;\n')
+	w('set tmargin 0;\n')
+	w('set bmargin 0.5;\n')
+	w('set view map;\n')
+	w('set palette rgbformula -23,-28,-3;\n')
+	w('unset ylabel;\n')
+	w('unset label;\n')
+	w('set pointsize 1.0;\n')
+	w('set xtics font "%s" offset 0,3;\n' % sfont)
+	w('set ytics font "%s" offset 0.6,0;\n' % sfont)
+	w('set mxtics 4;\n')
+	w('set mytics 8;\n')
+	w('set my2tics 4;\n')
+	###########################
+	## first do 2-d plots
+	###########################
+	w('set size %g,%g\n' % (1.2 * fsizex, 1.2 * fsizey))
+	for i in xrange(1, Npars):
+		yparam = params[i]
+		for j in xrange(i):
+			datafilename = densityfilenames[i][j]
+			xparam = params[j]
+
+			w('set zrange [0:%d]\n' % maxdensity[i][j])
+			w('set cbrange [0:%d]\n' % maxdensity[i][j])
+
+			w('set xtics format " "\n')
+			w('set ytics format " "\n')
+			w('set yrange [%g:%g];\n' % (yparam.minv, yparam.maxv))
+			w('set ytics %g,%g;\n' % (yparam.minv, yparam.range))
+
+			if i == (Npars - 1):
+				# print i,j
+				w('set xlabel "%s" font "%s" offset 0,1.4;\n' % (
+						xparam.name, bfont))
+				w('set xtics format "%g"\n')
+				w('set xtics font "Helvetica,12" offset 0,0.6;\n')
+
+			if j == 0:
+				xposition = xparam.minv - (0.15 * (xparam.range))
+				yposition = 0.5 * (yparam.minv + yparam.maxv)
+				w('set label "%s" at %g,%g rotate'% (
+						yparam.name,xposition,yposition))
+				w(' by 90 font "%s" center;\n' % bfont)
+				w('set ytics format "%g"\n')
+				w('set ytics font "Helvetica,12" offset 0.6,0;\n')
+
+			w('set xrange [%g:%g];\n' % (xparam.minv, xparam.maxv))
+
+			w('set xtics %g,%g;\n' % (
+					xparam.minv, 0.5 * (xparam.range)))
+			w('set origin %g,%g;\n' % (
+					(2 * margin) + (fsizex * j),
+					(2 * margin) + (fsizey * (-1 + Npars - i))))
+			w('splot "%s" using ($2):($1):($3) with image;\n' % (datafilename))
+
+			w('unset xlabel;\n')
+			w('unset ylabel;\n')
+			w('unset label;\n')
+			w('set xtics format " "\n')
+			w('set ytics format " "\n')
+			w('set origin %g,%g;\n' % (
+					2 * margin + fsizex * i, 2 * margin + fsizey * (Npars-j-1)))
+			w('set xrange [%g:%g];\n' % (yparam.minv, yparam.maxv))
+			w('set xtics %g,%g;\n' % (
+					yparam.minv, 0.5 * (yparam.range)))
+			w('set yrange [%g:%g];\n' % (xparam.minv,xparam.maxv))
+			w('set ytics %g,%g;\n' % (xparam.minv, (xparam.range)))
+			if i == Npars - 1:
+				xposition = yparam.maxv + 0.13 * (yparam.range);
+				yposition = 0.5 * (xparam.minv + xparam.maxv);
+				w('set label "%s" at %g,%g rotate by 270 font "%s" center\n' % (
+						xparam.name,xposition,yposition,bfont));
+				w('set ytics format "%g";\n')
+				w('set ytics font "%s" offset 24,0.0;\n' % sfont)
+			w('splot "%s" using ($1):($2):($3) with image;\n' % (datafilename))
+			w('unset xlabel;\n')
+			w('unset ylabel;\n')
+			w('unset label;\n')
+			w('set xtics offset 0;\n')
+
+	w('set size %g,%g\n' % (0.75 * fsizex, 0.75 * fsizey))
+	for i in xrange(Npars):
+		param = params[i]
+		w('unset ylabel;\n')
+		w('unset xlabel;\n')
+		w('set xtics format " "\n')
+		w('set ytics format " ";\n')
+		w('set y2tics format " ";\n')
+		w('set y2tics 0,1;\n')
+		w('unset ytics;\n')
+		w('unset y2tics;\n')
+		w('set ytics %g,%g;\n' % (0 , 0.5 * (maxhistogram[i])))
+		w('set origin %g,%g;\n' % (
+				(2 * margin) + (0.14 * fsizex) + (fsizex * i),
+				(2 * margin) + (0.14 * fsizey) + (fsizey * (Npars - i - 1))))
+		if i == Npars - 1:
+			w('set xlabel "%s" font "%s" offset 0,1.0;\n'%(param.name, bfont))
+			w('set xtics format "%g";\n')
+			w('set xtics font "%s" offset 0.0,0.3;\n' %(sfont))
+			w('set y2label "%s" font "%s" rotate by 270 offset -1.5,0;\n' % (
+					probability, bfont))
+		if i == 0:
+			w('set ylabel "%s" font "%s" offset 0.6,0;\n' % (
+					probability, bfont))
+			#w('set ytics format "%g"\n')
+		w('set xrange [%g:%g];\n' %(param.minv, param.maxv))
+		w('set yrange [0:%d]\n' % maxhistogram[i])
+		w('set xtics %g,%g;\n' % (param.minv, 0.5 * (param.range)))
+
+		#w('set xlabel xname font "Helvetica,14" offset 0,1.7;\n')
+		#w('set ylabel yname font "Helvetica,14" offset 1.5,0;\n')
+		w('plot "%s" using ($1):($2) with lines lw 4 lc 1;\n' %
+		  histogramfilenames[i])
+		# (xmin+(xmax-xmin)*$1/50)
+	gnuplot_fileobject.close()
+
+	def makePathExecutable(path):
+		mode = os.stat(path).st_mode
+		mode = mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+		os.chmod(path, mode)
+	makePathExecutable(gnuplot_filename) # for later execution
+
+	process = subprocess.Popen([gnuplot_command, gnuplot_filename])
+	process.wait()
+
+	if removeTempFiles:
+		for fnlist in densityfilenames:
+			for fn in fnlist:
+				os.remove(fn)
+		for fn in histogramfilenames:
+			os.remove(fn)
+		os.remove(gnuplot_filename)
+		os.rmdir(gnuplot_directory)
+	else:
+		print 'gnuplot file:', gnuplot_filename
+
+def parseParameterList(path):
+	commentChar = '#'
+	width_in_std_dev = 4
+	if not os.path.isfile(path):
+		raise IOError('no such file: %s' % path)
+	parameterList = []
+	f = open(path,'r')
+	for line in f:
+		line = line.split(commentChar,1)[0].strip()
+		if len(line) == 0:
+			continue
+		tokens = line.split()
+		if len(tokens) > 2:
+			dtype, name = tokens[:2]
+			args = tokens[2:]
+			if dtype.lower() == 'uniform':
+				assert len(args) >= 2
+				minv = float(args[0])
+				maxv = float(args[1])
+				rest = args[2:]
+			elif dtype.lower() == 'gaussian':
+				assert len(args) >= 2
+				minv = float(args[0]) - (width_in_std_dev * float(args[1]))
+				maxv = float(args[0]) + (width_in_std_dev * float(args[1]))
+				rest = args[2:]
+			else:
+				raise Exception('Unknown distribution type %s' % dtype )
+			dname = name
+			if len(rest) > 0:
+				dname = ' '.join(rest)
+			parameterList.append((name,dname,minv,maxv))
+	f.close()
+	assert len(parameterList) > 0
+	return parameterList
+
+if __name__ == '__main__':
+	GnuplotCommand = 'gnuplot'
+	if 'GNUPLOT_COMMAND' in os.environ:
+		GnuplotCommand = os.environ['GNUPLOT_COMMAND']
+
+	if len(sys.argv) < 5:
+		print 'Useage:\n ', sys.argv[0], '\\'
+		print '    InputFile.csv OutputFile.pdf \\'
+		print '    parameter_priors.dat Number_Of_Bins'
+		exit(1)
+
+	InputFileName, OutputFileName = sys.argv[1:3] # csv, pdf
+	ParameterList = parseParameterList(sys.argv[3]) # parameter_priors.dat
+	NumberOfBins = int(sys.argv[4]) # 50 is a good number
+
+	madai_gnuplot_scatterplot_matrix(ParameterList, InputFileName,
+		OutputFileName, NumberOfBins, GnuplotCommand)
+
+	# ## EXAMPLE parameter_priors.dat FILE
+	# #
+	# gaussian X0    0.0   0.5         X (inches)
+	# uniform  K     0.5   4.0         K (feet)
+	# uniform  TEMP  0.5   10.0        T (Kelvin)
+	# #
