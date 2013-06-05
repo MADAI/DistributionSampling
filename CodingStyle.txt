@@ -2,9 +2,9 @@ Coding Style Rules
 Cory Quammen <cquammen@cs.unc.edu>
 Last update: March 8, 2013
 
-----------
-Code style
-----------
+----------------
+C/C++ Code style
+----------------
 
 Consistent coding style within a source code project is important for
 readability and a clean look to the code.
@@ -55,10 +55,30 @@ Code should adhere to this handful of formatting rules:
 
 - Listen to the compiler warnings.  Make sure that the GCC's
   "-Wall -Wextra -pedantic -Wno-long-long" settings don't trigger
-  warnings.
+  warnings.  Be sure to check in both debug and release mode.
+
+-----------------------
+Shell Script Code style
+-----------------------
 
 - Shell scripts should be used only for the convenience of
   Unix/MacOS10.x/Linux/POSIX users.  Shell scripts should adhere to
   the POSIX portability standards defined here:
     http://pubs.opengroup.org/onlinepubs/009695399/utilities/sh.html
     http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html
+
+-----------------
+Python Code style
+-----------------
+
+- Avoid language features introduced since version 2.4 for maximum
+  backwards compatibility, unless absolutly necessary.
+
+- Use tabs for indentation, not spaces.  Tell your text editor to
+  interpret a tab as 4 spaces.
+
+- If your program has functions that may be useful in another context,
+  use the "if __name__=='__main__':" trick to allow a program to be
+  used as a module.
+
+- For everything else, adhere to PEP 8.
