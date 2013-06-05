@@ -124,7 +124,7 @@ std::vector< std::string > SplitString( const std::string & input, char separato
   std::string token = input.substr( 0, firstSeparator );
   tokens.push_back( token );
   while ( firstSeparator != std::string::npos ) {
-    size_t nextSeparator = input.find_first_of( ' ', firstSeparator+1 );
+    size_t nextSeparator = input.find_first_of( separator, firstSeparator+1 );
     token = input.substr( firstSeparator+1,
                           (nextSeparator - firstSeparator - 1) );
     tokens.push_back( token );
