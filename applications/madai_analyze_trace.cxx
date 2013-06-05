@@ -29,19 +29,11 @@
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 
-std::vector<std::string> splitComma(const std::string & line) {
-  std::vector<std::string> result;
-  std::istringstream lineStream(line);
-  std::string field;
-  while(std::getline(lineStream,field,','))
-    result.push_back(field);
-  return result;
-}
 
 int main(int argc, char ** argv) {
   if (argc < 3) {
     std::cerr
-      << "Useage\n  " << argv[0]
+      << "Usage\n  " << argv[0]
       << " statistics_directory trace_file\n\n";
     return EXIT_FAILURE;
   }
@@ -60,25 +52,28 @@ int main(int argc, char ** argv) {
   }
   assert (numberOfParameters = parameters.size());
 
-  std::string tracefile( argv[2] );
+  std::string traceFile( statisticsDirectory );
+  traceFile.append( madai::Paths::TRACE_DIRECTORY );
+  traceFile.append( "/" );
+  traceFile.append( argv[2] );
 
-  std::ifstream trace(tracefile.c_str());
+  std::ifstream trace(traceFile.c_str());
   std::string header;
   std::getline(trace,header);
-  std::vector<std::string> headers = splitComma(header);
+  std::vector<std::string> headers = madai::SplitString(header, ',');
 
   size_t numberOfFields = headers.size();
   assert(static_cast<int>(numberOfFields) > numberOfParameters);
 
   std::string line;
-  size_t linecount = 0, bestIndex = 0;
+  size_t lineCount = 0, bestIndex = 0;
   std::vector< double > sums(numberOfParameters, 0.0);
   std::vector< std::vector< double > > values(numberOfParameters);
 
   double bestLogLikelihood = -std::numeric_limits< double >::infinity();
 
   while (std::getline(trace,line)) {
-    std::vector<std::string> fields = splitComma(line);
+    std::vector<std::string> fields = madai::SplitString(line, ',');
     assert(numberOfFields == fields.size());
     for (int i = 0; i < numberOfParameters; ++i) {
       double value = std::atof(fields[i].c_str());
@@ -88,9 +83,9 @@ int main(int argc, char ** argv) {
     double logLikelihood = std::atof(fields[numberOfFields - 1].c_str());
     if (logLikelihood > bestLogLikelihood) {
       bestLogLikelihood = logLikelihood;
-      bestIndex = linecount;
+      bestIndex = lineCount;
     }
-    ++linecount;
+    ++lineCount;
   }
 
   trace.close();
@@ -109,12 +104,12 @@ int main(int argc, char ** argv) {
   std::cout << '\n';
 
   for (int i = 0; i < numberOfParameters; ++i) {
-    means[i] = sums[i] / linecount;
+    means[i] = sums[i] / lineCount;
     double variance = 0.0;
-    for (size_t k = 0; k < linecount; ++k) {
+    for (size_t k = 0; k < lineCount; ++k) {
       variance += std::pow(values[i][k] - means[i], 2);
     }
-    variance /= linecount;
+    variance /= lineCount;
     std::cout
       << std::setw(14) << parameters[i].m_Name
       << std::setw(14) << means[i]
@@ -131,10 +126,10 @@ int main(int argc, char ** argv) {
   for (int i = 0; i < numberOfParameters; ++i) {
     for (int j = 0; j <= i; ++j) {
       double covariance = 0.0;
-      for (size_t k = 0; k < linecount; ++k) {
+      for (size_t k = 0; k < lineCount; ++k) {
         covariance += (values[i][k] - means[i]) * (values[j][k] - means[j]);
       }
-      covariancematrix[i][j] = covariance /= linecount;
+      covariancematrix[i][j] = covariance /= lineCount;
       if (i != j)
         covariancematrix[j][i] = covariancematrix[i][j];
     }
