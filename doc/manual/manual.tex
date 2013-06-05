@@ -11,9 +11,11 @@
 \voffset -1.0in
 
 \newcommand{\path}[1]{\texttt{#1}}
-\newcommand{\commandline}[1]{\texttt{\$> #1}}
+\newcommand{\commandprompt}{\texttt{\$> }}
+\newcommand{\commandline}[1]{\texttt{\commandprompt{}#1}}
 \newcommand{\type}[1]{\texttt{#1}}
 \newcommand{\variable}[1]{\textit{#1}}
+\newcommand{\continueline}{{\char`\\}\\{\phantom{1234}}}
 
 \usepackage[colorlinks]{hyperref}
 
