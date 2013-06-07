@@ -8,6 +8,9 @@ Last updated: 2013-06-01
 ** PREREQUISITES **
 
 -   A compiler.
+    - "yum groupinstall "Development Tools" on Red Hat-based systems
+    - "apt-get install build-essential" on Debian-based systems
+    - XCode on MacOS 10.x systems.
 
 -   CMake version 2.8 or greater
     (Available at http://www.cmake.org/cmake/resources/software.html)
