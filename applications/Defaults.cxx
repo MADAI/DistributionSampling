@@ -39,8 +39,6 @@ const bool Defaults::GENERATE_TRAINING_POINTS_USE_MAXIMIN = false;
 
 const int Defaults::GENERATE_TRAINING_POINTS_MAXIMIN_TRIES = 20;
 
-const int Defaults::PERCENTILE_GRID_NUMBER_OF_SAMPLES = 100;
-
 const double Defaults::PCA_FRACTION_RESOLVING_POWER = 0.95;
 
 const std::string Defaults::EMULATOR_COVARIANCE_FUNCTION =
@@ -58,9 +56,9 @@ const std::string Defaults::EMULATOR_TRAINING_RIGOR = "basic";
 
 const std::string Defaults::SAMPLER = "MetropolisHastings";
 
-const bool Defaults::MCMC_USE_MODEL_ERROR = false;
+const int Defaults::SAMPLER_NUMBER_OF_SAMPLES = 100;
 
-const int Defaults::MCMC_NUMBER_OF_SAMPLES = 100;
+const bool Defaults::MCMC_USE_MODEL_ERROR = false;
 
 const int Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES = 0;
 
@@ -87,9 +85,6 @@ void Defaults::PrintAllDefaults(std::ostream & o) {
     << "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS "     << Defaults::GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS << '\n'
     << "GENERATE_TRAINING_POINTS_USE_MAXIMIN "             << Defaults::GENERATE_TRAINING_POINTS_USE_MAXIMIN << '\n'
     << "GENERATE_TRAINING_POINTS_MAXIMIN_TRIES "           << Defaults::GENERATE_TRAINING_POINTS_MAXIMIN_TRIES << '\n'
-    << "#\n"
-    << "PERCENTILE_GRID_NUMBER_OF_SAMPLES "                << Defaults::PERCENTILE_GRID_NUMBER_OF_SAMPLES << '\n'
-    << "#\n"
     << "PCA_FRACTION_RESOLVING_POWER "                     << Defaults::PCA_FRACTION_RESOLVING_POWER << '\n'
     << "EMULATOR_COVARIANCE_FUNCTION "                     << Defaults::EMULATOR_COVARIANCE_FUNCTION << '\n'
     << "EMULATOR_REGRESSION_ORDER "                        << Defaults::EMULATOR_REGRESSION_ORDER << '\n'
@@ -99,9 +94,9 @@ void Defaults::PrintAllDefaults(std::ostream & o) {
     << "EMULATOR_TRAINING_RIGOR "                          << Defaults::EMULATOR_TRAINING_RIGOR << '\n'
     << "#\n"
     << "SAMPLER "                                          << Defaults::SAMPLER << '\n'
+    << "SAMPLER_NUMBER_OF_SAMPLES "                        << Defaults::SAMPLER_NUMBER_OF_SAMPLES << '\n'
     << "#\n"
     << "MCMC_USE_MODEL_ERROR "                             << Defaults::MCMC_USE_MODEL_ERROR << '\n'
-    << "MCMC_NUMBER_OF_SAMPLES "                           << Defaults::MCMC_NUMBER_OF_SAMPLES << '\n'
     << "MCMC_NUMBER_OF_BURN_IN_SAMPLES "                   << Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES << '\n'
     << "MCMC_STEP_SIZE "                                   << Defaults::MCMC_STEP_SIZE << '\n'
     << "#\n"

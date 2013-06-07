@@ -48,8 +48,6 @@ public:
 
   static const int GENERATE_TRAINING_POINTS_MAXIMIN_TRIES;
 
-  static const int PERCENTILE_GRID_NUMBER_OF_SAMPLES;
-
   /**
    Emulator Variables */
   static const double PCA_FRACTION_RESOLVING_POWER;
@@ -70,11 +68,11 @@ public:
    Sampler variables */
   static const std::string SAMPLER;
 
+  static const int SAMPLER_NUMBER_OF_SAMPLES;
+
   /**
    MCMC Variables */
   static const bool MCMC_USE_MODEL_ERROR;
-
-  static const int MCMC_NUMBER_OF_SAMPLES;
 
   static const int MCMC_NUMBER_OF_BURN_IN_SAMPLES;
 
