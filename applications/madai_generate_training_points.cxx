@@ -55,16 +55,16 @@ bool WriteDirectories( const std::string modelOutputDirectory,
 
     std::ostringstream buffer;
     buffer << modelOutputDirectory << "/run"
-    << std::setw( 4 ) << std::setfill( '0' ) << i;
+           << std::setw( 4 ) << std::setfill( '0' ) << i;
     std::string runDirectory(buffer.str());
 
     if ( verbose ) {
-      std::cout << runDirectory << "\n";
+      std::cout << "Creating directory '" << runDirectory << "'\n";
     }
 
     directoryCreated = madaisys::SystemTools::MakeDirectory( runDirectory.c_str() );
     if ( !directoryCreated ) {
-      std::cerr << "Could not create directory '" << runDirectory << "\n";
+      std::cerr << "Could not create directory '" << runDirectory << "'\n";
       return false;
     }
 
@@ -127,7 +127,9 @@ int main( int argc, char * argv[] ) {
       << "GENERATE_TRAINING_POINTS_MAXIMIN_TRIES <value> (default: "
       << madai::Defaults::GENERATE_TRAINING_POINTS_MAXIMIN_TRIES << ")\n"
       << "VERBOSE <value> (default: "
-      << madai::Defaults::VERBOSE << ")\n";
+      << madai::Defaults::VERBOSE << ")\n"
+      << "READER_VERBOSE <value> (default: "
+      << madai::Defaults::READER_VERBOSE << ")\n";
 
     return EXIT_FAILURE;
   }
@@ -149,14 +151,17 @@ int main( int argc, char * argv[] ) {
   std::vector< madai::Parameter > parameters;
   std::string parametersFile = statisticsDirectory + madai::Paths::PARAMETER_PRIORS_FILE;
 
+  bool verbose = settings.GetOptionAsBool("VERBOSE", madai::Defaults::VERBOSE);
   bool readerVerbose = settings.GetOptionAsBool(
-    "READER_VERBOSE",
-    madai::Defaults::READER_VERBOSE );
+      "READER_VERBOSE",
+      madai::Defaults::READER_VERBOSE);
 
   int numberOfParameters = 0;
   bool parametersRead = madai::GaussianProcessEmulatorDirectoryReader::
-    ParseParameters( parameters, numberOfParameters, statisticsDirectory,
-                     readerVerbose );
+    ParseParameters( parameters,
+                     numberOfParameters,
+                     statisticsDirectory,
+                     readerVerbose);
   if ( !parametersRead ) {
     std::cerr << "Could not read parameters from prior file '"
               << parametersFile << "'" << std::endl;
@@ -199,13 +204,13 @@ int main( int argc, char * argv[] ) {
       sampleGenerator.Generate( numberOfTrainingPoints, parameters );
   }
 
-  if ( !WriteDirectories( modelOutputDirectory, parameters, samples, false ) ) {
+  if ( !WriteDirectories( modelOutputDirectory, parameters, samples, verbose ) ) {
     std::cerr << "Could not write model output directory '" << modelOutputDirectory << "'.\n";
     return EXIT_FAILURE;
   }
 
-  if ( settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE ) ) {
-    std::cout << "Write model output directory '" << modelOutputDirectory << "'.\n";
+  if ( verbose ) {
+    std::cout << "Wrote model output directory '" << modelOutputDirectory << "'.\n";
   }
 
   return EXIT_SUCCESS;
