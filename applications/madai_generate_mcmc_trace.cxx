@@ -67,6 +67,8 @@ int main(int argc, char ** argv) {
       << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"
       << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
       << madai::Defaults::EXPERIMENTAL_RESULTS_FILE << ")\n"
+      << "SAMPLER <value> (default: "
+      << madai::Defaults::SAMPLER << ")\n"
       << "SAMPLER_NUMBER_OF_SAMPLES <value> (default: "
       << madai::Defaults::SAMPLER_NUMBER_OF_SAMPLES << ")\n"
       << "MCMC_NUMBER_OF_BURN_IN_SAMPLES <value> (default: "
