@@ -22,7 +22,7 @@ Distribution Sampling Programs.
     \item[EMULATOR\_NUGGET] (default: 0.001) $\theta_1$. See section \ref{sec:CovarianceFunctions}.
     \item[EMULATOR\_AMPLITUDE] (default: 1) $\theta_0$. See section \ref{sec:CovarianceFunctions}.
     \item[EMULATOR\_SCALE] (default: 0.01) See section \ref{sec:CovarianceFunctions}. The final value for each parameter's scale ($\theta_{2+i}$) will be EMULATOR\_SCALE times the width of the middle two quartiles of that parameter's prior distribution.
-    \item[EMULATOR\_TRAINING\_RIGOR (default: basic) Determines the rigor with which the emulator is trained. Currently, only the default value of ``basic'' is supported.
+    \item[EMULATOR\_TRAINING\_RIGOR] (default: basic) Determines the rigor with which the emulator is trained. Currently, only the default value of ``basic'' is supported.
     \item[SAMPLER] (default: ``MetropolisHastings'') Determines which sampler to use to generate sample points. Available samplers are ``MetropolisHastings'' and ``PercentileGrid''.
     \item[SAMPLER\_NUMBER\_OF\_SAMPLES] (default: 100) How many samples should be generated in a trace. The default is small for testing purposes. Values around $10^6$ are recommended.
     \item[MCMC\_USE\_MODEL\_ERROR] (default: 0) Specifies whether error reported by the model should be used in the log likelihood calculation. Turning this off may make computation of the log likelihood faster at the cost of assuming that the model error is zero for each output.
