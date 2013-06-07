@@ -12,7 +12,6 @@ set( APPLICATIONS
   madai_pca_decompose
   madai_emulate
   madai_generate_mcmc_trace
-  madai_generate_percentile_grid_trace
   madai_generate_training_points
   madai_train_emulator
   madai_print_default_settings
