@@ -62,6 +62,8 @@ int main(int argc, char ** argv) {
       << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
       << madai::Defaults::EXPERIMENTAL_RESULTS_FILE << ")\n"
       << "PCA_FRACTION_RESOLVING_POWER <value> (default: 0.95)\n"
+      << "EMULATOR_TRAINING_RIGOR <value> (default: "
+      << madai::Defaults::EMULATOR_TRAINING_RIGOR << ")\n"
       << "EMULATOR_COVARIANCE_FUNCTION <value> (default: "
       << madai::Defaults::EMULATOR_COVARIANCE_FUNCTION << ")\n"
       << "EMULATOR_REGRESSION_ORDER <value> (default: "
