@@ -220,6 +220,7 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
+  std::ostream * progressStream = verbose ? (& std::cerr) : NULL;
   int returnCode = madai::SamplerCSVWriter::GenerateSamplesAndSaveToFile(
       *sampler,
       *model,
@@ -227,7 +228,7 @@ int main(int argc, char ** argv) {
       numberOfSamples,
       numberOfBurnInSamples,
       useModelError,
-      &(std::cerr));
+      progressStream);
 
   if ( verbose ) {
     if ( returnCode == EXIT_SUCCESS ) {
