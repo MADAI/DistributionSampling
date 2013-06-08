@@ -202,7 +202,7 @@ path:</p>
 <li>Python (used in tutorial examples) &mdash;
 	<a href="http://www.python.org/">python.org/</a>
 
-<li>MADAI Workbench (customized ParaView) <a href="https://madai-public.cs.unc.edu/visualization/madai-workbench/">madai.us</a></li>
+<li>MADAI Workbench (customized ParaView) <a href="http://vis.madai.us/">http://vis.madai.us</a></li>
 
 <li>ParaView &mdash; <a href="http://www.paraview.org/paraview/resources/software.php">paraview.org</a>
 <pre>$ <span class="input">sudo apt-get -y install paraview</span></pre>
@@ -316,7 +316,7 @@ MEAN_ENERGY    2.8          1.9
 <p>Next, we  will create a <code>settings.dat</code> file in
   this directory with some default values in it. All of the
   DistributionSampling utilities will look for this file.</p>
-<pre>$ <span class="input">madai_default_options &gt; ./settings.dat</span></pre>
+<pre>$ <span class="input">madai_print_default_settings &gt; ./settings.dat</span></pre>
 
 <div class="box">
 <p><em>Aside:</em> A detailed description of the options in <code>settings.dat</code> can be found in the manual.</p></div>
@@ -423,7 +423,7 @@ directory and will refer to it as <code>.</code> (a single dot).</p>
 file in this directory with some default values in it. All of the
 DistributionSampling utilities will look for this file.</p>
 
-<pre>$ <span class="input">madai_default_options &gt; ./settings.dat</span></pre>
+<pre>$ <span class="input">madai_print_default_settings &gt; ./settings.dat</span></pre>
 
 <div class="box">
 <p><em>Aside:</em> A detailed description of the options in <code>settings.dat</code> can be found in the manual.</p></div>
@@ -599,6 +599,18 @@ need to be drawn.  Once you are sure that the program is working
 correctly, set <code>MCMC_NUMBER_OF_SAMPLES</code> to a large number
 (a million or more) and let the program run for a while.</p>
 
+<pre>
+$ <span class="input">madai_set_variable . SAMPLER_NUMBER_OF_SAMPLES 1000000</span>
+old: SAMPLER_NUMBER_OF_SAMPLES 100
+new: SAMPLER_NUMBER_OF_SAMPLES 1000000
+$ <span class="input">madai_set_variable . MCMC_NUMBER_OF_BURN_IN_SAMPLES 200</span>
+old: MCMC_NUMBER_OF_BURN_IN_SAMPLES 0
+new: MCMC_NUMBER_OF_BURN_IN_SAMPLES 200
+$ <span class="input">madai_generate_trace . &quot;million.csv&quot;</span>
+</pre>
+
+<h3 id="Downsampling">Downsampling</h3>
+
 <p>While visualization software is capable of displaying ten million
 points in space, for analysis you may need to reduce the number of
 points.  To keep the same random distribution, it may be easiest to
@@ -606,7 +618,29 @@ pick out every <em>N</em>th line.  For example, to reduce one million
 points down to a fifty thousand, pick out every 20th line:</p>
 
 <pre>
-$ <span class="input">madai_subsample_text_file 20 trace/mcmc.csv trace/mcmc_50000.csv</span>
+$ <span class="input">madai_subsample_text_file 20 trace/million.csv trace/mcmc_50000.csv</span>
+</pre>
+
+<h3 id="BasicStatistics">Basic Statistics</h3>
+
+<pre>
+$ <span class="input">madai_analyze_trace . million.csv</span>
+     parameter       average      std.dev.   scaled dev.    best value
+            X0   -0.00379224      0.925268      0.801305     0.0170338
+             K       2.82017       0.86125      0.852416       3.98649
+          TEMP       1.84148       1.08205      0.394561      0.500879
+
+covariance:
+                          X0             K          TEMP
+            X0       0.85612    0.00873217     0.0299062
+             K    0.00873217      0.741751     0.0384384
+          TEMP     0.0299062     0.0384384       1.17083
+
+scaled covariance:
+                          X0             K          TEMP
+            X0       0.64209    0.00748472    0.00944407
+             K    0.00748472      0.726613     0.0138725
+          TEMP    0.00944407     0.0138725      0.155678
 </pre>
 
 <h2 id="Visualizing">3. Visualizing the Results</h2>
