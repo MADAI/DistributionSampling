@@ -46,7 +46,7 @@ int SamplerCSVWriter
   for ( int count = 0; count < NumberOfBurnInSamples; count++ ) {
     if (progress != NULL) {
       if ( count % step == 0 ) {
-        (*progress) << '\r' << "Burn in percent done: " << percent++ << "%";
+        (*progress) << '\r' << "Burn in percent done: " << percent++ << "%  ";
         progress->flush();
       }
     }
@@ -62,7 +62,7 @@ int SamplerCSVWriter
   for (int count = 0; count < NumberOfSamples; count ++) {
     if (progress != NULL) {
       if (count % step == 0)
-        (*progress) <<  '\r' << "SAMPLER percent done: " << percent++ << "%";
+        (*progress) <<  '\r' << "Sampler percent done: " << percent++ << "%  ";
       progress->flush();
     }
     Sample sample = sampler.NextSample();
@@ -70,10 +70,9 @@ int SamplerCSVWriter
     WriteSample( outFile, sample );
   }
   if (progress != NULL) {
-    (*progress) << "\r                          \r";
+    (*progress) << "\r                            \r";
     progress->flush();
   }
-
 
   return EXIT_SUCCESS;
 }
