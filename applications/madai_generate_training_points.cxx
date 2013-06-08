@@ -21,6 +21,7 @@
 #include <string> // std::string
 #include <vector> // std::vector
 #include <sstream> // std::ostringstream
+#include <iomanip> // std::setw
 
 #include "ApplicationUtilities.h"
 #include "GaussianDistribution.h"

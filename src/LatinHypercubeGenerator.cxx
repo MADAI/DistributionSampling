@@ -16,6 +16,11 @@
  *
  *=========================================================================*/
 
+#include <algorithm> // random_shuffle
+#include <cassert> // assert
+#include <cmath> // pow
+#include <limits> // numeric_limits::infinity
+
 #include "LatinHypercubeGenerator.h"
 
 #include "GaussianDistribution.h"
