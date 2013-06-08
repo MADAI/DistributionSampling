@@ -16,19 +16,19 @@
  *
  *=========================================================================*/
 
-#include "GaussianProcessEmulatedModel.h"
+#include <iostream>
 
+#include "GaussianProcessEmulatedModel.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
-
-#include <fstream>
-
+#include "GaussianProcessEmulator.h"
 
 namespace madai {
 
 
 GaussianProcessEmulatedModel
-::GaussianProcessEmulatedModel()
+::GaussianProcessEmulatedModel() :
+  m_GPE( new GaussianProcessEmulator )
 {
   m_StateFlag = UNINITIALIZED;
 }
@@ -36,7 +36,7 @@ GaussianProcessEmulatedModel
 GaussianProcessEmulatedModel
 ::~GaussianProcessEmulatedModel()
 {
-  // nothing to do.
+  delete m_GPE;
 }
 
 
@@ -51,26 +51,26 @@ GaussianProcessEmulatedModel
                      const std::string ExperimentalResultsDirectory )
 {
   GaussianProcessEmulatorDirectoryReader directoryReader;
-  if ( !directoryReader.LoadTrainingData( &m_GPME, ModelOutputDirectory,
+  if ( !directoryReader.LoadTrainingData( m_GPE, ModelOutputDirectory,
                                           StatisticsDirectory, ExperimentalResultsDirectory ) ) {
     std::cerr << "Error loading from the directory structure.\n";
     return Model::OTHER_ERROR;
   }
-  if ( !directoryReader.LoadPCA( &m_GPME, StatisticsDirectory ) ) {
+  if ( !directoryReader.LoadPCA( m_GPE, StatisticsDirectory ) ) {
     std::cerr << "Error loading the PCA decomposition data.\n";
     return Model::OTHER_ERROR;
   }
-  if ( !directoryReader.LoadEmulator( &m_GPME, StatisticsDirectory ) ) {
+  if ( !directoryReader.LoadEmulator( m_GPE, StatisticsDirectory ) ) {
     std::cerr << "Error loading Emulator data.\n";
     return Model::OTHER_ERROR;
   }
 
-  if ( m_GPME.m_Status != GaussianProcessEmulator::READY )
+  if ( m_GPE->m_Status != GaussianProcessEmulator::READY )
     return Model::OTHER_ERROR;
   m_StateFlag = READY;
-  m_Parameters = m_GPME.m_Parameters;
-  m_ScalarOutputNames = m_GPME.m_OutputNames;
-  if ( !m_GPME.GetUncertaintyScalesAsCovariance( m_TrainingAndObservedCovariance ) ) {
+  m_Parameters = m_GPE->m_Parameters;
+  m_ScalarOutputNames = m_GPE->m_OutputNames;
+  if ( !m_GPE->GetUncertaintyScalesAsCovariance( m_TrainingAndObservedCovariance ) ) {
     std::cerr << "Error setting the covariance containing experimental and model"
               << " output data.\n";
     return Model::OTHER_ERROR;
@@ -86,13 +86,13 @@ GaussianProcessEmulatedModel
 ::SetGaussianProcessEmulator(
   GaussianProcessEmulator & GPME )
 {
-  m_GPME = GPME;
-  if ( m_GPME.m_Status != GaussianProcessEmulator::READY )
+  *m_GPE = GPME; // Copy entire object, not pointer.  Makes tracking ownership easy.
+  if ( m_GPE->m_Status != GaussianProcessEmulator::READY )
     return Model::OTHER_ERROR;
   m_StateFlag = READY;
-  m_Parameters = m_GPME.m_Parameters;
-  m_ScalarOutputNames = m_GPME.m_OutputNames;
-  if ( !m_GPME.GetUncertaintyScalesAsCovariance( m_TrainingAndObservedCovariance ) ) {
+  m_Parameters = m_GPE->m_Parameters;
+  m_ScalarOutputNames = m_GPE->m_OutputNames;
+  if ( !m_GPE->GetUncertaintyScalesAsCovariance( m_TrainingAndObservedCovariance ) ) {
     std::cerr << "Error setting the covariance containing experimental and model"
               << " output data.\n";
     return Model::OTHER_ERROR;
@@ -106,7 +106,7 @@ const GaussianProcessEmulator &
 GaussianProcessEmulatedModel
 ::GetGaussianProcessEmulator() const
 {
-  return m_GPME;
+  return *m_GPE;
 }
 
 /**
@@ -120,13 +120,13 @@ GaussianProcessEmulatedModel
   std::vector< double > & scalars,
   std::vector< double > & scalarCovariance) const
 {
-  if (m_GPME.m_Status != GaussianProcessEmulator::READY)
+  if (m_GPE->m_Status != GaussianProcessEmulator::READY)
     return Model::OTHER_ERROR;
 
   if (this->GetNumberOfParameters() != parameters.size())
     return Model::OTHER_ERROR;
 
-  if (! m_GPME.GetEmulatorOutputsAndCovariance(
+  if (! m_GPE->GetEmulatorOutputsAndCovariance(
           parameters, scalars, scalarCovariance))
     return Model::OTHER_ERROR;
 
@@ -143,13 +143,13 @@ GaussianProcessEmulatedModel
   const std::vector< double > & parameters,
   std::vector< double > & scalars ) const
 {
-  if (m_GPME.m_Status != GaussianProcessEmulator::READY)
+  if (m_GPE->m_Status != GaussianProcessEmulator::READY)
     return Model::OTHER_ERROR;
 
   if (this->GetNumberOfParameters() != parameters.size())
     return Model::OTHER_ERROR;
 
-  if (! m_GPME.GetEmulatorOutputs (parameters, scalars))
+  if (! m_GPE->GetEmulatorOutputs (parameters, scalars))
     return Model::OTHER_ERROR;
 
   return Model::NO_ERROR;
@@ -168,17 +168,17 @@ GaussianProcessEmulatedModel
       this->GetNumberOfParameters() ) {
     return INVALID_ACTIVE_PARAMETERS;
   }
-  
+
   // Make a copy of the parameters that we can work with
   std::vector< double > parametersCopy( parameters );
-  
+
   // Clear the output vector
   gradient.clear();
-  
+
   // Get the gradient of the model outputs
   std::vector< double > meanGradients;
   std::vector< Eigen::MatrixXd > covarianceGradients;
-  if ( m_GPME.m_Status != GaussianProcessEmulator::READY ) {
+  if ( m_GPE->m_Status != GaussianProcessEmulator::READY ) {
     std::cerr << "Error: Emulator not ready.\n";
     return Model::OTHER_ERROR;
   }
@@ -188,15 +188,15 @@ GaussianProcessEmulatedModel
     return Model::OTHER_ERROR;
   }
   if ( m_UseModelCovarianceToCalulateLogLikelihood )
-    if ( !m_GPME.GetGradientsOfCovariances( parameters, covarianceGradients ) ) {
+    if ( !m_GPE->GetGradientsOfCovariances( parameters, covarianceGradients ) ) {
       std::cerr << "Error in GaussianProcessEmulator::GetGradientsOfCovariances.\n";
       return Model::OTHER_ERROR;
     }
-  if ( !m_GPME.GetGradientOfEmulatorOutputs( parameters, meanGradients ) ) {
+  if ( !m_GPE->GetGradientOfEmulatorOutputs( parameters, meanGradients ) ) {
     std::cerr << "Error in GaussianProcessEmulator::GetGradientOfEmulatorOutputs.\n";
     return Model::NO_ERROR;
   }
-  
+
   int p = parameters.size();
   size_t t = this->GetNumberOfScalarOutputs();
   assert( t > 0 );
@@ -213,7 +213,7 @@ GaussianProcessEmulatedModel
     return result;
   if ( scalars.size() != t )
     return Model::OTHER_ERROR;
-  
+
   std::vector< double > scalarDifferences(t);
   if ( m_ObservedScalarValues.size() == 0 ) {
     for ( size_t i = 0; i < t; ++i ) {
@@ -224,15 +224,15 @@ GaussianProcessEmulatedModel
       scalarDifferences[i] = scalars[i] - m_ObservedScalarValues[i];
     }
   }
-  
+
   // Get the constant covariance matrix
   std::vector< double > constantCovariance;
   if ( !this->GetConstantCovariance(constantCovariance) ) {
     std::cerr << "Error getting the constant covariance matrix from the model.\n";
     return Model::OTHER_ERROR;
   }
-  
-  if ( scalarCovariance.size() == 0 && 
+
+  if ( scalarCovariance.size() == 0 &&
       constantCovariance.size() == 0 ) {
     // Infinite precision makes no sense, so assume variance of 1.0
     // for each variable. Set covariance to Identity.
@@ -240,7 +240,7 @@ GaussianProcessEmulatedModel
     for ( unsigned int i = 0; i < (t*t); i++ )
       covariance[i] = 0.0;
     for ( unsigned int i = 0; i < t; i++ )
-      covariance[i*(t+1)] = 1.0; 
+      covariance[i*(t+1)] = 1.0;
   } else if (scalarCovariance.size() == 0) {
     assert(constantCovariance.size() == (t*t));
     covariance = constantCovariance;
@@ -252,17 +252,17 @@ GaussianProcessEmulatedModel
       covariance[i]
         = scalarCovariance[i] + constantCovariance[i];
   }
-  
+
   // Get gradient of the log prior likelihood
   std::vector< double > LPGradient
   = this->GetGradientOfLogPriorLikelihood( parameters );
-  
+
   Eigen::Map< Eigen::VectorXd > diff(&(scalarDifferences[0]),t);
   Eigen::Map< Eigen::MatrixXd > cov(&(covariance[0]),t,t);
   Eigen::Map< Eigen::MatrixXd > MGrads(&(meanGradients[0]),t,p);
   Eigen::VectorXd LLGrad( p );
   Eigen::VectorXd t1( t );
-  
+
   if ( scalarCovariance.size() == 0 &&
       constantCovariance.size() == 0 ) {
     // Assume variance of 1.0 for each output
@@ -270,10 +270,10 @@ GaussianProcessEmulatedModel
   } else {
     // FIXME check for singular matrix -> return negative infinity!
     //assert( cov.determinant() >= 0.0 ); // is there a better way?
-    
+
     t1 = cov.colPivHouseholderQr().solve(diff);
   }
-  
+
   LLGrad = -MGrads.transpose()*t1;
   if ( scalarCovariance.size() == 0 ) {
     // emulator error not used, do nothing
@@ -285,13 +285,13 @@ GaussianProcessEmulatedModel
       }
     }
   }
-  
+
   for ( int i = 0; i < p; i++ ) {
     if ( activeParameters[i] ) {
       gradient.push_back( LLGrad(i) + LPGradient[i] );
     }
   }
-  
+
   return NO_ERROR;
 }
 
@@ -306,7 +306,7 @@ GaussianProcessEmulatedModel
               << m_TrainingAndObservedCovariance.size() << "\n";
     return false;
   }
-  
+
   x.resize(t*t);
   x = m_TrainingAndObservedCovariance;
   return true;

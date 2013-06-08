@@ -20,12 +20,13 @@
 #define madai_GaussianProcessEmulatedModel_h_included
 
 #include "Model.h"
-#include "GaussianProcessEmulator.h"
 
 #include <string>
 #include <vector>
 
 namespace madai {
+
+class GaussianProcessEmulator;
 
 /** \class GaussianProcessEmulatedModel
  *
@@ -58,7 +59,7 @@ class GaussianProcessEmulatedModel : public Model {
   /**
      Returns a const reference to internal data for debugging purposes. */
   const GaussianProcessEmulator & GetGaussianProcessEmulator() const;
-  
+
   /**
    * Get the scalar outputs from the model evaluated at point
    * \c parameters.
@@ -74,7 +75,7 @@ class GaussianProcessEmulatedModel : public Model {
    */
   virtual ErrorType GetScalarOutputs( const std::vector< double > & parameters,
                                       std::vector< double > & scalars ) const;
-  
+
   /**
    * Get the scalar and gradient outputs of the model at point
    * \c parameters.
@@ -90,15 +91,15 @@ class GaussianProcessEmulatedModel : public Model {
     const std::vector<double>&, double&, double&) const {
     return METHOD_NOT_IMPLEMENTED;
   }
-  
+
   virtual bool GetConstantCovariance(std::vector< double > & x) const;
-  
+
 protected:
-  
+
   std::vector< double > m_TrainingAndObservedCovariance;
 
 private:
-  GaussianProcessEmulator m_GPME;
+  GaussianProcessEmulator * m_GPE;
 
 }; // end GaussianProcessEmulatedModel
 

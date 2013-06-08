@@ -27,6 +27,7 @@
 #include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulator.h"
 #include "Trace.h"
 #include "Paths.h"
 

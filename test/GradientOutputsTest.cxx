@@ -26,6 +26,7 @@
 #include "GaussianProcessEmulatedModel.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulator.h"
 #include "Random.h"
 #include "Trace.h"
 #include "Paths.h"
@@ -51,34 +52,34 @@ void model(const std::vector< double > & params, std::vector< double > & out) {
  */
 int main( int, char*[] ) {
   static const int N = 100;
-  
+
   madai::Parameter param0 ( "param_0", -1, 1 );
   madai::Parameter param1 ( "param_1", -1, 1 );
   std::vector< madai::Parameter > generatorParameters;
   generatorParameters.push_back( param0 );
   generatorParameters.push_back( param1 );
-  
-  GaussianProcessEmulatorTestGenerator generator( &model, 2, 2, N, 
+
+  GaussianProcessEmulatorTestGenerator generator( &model, 2, 2, N,
                                                   generatorParameters);
-  
+
   std::string TempDirectory = "/tmp/";
   if ( !generator.WriteDirectoryStructure( TempDirectory ) ) {
     std::cerr << "Error writing directory structure.\n";
     return EXIT_FAILURE;
   }
-  
+
   std::string MOD = TempDirectory + madai::Paths::SEPARATOR +
     madai::Defaults::MODEL_OUTPUT_DIRECTORY;
   std::string ERD = TempDirectory + madai::Paths::SEPARATOR +
     madai::Defaults::EXPERIMENTAL_RESULTS_FILE;
-                    
+
   madai::GaussianProcessEmulator gpe;
   madai::GaussianProcessEmulatorDirectoryReader directoryReader;
   if ( !directoryReader.LoadTrainingData( &gpe, MOD, TempDirectory, ERD ) ) {
     std::cerr << "Error loading from created directory structure.\n";
     return EXIT_FAILURE;
   }
-  
+
   double fractionResolvingPower = 0.999;
   madai::GaussianProcessEmulator::CovarianceFunctionType CovarianceFunction
     = madai::GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
@@ -86,12 +87,12 @@ int main( int, char*[] ) {
   double defaultNugget = 1e-3;
   double amplitude = 1.0;
   double scale = 1e-2;
-  
+
   if ( !gpe.PrincipalComponentDecompose() ) {
     std::cerr << "Error in GaussianProcessEmulator::PrincipalComponentDecompose\n";
     return EXIT_FAILURE;
   }
-  
+
   std::string PCAFileName = TempDirectory + madai::Paths::SEPARATOR +
                             madai::Paths::PCA_DECOMPOSITION_FILE;
   std::ofstream PCAFile( PCAFileName.c_str() );
@@ -99,16 +100,16 @@ int main( int, char*[] ) {
     std::cerr << "Could not open file '" << PCAFileName << "'\n";
     return EXIT_FAILURE;
   }
-  
+
   madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
   singleFileWriter.WritePCA( &gpe, PCAFile );
   PCAFile.close();
-  
+
   if ( !gpe.RetainPrincipalComponents( fractionResolvingPower ) ) {
     std::cerr << "Error in GaussianProcessEmulator::RetainPrincipalComponents\n";
     return EXIT_FAILURE;
   }
-  
+
   if ( !gpe.BasicTraining( CovarianceFunction,
                            regressionOrder,
                            defaultNugget,
@@ -117,7 +118,7 @@ int main( int, char*[] ) {
     std::cerr << "Error in GaussianProcessEmulator::BasicTraining";
     return EXIT_FAILURE;
   }
-  
+
   std::string EmulatorStateFileName = TempDirectory + madai::Paths::SEPARATOR +
                                       madai::Paths::EMULATOR_STATE_FILE;
   std::ofstream EmulatorStateFile( EmulatorStateFileName.c_str() );
@@ -125,21 +126,21 @@ int main( int, char*[] ) {
     std::cerr << "Could not open file '" << EmulatorStateFileName << "'\n";
     return EXIT_FAILURE;
   }
-  
+
   singleFileWriter.Write( &gpe, EmulatorStateFile );
   EmulatorStateFile.close();
-  
+
   if ( !gpe.MakeCache() ) {
     std::cerr << "Error in GaussianProcessEmulator::MakeCache().\n";
     return EXIT_FAILURE;
   }
-  
+
   madai::GaussianProcessEmulatedModel gpem;
   if ( gpem.SetGaussianProcessEmulator( gpe ) != madai::Model::NO_ERROR ) {
     std::cerr << "Error in GaussianProcessEmulatedModel::SetGaussianProcessEmulator.\n";
     return EXIT_FAILURE;
   }
-  
+
   // Check gradients at 100 random places in parameter space
   assert ( 2 == gpem.GetNumberOfParameters() );
   int p = gpem.GetNumberOfParameters();
@@ -153,21 +154,21 @@ int main( int, char*[] ) {
     // Choose random point in parameter space
     std::vector< double > currentParameters(p,0.0);
     for ( int j = 0; j < p; j++ ) {
-      const madai::Distribution * priorDist 
+      const madai::Distribution * priorDist
           = generatorParameters[j].GetPriorDistribution();
       currentParameters[j] = priorDist->GetSample(RandomNumberGenerator);
     }
-    
+
     // Get the analytic gradient
     gpem.SetUseModelCovarianceToCalulateLogLikelihood(false);
     std::vector< double > grad;
     std::vector< double > scalars;
-    if ( gpem.GetScalarAndGradientOutputs( currentParameters, 
+    if ( gpem.GetScalarAndGradientOutputs( currentParameters,
              activeParameters, scalars, grad ) != madai::Model::NO_ERROR ) {
       std::cerr << "Error in Model::GetAnalyticGradientOfLogLikelihood.\n";
       return EXIT_FAILURE;
     }
-    
+
     // Get the numeric gradient
     std::vector< double > grad2;
     if ( gpem.Model::GetScalarAndGradientOutputs(currentParameters,
@@ -175,7 +176,7 @@ int main( int, char*[] ) {
       std::cerr << "Error in Model:GetScalarAndGradientOutputs.\n";
       return EXIT_FAILURE;
     }
-    
+
     // Compare gradients
     std::vector< double > diff(p,0.0);
     double AnalyticNormSquared = 0;

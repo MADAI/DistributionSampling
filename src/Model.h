@@ -19,14 +19,12 @@
 #ifndef madai_Model_h_included
 #define madai_Model_h_included
 
-#include "Parameter.h"
-#include "Random.h"
-
-#include <Eigen/Dense>
-
 #include <cfloat>
 #include <vector>
 #include <iostream>
+
+#include "Parameter.h"
+#include "Random.h"
 
 namespace madai {
 
@@ -90,7 +88,7 @@ public:
    * parameters argument. */
   virtual ErrorType GetScalarOutputs( const std::vector< double > & parameters,
                                       std::vector< double > & scalars ) const = 0;
-    
+
   /** Get the gradient outputs from the priors evaluated at x.
    *
    * Outputs a vector containing the gradients of each parameter.
@@ -229,7 +227,7 @@ public:
      this->SetObservedScalarValues() and
      this->SetObservedScalarCovariance(). */
   virtual ErrorType LoadObservations(std::istream & i);
-  
+
   virtual bool GetConstantCovariance(std::vector< double > & x) const;
 
 protected:
