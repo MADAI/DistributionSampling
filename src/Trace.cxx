@@ -16,6 +16,7 @@
  *
  *=========================================================================*/
 
+#include "cstdlib" // atof
 #include "Trace.h"
 
 namespace madai {

@@ -16,6 +16,7 @@
  *
  *=========================================================================*/
 
+#include <cstdlib> // EXIT_SUCCESS
 #include <iostream>
 #include "Random.h"
 using std::cout;

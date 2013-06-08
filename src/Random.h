@@ -19,15 +19,6 @@
 #ifndef madai_Random_h_included
 #define madai_Random_h_included
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-
-#include <vector>
-
-
 namespace madai {
 
 /** \class Random
@@ -92,36 +83,11 @@ private:
   /** Explicitly disallowed */
   Random(madai::Random const &);
 
-  /** Typedefs for random number generation */
-  //@{
-  typedef boost::mt19937               BaseGeneratorType;
-  typedef boost::uniform_int< int >    UniformIntDistributionType;
-  typedef boost::uniform_int< long >   UniformLongDistributionType;
-  typedef boost::uniform_real<>        UniformRealDistributionType;
-  typedef boost::normal_distribution<> NormalDistributionType;
-  typedef boost::variate_generator<
-    BaseGeneratorType&,
-    UniformRealDistributionType >      UniformRealGeneratorType;
-  //@}
-
-  /** Mersenne Twister random number generator */
-  BaseGeneratorType           m_BaseGenerator;
-
-  /** Uniform int distribution */
-  UniformIntDistributionType  m_UniformIntDistribution;
-
-  /** Uniform long distribution */
-  UniformLongDistributionType  m_UniformLongDistribution;
-
-  /** Uniform real distribution */
-  UniformRealDistributionType m_UniformRealDistribution;
-
-  /** Uniform real generator */
-  UniformRealGeneratorType    m_UniformRealGenerator;
-
-  /** Normal distribution */
-  NormalDistributionType      m_NormalDistribution;
-
+  /** @{ */
+  /** Opaque Pointer for Private Implementation */
+  struct RandomPrivate;
+  RandomPrivate * m_RandomImplementation;
+  /** @} */
 };
 
 }
