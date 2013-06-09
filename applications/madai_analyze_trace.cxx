@@ -28,6 +28,7 @@
 
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
+#include "System.h"
 
 
 int main(int argc, char ** argv) {
@@ -57,7 +58,17 @@ int main(int argc, char ** argv) {
   traceFile.append( "/" );
   traceFile.append( argv[2] );
 
+  if ( !madai::System::IsFile( traceFile ) ) {
+    std::cerr << "Trace file '" << traceFile << "' does not exist or is a directory.\n";
+    return EXIT_FAILURE;
+  }
+
   std::ifstream trace(traceFile.c_str());
+  if ( !trace.good() ) {
+    std::cerr << "Error reading trace file '" << traceFile << "'.\n";
+    return EXIT_FAILURE;
+  }
+
   std::string header;
   std::getline(trace,header);
   std::vector<std::string> headers = madai::SplitString(header, ',');
