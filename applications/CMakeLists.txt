@@ -39,5 +39,7 @@ install( PROGRAMS
   madai_gnuplot_scatterplot_matrix
   madai_subsample_text_file
   madai_set_variable
+  madai_catenate_traces
+  madai_launch_multiple_madai_generate_trace
   DESTINATION bin
 )

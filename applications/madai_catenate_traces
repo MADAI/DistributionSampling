@@ -1,0 +1,16 @@
+#!/bin/sh
+# madai_catenate_traces
+if [ -z "$1" ] ; then
+  echo "Usage:" >&2;
+  echo " $0 FILE [MORE_FILES ...] > OUTFILE" >&2;
+  echo "" >&2;
+  echo "Remove the first line of all but the first file and concatenate" >&2;
+  echo "them together. Prints to standard output." >&2;
+  echo "" >&2;
+  exit 1;
+fi
+cat "$1"
+shift
+for arg; do
+  tail -n+2 < "$arg"
+done

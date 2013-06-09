@@ -1,0 +1,37 @@
+#!/bin/sh
+# madai_launch_multiple_madai_generate_trace
+if [ -z "$2" ] ; then
+  echo "Usage:" >&2;
+  echo "  $0 \\" >&2;
+  echo "    DIRECTORY NUMBER [IDENTIFIER]" >&2;
+  echo "" >&2;
+  echo "Is equivalent to launching" >&2;
+  echo "" >&2;
+  echo "  nice madai_generate_trace DIRECTORY IDENTIFIER_XXX.csv &" >&2;
+  echo "" >&2;
+  echo "NUMBER number of times and waiting for them all to finish." >&2;
+  echo "" >&2;
+  echo "IDENTIFIER defaults to \"samples\".  If madai_generate_trace" >&2;
+  echo "is not in the \$PATH, use the MADAI_GENERATE_TRACE" >&2;
+  echo "environment variable to specify its location." >&2;
+  echo "XXX is replaced by 001, 002, 003, ...." >&2;
+  exit 1;
+fi
+EXECUTABLE=${MADAI_GENERATE_TRACE:-madai_generate_trace}
+if ! command -v "$EXECUTABLE" > /dev/null ; then
+  echo "madai_generate_trace not in \$PATH" >&2;
+  exit 2;
+fi
+DIR="$1"
+NUM="$2"
+ID="${3:-samples}"
+CPIDLIST=''
+while [ "$NUM" -gt 0 ] ; do
+  NAME=$(printf "${ID}_%03d.csv" "$NUM")
+  nice "$EXECUTABLE" "$DIR" "$NAME" > /dev/null 2>&1 &
+  CPIDLIST="${CPIDLIST} $!"
+  NUM=$(($NUM - 1))
+done
+for CPID in $CPIDLIST ; do
+  wait $CPID;
+done
