@@ -20,6 +20,7 @@
 #define madai_Sampler_h_included
 
 #include <set>
+#include <string>
 
 #include "Model.h"
 #include "Trace.h"
@@ -53,7 +54,8 @@ public:
   /** Destructor. */
   virtual ~Sampler();
 
-  /** Set the current Model
+  /**
+   * Set the current Model
    *
    * \warning The observed values and covariances must be set prior to
    * calling this method. Use Model::SetObservedScalarValues() and
@@ -63,15 +65,60 @@ public:
    * \param model The Model on which the Sampler will operate. */
   void SetModel( const Model * model );
 
-  /** Get the current Model
+  /**
+   * Get the current Model
    *
    * \return The Model in which the Sampler operates. */
   const Model * GetModel() const;
 
-  /** Get a list of the names of the active parameters. */
-  std::set< std::string > GetActiveParameters();
+  /**
+   * Get the number of parameters
+   *
+   * \return The number of Parameters as defined by the Model from which
+   *  this Sampler draws samples. */
+  virtual unsigned int GetNumberOfParameters() const;
 
-  /** Activate a Parameter by name
+  /**
+   *  Get the list of parameters
+   *
+   * These are not the parameter values but instead a description of
+   * the parameter. */
+  virtual const std::vector< Parameter > & GetParameters() const;
+
+  /*
+   * The following functions refer to active and inactive parameters.
+   * Parameters may be refered to by name or by index.
+   */
+
+  /**
+   * Get a list of the names of the active parameters. */
+  std::set< std::string > GetActiveParameters() const;
+
+  /**
+   * Which Parameters are active?  Indexes correspond to indexes
+   * within this->GetParameters().  */
+  const std::vector< bool > & GetActiveParametersByIndex() const;
+
+  /**
+   * Get the number of active parameters. */
+  unsigned int GetNumberOfActiveParameters() const;
+
+  /**
+   * Check whether a parameter is active
+   *
+   * \param parameterName Name of the Parameter. */
+  bool IsParameterActive( const std::string & parameterName ) const;
+
+  /**
+   * Check whether a parameter is active
+   *
+   * \param parameterIndex The index of the Parameter.  This index
+   * corresponds to the position of the Parameter in the vector of
+   * Parameters returned by Sampler::GetParameters(). */
+  bool IsParameterActive( unsigned int parameterIndex ) const;
+
+  /**
+   * Activate a Parameter by name
    *
    * Activating a Parameter means that the Parameter value will be
    * varied by the sampler.
@@ -79,21 +126,23 @@ public:
    * \param parameterName Name of the parameter to activate. */
   void ActivateParameter( const std::string & parameterName );
 
-  /** Activate a Parameter by index
+  /**
+   * Activate a Parameter by index
    *
    * Activating a Parameter means that the Parameter value will be
    * varied by the sampler.
    *
    * \param parameterIndex The index of the Parameter to
-   * activate. This index corresponds to the position of the Parameter
-   * in the vector of Parameters returned by Sampler::GetParameters().
-   */
+   * activate. This index corresponds to the position of the
+   * Parameter in the vector of Parameters returned by
+   * Sampler::GetParameters(). */
   void ActivateParameter( unsigned int parameterIndex );
 
-  /** Deactivate a parameter by name
+  /**
+   * Deactivate a parameter by name
    *
-   * Deactivating a Parameter means that the Parameter value will not be
-   * varied by the sampler.
+   * Deactivating a Parameter means that the Parameter value will not
+   * be varied by the sampler.
    *
    * \param parameterName Name of the Parameter to deactivate. */
   void DeactivateParameter( const std::string & parameterName );
@@ -101,76 +150,102 @@ public:
   /**
    * Deactivate a parameter by index
    *
-   * Deactivating a Parameter means that the Parameter value will not be
-   * varied by the sampler.
+   * Deactivating a Parameter means that the Parameter value will not
+   * be varied by the sampler.
    *
    * \param parameterIndex The index of the Parameter to
-   * deactivate. This index corresponds to the position of the Parameter
-   * in the vector of Parameters returned by Sampler::GetParameters().
-   */
+   * deactivate. This index corresponds to the position of the
+   * Parameter in the vector of Parameters returned by
+   * Sampler::GetParameters(). */
   void DeactivateParameter( unsigned int parameterIndex );
 
-  /** Get the number of parameters
-   *
-   * \return The number of Parameters as defined by the Model from which
-   *  this Sampler draws samples. */
-  virtual unsigned int GetNumberOfParameters() const;
 
-  /** Get the list of parameters
-   *
-   * These are not the parameter values but instead a description of
-   * the parameter. */
-  virtual const std::vector< Parameter > & GetParameters() const;
+  /*
+   * The Sampler stores a set of current values for the parameter.
+   * Samplers will change these values at each call to NextSample(),
+   * but will not change a parameter values if
+   * (! IsParameterActive(param)).
+   */
 
-  /** Get the number of active parameters. */
-  unsigned int GetNumberOfActiveParameters() const;
-
-  /** Check whether a parameter is active
-   *
-   * \param parameterName Name of the Parameter. */
-  bool IsParameterActive( const std::string & parameterName );
-
-  /** Sets a parameter value by name
+  /**
+   * Sets a parameter value by name
    *
    * \param parameterName The name of the Parameter whose value should
    *  be set.
-   * \param value The new value of the Parameter. */
+   * \param value The new value of the Parameter.
+   *
+   * This method will trigger a call to
+   * Sampler::ParameterSetExternally()  */
   virtual ErrorType SetParameterValue( const std::string & parameterName,
                                        double value );
 
-  /** Get the current value of a parameter
+  /**
+   * Sets a parameter value by index
+   *
+   * \param parameterIndex  The index of the Parameter.  This index
+   * corresponds to the position of the Parameter in the vector of
+   * Parameters returned by Sampler::GetParameters().
+   * \param value  The new value of the Parameter.
+   *
+   * This method will trigger a call to
+   * Sampler::ParameterSetExternally() */
+  virtual ErrorType SetParameterValue( unsigned int parameterIndex,
+                                       double value );
+
+  /**
+   * Sets all of the parameters at one time.
+   *
+   * \param parameterValues a vector of new parameters.  Must be
+   * correct length.
+   *
+   * This method will trigger a call to
+   * Sampler::ParameterSetExternally()  */
+  virtual ErrorType SetParameterValues(
+      const std::vector< double > & parameterValues);
+
+
+  /**
+   * Get the current value of a parameter
    *
    * \param parameterName The name of the Parameter whose value you
    *   want.
    * \return The value of the Parameter. */
-  virtual double GetParameterValue( const std::string & parameterName );
+  virtual double GetParameterValue( const std::string & parameterName ) const;
 
-  /** Compute the next set of parameters, output scalar values, and
+  /**
+   * Get the current parameter values.  */
+  const std::vector< double > & GetCurrentParameters() const;
+
+  /**
+   * Return the model's outputs for this->GetCurrentParameters().  */
+  const std::vector< double > & GetCurrentOutputs()  const;
+
+  /**
+   * Return the model's logLikelihood for this->GetCurrentParameters(). */
+  double GetCurrentLogLikelihood() const;
+
+  /*
+   *
+   */
+
+  /**
+   * Compute the next set of parameters, output scalar values, and
    * log likelihood
    *
    * \return A new Sample. */
   virtual Sample NextSample() = 0;
 
-  /** Get the current parameter values. */
-  const std::vector< double > & GetCurrentParameters() const;
+  /**
+   Return Error Type As String */
+  static std::string GetErrorTypeAsString( ErrorType error );
 
-  /** Get the current log-likelihood. */
-  double & GetCurrentLogLikelihood() const;
 
 protected:
-  /** Initialize the Sampler
-   *
-   * \param model The Model from which the Sampler should draw
-   *  samples. */
-  virtual void Initialize( const Model * model );
-
-  /** Given the name of a Parameter, return its index
-   *
-   * \param parameterName Name of the Parameter for which the index is
-   *   sought.
-   * \return The index of the Parameter if found, the maximum value of
-   *   unsigned int otherwise. */
-  unsigned int GetParameterIndex( const std::string & parameterName ) const;
+  /**
+   * Which Parameters are active?  Indexes correspond to indexes
+   * within this->GetParameters().
+   */
+  std::vector< bool > m_ActiveParameterIndices;
 
   /** The Model from which this Sampler takes samples. */
   const Model * m_Model;
@@ -189,17 +264,27 @@ protected:
   /** Stores the current log-likelihood. */
   double m_CurrentLogLikelihood;
 
-  /** Subclasses that need to reset internal state when a parameter
-  value has been changed outside the operation of the optimization
-  algorithm should override this method. */
-  virtual void ParameterSetExternally() {};
+  /* Protected methods: */
+
+  /** Initialize the Sampler
+   *
+   * \param model The Model from which the Sampler should draw
+   *  samples. */
+  virtual void Initialize( const Model * model );
+
+  /** Given the name of a Parameter, return its index
+   *
+   * \param parameterName Name of the Parameter for which the index is
+   *   sought.
+   * \return The index of the Parameter if found, the maximum value of
+   *   unsigned int otherwise. */
+  unsigned int GetParameterIndex( const std::string & parameterName ) const;
 
   /**
-     Which Parameters are active?  Indexes correspond to indexes
-     within this->GetParameters().
-  */
-  std::vector< bool > m_ActiveParameterIndices;
-
+   * Subclasses that need to reset internal state when a parameter
+   * value has been changed outside the operation of the optimization
+   * algorithm should override this method. */
+  virtual void ParameterSetExternally();
 
 }; // end Sampler
 
