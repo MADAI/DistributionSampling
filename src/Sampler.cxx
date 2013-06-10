@@ -16,10 +16,11 @@
  *
  *=========================================================================*/
 
-#include "Sampler.h"
-#include "Parameter.h"
+#include <algorithm> // std::count
 #include <cassert>
 
+#include "Sampler.h"
+#include "Parameter.h"
 
 namespace madai {
 
