@@ -43,6 +43,8 @@ PercentileGridSampler
 ::Initialize( const Model * model )
 {
   assert(model != NULL);
+  if ((model == NULL) || (m_Model == model))
+    return;
   m_Model = model;
 
   Sampler::Initialize( model );
@@ -57,12 +59,7 @@ unsigned int
 PercentileGridSampler
 ::GetNumberSamples()
 {
-  unsigned int result = 1;
-  for ( unsigned int i = 0; i < m_Model->GetNumberOfParameters(); ++i ) {
-    result *= m_SampleScale;
-  }
-
-  return result;
+  return std::pow(m_SampleScale, this->GetNumberOfActiveParameters());
 }
 
 
@@ -71,7 +68,9 @@ void PercentileGridSampler
 {
   if (m_Model == NULL)
     return;
-  unsigned int p = m_Model->GetNumberOfParameters();
+  // call this function *after* Deactivating Parameters!
+  unsigned int p = this->GetNumberOfActiveParameters();
+  assert((p <= m_Model->GetNumberOfParameters()) && (p > 0));
   unsigned int n = static_cast< unsigned int >(
       std::ceil(std::pow(N,1.0 / static_cast< double >(p))));
   if (n < 2)
@@ -83,22 +82,27 @@ Sample
 PercentileGridSampler
 ::NextSample()
 {
-  Model * m = const_cast< Model * >(m_Model);
+  const std::vector< Parameter > & parameters = m_Model->GetParameters();
+  assert (this->GetNumberOfActiveParameters() > 0);
   unsigned int p = m_Model->GetNumberOfParameters();
 
-  // do something
-  std::vector< double > x(p,0.0);
+  assert(m_CurrentParameters.size() == m_Model->GetNumberOfParameters());
+  std::vector< double > x(m_CurrentParameters); // copy constructor
 
+  // do something
   double rangeOverN = 1.0 / static_cast< double >( m_SampleScale );
   double start = 0.5 * rangeOverN;
   for ( unsigned int dim = 0; dim < p; ++dim ) {
-    x[dim] =
-      m_Model->GetParameters()[dim].GetPriorDistribution()
-      ->GetPercentile(start + (m_StateVector[dim] * rangeOverN));
+    if (this->IsParameterActive(dim)) {
+      x[dim] =
+        parameters[dim].GetPriorDistribution()->GetPercentile(
+            start + (m_StateVector[dim] * rangeOverN));
+    }
   }
 
   unsigned int dim = 0;
-  while (m_StateVector[dim] == m_SampleScale - 1) {
+  while ((! this->IsParameterActive(dim)) ||
+         (m_StateVector[dim] == m_SampleScale - 1)) {
     m_StateVector[dim] = 0;
     dim = (dim + 1) % p;
   }
@@ -106,6 +110,7 @@ PercentileGridSampler
 
   std::vector< double > y( m_Model->GetNumberOfScalarOutputs(), 0.0 );
   double ll; // ll is new_log_likelihood
+  Model * m = const_cast< Model * >(m_Model);
   m->GetScalarOutputsAndLogLikelihood(x,y,ll);
   return Sample( x, y, ll );
 
