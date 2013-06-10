@@ -24,11 +24,11 @@
 #include <vector>
 
 #include "Model.h"
-#include "Paths.h"
-#include "RuntimeParameterFileReader.h"
-
 
 namespace madai {
+
+class Sampler;
+class RuntimeParameterFileReader;
 
 void EnsurePathSeparatorAtEnd( std::string & path );
 
@@ -54,6 +54,20 @@ int FindIndex(const S & v, const T & s)
 }
 
 Model::ErrorType LoadObservations(Model * model, std::istream & i);
+
+/**
+  The InactiveParametersFile has the same format as any option file:
+  it can have #-marked comments, which will be ignored.
+
+  If it has a line with the format:
+      PARAMETER_NAME PARAMETER_VALUE
+  then that parameter will be set to that value and deactivated.
+
+  Return true if everything works correctly.
+  */
+bool SetInactiveParameters(
+    const std::string & InactiveParametersFile,
+    madai::Sampler & sampler);
 
 
 } // end namespace madai

@@ -28,8 +28,8 @@
 
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
+#include "Paths.h"
 #include "System.h"
-
 
 int main(int argc, char ** argv) {
   if (argc < 3) {

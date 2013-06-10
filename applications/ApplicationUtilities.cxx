@@ -23,6 +23,9 @@
 
 #include "Paths.h"
 #include "Defaults.h"
+#include "System.h"
+#include "RuntimeParameterFileReader.h"
+#include "Sampler.h"
 
 #include <madaisys/SystemTools.hxx>
 
@@ -177,6 +180,57 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i)
     return e;
   }
   return madai::Model::NO_ERROR;
+}
+
+
+/**
+  The InactiveParametersFile has the same format as any option file:
+  it can have #-marked comments, which will be ignored.
+
+  If it has a line with the format:
+      PARAMETER_NAME PARAMETER_VALUE
+  then that parameter will be set to that value and deactivated.
+
+  Return true if everything works correctly.
+  */
+bool SetInactiveParameters(
+    const std::string & InactiveParametersFile,
+    madai::Sampler & sampler)
+{
+  if (InactiveParametersFile == "")
+    return true; // an empty filename is taken to mean no parameters
+                 // should be deactivated.
+  if (! IsFile(InactiveParametersFile)) {
+    std::cerr
+      << "Expected \"" << InactiveParametersFile
+      << "\" to be a file, but it does not exist or is a directory.\n";
+    return false;
+  }
+
+  madai::RuntimeParameterFileReader rpfr;
+  if (! rpfr.ParseFile( InactiveParametersFile )) {
+    std::cerr
+      << "Error in RuntimeParameterFileReader::ParseFile("
+      << InactiveParametersFile << ")\n";
+    return false;
+  }
+  const std::vector< Parameter > & parameters = sampler.GetParameters();
+  std::vector< double > parameterValues(sampler.GetCurrentParameters());
+  assert(parameterValues.size() == parameters.size());
+
+  for (unsigned int i = 0; i < parameters.size(); ++i) {
+    const std::string & parameterName = parameters[i].m_Name;
+    if (rpfr.HasOption(parameterName)) {
+      parameterValues[i] = rpfr.GetOptionAsDouble(parameterName);
+      sampler.DeactivateParameter( i );
+    }
+  }
+  if (sampler.SetParameterValues( parameterValues) !=
+      madai::Sampler::NO_ERROR) {
+    std::cerr << "Error in madai::Sampler::SetParameterValues():\n";
+    return false;
+  }
+  return true;
 }
 
 

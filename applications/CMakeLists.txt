@@ -4,6 +4,10 @@ add_library( ApplicationUtilities
   Defaults.cxx
 )
 
+target_link_libraries( ApplicationUtilities
+  DistributionSampling
+)
+
 set( APPLICATIONS
   madai_pca_decompose
   madai_basic_train
