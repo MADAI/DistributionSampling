@@ -162,16 +162,15 @@ int main(int argc, char ** argv) {
       return EXIT_FAILURE;
     }
 
-    std::string observationsFile = experimentalResultsFile +
-      madai::Paths::SEPARATOR + madai::Paths::RESULTS_FILE;
-    std::ifstream observations( observationsFile.c_str() );
-    if ( madai::Model::NO_ERROR != externalModel.LoadObservations( observations ) ) {
+    std::ifstream experimentalResults(experimentalResultsFile.c_str());
+    if ( madai::Model::NO_ERROR !=
+         externalModel.LoadObservations( experimentalResults ) ) {
       std::cerr << "Error loading observations.\n";
       externalModel.StopProcess();
 
       return EXIT_FAILURE;
     }
-    observations.close();
+    experimentalResults.close();
 
     model = &externalModel;
   }
