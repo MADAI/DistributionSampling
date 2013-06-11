@@ -21,9 +21,6 @@
 
 #include "Distribution.h"
 
-#include "boost/math/distributions/normal.hpp"
-
-
 namespace madai {
 
 /** \class GaussianDistribution
@@ -75,8 +72,17 @@ protected:
   inline double GetExponent( double value ) const;
 
 private:
-  /** Underlying class from Boost library that computes the things we want. */
-  boost::math::normal * m_InternalDistribution;
+  /** Explicitly disallowed */
+  GaussianDistribution& operator=(const madai::GaussianDistribution &);
+
+  /** Explicitly disallowed */
+  GaussianDistribution(const madai::GaussianDistribution &);
+
+  /** @{ */
+  /** Opaque Pointer for Private Implementation */
+  struct GaussianDistributionPrivate;
+  GaussianDistributionPrivate * m_GaussianDistributionImplementation;
+  /** @} */
 
 };
 

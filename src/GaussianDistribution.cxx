@@ -20,13 +20,30 @@
 
 #include <cmath>
 
+#include "boost/math/distributions/normal.hpp"
+
+
 namespace madai {
+
+struct GaussianDistribution::GaussianDistributionPrivate {
+  /** Underlying class from Boost library that computes the things we want. */
+  boost::math::normal m_InternalDistribution;
+  GaussianDistributionPrivate(double mean, double standardDeviation);
+};
+
+GaussianDistribution::GaussianDistributionPrivate
+::GaussianDistributionPrivate(double mean, double standardDeviation) :
+  m_InternalDistribution(mean, standardDeviation)
+{
+}
 
 GaussianDistribution
 ::GaussianDistribution() :
   m_Mean( 0.0 ),
   m_StandardDeviation( 1.0 ),
-  m_InternalDistribution( new boost::math::normal( m_Mean, m_StandardDeviation ) )
+  m_GaussianDistributionImplementation(
+      new GaussianDistribution::GaussianDistributionPrivate(
+          m_Mean, m_StandardDeviation))
 {
 }
 
@@ -34,7 +51,7 @@ GaussianDistribution
 GaussianDistribution
 ::~GaussianDistribution()
 {
-  delete m_InternalDistribution;
+  delete m_GaussianDistributionImplementation;
 }
 
 Distribution *
@@ -54,9 +71,10 @@ GaussianDistribution
 {
   m_Mean = mean;
 
-  delete m_InternalDistribution;
-  m_InternalDistribution = new boost::math::normal( m_Mean, m_StandardDeviation );
-
+  delete m_GaussianDistributionImplementation;
+  m_GaussianDistributionImplementation =
+    new GaussianDistribution::GaussianDistributionPrivate(
+        m_Mean, m_StandardDeviation);
 }
 
 
@@ -74,9 +92,10 @@ GaussianDistribution
 {
   m_StandardDeviation = standardDeviation;
 
-  delete m_InternalDistribution;
-  m_InternalDistribution = new boost::math::normal( m_Mean, m_StandardDeviation );
-
+  delete m_GaussianDistributionImplementation;
+  m_GaussianDistributionImplementation =
+    new GaussianDistribution::GaussianDistributionPrivate(
+        m_Mean, m_StandardDeviation);
 }
 
 
@@ -112,7 +131,8 @@ GaussianDistribution
 ::GetProbabilityDensity( double value ) const
 {
   //return this->GetNormalizationFactor() * exp( this->GetExponent( value ) );
-  return boost::math::pdf( *m_InternalDistribution, value );
+  return boost::math::pdf(
+      m_GaussianDistributionImplementation->m_InternalDistribution, value );
 }
 
 
@@ -120,7 +140,9 @@ double
 GaussianDistribution
 ::GetPercentile( double percentile ) const
 {
-  return boost::math::quantile( *m_InternalDistribution, percentile );
+  return boost::math::quantile(
+      m_GaussianDistributionImplementation->m_InternalDistribution,
+      percentile );
 }
 
 double
