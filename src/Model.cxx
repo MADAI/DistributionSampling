@@ -264,6 +264,10 @@ Model::ErrorType
 Model
 ::LoadObservations(std::istream & i)
 {
+  if ( !i.good() ) {
+    return Model::FILE_NOT_FOUND_ERROR;
+  }
+
   // std::ifstream i("DIRECTORY/experimental_results/results.dat");
   const std::vector< std::string > & scalarOutputNames = this->GetScalarOutputNames();
   unsigned int numberOfScalarOutputs = this->GetNumberOfScalarOutputs();
