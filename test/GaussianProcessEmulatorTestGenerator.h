@@ -35,7 +35,7 @@ public:
     const std::vector< madai::Parameter > & parameters );
 
   void WriteTrainingFile(std::ostream & o);
-  
+
   bool WriteDirectoryStructure(std::string StatisticsDirectory);
 
   static void LatinHypercube(

@@ -416,7 +416,7 @@ Model
       distSq += std::pow(scalarDifferences[i],2);
     }
   }
-  
+
   std::vector< double > constantCovariance;
   if ( !this->GetConstantCovariance(constantCovariance) ) {
     std::cerr << "Error getting the constant covariance matrix from the model\n";
@@ -497,7 +497,7 @@ Model
               << m_ObservedScalarCovariance.size() << "\n";
     return false;
   }
-  
+
   x.resize(t*t);
   x = m_ObservedScalarCovariance;
   return true;

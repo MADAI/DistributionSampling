@@ -57,7 +57,7 @@ public:
     data (submodels with their thetas).
     \returns true on success. */
   bool LoadEmulator(GaussianProcessEmulator * gpe, std::string TopDirectory);
-  
+
 
 };
 

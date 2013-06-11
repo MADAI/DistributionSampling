@@ -78,11 +78,10 @@ private:
   /** Explicitly disallowed */
   GaussianDistribution(const madai::GaussianDistribution &);
 
-  /** @{ */
-  /** Opaque Pointer for Private Implementation */
   struct GaussianDistributionPrivate;
+
+  /** Opaque Pointer for Private Implementation */
   GaussianDistributionPrivate * m_GaussianDistributionImplementation;
-  /** @} */
 
 };
 

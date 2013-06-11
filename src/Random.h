@@ -83,11 +83,10 @@ private:
   /** Explicitly disallowed */
   Random(madai::Random const &);
 
-  /** @{ */
-  /** Opaque Pointer for Private Implementation */
   struct RandomPrivate;
+
+  /** Opaque Pointer for Private Implementation */
   RandomPrivate * m_RandomImplementation;
-  /** @} */
 };
 
 }

@@ -99,7 +99,6 @@ UniformDistribution
 }
 
 
-
 double
 UniformDistribution
 ::GetProbabilityDensity( double x ) const

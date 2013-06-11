@@ -125,7 +125,6 @@ GaussianDistribution
 }
 
 
-
 double
 GaussianDistribution
 ::GetProbabilityDensity( double value ) const

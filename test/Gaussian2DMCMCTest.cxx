@@ -30,7 +30,7 @@
  * Do a large run with the mcmc using a 2D gaussian as the model. Binning the
  * point in parameter space should approximate a gaussian shape.
  ***/
- 
+
 bool skip_comments(std::FILE * fp, char comment_character){
   int c = std::getc(fp);
   if((c == EOF) || std::ferror(fp)) {
@@ -49,7 +49,7 @@ bool skip_comments(std::FILE * fp, char comment_character){
   }
   return true;
 }
- 
+
 int main( int argc, char ** argv ) {
   srand( time( NULL ) );
   if( argc != 2 ){
@@ -63,19 +63,19 @@ int main( int argc, char ** argv ) {
   std::string info_dir( argv[1] );
   madai::Gaussian2DModel g2d_model;
   madai::MarkovChainMonteCarloSampler run( &g2d_model, info_dir );
-  
+
   std::vector< madai::Parameter > const * parameters = &( g2d_model.GetParameters() );
   for( int i = 0; i < parameters->size(); i++ )
     run.ActivateParameter( (*parameters)[i].m_Name );
-  
+
   madai::Trace trace( info_dir, "default" );
   if( run.m_BurnIn == 0 ) {
     trace.Add( run.m_InitialTheta );
   }
-  
+
   for( int j = 0; j < g2d_model.GetNumberOfParameters(); j++ )
     run.m_ParameterValues.push_back(0);
-  
+
   run.m_AcceptCount = 0;
   for( run.m_IterationNumber = 1; run.m_IterationNumber < trace.m_MaxIterations; run.m_IterationNumber++ ) {
     run.NextSample( &trace );
@@ -84,9 +84,9 @@ int main( int argc, char ** argv ) {
     trace.WriteOut( g2d_model.GetParameters() );
   }
   trace.MakeTrace();
-  
+
   std::cerr << "Trace Created" << std::endl;
-  
+
   // At this point the run has completed. Now I want to bin the points in the trace.
   std::string trace_file_name;
   trace_file_name = trace.m_TraceDirectory.c_str();
@@ -96,7 +96,7 @@ int main( int argc, char ** argv ) {
     std::cerr << "Error opening trace.dat [1]" << std::endl;
     return EXIT_FAILURE;
   }
-  
+
   // Find ranges of the trace data
   double range[2][2];
   double x, y;
@@ -121,9 +121,9 @@ int main( int argc, char ** argv ) {
   range[1][0] -= 0.5;
   range[0][1] += 0.5;
   range[1][1] += 0.5;
-  
+
   std::cerr << "Ranges of MCMC data found" << std::endl;
-  
+
   fclose( fp );
   FILE* tfile = fopen( trace_file_name.c_str(), "r" );
   if( tfile == NULL ) {
@@ -155,9 +155,9 @@ int main( int argc, char ** argv ) {
       rho[1][j] += densities[i][j];
     }
   }
-  
+
   std::cerr << "Trace has been binned into densities" << std::endl;
-  
+
   // Print densities to files
   std::ofstream o1;
   o1.open( "DensityPlot.txt" );
@@ -200,7 +200,7 @@ int main( int argc, char ** argv ) {
     delete densities[q];
   }
   delete densities;
-  
+
   // Find lower and upper bins at places of the same height on the gaussian (used to estimate the means)
   int** lower_bin = new int*[2]();
   int** upper_bin = new int*[2]();
@@ -228,9 +228,9 @@ int main( int argc, char ** argv ) {
       }
     }
   }
-  
+
   std::cerr << "Found upper and lower bins" << std::endl;
-  
+
   // Calculate the Means (Average the upper and lower positions for multiple heights and then average across heights)
   double* Means = new double[2]();
   double** mns = new double*[2]();
@@ -253,9 +253,9 @@ int main( int argc, char ** argv ) {
     }
     Means[iter] /= 10.0;
   }
-  
+
   std::cerr << "Means Calculated" << std::endl;
-  
+
   double* error = new double[2]();
   for( iter = 0; iter < 2; iter++ ) {
     for( beta = 0; beta < 10; beta++ ) {
@@ -264,15 +264,15 @@ int main( int argc, char ** argv ) {
     error[iter] /= 10;
     error[iter] = sqrt( error[iter] );
   }
-  
+
   std::cerr << "Means Errors Calculated" << std::endl;
-  
+
   // Mean bins
   mb[0] = int( double( nbins ) * ( Means[0] - range[0][0] ) / ( range[0][1] - range[0][0] ) );
   mb[1] = int( double( nbins ) * ( Means[1] - range[1][0] ) / ( range[1][1] - range[1][0] ) );
-  
+
   std::cerr << "Got Mean bins" << std::endl;
-  
+
   // Initial values of the deviations
   double** sigma = new double*[2]();
   for( iter = 0; iter < 2; iter++ ) {
@@ -282,9 +282,9 @@ int main( int argc, char ** argv ) {
     sigma[iter][1] = 0;
     sigma[iter][2] = 3 * Dev[iter];
   }
-  
+
   std::cerr << "Initialized sigmas" << std::endl;
-  
+
   // Begin optimizing the gaussian as a function of sigma
   double prec = -16.0;
   double* S = new double[2]();
@@ -333,7 +333,7 @@ int main( int argc, char ** argv ) {
     }
     std::cerr << std::endl;
   }
-  
+
   // Print out fit and model values for inspection
   std::cerr << "Parameters for the gaussian fit of the densities:" << std::endl;
   double ModMeanX, ModMeanY;
@@ -342,7 +342,7 @@ int main( int argc, char ** argv ) {
   std::cerr << "XSigma: Fit = " << sigma[0][0] << "  Model = " << Dev[0] << std::endl;
   std::cerr << "YMean: Fit = " << Means[1] << "  Error = " << error[1] << "  Model = " << ModMeanY << std::endl;
   std::cerr << "YSigma: Fit = " << sigma[1][0] << "  Model = " << Dev[1] << std::endl;
-  
+
   // Calculate various values which might shine light on how well a fit the gaussian is
   double* peak_abs_dev = new double[2]();
   double* peak_perc_dev = new double[2]();
@@ -380,12 +380,12 @@ int main( int argc, char ** argv ) {
   std::cerr << "The peak percentage deviation from rhoy is:\n" << peak_perc_dev[1] << "\n\n";
   std::cerr << "The average absolute deviations:\nrhox = " << S[0] / double( used_bins ) << "\nrhoy = " << S[1] / double( used_bins ) << std::endl;
   std::cerr << "The average percentage deviations:\nrhox = " << SPD[0] / double( used_bins ) << "\nrhoy = " << SPD[1] / double( used_bins ) << std::endl;
-  
+
   for( iter = 0; iter < 2; iter++ ) {
     delete rho[iter];
   }
   delete rho;
-  
+
   // Open pipe to create plots of rho(x) and rho(y)
   FILE* XPlot = popen( "gnuplot -persist", "w" );
   bool PlotDensities = true;
@@ -422,6 +422,6 @@ int main( int argc, char ** argv ) {
     std::cerr << "Densities have been written to DensityPlot.txt, DensityPlotX.txt, and DensityPlotY.txt" << std::endl;
     std::cerr << "Plot these values for inspection of the distribution" << std::endl;
   }
-  
+
   return EXIT_SUCCESS;
 }

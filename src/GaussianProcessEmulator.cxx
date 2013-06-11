@@ -199,8 +199,7 @@ bool GaussianProcessEmulator::SingleModel::GetGradientOfCovarianceCalc(
     Eigen::VectorXd & gradient) const
 {
   int p = m_Parent->m_NumberParameters;
-  int numberThetas = m_Thetas.size();
-  int offset;
+  int offset = 0;
   switch(m_CovarianceFunction) {
     case POWER_EXPONENTIAL_FUNCTION:
       offset = 3;
@@ -212,17 +211,21 @@ bool GaussianProcessEmulator::SingleModel::GetGradientOfCovarianceCalc(
       break;
     default:
       assert(false);
+      return false;
   }
-  assert(numberThetas == (p + offset));
+  if (m_Thetas.size() != (p + offset)) {
+    assert(false);
+    return false;
+  }
   const double & amplitude = m_Thetas(0);
-  
+
   double distanceSquared = 0.0;
   for (int i = 0; i < p; i++) {
     double d = v1(i) - v2(i);
     double l = m_Thetas(i + offset);
     distanceSquared += std::pow( (d / l), 2);
   }
-  
+
   gradient.resize(p);
   switch(m_CovarianceFunction) {
   case POWER_EXPONENTIAL_FUNCTION:
@@ -443,7 +446,7 @@ bool GaussianProcessEmulator::GetUncertaintyScalesAsCovariance(
       return false;
     }
   }
-  
+
   x.resize(t*t);
   Eigen::Map< Eigen::MatrixXd > Cov(&(x[0]),t,t);
   Cov = m_UncertaintyScales.asDiagonal();
@@ -970,7 +973,7 @@ bool GaussianProcessEmulator::GetGradientOfEmulatorOutputs(
     return false;
   }
   gradients.clear();
-  
+
   int p = m_NumberParameters;
   int t = m_NumberPCAOutputs;
   int o = m_NumberOutputs;
@@ -1135,14 +1138,14 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
    Get the gradients of the error returned by the emulator. */
 bool GaussianProcessEmulator::GetGradientsOfCovariances(
     const std::vector< double > & x,
-    std::vector< Eigen::MatrixXd > & gradients ) const 
+    std::vector< Eigen::MatrixXd > & gradients ) const
 {
   if (m_Status != READY)
     return false;
-  
+
   Eigen::Map<const Eigen::VectorXd> point(&(x[0]),x.size());
   int p = m_NumberParameters;
-  
+
   Eigen::MatrixXd var_grads(m_NumberPCAOutputs, p);
   for ( int i = 0; i < m_NumberPCAOutputs; i++ ) {
     std::vector< double > tg;
@@ -1150,10 +1153,10 @@ bool GaussianProcessEmulator::GetGradientsOfCovariances(
       return false;
     var_grads.row(i) = Eigen::Map< Eigen::VectorXd >(&(tg[0]),p);
   }
-  
+
   Eigen::MatrixXd uncertaintyScales
   = m_UncertaintyScales * m_UncertaintyScales.transpose();
-  
+
   for ( int i = 0; i < p; i++ ) {
     gradients.push_back( uncertaintyScales.cwiseProduct( m_RetainedPCAEigenvectors
             * var_grads.col(i).asDiagonal() * m_RetainedPCAEigenvectors.transpose() ) );

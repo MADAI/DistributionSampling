@@ -113,13 +113,13 @@ public:
     const std::vector< double > & x,
     std::vector< double > & y,
     std::vector< double > & ycov) const;
-    
+
   /**
     Get the gradients of the model outputs at x. */
   bool GetGradientOfEmulatorOutputs(
     const std::vector< double > & x,
     std::vector< double > & gradients ) const;
-  
+
   /**
     Get the gradients of the elements of the output covaiance matrix. */
   bool GetGradientsOfCovariances(

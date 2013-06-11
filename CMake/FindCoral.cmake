@@ -15,7 +15,7 @@ set( LIB_PATHS
   /usr/lib
   /usr/local/lib
   /opt/local/lib
-  /Users/quammen/tmp/lib  
+  /Users/quammen/tmp/lib
 )
 
 set( INCLUDE_PATHS
@@ -84,7 +84,7 @@ if ( NOT coral_DIR )
   endif()
 
 endif()
-  
+
 if ( NOT coral_FOUND )
   if ( coral_FIND_REQUIRED )
     message( FATAL_ERROR ${coral_DIR_MESSAGE})

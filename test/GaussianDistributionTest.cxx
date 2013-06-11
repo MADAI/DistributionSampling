@@ -27,7 +27,7 @@
 int main( int , char *[] )
 {
   madai::GaussianDistribution distribution;
-  
+
   if ( distribution.GetMean() != 0.0 ) {
     std::cerr << "Default mean is not 0.0" << std::endl;
     return EXIT_FAILURE;
@@ -58,7 +58,7 @@ int main( int , char *[] )
   double x = 2.9;
   double variance = newStandardDeviation * newStandardDeviation;
   double normalization = 1.0 / sqrt( 2.0 * M_PI * variance );
-  double expectedLogDensity = log( normalization ) + 
+  double expectedLogDensity = log( normalization ) +
     -( x - newMean ) * ( x - newMean ) / ( 2.0 * variance );
   double actualLogDensity = distribution.GetLogProbabilityDensity( x );
   if ( expectedLogDensity != actualLogDensity ) {

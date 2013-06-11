@@ -163,7 +163,7 @@ int main(int argc, char ** argv) {
               << "', should have been 'output'" << std::endl;
     return EXIT_FAILURE;
   }
-  
+
   int t = externalModel.GetNumberOfScalarOutputs();
   std::vector< double > observedScalarValues;
   for(int i = 0; i < t; ++i)

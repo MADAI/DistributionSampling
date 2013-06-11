@@ -15,7 +15,7 @@ set( LIB_PATHS
   /usr/lib
   /usr/local/lib
   /opt/local/lib
-  /Users/quammen/tmp/lib  
+  /Users/quammen/tmp/lib
 )
 
 set( INCLUDE_PATHS
@@ -84,7 +84,7 @@ if ( NOT MADAIEmulator_DIR )
   endif()
 
 endif()
-  
+
 if ( NOT MADAIEmulator_FOUND )
   if ( MADAIEmulator_FIND_REQUIRED )
     message( FATAL_ERROR ${MADAIEmulator_DIR_MESSAGE})

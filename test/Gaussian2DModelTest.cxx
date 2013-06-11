@@ -101,7 +101,7 @@ int main( int, char *[] )
   std::vector< double > parameters;
   parameters.push_back( 22.2 );
   parameters.push_back( -14.0 );
-  
+
   std::vector< double > scalars;
   error = model->GetScalarOutputs( parameters, scalars );
   if ( error != madai::Model::NO_ERROR )
