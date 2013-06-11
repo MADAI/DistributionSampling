@@ -18,6 +18,8 @@
 #include "ApplicationUtilities.h"
 
 #include <algorithm> // std::transform
+#include <cassert>
+#include <cmath>
 
 #include "Paths.h"
 #include "Defaults.h"

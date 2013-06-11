@@ -18,6 +18,7 @@
 
 #include "Gaussian2DModel.h"
 
+#include <cassert>
 #include <cmath>
 
 #include "UniformDistribution.h"

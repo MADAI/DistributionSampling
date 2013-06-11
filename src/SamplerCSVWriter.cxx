@@ -17,6 +17,7 @@
  *=========================================================================*/
 
 #include <cassert>
+#include <cstdlib>
 
 #include "SamplerCSVWriter.h"
 #include "Sample.h"

@@ -16,6 +16,7 @@
  *
  *=========================================================================*/
 
+#include <cassert>
 #include <iostream> // std::cerr
 #include <fstream> // std::ifstream, std::ofstream
 #include <string> // std::string
