@@ -18,26 +18,55 @@ look for bugs is in your topic branch.
 
 To create new topic branch, use the following commands:
 
-git branch NewTopicBranch
+    git branch NewTopicBranch
 
 This will create a new branch called "NewTopicBranch" (you should give
 your topic a more sensible name). It will have all the same commits as
 the master branch. To add new commits to the NewTopicBranch, you must
 first check it out:
 
-git checkout NewTopicBranch
+    git checkout NewTopicBranch
 
 Subsequent invocations of "git commit" will commit to that topic
 branch and won't touch the master branch.
 
 To can do the same as the above two commands with a single command:
 
-git checkout -b NewTopicBranch.
+    git checkout -b NewTopicBranch.
+
+If there are changes in the master branch while you are working on
+your branch, you may want to rebase your branch on the updated master
+branch.  This will guarantee that your changes will be compatible the
+changes on master.
+
+    git checkout master
+    git pull
+    git checkout NewTopicBranch
+    git rebase master
 
 After you are satisfied with your work, you should push the topic
 branch to the main git repository so that others may review it.
 
-git push origin NewTopicBranch
+    git push origin NewTopicBranch
+
+Before pushing to the origin repository, please verify:
+
+  - The code compiles with no errors or warnings in both Debug and
+    Release mode.
+
+  - The code adheres to the project's Coding Style Rules and passes
+    the Style Check.
+
+  - CTest returns no errors in both Debug and Release mode.
+
+  - The change does what you expect it to.
+
+  - The commit messages describe the changes.
+
+  - The branch's name is descriptive.  If the branch addresses an
+    issue in the project issue tracker, name it
+    Issue(###)_(Descriptive_Name).  You can rename you issue with
+    `git branch -m OldBranchName BetterBranchName`.
 
 If the work is satisfactory, then the topic branch will be merged
 into the master branch.
@@ -45,15 +74,15 @@ into the master branch.
 After your topic branch is merged with the master branch, you should
 update your master branch using
 
-git checkout master
-git pull origin master
+    git checkout master
+    git pull origin master
 
 Then you can delete your topic branch from your local repository
 using:
 
-git branch -d NewTopicBranch
+    git branch -d NewTopicBranch
 
 If you did some work in a branch and then decide that it shouldn't be
 included in master, you can force a delete your branch with
 
-git branch -D NewTopicBranch
+    git branch -D NewTopicBranch
