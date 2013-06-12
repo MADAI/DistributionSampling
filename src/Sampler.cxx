@@ -347,6 +347,7 @@ Sampler
   Model::ErrorType error = m_Model->GetScalarOutputsAndLogLikelihood(
       m_CurrentParameters, m_CurrentOutputs, m_CurrentLogLikelihood);
   assert(error == Model::NO_ERROR);
+  (void) error;
 }
 
 
