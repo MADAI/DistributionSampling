@@ -80,8 +80,11 @@ std::string GetExperimentalResultsFile( const std::string & statisticsDirectory,
       experimentalResultsFile.substr( 1, experimentalResultsFile.size()-2 );
   }
 
+  std::string statisticsDirectoryCopy( statisticsDirectory );
+  EnsurePathSeparatorAtEnd( statisticsDirectoryCopy );
+
   if ( experimentalResultsFile[0] != Paths::SEPARATOR ) {
-    experimentalResultsFile.insert( 0, statisticsDirectory );
+    experimentalResultsFile.insert( 0, statisticsDirectoryCopy );
   }
 
   return experimentalResultsFile;
