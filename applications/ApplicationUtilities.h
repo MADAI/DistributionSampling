@@ -30,6 +30,10 @@ namespace madai {
 class Sampler;
 class RuntimeParameterFileReader;
 
+/**
+ * Ensures that a path separator appropriate for the system ('/' for
+ * Mac OS X and Linux, '\' for Windows) is at the end of the path
+ * passed in as the argument. Modifies the input argument. */
 void EnsurePathSeparatorAtEnd( std::string & path );
 
 std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
