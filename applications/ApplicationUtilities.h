@@ -67,7 +67,7 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i);
   Return true if everything works correctly.
   */
 bool SetInactiveParameters(
-    const std::string & InactiveParametersFile,
+    const std::string & inactiveParametersFile,
     madai::Sampler & sampler);
 
 
