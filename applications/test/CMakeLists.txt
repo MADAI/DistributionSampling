@@ -11,6 +11,7 @@ include_directories( ${DistributionSampling_SOURCE_DIR}/applications )
 
 foreach( test
   EnsurePathSeparatorAtEndTest
+  FindIndexTest
   LowerCaseTest
   SplitStringTest
   )

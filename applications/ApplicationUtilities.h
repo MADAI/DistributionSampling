@@ -63,6 +63,12 @@ std::string LowerCase( const std::string & s );
  * will be returned as the string between those two separators. */
 std::vector< std::string > SplitString( const std::string & input, char separator );
 
+
+/**
+ * Given a vector of type T and an argument of type T, returns the
+ * index of the element in the vector that equals the argument
+ * according to the == operator. If the element is not found in the
+ * index, returns -1. */
 template<class S, class T>
 int FindIndex(const S & v, const T & s)
 {
