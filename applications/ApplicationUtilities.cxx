@@ -54,8 +54,11 @@ std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
     modelOutputDirectory = modelOutputDirectory.substr( 1, modelOutputDirectory.size()-2 );
   }
 
+  std::string statisticsDirectoryCopy( statisticsDirectory );
+  EnsurePathSeparatorAtEnd( statisticsDirectoryCopy );
+
   if ( modelOutputDirectory[0] != Paths::SEPARATOR ) {
-    modelOutputDirectory.insert( 0, statisticsDirectory );
+    modelOutputDirectory.insert( 0, statisticsDirectoryCopy );
   }
 
   return modelOutputDirectory;
