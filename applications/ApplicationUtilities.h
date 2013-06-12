@@ -36,6 +36,9 @@ class RuntimeParameterFileReader;
  * passed in as the argument. Modifies the input argument. */
 void EnsurePathSeparatorAtEnd( std::string & path );
 
+/**
+ * Get the model output directory specified by the settings.dat file
+ * in the statisticsDirectory. */
 std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
                                      const RuntimeParameterFileReader & settings );
 
