@@ -42,6 +42,9 @@ void EnsurePathSeparatorAtEnd( std::string & path );
 std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
                                      const RuntimeParameterFileReader & settings );
 
+/**
+ * Get the experimental results file specified by the settings.dat
+ * file in the statisticsDirectory. */
 std::string GetExperimentalResultsFile( const std::string & statisticsDirectory,
                                         const RuntimeParameterFileReader & settings );
 
