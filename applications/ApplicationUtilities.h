@@ -52,6 +52,15 @@ std::string LowerCase( const char * buffer );
  * are lowercase. */
 std::string LowerCase( const std::string & s );
 
+/**
+ * Splits the input string by the separator character. The result is a
+ * vector of substrings from the original string that were separated
+ * by the the separator character. Note that if the input starts with
+ * a separator character, the first element in the output vector will
+ * be an empty string. Similarly, if the input ends with a separator
+ * character, the last element will be an empty string. Finally, if
+ * there are two subsequent separators in the input, an empty string
+ * will be returned as the string between those two separators. */
 std::vector< std::string > SplitString( const std::string & input, char separator );
 
 template<class S, class T>
