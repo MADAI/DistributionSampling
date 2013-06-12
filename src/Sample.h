@@ -87,6 +87,12 @@ public:
 
 }; // class Sample
 
+/**
+ Operator for printing to an ostream.
+*/
+std::ostream & operator<<(std::ostream & os, const Sample & sample);
+
+
 } // end namespace madai
 
 #endif // madai_Sample_h_included

@@ -16,6 +16,8 @@
  *
  *=========================================================================*/
 
+#include <ostream>
+
 #include "Sample.h"
 
 
@@ -87,6 +89,36 @@ Sample
 bool Sample
 ::operator<(const Sample & rhs) const {
     return (m_LogLikelihood < rhs.m_LogLikelihood);
+}
+
+
+std::ostream & operator<<(std::ostream & os, const Sample & sample) {
+
+  os << "Sample:\n";
+  os << "  ParameterValues: [";
+  for ( size_t i = 0; i < sample.m_ParameterValues.size(); ++i ) {
+    os << sample.m_ParameterValues[i];
+    if ( i < sample.m_ParameterValues.size()-1) os << ", ";
+  }
+  os << "]\n";
+
+  os << "  OutputValues: [";
+  for ( size_t i = 0; i < sample.m_OutputValues.size(); ++i ) {
+    os << sample.m_OutputValues[i];
+    if ( i < sample.m_OutputValues.size()-1) os << ", ";
+  }
+  os << "]\n";
+
+  os << "  LogLikelihood: [" << sample.m_LogLikelihood << "]\n";
+
+  if ( sample.m_Comments.size() > 0 ) {
+    for ( size_t i = 0; i < sample.m_Comments.size(); ++i ) {
+      os << sample.m_Comments[i];
+      if ( i < sample.m_Comments.size()-1) os << ", ";
+    }
+  }
+
+  return os;
 }
 
 } // end namespace madai
