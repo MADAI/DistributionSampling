@@ -56,8 +56,9 @@ int FindIndex(const S & v, const T & s)
 Model::ErrorType LoadObservations(Model * model, std::istream & i);
 
 /**
-  The InactiveParametersFile has the same format as any option file:
-  it can have #-marked comments, which will be ignored.
+  The file located at the path stored in inactiveParametersFile has
+  the same format as any option file: it can have comments preceded by
+  #, which will be ignored.
 
   If it has a line with the format:
       PARAMETER_NAME PARAMETER_VALUE

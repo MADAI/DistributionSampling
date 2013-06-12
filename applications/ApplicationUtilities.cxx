@@ -21,11 +21,11 @@
 #include <cassert>
 #include <cmath>
 
-#include "Paths.h"
 #include "Defaults.h"
-#include "System.h"
+#include "Paths.h"
 #include "RuntimeParameterFileReader.h"
 #include "Sampler.h"
+#include "System.h"
 
 #include <madaisys/SystemTools.hxx>
 
@@ -182,10 +182,10 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i)
   return madai::Model::NO_ERROR;
 }
 
-
 /**
-  The InactiveParametersFile has the same format as any option file:
-  it can have #-marked comments, which will be ignored.
+  The file located at the path stored in inactiveParametersFile has
+  the same format as any option file: it can have comments preceded by
+  #, which will be ignored.
 
   If it has a line with the format:
       PARAMETER_NAME PARAMETER_VALUE
@@ -194,24 +194,24 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i)
   Return true if everything works correctly.
   */
 bool SetInactiveParameters(
-    const std::string & InactiveParametersFile,
+    const std::string & inactiveParametersFile,
     madai::Sampler & sampler)
 {
-  if (InactiveParametersFile == "")
+  if (inactiveParametersFile == "")
     return true; // an empty filename is taken to mean no parameters
                  // should be deactivated.
-  if (! IsFile(InactiveParametersFile)) {
+  if (! IsFile(inactiveParametersFile)) {
     std::cerr
-      << "Expected \"" << InactiveParametersFile
+      << "Expected \"" << inactiveParametersFile
       << "\" to be a file, but it does not exist or is a directory.\n";
     return false;
   }
 
-  madai::RuntimeParameterFileReader rpfr;
-  if (! rpfr.ParseFile( InactiveParametersFile )) {
+  madai::RuntimeParameterFileReader settings;
+  if (! settings.ParseFile( inactiveParametersFile )) {
     std::cerr
       << "Error in RuntimeParameterFileReader::ParseFile("
-      << InactiveParametersFile << ")\n";
+      << inactiveParametersFile << ")\n";
     return false;
   }
   const std::vector< Parameter > & parameters = sampler.GetParameters();
@@ -220,8 +220,8 @@ bool SetInactiveParameters(
 
   for (unsigned int i = 0; i < parameters.size(); ++i) {
     const std::string & parameterName = parameters[i].m_Name;
-    if (rpfr.HasOption(parameterName)) {
-      parameterValues[i] = rpfr.GetOptionAsDouble(parameterName);
+    if (settings.HasOption(parameterName)) {
+      parameterValues[i] = settings.GetOptionAsDouble(parameterName);
       sampler.DeactivateParameter( i );
     }
   }
