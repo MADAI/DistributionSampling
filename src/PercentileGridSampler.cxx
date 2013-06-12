@@ -59,7 +59,9 @@ unsigned int
 PercentileGridSampler
 ::GetNumberSamples()
 {
-  return std::pow(m_SampleScale, this->GetNumberOfActiveParameters());
+  float floatResult = std::pow(static_cast<float>(m_SampleScale),
+                               static_cast<int>(this->GetNumberOfActiveParameters()));
+  return static_cast<unsigned int>( floatResult + 0.5 );
 }
 
 
