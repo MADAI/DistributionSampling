@@ -42,9 +42,15 @@ std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
 std::string GetExperimentalResultsFile( const std::string & statisticsDirectory,
                                         const RuntimeParameterFileReader & settings );
 
-std::string LowerCase( char * buffer );
+/**
+ * Returns a string where all the characters in the input parameter
+ * are lowercase. */
+std::string LowerCase( const char * buffer );
 
-std::string LowerCase( std::string & s );
+/**
+ * Returns a string where all the characters in the input parameter
+ * are lowercase. */
+std::string LowerCase( const std::string & s );
 
 std::vector< std::string > SplitString( const std::string & input, char separator );
 

@@ -106,14 +106,14 @@ bool IsDirectory( const std::string & path )
   return IsDirectory( path.c_str() );
 }
 
-std::string LowerCase( char * buffer )
+std::string LowerCase( const char * buffer )
 {
   std::string outBuffer( buffer );
 
   return LowerCase( outBuffer );
 }
 
-std::string LowerCase( std::string & s )
+std::string LowerCase( const std::string & s )
 {
   std::string copy( s );
   std::transform( copy.begin(), copy.end(),
