@@ -50,12 +50,19 @@ public:
   virtual unsigned int GetNumberOfSamples();
   //@}
 
+  /**
+     Reset the sampler to start at the first sample.
+  */
+  void Reset();
+
 protected:
   /**
-     the number of samples in each direction */
+     Keeps track of which grid sample we are on. */
   std::vector<unsigned int> m_StateVector;
 
-  unsigned int m_SampleScale;
+  /**
+     Number of samples in each dimension. */
+  unsigned int m_NumberOfSamplesInEachDimension;
 
 protected:
   virtual void Initialize( const Model * model );

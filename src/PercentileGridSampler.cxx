@@ -28,7 +28,7 @@ namespace madai {
 PercentileGridSampler
 ::PercentileGridSampler() :
   Sampler(),
-  m_SampleScale(4)
+  m_NumberOfSamplesInEachDimension(4)
 {
 }
 
@@ -36,6 +36,75 @@ PercentileGridSampler
 PercentileGridSampler
 ::~PercentileGridSampler()
 {
+}
+
+Sample
+PercentileGridSampler
+::NextSample()
+{
+  const std::vector< Parameter > & parameters = m_Model->GetParameters();
+  assert (this->GetNumberOfActiveParameters() > 0);
+  unsigned int p = m_Model->GetNumberOfParameters();
+
+  assert(m_CurrentParameters.size() == m_Model->GetNumberOfParameters());
+  std::vector< double > x(m_CurrentParameters); // copy constructor
+
+  // do something
+  double rangeOverN = 1.0 / static_cast< double >( m_NumberOfSamplesInEachDimension );
+  double start = 0.5 * rangeOverN;
+  for ( unsigned int dim = 0; dim < p; ++dim ) {
+    if (this->IsParameterActive(dim)) {
+      x[dim] =
+        parameters[dim].GetPriorDistribution()->GetPercentile(
+            start + (m_StateVector[dim] * rangeOverN));
+    }
+  }
+
+  unsigned int dim = 0;
+  while ((! this->IsParameterActive(dim)) ||
+         (m_StateVector[dim] == m_NumberOfSamplesInEachDimension - 1)) {
+    m_StateVector[dim] = 0;
+    dim = (dim + 1) % p;
+  }
+  m_StateVector[dim] ++;
+
+  std::vector< double > y( m_Model->GetNumberOfScalarOutputs(), 0.0 );
+  double ll; // ll is new_log_likelihood
+  Model * m = const_cast< Model * >(m_Model);
+  m->GetScalarOutputsAndLogLikelihood(x,y,ll);
+  return Sample( x, y, ll );
+
+}
+
+void PercentileGridSampler
+::SetNumberOfSamples( unsigned int N )
+{
+  if (m_Model == NULL)
+    return;
+  // call this function *after* Deactivating Parameters!
+  unsigned int p = this->GetNumberOfActiveParameters();
+  assert((p <= m_Model->GetNumberOfParameters()) && (p > 0));
+  unsigned int n = static_cast< unsigned int >(
+      std::ceil(std::pow(N,1.0 / static_cast< double >(p))));
+  if (n < 2)
+    n = 2;
+  m_NumberOfSamplesInEachDimension = n;
+}
+
+unsigned int
+PercentileGridSampler
+::GetNumberOfSamples()
+{
+  float floatResult = std::pow(static_cast<float>(m_NumberOfSamplesInEachDimension),
+                               static_cast<int>(this->GetNumberOfActiveParameters()));
+  return static_cast<unsigned int>( floatResult + 0.5 );
+}
+
+void
+PercentileGridSampler
+::Reset()
+{
+  this->Initialize( m_Model );
 }
 
 void
@@ -52,70 +121,6 @@ PercentileGridSampler
   this->SetNumberOfSamples(this->GetNumberOfSamples());
   m_StateVector.clear();
   m_StateVector.resize(p,0);
-}
-
-
-unsigned int
-PercentileGridSampler
-::GetNumberOfSamples()
-{
-  float floatResult = std::pow(static_cast<float>(m_SampleScale),
-                               static_cast<int>(this->GetNumberOfActiveParameters()));
-  return static_cast<unsigned int>( floatResult + 0.5 );
-}
-
-
-void PercentileGridSampler
-::SetNumberOfSamples( unsigned int N )
-{
-  if (m_Model == NULL)
-    return;
-  // call this function *after* Deactivating Parameters!
-  unsigned int p = this->GetNumberOfActiveParameters();
-  assert((p <= m_Model->GetNumberOfParameters()) && (p > 0));
-  unsigned int n = static_cast< unsigned int >(
-      std::ceil(std::pow(N,1.0 / static_cast< double >(p))));
-  if (n < 2)
-    n = 2;
-  m_SampleScale = n;
-}
-
-Sample
-PercentileGridSampler
-::NextSample()
-{
-  const std::vector< Parameter > & parameters = m_Model->GetParameters();
-  assert (this->GetNumberOfActiveParameters() > 0);
-  unsigned int p = m_Model->GetNumberOfParameters();
-
-  assert(m_CurrentParameters.size() == m_Model->GetNumberOfParameters());
-  std::vector< double > x(m_CurrentParameters); // copy constructor
-
-  // do something
-  double rangeOverN = 1.0 / static_cast< double >( m_SampleScale );
-  double start = 0.5 * rangeOverN;
-  for ( unsigned int dim = 0; dim < p; ++dim ) {
-    if (this->IsParameterActive(dim)) {
-      x[dim] =
-        parameters[dim].GetPriorDistribution()->GetPercentile(
-            start + (m_StateVector[dim] * rangeOverN));
-    }
-  }
-
-  unsigned int dim = 0;
-  while ((! this->IsParameterActive(dim)) ||
-         (m_StateVector[dim] == m_SampleScale - 1)) {
-    m_StateVector[dim] = 0;
-    dim = (dim + 1) % p;
-  }
-  m_StateVector[dim] ++;
-
-  std::vector< double > y( m_Model->GetNumberOfScalarOutputs(), 0.0 );
-  double ll; // ll is new_log_likelihood
-  Model * m = const_cast< Model * >(m_Model);
-  m->GetScalarOutputsAndLogLikelihood(x,y,ll);
-  return Sample( x, y, ll );
-
 }
 
 } // end namespace madai
