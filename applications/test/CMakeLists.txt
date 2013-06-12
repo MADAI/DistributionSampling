@@ -11,6 +11,7 @@ include_directories( ${DistributionSampling_SOURCE_DIR}/applications )
 
 foreach( test
   EnsurePathSeparatorAtEndTest
+  LowerCaseTest
   )
   add_executable( ${test} ${test}.cxx )
   target_link_libraries( ${test} ${LIBRARIES} )
