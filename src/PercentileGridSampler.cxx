@@ -49,7 +49,7 @@ PercentileGridSampler
 
   Sampler::Initialize( model );
   unsigned int p = m_Model->GetNumberOfParameters();
-  this->SetNumberSamples(this->GetNumberSamples());
+  this->SetNumberOfSamples(this->GetNumberOfSamples());
   m_StateVector.clear();
   m_StateVector.resize(p,0);
 }
@@ -57,7 +57,7 @@ PercentileGridSampler
 
 unsigned int
 PercentileGridSampler
-::GetNumberSamples()
+::GetNumberOfSamples()
 {
   float floatResult = std::pow(static_cast<float>(m_SampleScale),
                                static_cast<int>(this->GetNumberOfActiveParameters()));
@@ -66,7 +66,7 @@ PercentileGridSampler
 
 
 void PercentileGridSampler
-::SetNumberSamples( unsigned int N )
+::SetNumberOfSamples( unsigned int N )
 {
   if (m_Model == NULL)
     return;

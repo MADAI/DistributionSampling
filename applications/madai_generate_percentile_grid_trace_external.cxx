@@ -117,8 +117,8 @@ int main(int argc, char ** argv) {
 
   madai::PercentileGridSampler sampler;
   sampler.SetModel( &em );
-  sampler.SetNumberSamples( numberOfSamples );
-  numberOfSamples = sampler.GetNumberSamples();
+  sampler.SetNumberOfSamples( numberOfSamples );
+  numberOfSamples = sampler.GetNumberOfSamples();
 
   madai::Trace trace;
 

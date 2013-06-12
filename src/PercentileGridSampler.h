@@ -46,8 +46,8 @@ public:
      equal n^p for p=model->NumberOfParameters and n is an integer.
      if N it not, it will be rounded up.
   */
-  virtual void SetNumberSamples( unsigned int N );
-  virtual unsigned int GetNumberSamples();
+  virtual void SetNumberOfSamples( unsigned int N );
+  virtual unsigned int GetNumberOfSamples();
   //@}
 
 protected:
