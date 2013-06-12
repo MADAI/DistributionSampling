@@ -34,6 +34,10 @@ install( TARGETS ${APPLICATIONS}
   RUNTIME DESTINATION bin
 )
 
+if ( BUILD_TESTING )
+  add_subdirectory( test )
+endif()
+
 # Install scripts
 install( PROGRAMS
   madai_gnuplot_scatterplot_matrix
