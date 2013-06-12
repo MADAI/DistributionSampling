@@ -22,3 +22,11 @@ done
 for file in test/*.cxx; do
 	"$kwstyle" -v "$file" -xml "${script_path}/KWStyleTest.xml" | sed '/^$/d';
 done
+
+for file in applications/*.cxx; do
+  "$kwstyle" -v "$file" -xml "${script_path}/KWStyle.xml" | sed '/^$/d';
+done
+
+for file in applications/test/*.cxx; do
+  "$kwstyle" -v "$file" -xml "${script_path}/KWStyleTest.xml" | sed '/^$/d';
+done
