@@ -19,6 +19,7 @@ foreach( test
   Gaussian2DModelTest
   MetropolisHastingsSamplerTest
   NumericalGradientEstimationTest
+  PercentileGridSamplerTest
   RegularStepGradientAscentSamplerTest
   )
   add_executable( ${test} ${test}.cxx )
