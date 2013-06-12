@@ -89,10 +89,6 @@ link_directories( ${DistributionSampling_LIBRARY_DIRS} )
 
 set( DistributionSampling_LIBRARIES  DistributionSampling)
 
-add_subdirectory( applications )
-add_subdirectory( src )
-add_subdirectory( ThirdParty )
-
 option( BUILD_TESTING "Build the tests for DistributionSampling." OFF )
 if ( BUILD_TESTING )
   enable_testing()
@@ -105,6 +101,10 @@ if ( BUILD_TESTING )
   set( DistributionSampling_TEST_LIBRARIES DistributionSamplingTest )
 
 endif()
+
+add_subdirectory( applications )
+add_subdirectory( src )
+add_subdirectory( ThirdParty )
 
 # Configure package file
 configure_file(
