@@ -58,6 +58,8 @@ const std::string Defaults::SAMPLER = "MetropolisHastings";
 
 const int Defaults::SAMPLER_NUMBER_OF_SAMPLES = 100;
 
+const std::string Defaults::SAMPLER_INACTIVE_PARAMETERS_FILE = "";
+
 const bool Defaults::MCMC_USE_MODEL_ERROR = false;
 
 const int Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES = 0;
@@ -95,6 +97,7 @@ void Defaults::PrintAllDefaults(std::ostream & o) {
     << "#\n"
     << "SAMPLER "                                          << Defaults::SAMPLER << '\n'
     << "SAMPLER_NUMBER_OF_SAMPLES "                        << Defaults::SAMPLER_NUMBER_OF_SAMPLES << '\n'
+    << "SAMPLER_INACTIVE_PARAMETERS_FILE "                  << Defaults::SAMPLER_INACTIVE_PARAMETERS_FILE << '\n'
     << "#\n"
     << "MCMC_USE_MODEL_ERROR "                             << Defaults::MCMC_USE_MODEL_ERROR << '\n'
     << "MCMC_NUMBER_OF_BURN_IN_SAMPLES "                   << Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES << '\n'

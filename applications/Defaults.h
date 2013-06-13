@@ -69,6 +69,8 @@ namespace Defaults {
 
   extern const int SAMPLER_NUMBER_OF_SAMPLES;
 
+  extern const std::string SAMPLER_INACTIVE_PARAMETERS_FILE;
+
   /**
    MCMC Variables */
   extern const bool MCMC_USE_MODEL_ERROR;
