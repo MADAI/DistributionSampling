@@ -68,6 +68,8 @@ int main(int argc, char ** argv) {
       << madai::Defaults::SAMPLER << ")\n"
       << "SAMPLER_NUMBER_OF_SAMPLES <value> (default: "
       << madai::Defaults::SAMPLER_NUMBER_OF_SAMPLES << ")\n"
+      << "SAMPLER_INACTIVE_PARAMETERS_FILE <value> (default: "
+      << madai::Defaults::SAMPLER_INACTIVE_PARAMETERS_FILE << ")\n"
       << "MCMC_NUMBER_OF_BURN_IN_SAMPLES <value> (default: "
       << madai::Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES << ")\n"
       << "MCMC_USE_MODEL_ERROR <value> (default: "
@@ -194,12 +196,25 @@ int main(int argc, char ** argv) {
       std::cout << "Using PercentileGridSampler for sampling\n";
     }
   } else { // Default to Metropolis Hastings
+    mhs.SetModel( model );
     mhs.SetStepSize( stepSize );
 
     sampler = &mhs;
 
     if ( verbose ) {
       std::cout << "Using MetropolisHastingsSampler for sampling\n";
+    }
+  }
+
+  // Potentially set some parameters to inactive
+  std::string samplerInactiveParametersFile =
+    madai::GetInactiveParametersFile( statisticsDirectory, settings );
+  if ( samplerInactiveParametersFile != "" ) {
+    if ( ! madai::SetInactiveParameters( samplerInactiveParametersFile,
+                                         *sampler, verbose ) ) {
+      std::cerr << "Error when setting inactive parameters from file '"
+                << samplerInactiveParametersFile << "'.\n";
+      return EXIT_FAILURE;
     }
   }
 
