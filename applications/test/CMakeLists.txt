@@ -20,6 +20,7 @@ foreach( test
   GetModelOutputDirectoryTest
   LoadObservationsTest
   LowerCaseTest
+  SetInactiveParametersTest
   SplitStringTest
   )
   add_executable( ${test} ${test}.cxx )
