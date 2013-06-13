@@ -1,5 +1,6 @@
 set( LIBRARIES
   DistributionSampling
+  DistributionSamplingTest
   ApplicationUtilities
   ${CORELIBS}
 )
@@ -7,13 +8,17 @@ set( LIBRARIES
 # Put the tests in test subdirectory
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${DistributionSampling_BINARY_DIR}/applications/test )
 
-include_directories( ${DistributionSampling_SOURCE_DIR}/applications )
+include_directories(
+  ${DistributionSampling_SOURCE_DIR}/applications
+  ${DistributionSampling_SOURCE_DIR}/test
+ )
 
 foreach( test
   EnsurePathSeparatorAtEndTest
   FindIndexTest
   GetExperimentalResultsFileTest
   GetModelOutputDirectoryTest
+  LoadObservationsTest
   LowerCaseTest
   SplitStringTest
   )
