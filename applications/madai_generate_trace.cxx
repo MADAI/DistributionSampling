@@ -182,8 +182,8 @@ int main(int argc, char ** argv) {
   if ( samplerType == "PercentileGrid" ) {
     pgs.SetModel( model );
 
-    pgs.SetNumberSamples(numberOfSamples);
-    numberOfSamples = pgs.GetNumberSamples();
+    pgs.SetNumberOfSamples(numberOfSamples);
+    numberOfSamples = pgs.GetNumberOfSamples();
     if ( verbose ) {
       std::cout << "Number of grid samples: " << numberOfSamples << "\n";
     }
