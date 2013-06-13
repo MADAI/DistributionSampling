@@ -90,6 +90,36 @@ std::string GetExperimentalResultsFile( const std::string & statisticsDirectory,
   return experimentalResultsFile;
 }
 
+std::string GetInactiveParametersFile( const std::string & statisticsDirectory,
+                                       const RuntimeParameterFileReader & settings )
+{
+  std::string inactiveParameterFile = settings.GetOption(
+      "SAMPLER_INACTIVE_PARAMETERS_FILE",
+      Defaults::SAMPLER_INACTIVE_PARAMETERS_FILE);
+  if ( inactiveParameterFile == "" ) {
+    return std::string();
+  }
+
+  // Check for quotes around directory name
+  if ( ( inactiveParameterFile[0] == '"' &&
+         *(inactiveParameterFile.end()-1) == '"' ) ||
+       ( inactiveParameterFile[0] == '\'' &&
+         *(inactiveParameterFile.end()-1) == '\'' ) ) {
+    // Truncate path to remove quotes
+    inactiveParameterFile =
+      inactiveParameterFile.substr( 1, inactiveParameterFile.size()-2 );
+  }
+
+  std::string statisticsDirectoryCopy( statisticsDirectory );
+  EnsurePathSeparatorAtEnd( statisticsDirectoryCopy );
+
+  if ( inactiveParameterFile[0] != Paths::SEPARATOR ) {
+    inactiveParameterFile.insert( 0, statisticsDirectoryCopy );
+  }
+
+  return inactiveParameterFile;
+}
+
 bool IsFile( const char * path )
 {
   return ( SystemTools::FileExists( path ) &&
@@ -205,7 +235,8 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i)
   */
 bool SetInactiveParameters(
     const std::string & inactiveParametersFile,
-    madai::Sampler & sampler)
+    madai::Sampler & sampler,
+    bool verbose )
 {
   if (inactiveParametersFile == "")
     return true; // an empty filename is taken to mean no parameters
@@ -233,6 +264,9 @@ bool SetInactiveParameters(
     if (settings.HasOption(parameterName)) {
       parameterValues[i] = settings.GetOptionAsDouble(parameterName);
       sampler.DeactivateParameter( i );
+      if ( verbose ) {
+        std::cout << "Deactivating parameter '" << parameterName << "'.\n";
+      }
     }
   }
   if (sampler.SetParameterValues( parameterValues) !=

@@ -49,6 +49,13 @@ std::string GetExperimentalResultsFile( const std::string & statisticsDirectory,
                                         const RuntimeParameterFileReader & settings );
 
 /**
+ * Get the inactive parameter file specified by the settings.dat file
+ * in the statisticsDirectory. If there is no setting
+ * SAMPLER_INACTIVE_PARAMETER_FILE, then an empty string is returned. */
+std::string GetInactiveParametersFile( const std::string & statisticsDirectory,
+                                       const RuntimeParameterFileReader & settings );
+
+/**
  * Returns a string where all the characters in the input parameter
  * are lowercase. */
 std::string LowerCase( const char * buffer );
@@ -104,7 +111,8 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i);
   */
 bool SetInactiveParameters(
     const std::string & inactiveParametersFile,
-    madai::Sampler & sampler);
+    madai::Sampler & sampler,
+    bool verbose);
 
 
 } // end namespace madai

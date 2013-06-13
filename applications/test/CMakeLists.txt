@@ -17,6 +17,7 @@ foreach( test
   EnsurePathSeparatorAtEndTest
   FindIndexTest
   GetExperimentalResultsFileTest
+  GetInactiveParameterFileTest
   GetModelOutputDirectoryTest
   LoadObservationsTest
   LowerCaseTest
