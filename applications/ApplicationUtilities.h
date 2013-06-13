@@ -84,6 +84,11 @@ int FindIndex(const S & v, const T & s)
   return std::distance(v.begin(), it);
 }
 
+/**
+ * Given a Model and an input stream, loads observations assumed to be
+ * in the input stream to defined in the stream and sets them in the
+ * Model. Returns and error code based on the success of the
+ * operation. */
 Model::ErrorType LoadObservations(Model * model, std::istream & i);
 
 /**

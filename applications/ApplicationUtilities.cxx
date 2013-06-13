@@ -150,16 +150,20 @@ std::vector< std::string > SplitString( const std::string & input, char separato
    be compared against this. */
 Model::ErrorType LoadObservations(Model * model, std::istream & i)
 {
-  // std::ifstream i("DIRECTORY/experimental_results/results.dat");
+  if ( !i.good() ) {
+    return madai::Model::FILE_NOT_FOUND_ERROR;
+  }
+
   const std::vector< std::string > & scalarOutputNames = model->GetScalarOutputNames();
   unsigned int numberOfScalarOutputs = model->GetNumberOfScalarOutputs();
   assert(scalarOutputNames.size() == numberOfScalarOutputs);
-  assert (numberOfScalarOutputs > 0);
+  assert(numberOfScalarOutputs > 0);
   std::vector< double > observedScalarValues(numberOfScalarOutputs, 0.0);
   std::vector< double > observedScalarCovariance(
       numberOfScalarOutputs * numberOfScalarOutputs, 0.0);
-  for (unsigned int j = 0; j < numberOfScalarOutputs; ++j)
+  for (unsigned int j = 0; j < numberOfScalarOutputs; ++j) {
     observedScalarCovariance[j * (1 + numberOfScalarOutputs)] = 1.0;
+  }
   while (true) { // will loop forever if input stream lasts forever.
     std::string name;
     double value, uncertainty;
