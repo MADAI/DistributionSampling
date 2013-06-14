@@ -18,7 +18,7 @@
 
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "RuntimeParameterFileReader.h"
 #include "Paths.h"
@@ -91,7 +91,7 @@ int main( int argc, char ** argv )
 
   // Read in the training data
   madai::GaussianProcessEmulator gpe;
-  madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
   bool verbose = settings.GetOptionAsBool(
       "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
   directoryReader.SetVerbose( verbose );

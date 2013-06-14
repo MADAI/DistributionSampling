@@ -30,8 +30,7 @@ ACKNOWLEDGMENTS:
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
 #include "GaussianDistribution.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
-#include "GaussianProcessEmulatorSingleFileReader.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "RuntimeParameterFileReader.h"
 #include "UniformDistribution.h"
 #include "Paths.h"
@@ -174,7 +173,7 @@ int main(int argc, char ** argv) {
       madai::Defaults::EMULATE_WRITE_HEADER);
 
   madai::GaussianProcessEmulator gpe;
-  madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
   bool verbose = settings.GetOptionAsBool(
       "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
   directoryReader.SetVerbose( verbose );

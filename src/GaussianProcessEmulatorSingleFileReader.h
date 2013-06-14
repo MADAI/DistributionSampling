@@ -32,6 +32,7 @@ public:
   GaussianProcessEmulatorSingleFileReader();
   ~GaussianProcessEmulatorSingleFileReader();
 
+#if 0
   /**
     This loads a fully-ready-to-go GPEM
     \returns true on success. */
@@ -46,6 +47,7 @@ public:
     This takes an empty GPEM and loads training data.
     \returns true on success. */
   bool LoadTrainingData(GaussianProcessEmulator * gpe, std::string TopDirectory);
+#endif
 
   /**
     This takes a GPEM and loads PCA data.

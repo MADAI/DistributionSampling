@@ -25,7 +25,7 @@
 #include "GaussianProcessEmulatorTestGenerator.h"
 #include "GaussianProcessEmulatedModel.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "GaussianProcessEmulator.h"
 #include "Random.h"
 #include "Trace.h"
@@ -74,7 +74,7 @@ int main( int, char*[] ) {
     madai::Defaults::EXPERIMENTAL_RESULTS_FILE;
 
   madai::GaussianProcessEmulator gpe;
-  madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
   if ( !directoryReader.LoadTrainingData( &gpe, MOD, TempDirectory, ERD ) ) {
     std::cerr << "Error loading from created directory structure.\n";
     return EXIT_FAILURE;

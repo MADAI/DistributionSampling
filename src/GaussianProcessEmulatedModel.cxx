@@ -19,7 +19,7 @@
 #include <iostream>
 
 #include "GaussianProcessEmulatedModel.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulator.h"
 
@@ -50,7 +50,7 @@ GaussianProcessEmulatedModel
                      const std::string ModelOutputDirectory,
                      const std::string ExperimentalResultsDirectory )
 {
-  GaussianProcessEmulatorDirectoryReader directoryReader;
+  GaussianProcessEmulatorDirectoryFormatIO directoryReader;
   if ( !directoryReader.LoadTrainingData( m_GPE, ModelOutputDirectory,
                                           StatisticsDirectory, ExperimentalResultsDirectory ) ) {
     std::cerr << "Error loading from the directory structure.\n";

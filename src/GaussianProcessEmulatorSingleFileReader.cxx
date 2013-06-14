@@ -463,6 +463,7 @@ const char * stat(GaussianProcessEmulator::StatusType s) {
 } // end anonymous namespace
 
 
+#if 0
 /**
     This loads a fully-ready-to-go GPEM
     \returns true on success. */
@@ -500,5 +501,7 @@ GaussianProcessEmulatorSingleFileReader
   gpe->CheckStatus();
   return (gpe->CheckStatus() == GaussianProcessEmulator::UNTRAINED);
 }
+
+#endif
 
 } // end namespace madai

@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef madai_GaussianProcessEmulatorDirectoryFormatIO_h_included
-#define madai_GaussianProcessEmulatorDirectoryFormatIO_h_included
+#ifndef madai_GaussianProcessEmulatorDirectoryReader_h_included
+#define madai_GaussianProcessEmulatorDirectoryReader_h_included
 
 #include <string>
 #include <vector>
@@ -29,10 +29,10 @@ namespace madai {
 class GaussianProcessEmulator;
 class Parameter;
 
-class GaussianProcessEmulatorDirectoryFormatIO {
+class GaussianProcessEmulatorDirectoryReader {
 public:
-  GaussianProcessEmulatorDirectoryFormatIO();
-  ~GaussianProcessEmulatorDirectoryFormatIO();
+  GaussianProcessEmulatorDirectoryReader();
+  ~GaussianProcessEmulatorDirectoryReader();
 
   /**
    Enable verbose output when reading. */
@@ -74,4 +74,4 @@ protected:
 
 } // end namespace madai
 
-#endif // madai_GaussianProcessEmulatorDirectoryFormatIO_h_included
+#endif // madai_GaussianProcessEmulatorDirectoryReader_h_included

@@ -16,7 +16,7 @@
  *
  *=========================================================================*/
 
-#include "GaussianProcessEmulatorDirectoryFormatIO.h"
+#include "GaussianProcessEmulatorDirectoryReader.h"
 
 #include "GaussianDistribution.h"
 #include "GaussianProcessEmulator.h"
@@ -40,21 +40,21 @@ using madaisys::SystemTools;
 
 namespace madai {
 
-GaussianProcessEmulatorDirectoryFormatIO
-::GaussianProcessEmulatorDirectoryFormatIO() :
+GaussianProcessEmulatorDirectoryReader
+::GaussianProcessEmulatorDirectoryReader() :
   m_Verbose( false )
 {
 }
 
 
-GaussianProcessEmulatorDirectoryFormatIO
-::~GaussianProcessEmulatorDirectoryFormatIO()
+GaussianProcessEmulatorDirectoryReader
+::~GaussianProcessEmulatorDirectoryReader()
 {
 }
 
 
 void
-GaussianProcessEmulatorDirectoryFormatIO
+GaussianProcessEmulatorDirectoryReader
 ::SetVerbose( bool value )
 {
   m_Verbose = value;
@@ -62,7 +62,7 @@ GaussianProcessEmulatorDirectoryFormatIO
 
 
 bool
-GaussianProcessEmulatorDirectoryFormatIO
+GaussianProcessEmulatorDirectoryReader
 ::GetVerbose() const
 {
   return m_Verbose;
@@ -263,7 +263,7 @@ bool parseExperimentalResults(
 /**
    Read the parameter_priors.dat file in statistical_analysis. */
 bool
-GaussianProcessEmulatorDirectoryFormatIO
+GaussianProcessEmulatorDirectoryReader
 ::ParseParameters(
     std::vector< madai::Parameter > & parameters,
     int & numberParameters,
@@ -741,7 +741,7 @@ bool parseModelDataDirectoryStructure(
     const std::string & statisticalAnalysisDirectory,
     bool verbose )
 {
-  if ( !GaussianProcessEmulatorDirectoryFormatIO::ParseParameters(
+  if ( !GaussianProcessEmulatorDirectoryReader::ParseParameters(
           gpme.m_Parameters,
           gpme.m_NumberParameters,
           statisticalAnalysisDirectory,
@@ -1021,7 +1021,7 @@ bool parseGaussianProcessEmulator(
   This takes an empty GPEM and loads training data.
   \returns true on success. */
 bool
-GaussianProcessEmulatorDirectoryFormatIO
+GaussianProcessEmulatorDirectoryReader
 ::LoadTrainingData(GaussianProcessEmulator * gpe,
                     std::string modelOutputDirectory,
                     std::string statisticalAnalysisDirectory,
@@ -1047,7 +1047,7 @@ GaussianProcessEmulatorDirectoryFormatIO
   This takes a GPEM and loads PCA data.
   \returns true on success. */
 bool
-GaussianProcessEmulatorDirectoryFormatIO
+GaussianProcessEmulatorDirectoryReader
 ::LoadPCA(GaussianProcessEmulator * gpe,
           const std::string & statisticsDirectory)
 {
@@ -1093,7 +1093,7 @@ GaussianProcessEmulatorDirectoryFormatIO
   data (submodels with their thetas).
   \returns true on success. */
 bool
-GaussianProcessEmulatorDirectoryFormatIO
+GaussianProcessEmulatorDirectoryReader
 ::LoadEmulator(GaussianProcessEmulator * gpe,
                const std::string & statisticalAnalysisDirectory)
 {
