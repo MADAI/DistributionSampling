@@ -69,6 +69,12 @@ std::string LowerCase( const std::string & s );
  * will be returned as the string between those two separators. */
 std::vector< std::string > SplitString( const std::string & input, char separator );
 
+/**
+ * Reads in a line from an istream and returns the tokens
+ * (whitespace-separated) in a vector of strings. Ignores line content
+ * from the comment character '#' and beyond. */
+std::vector< std::string > ReadLineAsTokens( std::istream & is,
+                                             std::string & line );
 
 /**
  * Given a vector of type T and an argument of type T, returns the

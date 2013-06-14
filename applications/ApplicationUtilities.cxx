@@ -27,6 +27,8 @@
 #include "Sampler.h"
 #include "System.h"
 
+#include <boost/algorithm/string.hpp>
+
 #include <madaisys/SystemTools.hxx>
 
 using madaisys::SystemTools;
@@ -145,6 +147,37 @@ std::vector< std::string > SplitString( const std::string & input, char separato
   return tokens;
 }
 
+std::vector< std::string > ReadLineAsTokens( std::istream & is,
+                                             std::string & line )
+{
+  std::vector< std::string > tokens;
+
+  std::getline( is, line );
+
+  // First, split on comment character
+  std::vector< std::string > contentAndComments;
+  boost::split( contentAndComments, line, boost::is_any_of("#") );
+
+  if ( contentAndComments.size() == 0 ) {
+    return tokens;
+  }
+
+  // Trim any leading or trailing spaces in the content
+  boost::trim( contentAndComments[0] );
+
+  // Next, split only the non-comment content
+  boost::split( tokens, contentAndComments[0], boost::is_any_of("\t "),
+                boost::token_compress_on );
+
+  // If first token is empty string, remove it and return
+  if ( tokens[0] == "" ) {
+    tokens.erase( tokens.begin() );
+    return tokens;
+  }
+
+  return tokens;
+}
+
 /**
    Load a file with experimental observations in it.  The model will
    be compared against this. */
@@ -173,10 +206,27 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i)
   scalarNamesRemaining.insert(scalarOutputNames.begin(), scalarOutputNames.end());
 
   while (true) { // will loop forever if input stream lasts forever.
-    std::string name;
-    double value, uncertainty;
-    if(! (i >> name >> value >> uncertainty))
+    std::string line;
+    std::vector< std::string > tokens = ReadLineAsTokens( i, line );
+
+    if ( tokens.size() == 0 )
       break;
+
+    std::string formatMessage( "<observed scalar name> <observed scalar value> "
+                               "<observed scalar variance>" );
+    if ( tokens.size() < 3 ) {
+      std::cerr << "Too few tokens in line '" << line << "' of experimental "
+                << "results file. Format should be " << formatMessage << "\n";
+      return madai::Model::OTHER_ERROR;
+    } else if (tokens.size() > 3) {
+      std::cerr << "Too many tokens in line '" << line << "' of experimental "
+                << "results file. Format should be " << formatMessage << "\n";
+    }
+
+    std::string name = tokens[0];
+    double value = atof( tokens[1].c_str() );
+    double uncertainty = atof( tokens[2].c_str() );
+
     int index = madai::FindIndex(scalarOutputNames, name);
     if (index != -1) {
       observedScalarValues[index] = value;
