@@ -158,12 +158,20 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i)
   unsigned int numberOfScalarOutputs = model->GetNumberOfScalarOutputs();
   assert(scalarOutputNames.size() == numberOfScalarOutputs);
   assert(numberOfScalarOutputs > 0);
+
+  // Assume unset values and covariance are all zero.
   std::vector< double > observedScalarValues(numberOfScalarOutputs, 0.0);
   std::vector< double > observedScalarCovariance(
       numberOfScalarOutputs * numberOfScalarOutputs, 0.0);
+
   for (unsigned int j = 0; j < numberOfScalarOutputs; ++j) {
     observedScalarCovariance[j * (1 + numberOfScalarOutputs)] = 1.0;
   }
+
+  // Keep track of which scalar names haven't yet been read
+  std::set< std::string > scalarNamesRemaining;
+  scalarNamesRemaining.insert(scalarOutputNames.begin(), scalarOutputNames.end());
+
   while (true) { // will loop forever if input stream lasts forever.
     std::string name;
     double value, uncertainty;
@@ -172,18 +180,31 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i)
     int index = madai::FindIndex(scalarOutputNames, name);
     if (index != -1) {
       observedScalarValues[index] = value;
+
       // observedScalarCovariance is a square matrix;
-      observedScalarCovariance[index * (1 + numberOfScalarOutputs)] = std::pow(uncertainty, 2);
       // uncertainty^2 is variance.
+      observedScalarCovariance[index * (1 + numberOfScalarOutputs)] = std::pow(uncertainty, 2);
+
+      scalarNamesRemaining.erase(name);
+    } else {
+      std::cout << "Unknown observed scalar name '" << name << "'. Ignoring.\n";
     }
   }
-  // assume extra values are all zero.
+
+  // Report any observed scalars with unread values
+  for ( std::set< std::string >::iterator iter = scalarNamesRemaining.begin();
+        iter != scalarNamesRemaining.end(); ++iter ) {
+    std::cout << "Value for observed scalar '" << *iter << "' was not "
+              << "specified. Assuming its value is zero.\n";
+  }
+
   Model::ErrorType e;
   e = model->SetObservedScalarValues(observedScalarValues);
   if (e != madai::Model::NO_ERROR) {
     std::cerr << "Error in Model::SetObservedScalarValues\n";
     return e;
   }
+
   e = model->SetObservedScalarCovariance(observedScalarCovariance);
   if (e != madai::Model::NO_ERROR) {
     std::cerr << "Error in Model::SetObservedScalarCovariance\n";

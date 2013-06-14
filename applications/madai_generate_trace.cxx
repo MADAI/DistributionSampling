@@ -164,7 +164,7 @@ int main(int argc, char ** argv) {
 
     std::ifstream experimentalResults(experimentalResultsFile.c_str());
     if ( madai::Model::NO_ERROR !=
-         externalModel.LoadObservations( experimentalResults ) ) {
+         madai::LoadObservations( &externalModel, experimentalResults ) ) {
       std::cerr << "Error loading observations.\n";
       externalModel.StopProcess();
 

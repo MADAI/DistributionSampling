@@ -23,6 +23,8 @@
 #include <cassert>
 #include <cmath>
 #include <limits>
+#include <set>
+
 
 template<class S, class T>
 int static findIndex(const S & v, const T & s)
@@ -259,7 +261,7 @@ Model
 
 /**
    Load a file with experimental observations in it.  The model will
-   be comared against this. */
+   be compared against this. */
 Model::ErrorType
 Model
 ::LoadObservations(std::istream & i)
@@ -268,7 +270,6 @@ Model
     return Model::FILE_NOT_FOUND_ERROR;
   }
 
-  // std::ifstream i("DIRECTORY/experimental_results/results.dat");
   const std::vector< std::string > & scalarOutputNames = this->GetScalarOutputNames();
   unsigned int numberOfScalarOutputs = this->GetNumberOfScalarOutputs();
   assert(scalarOutputNames.size() == numberOfScalarOutputs);
@@ -276,8 +277,15 @@ Model
   std::vector< double > observedScalarValues(numberOfScalarOutputs, 0.0);
   std::vector< double > observedScalarCovariance(
       numberOfScalarOutputs * numberOfScalarOutputs, 0.0);
-  for (unsigned int j = 0; j < numberOfScalarOutputs; ++j)
+
+  // Keep track of which scalar names haven't yet been read
+  std::set< std::string > scalarNamesRemaining;
+  scalarNamesRemaining.insert(scalarOutputNames.begin(), scalarOutputNames.end());
+
+  for (unsigned int j = 0; j < numberOfScalarOutputs; ++j) {
     observedScalarCovariance[j * (1 + numberOfScalarOutputs)] = 1.0;
+  }
+
   while (true) { // will loop forever if input stream lasts forever.
     std::string name;
     double value, uncertainty;
@@ -289,8 +297,21 @@ Model
       // observedScalarCovariance is a square matrix;
       observedScalarCovariance[index * (1 + numberOfScalarOutputs)] = std::pow(uncertainty, 2);
       // uncertainty^2 is variance.
+
+      // Remove this name from set of remaining names
+      scalarNamesRemaining.erase( name );
+    } else {
+      std::cout << "Unknown observation name '" << name << "'. Ignoring.\n";
     }
   }
+
+  // Report any observed scalars with unread values
+  for ( std::set< std::string >::iterator iter = scalarNamesRemaining.begin();
+        iter != scalarNamesRemaining.end(); ++iter ) {
+    std::cout << "Value for observed scalar '" << *iter << "' was not "
+              << "specified. Assuming its value is zero.\n";
+  }
+
   // assume extra values are all zero.
   Model::ErrorType e;
   e = this->SetObservedScalarValues(observedScalarValues);
