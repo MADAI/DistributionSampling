@@ -3,7 +3,6 @@ set( SRC_FILES
   GaussianProcessEmulator.cxx
   GaussianProcessEmulatedModel.cxx
   GaussianProcessEmulatorDirectoryFormatIO.cxx
-  GaussianProcessEmulatorSingleFileReader.cxx
   GaussianProcessEmulatorSingleFileWriter.cxx
   Parameter.cxx
   Distribution.cxx

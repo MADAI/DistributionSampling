@@ -20,7 +20,6 @@
 
 #include "GaussianProcessEmulatedModel.h"
 #include "GaussianProcessEmulatorDirectoryFormatIO.h"
-#include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulator.h"
 
 namespace madai {

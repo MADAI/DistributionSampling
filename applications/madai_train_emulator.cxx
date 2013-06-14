@@ -31,7 +31,6 @@ ACKNOWLEDGMENTS:
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
 #include "GaussianProcessEmulatorDirectoryFormatIO.h"
-#include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "RuntimeParameterFileReader.h"
 #include "Paths.h"

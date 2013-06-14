@@ -24,7 +24,6 @@
 #include "GaussianProcessEmulatorTestGenerator.h"
 #include "MetropolisHastingsSampler.h"
 #include "GaussianProcessEmulatedModel.h"
-#include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "GaussianProcessEmulator.h"
