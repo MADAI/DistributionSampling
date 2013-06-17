@@ -22,7 +22,6 @@
 
 #include "Gaussian2DModel.h"
 #include "RegularStepGradientAscentSampler.h"
-#include "Trace.h"
 
 
 int main( int, char *[] )

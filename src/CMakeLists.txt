@@ -19,7 +19,6 @@ set( SRC_FILES
   RuntimeParameterFileReader.cxx
   Sample.cxx
   MetropolisHastingsSampler.cxx
-  Trace.cxx
   UniformDistribution.cxx
   PercentileGridSampler.cxx
   SamplerCSVWriter.cxx

@@ -17,6 +17,7 @@
  *=========================================================================*/
 
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -28,7 +29,6 @@
 #include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulator.h"
-#include "Trace.h"
 #include "Paths.h"
 
 const char DEFAULT_MODEL_OUTPUT_DIRECTORY[] = "model_output";
@@ -161,24 +161,18 @@ int main( int, char *[] ) {
     observedScalarCovariance[i + (t * i)] = 0.05;
   gpem.SetObservedScalarCovariance(observedScalarCovariance);
 
-  madai::Trace trace;
   unsigned int numberIter = 500;
   for (unsigned int count = 0; count < numberIter; count ++) {
     madai::Sample sample = mcmc.NextSample();
-    trace.Add( sample );
+    std::cout << sample << "\n";
   }
 
   gpem.SetUseModelCovarianceToCalulateLogLikelihood(false);
 
   for (unsigned int count = 0; count < numberIter; count ++) {
     madai::Sample sample = mcmc.NextSample();
-    trace.Add( sample );
+    std::cout << sample << "\n";
   }
-
-
-  trace.WriteCSVOutput( std::cout,
-                   gpem.GetParameters(),
-                   gpem.GetScalarOutputNames() );
 
   return EXIT_SUCCESS;
 }

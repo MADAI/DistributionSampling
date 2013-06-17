@@ -31,7 +31,6 @@
 #include "RuntimeParameterFileReader.h"
 #include "Paths.h"
 #include "PercentileGridSampler.h"
-#include "Trace.h"
 #include "SamplerCSVWriter.h"
 
 #include "madaisys/SystemTools.hxx"

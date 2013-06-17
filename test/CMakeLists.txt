@@ -32,7 +32,6 @@ foreach( test
   LatinHypercubeGeneratorTest
   ModelTest
   RandomTest
-  TraceTest
   SampleTest
   UniformDistributionTest
   RuntimeParameterFileReaderTest

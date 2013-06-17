@@ -17,6 +17,7 @@
  *=========================================================================*/
 
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -28,7 +29,6 @@
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "GaussianProcessEmulator.h"
 #include "Random.h"
-#include "Trace.h"
 #include "Paths.h"
 
 inline double LogisticFunction(double x) {

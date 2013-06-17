@@ -28,7 +28,7 @@ namespace madai {
 
 /** \class Sample
  *
- * Individual entry in a Trace.
+ * Individual sample from a distribution.
  */
 class Sample {
 public:

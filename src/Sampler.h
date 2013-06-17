@@ -23,7 +23,6 @@
 #include <string>
 
 #include "Model.h"
-#include "Trace.h"
 #include "Parameter.h"
 #include "Sample.h"
 

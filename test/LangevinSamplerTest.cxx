@@ -22,7 +22,6 @@
 
 #include "Gaussian2DModel.h"
 #include "LangevinSampler.h"
-#include "Trace.h"
 
 
 int main( int, char *[] )

@@ -37,7 +37,7 @@ public:
   /** destructor */
   virtual ~PercentileGridSampler();
 
-  /** append the next point to the Trace  */
+  /** Get the next sample from the distribution. */
   virtual Sample NextSample();
 
   //@{

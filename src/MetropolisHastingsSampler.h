@@ -42,7 +42,7 @@ public:
   /** destructor */
   virtual ~MetropolisHastingsSampler();
 
-  /** append the next point to the Trace  */
+  /** Get the next sample from the distribution. */
   virtual Sample NextSample();
 
   //@{
