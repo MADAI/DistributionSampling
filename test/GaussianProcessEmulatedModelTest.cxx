@@ -24,7 +24,6 @@
 #include "GaussianProcessEmulatorTestGenerator.h"
 #include "MetropolisHastingsSampler.h"
 #include "GaussianProcessEmulatedModel.h"
-#include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "GaussianProcessEmulator.h"
 #include "Trace.h"
@@ -103,8 +102,8 @@ int main( int, char *[] ) {
     return EXIT_FAILURE;
   }
 
-  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
-  singleFileWriter.WritePCA( &gpe, PCAFile );
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryFormatIO;
+  directoryFormatIO.WritePCA( &gpe, PCAFile );
   PCAFile.close();
 
   if ( !gpe.RetainPrincipalComponents( fractionResolvingPower ) ) {
@@ -130,7 +129,7 @@ int main( int, char *[] ) {
     return EXIT_FAILURE;
   }
 
-  singleFileWriter.Write( &gpe, EmulatorStateFile );
+  directoryFormatIO.Write( &gpe, EmulatorStateFile );
   EmulatorStateFile.close();
 
   if (! gpe.MakeCache()) {

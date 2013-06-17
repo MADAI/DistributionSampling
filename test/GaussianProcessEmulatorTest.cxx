@@ -24,7 +24,6 @@
 #include <Eigen/Dense>
 #include "GaussianProcessEmulatorTestGenerator.h"
 #include "GaussianProcessEmulator.h"
-#include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "Paths.h"
 
@@ -89,8 +88,8 @@ int main( int, char *[] ) {
     return EXIT_FAILURE;
   }
 
-  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
-  singleFileWriter.WritePCA( &gpe, PCAFile );
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryFormatIO;
+  directoryFormatIO.WritePCA( &gpe, PCAFile );
   PCAFile.close();
 
   double fractionResolvingPower = 0.999;
@@ -120,7 +119,7 @@ int main( int, char *[] ) {
     return EXIT_FAILURE;
   }
 
-  singleFileWriter.Write( &gpe, EmulatorStateFile );
+  directoryFormatIO.Write( &gpe, EmulatorStateFile );
   EmulatorStateFile.close();
 
   if (! gpe.MakeCache()) {
@@ -161,7 +160,7 @@ int main( int, char *[] ) {
 
   std::string ThetaFileName = TempDirectory + madai::Paths::SEPARATOR + "thetas.dat";
   std::ofstream ThetaFile( ThetaFileName.c_str() );
-  if(! singleFileWriter.PrintThetas(&gpe,ThetaFile)) {
+  if(! directoryFormatIO.PrintThetas(&gpe,ThetaFile)) {
     std::cerr << "Error printing Thetas.\n";
     return EXIT_FAILURE;
   }

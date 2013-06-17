@@ -40,7 +40,7 @@ public:
   bool GetVerbose() const;
 
   /**
-    This takes an empty GPEM and loads training data.
+    This takes an empty GaussianProcessEmulator and loads training data.
     \returns true on success. */
   bool LoadTrainingData(GaussianProcessEmulator * gpe,
                         std::string modelOutputDirectory,
@@ -48,10 +48,23 @@ public:
                         std::string experimentalResultsFileName);
 
   /**
-    This takes a GPEM and loads PCA data.
+    This takes a GaussianProcessEmulator and loads principal component
+    analysis data.
     \returns true on success. */
   bool LoadPCA( GaussianProcessEmulator * gpe,
                 const std::string & statisticalAnalysisDirectory);
+
+  /**
+    Writes current state to file.  \returns true on success. */
+  bool Write(GaussianProcessEmulator * gpe,std::ostream & output) const;
+
+  /**
+    Writes current state of PCADecomposition to file. */
+  bool WritePCA( GaussianProcessEmulator * gpe, std::ostream & output) const;
+
+  /**
+     Writes current state to file.  \returns true on sucess. */
+  bool PrintThetas( GaussianProcessEmulator * gpe, std::ostream & output) const;
 
   /**
     This takes a GPEM and loads the emulator specific

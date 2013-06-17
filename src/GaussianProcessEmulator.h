@@ -26,6 +26,7 @@
 
 #ifndef madai_GaussianProcessEmulator_h_included
 #define madai_GaussianProcessEmulator_h_included
+
 #include <iostream> // std::istream std::ostream
 #include <vector>   // std::vector
 #include <Eigen/Dense> // Eigen::MatrixXd, Eigen::VectorXd
@@ -38,8 +39,6 @@ class GaussianProcessEmulator
 {
 
 friend class GaussianProcessEmulatorDirectoryReader;
-friend class GaussianProcessEmulatorSingleFileReader;
-friend class GaussianProcessEmulatorSingleFileWriter;
 
 public:
   // ENUMERATIONS

@@ -802,6 +802,16 @@ bool parseComments(
 }
 
 
+std::ostream & serializeComments(
+    const std::vector< std::string > & comments,
+    std::ostream & o) {
+  for (unsigned int i = 0; i < comments.size(); ++i) {
+    o << comments[i] << '\n';
+  }
+  return o;
+}
+
+
 /**
    Populates a matrix from a istream.  Expects positive integers
    number_rows and number_columns to be listed first. Reads elements
@@ -830,6 +840,25 @@ inline bool ReadMatrix(
 
 
 /**
+   Print a Matrix to output stream, preceded by its dimensions.  Use
+   row-major order. */
+template < typename TDerived >
+static inline std::ostream & PrintMatrix(
+    const Eigen::MatrixBase< TDerived > & m,
+    std::ostream & o)
+{
+  o << m.rows() << ' ' << m.cols() << '\n';
+  if (m.cols() > 0) {
+    for (int i = 0; i < m.rows(); ++i) {
+      for (int j = 0; j < (m.cols() - 1); ++j)
+        o << m(i, j) << '\t';
+      o << m(i, m.cols() - 1) << '\n';
+    }
+  }
+  return o;
+}
+
+/**
    Populates a Vector from a istream.  Expects positive integers
    number_elements to be listed first. Reads elements in order.
 
@@ -852,6 +881,38 @@ inline bool ReadVector(
   }
   return true;
 }
+
+/**
+   Print a Vector to output stream, preceded by its size. */
+template < typename TDerived >
+static inline std::ostream & PrintVector(
+    const Eigen::MatrixBase< TDerived > & v,
+    std::ostream & o)
+{
+  o << v.size() << '\n';
+  for (int i = 0; i < v.size(); ++i) {
+    o << v(i) << '\n';
+  }
+  return o;
+}
+
+
+/**
+ * A covariance function can be represented as a string. */
+const char * GetCovarianceFunctionString(
+  GaussianProcessEmulator::CovarianceFunctionType cov)
+{
+  switch (cov) {
+  case GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION:  return "POWER_EXPONENTIAL_FUNCTION";
+  case GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION: return "SQUARE_EXPONENTIAL_FUNCTION";
+  case GaussianProcessEmulator::MATERN_32_FUNCTION:  return "MATERN_32_FUNCTION";
+  case GaussianProcessEmulator::MATERN_52_FUNCTION:  return "MATERN_52_FUNCTION";
+  default:
+    assert(false);
+    return "UNKNOWN";
+  }
+}
+
 
 bool parseSubmodels(
     GaussianProcessEmulator::SingleModel & m,
@@ -961,6 +1022,50 @@ bool parsePCADecomposition(
   }
 
   return true;
+}
+
+std::ostream & serializePCADecomposition(
+    const GaussianProcessEmulator & gpme,
+    std::ostream & o ) {
+  serializeComments(gpme.m_Comments,o);
+  o << "OUTPUT_MEANS\n";
+  PrintVector(gpme.m_TrainingOutputMeans, o);
+  o << "OUTPUT_UNCERTAINTY_SCALES\n";
+  PrintVector(gpme.m_UncertaintyScales, o);
+  o << "OUTPUT_PCA_EIGENVALUES\n";
+  PrintVector(gpme.m_PCAEigenvalues, o);
+  o << "OUTPUT_PCA_EIGENVECTORS\n";
+  PrintMatrix(gpme.m_PCAEigenvectors, o);
+  o << "END_OF_FILE\n";
+  return o;
+}
+
+
+std::ostream & serializeSubmodels(
+    const GaussianProcessEmulator::SingleModel & m,
+    int modelIndex,
+    std::ostream & o) {
+  o << "MODEL " << modelIndex << '\n';
+  o << "COVARIANCE_FUNCTION\t"
+    << GetCovarianceFunctionString(m.m_CovarianceFunction) << '\n';
+  o << "REGRESSION_ORDER\t" << m.m_RegressionOrder << '\n';
+  o << "THETAS\n";
+  PrintVector(m.m_Thetas, o);
+  o << "END_OF_MODEL\n";
+  return o;
+}
+
+
+std::ostream & serializeGaussianProcessEmulator(
+    const GaussianProcessEmulator & gpme,
+    std::ostream & o) {
+  o << "SUBMODELS\t"
+    << gpme.m_NumberPCAOutputs << "\n";
+  for (int i = 0; i < gpme.m_NumberPCAOutputs; ++i) {
+    serializeSubmodels(gpme.m_PCADecomposedModels[i],i,o);
+  }
+  o << "END_OF_FILE\n";
+  return o;
 }
 
 
@@ -1085,6 +1190,52 @@ GaussianProcessEmulatorDirectoryFormatIO
 
   // We are finished reading the input files.
   return (gpe->CheckStatus() == GaussianProcessEmulator::UNTRAINED);
+}
+
+
+bool
+GaussianProcessEmulatorDirectoryFormatIO
+::Write(GaussianProcessEmulator * gpe, std::ostream & output) const
+{
+  output.precision(17);
+  serializeGaussianProcessEmulator(*gpe, output);
+
+  return true;
+}
+
+
+bool
+GaussianProcessEmulatorDirectoryFormatIO
+::WritePCA(GaussianProcessEmulator * gpe, std::ostream & output) const
+{
+  output.precision(17);
+  serializePCADecomposition(*gpe,output);
+
+  return true;
+}
+
+
+bool
+GaussianProcessEmulatorDirectoryFormatIO
+::PrintThetas(GaussianProcessEmulator * gpe, std::ostream & output) const
+{
+  output.precision(17);
+  serializeComments(gpe->m_Comments,output);
+  output << "THETAS_FILE\n";
+  output << "SUBMODELS\t"
+    << gpe->m_NumberPCAOutputs << "\n\n";
+  for (int i = 0; i < gpe->m_NumberPCAOutputs; ++i) {
+    const GaussianProcessEmulator::SingleModel & m = gpe->m_PCADecomposedModels[i];
+    output << "MODEL " << i << '\n';
+    output << "COVARIANCE_FUNCTION\t"
+      << GetCovarianceFunctionString(m.m_CovarianceFunction) << '\n';
+    output << "REGRESSION_ORDER\t" << m.m_RegressionOrder << '\n';
+    output << "THETAS\n";
+    PrintVector(m.m_Thetas, output);
+    output << "END_OF_MODEL\n\n";
+  }
+  output << "END_OF_FILE\n";
+  return true;
 }
 
 

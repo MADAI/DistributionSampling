@@ -31,7 +31,6 @@ ACKNOWLEDGMENTS:
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
 #include "GaussianProcessEmulatorDirectoryFormatIO.h"
-#include "GaussianProcessEmulatorSingleFileWriter.h"
 #include "RuntimeParameterFileReader.h"
 #include "Paths.h"
 #include "Defaults.h"
@@ -176,8 +175,8 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
-  singleFileWriter.Write( &gpe, os );
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryFormatIO;
+  directoryFormatIO.Write( &gpe, os );
 
   if ( settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE ) ) {
     std::cout << "Emulator training succeeded.\n";
