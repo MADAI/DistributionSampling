@@ -16,6 +16,7 @@ set( APPLICATIONS
   madai_train_emulator
   madai_print_default_settings
   madai_analyze_trace
+  madai_generate_posterior_samples
 )
 
 foreach( application ${APPLICATIONS} )
@@ -45,5 +46,6 @@ install( PROGRAMS
   madai_set_variable
   madai_catenate_traces
   madai_launch_multiple_madai_generate_trace
+  madai_generate_posterior_samples
   DESTINATION bin
 )
