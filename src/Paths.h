@@ -23,29 +23,28 @@
 
 namespace madai {
 
-class Paths {
-public:
+namespace Paths {
 
-  static const char SEPARATOR;
+  extern const char SEPARATOR;
 
-  static const std::string TRACE_DIRECTORY;
+  extern const std::string TRACE_DIRECTORY;
 
-  static const std::string OBSERVABLE_NAMES_FILE;
+  extern const std::string OBSERVABLE_NAMES_FILE;
 
-  static const std::string PARAMETERS_FILE;
+  extern const std::string PARAMETERS_FILE;
 
-  static const std::string RUNTIME_PARAMETER_FILE;
+  extern const std::string RUNTIME_PARAMETER_FILE;
 
-  static const std::string RESULTS_FILE;
+  extern const std::string RESULTS_FILE;
 
-  static const std::string EMULATOR_STATE_FILE;
+  extern const std::string EMULATOR_STATE_FILE;
 
-  static const std::string PCA_DECOMPOSITION_FILE;
+  extern const std::string PCA_DECOMPOSITION_FILE;
 
-  static const std::string PARAMETER_PRIORS_FILE;
+  extern const std::string PARAMETER_PRIORS_FILE;
 
-};
+} // end namespace Paths
 
 } // end namespace madai
 
-#endif // madai_DirectoryPaths_h_included
+#endif // madai_Paths_h_included

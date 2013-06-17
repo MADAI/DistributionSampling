@@ -25,8 +25,6 @@
 #include "Defaults.h"
 #include "System.h"
 
-using madai::Paths;
-
 
 int main( int argc, char ** argv )
 {
@@ -37,14 +35,14 @@ int main( int argc, char ** argv )
       << "\n"
       << "This program performs a principal components analysis on \n"
       << "experimental data. It stores the results in \n"
-      << "<StatisticsDirectory>" << Paths::SEPARATOR
-      << Paths::PCA_DECOMPOSITION_FILE << "\n"
+      << "<StatisticsDirectory>" << madai::Paths::SEPARATOR
+      << madai::Paths::PCA_DECOMPOSITION_FILE << "\n"
       << "\n"
       << "<StatisticsDirectory> is the directory in which all \n"
       << "statistics data are stored. It contains the parameter file "
-      << Paths::RUNTIME_PARAMETER_FILE << "\n"
+      << madai::Paths::RUNTIME_PARAMETER_FILE << "\n"
       << "\n"
-      << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+      << "Format of entries in " << madai::Paths::RUNTIME_PARAMETER_FILE
       << ":\n\n"
       << "MODEL_OUTPUT_DIRECTORY <value> (default: "
       << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"

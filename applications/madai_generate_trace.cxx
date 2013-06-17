@@ -36,8 +36,6 @@
 
 #include "madaisys/SystemTools.hxx"
 
-using madai::Paths;
-
 
 int main(int argc, char ** argv) {
 
@@ -55,13 +53,13 @@ int main(int argc, char ** argv) {
       << "\n"
       << "<StatisticsDirectory> is the directory in which all \n"
       << "statistics data are stored. It contains the parameter file "
-      << Paths::RUNTIME_PARAMETER_FILE << "\n"
+      << madai::Paths::RUNTIME_PARAMETER_FILE << "\n"
       << "\n"
       << "<OutputFileName> is the name of the comma-separated value-format \n"
       << "file in which the trace will be written. This file will be \n"
       << "written in the directory <StatisticsDirectory>/trace/.\n"
       << "\n"
-      << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+      << "Format of entries in " << madai::Paths::RUNTIME_PARAMETER_FILE
       << ":\n\n"
       << "MODEL_OUTPUT_DIRECTORY <value> (default: "
       << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"
@@ -211,7 +209,7 @@ int main(int argc, char ** argv) {
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
   std::string outputFileName( argv[2] );
   std::string outputFilePath =
-    traceDirectory + Paths::SEPARATOR + outputFileName;
+    traceDirectory + madai::Paths::SEPARATOR + outputFileName;
 
   std::ofstream outFile(outputFilePath.c_str());
   if ( !outFile.good() ) {

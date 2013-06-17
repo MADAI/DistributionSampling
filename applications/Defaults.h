@@ -24,77 +24,75 @@
 
 namespace madai {
 
-class Defaults {
-public:
+namespace Defaults {
   /**
      Generic Variables */
-  static const std::string MODEL_OUTPUT_DIRECTORY;
+  extern const std::string MODEL_OUTPUT_DIRECTORY;
 
-  static const std::string EXPERIMENTAL_RESULTS_FILE;
+  extern const std::string EXPERIMENTAL_RESULTS_FILE;
 
-  static const bool VERBOSE;
+  extern const bool VERBOSE;
 
-  static const bool READER_VERBOSE;
+  extern const bool READER_VERBOSE;
 
   /**
    Latin Hypercube Variables */
-  static const int GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS;
+  extern const int GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS;
 
-  static const bool GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE;
+  extern const bool GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE;
 
-  static const double GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS;
+  extern const double GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS;
 
-  static const bool GENERATE_TRAINING_POINTS_USE_MAXIMIN;
+  extern const bool GENERATE_TRAINING_POINTS_USE_MAXIMIN;
 
-  static const int GENERATE_TRAINING_POINTS_MAXIMIN_TRIES;
+  extern const int GENERATE_TRAINING_POINTS_MAXIMIN_TRIES;
 
   /**
    Emulator Variables */
-  static const double PCA_FRACTION_RESOLVING_POWER;
+  extern const double PCA_FRACTION_RESOLVING_POWER;
 
-  static const std::string EMULATOR_COVARIANCE_FUNCTION;
+  extern const std::string EMULATOR_COVARIANCE_FUNCTION;
 
-  static const int EMULATOR_REGRESSION_ORDER;
+  extern const int EMULATOR_REGRESSION_ORDER;
 
-  static const double EMULATOR_NUGGET;
+  extern const double EMULATOR_NUGGET;
 
-  static const double EMULATOR_AMPLITUDE;
+  extern const double EMULATOR_AMPLITUDE;
 
-  static const double EMULATOR_SCALE;
+  extern const double EMULATOR_SCALE;
 
-  static const std::string EMULATOR_TRAINING_RIGOR;
+  extern const std::string EMULATOR_TRAINING_RIGOR;
 
   /**
    Sampler variables */
-  static const std::string SAMPLER;
+  extern const std::string SAMPLER;
 
-  static const int SAMPLER_NUMBER_OF_SAMPLES;
+  extern const int SAMPLER_NUMBER_OF_SAMPLES;
 
   /**
    MCMC Variables */
-  static const bool MCMC_USE_MODEL_ERROR;
+  extern const bool MCMC_USE_MODEL_ERROR;
 
-  static const int MCMC_NUMBER_OF_BURN_IN_SAMPLES;
+  extern const int MCMC_NUMBER_OF_BURN_IN_SAMPLES;
 
-  static const double MCMC_STEP_SIZE;
+  extern const double MCMC_STEP_SIZE;
 
   /**
    External Model Variables */
-  static const std::string EXTERNAL_MODEL_EXECUTABLE;
+  extern const std::string EXTERNAL_MODEL_EXECUTABLE;
 
-  static const std::string EXTERNAL_MODEL_ARGUMENTS;
+  extern const std::string EXTERNAL_MODEL_ARGUMENTS;
 
   /**
    Emulate Variables */
-  static const bool EMULATE_QUIET;
+  extern const bool EMULATE_QUIET;
 
-  static const bool EMULATE_WRITE_HEADER;
+  extern const bool EMULATE_WRITE_HEADER;
 
   /**
     Print All Defaults */
-  static void PrintAllDefaults(std::ostream & output);
-};
-
+  void PrintAllDefaults(std::ostream & output);
+} // end namespace Defaults
 
 } // end namespace madai
 

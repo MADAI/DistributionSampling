@@ -37,7 +37,6 @@ ACKNOWLEDGMENTS:
 #include "Paths.h"
 #include "Defaults.h"
 
-using madai::Paths;
 
 std::ostream & operator <<(std::ostream & o, const madai::Distribution * d) {
   const madai::UniformDistribution * uniformPriorDist
@@ -140,9 +139,9 @@ int main(int argc, char ** argv) {
               << "\n"
               << "<StatisticsDirectory> is the directory in which all \n"
               << "statistics data are stored. It contains the parameter file "
-              << Paths::RUNTIME_PARAMETER_FILE << "\n"
+              << madai::Paths::RUNTIME_PARAMETER_FILE << "\n"
               << "\n"
-              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+              << "Format of entries in " << madai::Paths::RUNTIME_PARAMETER_FILE
               << ":\n\n"
               << "MODEL_OUTPUT_DIRECTORY <value> (default: "
               << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"
