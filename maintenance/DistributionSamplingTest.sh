@@ -26,6 +26,8 @@ getopencmd() {
 get_nproc() {
 	# print out number of parallel processes
 	command -v nproc > /dev/null && { nproc; return; }
+	command -v sysctl > /dev/null && {
+		sysctl -n hw.ncpu 2> /dev/null && return; }
 	# Insert other logic here.
 	echo 1; ## default value
 }
