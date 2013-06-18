@@ -205,12 +205,13 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i)
   std::set< std::string > scalarNamesRemaining;
   scalarNamesRemaining.insert(scalarOutputNames.begin(), scalarOutputNames.end());
 
-  while (true) { // will loop forever if input stream lasts forever.
+  while (!i.eof()) { // will loop while there is still content
+                      // remaining in the file
     std::string line;
     std::vector< std::string > tokens = ReadLineAsTokens( i, line );
 
     if ( tokens.size() == 0 )
-      break;
+      continue;
 
     std::string formatMessage( "<observed scalar name> <observed scalar value> "
                                "<observed scalar variance>" );
