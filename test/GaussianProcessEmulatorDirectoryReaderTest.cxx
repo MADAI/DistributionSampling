@@ -25,7 +25,7 @@
 #include "ApplicationUtilities.h"
 #include "GaussianDistribution.h"
 #include "GaussianProcessEmulator.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "Paths.h"
 #include "RuntimeParameterFileReader.h"
 #include "UniformDistribution.h"
@@ -605,7 +605,7 @@ int main( int argc, char *argv[] )
 
   // Read in the training data
   madai::GaussianProcessEmulator gpe;
-  madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
 
   directoryReader.SetVerbose( true );
   if ( !directoryReader.LoadTrainingData( &gpe,

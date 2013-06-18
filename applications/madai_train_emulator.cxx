@@ -30,9 +30,7 @@ ACKNOWLEDGMENTS:
 
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
-#include "GaussianProcessEmulatorSingleFileReader.h"
-#include "GaussianProcessEmulatorSingleFileWriter.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "RuntimeParameterFileReader.h"
 #include "Paths.h"
 #include "Defaults.h"
@@ -134,7 +132,7 @@ int main(int argc, char ** argv) {
       "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
 
   madai::GaussianProcessEmulator gpe;
-  madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
   directoryReader.SetVerbose( readerVerbose );
 
   if ( !directoryReader.LoadTrainingData( &gpe,
@@ -177,8 +175,8 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
-  singleFileWriter.Write( &gpe, os );
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryFormatIO;
+  directoryFormatIO.Write( &gpe, os );
 
   if ( settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE ) ) {
     std::cout << "Emulator training succeeded.\n";

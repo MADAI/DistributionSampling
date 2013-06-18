@@ -17,12 +17,11 @@
  *=========================================================================*/
 
 #include "ApplicationUtilities.h"
-#include "GaussianProcessEmulator.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
-#include "GaussianProcessEmulatorSingleFileWriter.h"
-#include "RuntimeParameterFileReader.h"
-#include "Paths.h"
 #include "Defaults.h"
+#include "GaussianProcessEmulator.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
+#include "Paths.h"
+#include "RuntimeParameterFileReader.h"
 #include "System.h"
 
 
@@ -91,7 +90,7 @@ int main( int argc, char ** argv )
 
   // Read in the training data
   madai::GaussianProcessEmulator gpe;
-  madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
   bool verbose = settings.GetOptionAsBool(
       "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
   directoryReader.SetVerbose( verbose );
@@ -119,8 +118,8 @@ int main( int argc, char ** argv )
     return EXIT_FAILURE;
   }
 
-  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
-  singleFileWriter.WritePCA( &gpe, os );
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryFormatIO;
+  directoryFormatIO.WritePCA( &gpe, os );
 
   if ( settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE ) ) {
     std::cout << "PCA decomposition succeeded.\n";

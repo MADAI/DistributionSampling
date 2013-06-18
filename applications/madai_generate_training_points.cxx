@@ -26,7 +26,7 @@
 
 #include "ApplicationUtilities.h"
 #include "GaussianDistribution.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "LatinHypercubeGenerator.h"
 #include "Parameter.h"
 #include "Paths.h"
@@ -156,7 +156,7 @@ int main( int argc, char * argv[] ) {
       madai::Defaults::READER_VERBOSE);
 
   int numberOfParameters = 0;
-  bool parametersRead = madai::GaussianProcessEmulatorDirectoryReader::
+  bool parametersRead = madai::GaussianProcessEmulatorDirectoryFormatIO::
     ParseParameters( parameters,
                      numberOfParameters,
                      statisticsDirectory,
