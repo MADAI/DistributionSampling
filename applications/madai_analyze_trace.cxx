@@ -130,6 +130,10 @@ int main(int argc, char ** argv) {
       << '\n';
   }
 
+  // Print the relative log-likelihood from the best point
+  std::cout << "\nbest log likelihood\n";
+  std::cout << std::setw(14) << bestLogLikelihood << "\n";
+
   std::vector< std::vector< double > > covariancematrix;
   for (int i = 0; i < numberOfParameters; ++i)
     covariancematrix.push_back(std::vector< double >(numberOfParameters, 0.0));
