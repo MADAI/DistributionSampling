@@ -28,7 +28,7 @@
 int main( int, char *[] ) {
 
   // Create a string with some observations for the Gaussian 2D model
-  std::string observations( "X 22.0 3.2\nY 13.2 1.7\n" );
+  std::string observations( "X 22.0 3.2\n\n\n Y 13.2 1.7\n" );
 
   // Create a stream from the string
   std::istringstream stream( observations );

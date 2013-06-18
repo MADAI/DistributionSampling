@@ -221,13 +221,6 @@ public:
   void SetUseModelCovarianceToCalulateLogLikelihood(bool);
   //@}
 
-  /**
-     Load a file with experimental observations in it.  The model will
-     be comared against this.  Will call
-     this->SetObservedScalarValues() and
-     this->SetObservedScalarCovariance(). */
-  virtual ErrorType LoadObservations(std::istream & i);
-
   virtual bool GetConstantCovariance(std::vector< double > & x) const;
 
 protected:
