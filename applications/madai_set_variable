@@ -14,7 +14,8 @@ FILE="${DIR}/settings.dat"
 PATTERN="^[[:space:]]*${KEY}\([[:space:]].*\)*\$"
 if [ -f "$FILE" ] && grep -q "$PATTERN" "$FILE" ; then
   echo "old:" `grep "$PATTERN" "$FILE"`
-  sed -i "s#${PATTERN}#${KEY} ${VAL}#" "$FILE"
+  mv "$FILE" "${FILE}.OLD"
+  sed "s#${PATTERN}#${KEY} ${VAL}#" < "${FILE}.OLD" > "$FILE"
   echo "new:" `grep "$PATTERN" "$FILE"`
 else
   # Assume $FILE empty or ends in newline.
