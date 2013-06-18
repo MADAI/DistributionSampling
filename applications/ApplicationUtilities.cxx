@@ -43,83 +43,68 @@ void EnsurePathSeparatorAtEnd( std::string & path )
   }
 }
 
-std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
-                                     const RuntimeParameterFileReader & settings )
+/** General-purpose function for getting a file or directory relative
+* to the statistics directory. */
+std::string GetStatisticsDirectoryRelativePath(
+  const std::string & statisticsDirectory,
+  const RuntimeParameterFileReader & settings,
+  const std::string & settingName,
+  const std::string & settingDefault )
 {
-  std::string modelOutputDirectory = settings.GetOption(
-      "MODEL_OUTPUT_DIRECTORY", Defaults::MODEL_OUTPUT_DIRECTORY);
+  std::string path = settings.GetOption( settingName, settingDefault );
 
   // Check for quotes around directory name
-  if ( ( modelOutputDirectory[0] == '"'  && *(modelOutputDirectory.end()-1) == '"' ) ||
-       ( modelOutputDirectory[0] == '\'' && *(modelOutputDirectory.end()-1) == '\'' ) ) {
+  if ( ( path[0] == '"'  && *(path.end()-1) == '"' ) ||
+       ( path[0] == '\'' && *(path.end()-1) == '\'' ) ) {
     // Truncate path to remove quotes
-    modelOutputDirectory = modelOutputDirectory.substr( 1, modelOutputDirectory.size()-2 );
+    path = path.substr( 1, path.size()-2 );
   }
 
   std::string statisticsDirectoryCopy( statisticsDirectory );
   EnsurePathSeparatorAtEnd( statisticsDirectoryCopy );
 
-  if ( modelOutputDirectory[0] != Paths::SEPARATOR ) {
-    modelOutputDirectory.insert( 0, statisticsDirectoryCopy );
+  if ( path[0] != Paths::SEPARATOR ) {
+    path.insert( 0, statisticsDirectoryCopy );
   }
 
-  return modelOutputDirectory;
+  return path;
+}
+
+
+std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
+                                     const RuntimeParameterFileReader & settings )
+{
+  return GetStatisticsDirectoryRelativePath(
+    statisticsDirectory, settings,
+    "MODEL_OUTPUT_DIRECTORY",
+    Defaults::MODEL_OUTPUT_DIRECTORY );
 }
 
 std::string GetExperimentalResultsFile( const std::string & statisticsDirectory,
                                         const RuntimeParameterFileReader & settings )
 {
-  std::string experimentalResultsFile = settings.GetOption(
-      "EXPERIMENTAL_RESULTS_FILE", Defaults::EXPERIMENTAL_RESULTS_FILE);
-
-  // Check for quotes around directory name
-  if ( ( experimentalResultsFile[0] == '"' &&
-         *(experimentalResultsFile.end()-1) == '"' ) ||
-       ( experimentalResultsFile[0] == '\'' &&
-         *(experimentalResultsFile.end()-1) == '\'' ) ) {
-    // Truncate path to remove quotes
-    experimentalResultsFile =
-      experimentalResultsFile.substr( 1, experimentalResultsFile.size()-2 );
-  }
-
-  std::string statisticsDirectoryCopy( statisticsDirectory );
-  EnsurePathSeparatorAtEnd( statisticsDirectoryCopy );
-
-  if ( experimentalResultsFile[0] != Paths::SEPARATOR ) {
-    experimentalResultsFile.insert( 0, statisticsDirectoryCopy );
-  }
-
-  return experimentalResultsFile;
+  return GetStatisticsDirectoryRelativePath(
+    statisticsDirectory, settings,
+    "EXPERIMENTAL_RESULTS_FILE",
+    Defaults::EXPERIMENTAL_RESULTS_FILE );
 }
 
 std::string GetInactiveParametersFile( const std::string & statisticsDirectory,
                                        const RuntimeParameterFileReader & settings )
 {
-  std::string inactiveParameterFile = settings.GetOption(
-      "SAMPLER_INACTIVE_PARAMETERS_FILE",
-      Defaults::SAMPLER_INACTIVE_PARAMETERS_FILE);
-  if ( inactiveParameterFile == "" ) {
-    return std::string();
-  }
+  return GetStatisticsDirectoryRelativePath(
+    statisticsDirectory, settings,
+    "SAMPLER_INACTIVE_PARAMETERS_FILE",
+    Defaults::SAMPLER_INACTIVE_PARAMETERS_FILE );
+}
 
-  // Check for quotes around directory name
-  if ( ( inactiveParameterFile[0] == '"' &&
-         *(inactiveParameterFile.end()-1) == '"' ) ||
-       ( inactiveParameterFile[0] == '\'' &&
-         *(inactiveParameterFile.end()-1) == '\'' ) ) {
-    // Truncate path to remove quotes
-    inactiveParameterFile =
-      inactiveParameterFile.substr( 1, inactiveParameterFile.size()-2 );
-  }
-
-  std::string statisticsDirectoryCopy( statisticsDirectory );
-  EnsurePathSeparatorAtEnd( statisticsDirectoryCopy );
-
-  if ( inactiveParameterFile[0] != Paths::SEPARATOR ) {
-    inactiveParameterFile.insert( 0, statisticsDirectoryCopy );
-  }
-
-  return inactiveParameterFile;
+std::string GetPosteriorAnalysisDirectory( const std::string & statisticsDirectory,
+                                           const RuntimeParameterFileReader & settings )
+{
+  return GetStatisticsDirectoryRelativePath(
+    statisticsDirectory, settings,
+    "POSTERIOR_ANALYSIS_DIRECTORY",
+    Defaults::POSTERIOR_ANALYSIS_DIRECTORY );
 }
 
 bool IsFile( const char * path )

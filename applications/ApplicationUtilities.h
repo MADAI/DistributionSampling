@@ -56,6 +56,13 @@ std::string GetInactiveParametersFile( const std::string & statisticsDirectory,
                                        const RuntimeParameterFileReader & settings );
 
 /**
+ * Get the posterior analysis directory specified by the settings.dat
+ * file in the statisticsDirectory. If there is no setting
+ * POSTERIOR_ANALYSIS_DIRECTORY, then an empty string is returned. */
+std::string GetPosteriorAnalysisDirectory( const std::string & statisticsDirectory,
+                                           const RuntimeParameterFileReader & settings );
+
+/**
  * Returns a string where all the characters in the input parameter
  * are lowercase. */
 std::string LowerCase( const char * buffer );
