@@ -18,13 +18,13 @@
 #include <cassert>  // assert
 #include <cstdlib>  // std::atof
 #include <cmath>    // std::sqrt, std::pow
+#include <iomanip>  // std::setw
 #include <iostream> // std::cout
 #include <fstream>  // std::ifstream
-#include <vector>   // std::vector
-#include <string>   // std::string
-#include <sstream>  // std::stringstream
-#include <iomanip>  // std::setw
 #include <limits>   // infinity
+#include <sstream>  // std::stringstream
+#include <string>   // std::string
+#include <vector>   // std::vector
 
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulatorDirectoryFormatIO.h"
