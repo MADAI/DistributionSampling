@@ -58,18 +58,15 @@ stylecheck() (
 	TMP=`mktemp`
 	cd "$SRC_DIR"
 	RETCODE=0
-	for file in \
-		applications/*.cxx \
-		applications/test/*.cxx \
-		test/*.cxx \
-		src/*.h \
-		src/*.cxx ; do
+	for file in applications/*.cxx src/*.h src/*.cxx ; do
 		KWStyle -v "$file" -xml maintenance/KWStyle.xml > "$TMP"
 		KRET=$?
-		if [ "$KRET" -gt 0 ]; then
-			cat "$TMP" ;
-			RETCODE="$KRET" ;
-		fi
+		if [ "$KRET" -gt 0 ]; then cat "$TMP" ; RETCODE="$KRET" ; fi
+	done
+	for file in applications/test/*.cxx test/*.cxx ; do
+		KWStyle -v "$file" -xml maintenance/KWStyleTest.xml > "$TMP"
+		KRET=$?
+		if [ "$KRET" -gt 0 ]; then cat "$TMP" ; RETCODE="$KRET" ; fi
 	done
 	rm "$TMP";
 	return $RETCODE
