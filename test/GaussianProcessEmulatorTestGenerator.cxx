@@ -26,7 +26,6 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include "GaussianProcessEmulatorDirectoryReader.h"
 
 #include "madaisys/SystemTools.hxx"
 
