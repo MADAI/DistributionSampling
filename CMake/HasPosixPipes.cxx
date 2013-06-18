@@ -26,6 +26,9 @@
 
 int main( int argc, char* argv[] )
 {
+  (void) argc;
+  (void) argv;
+
   int pipeInfo[2];
 
   pipe( pipeInfo );
