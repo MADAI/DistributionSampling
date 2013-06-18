@@ -372,34 +372,8 @@ GaussianProcessEmulatorDirectoryFormatIO
   return ( numberParameters > 0 );
 }
 
-// anonymous namespace
-namespace {
 
-/**
-   Read the CovarianceFunctionType from the command line. */
-bool parseCovarianceFunction(
-    GaussianProcessEmulator::CovarianceFunctionType & covarianceType,
-    std::istream & input)
-{
-  if (! input.good()) return false;
-  std::string s;
-  input >> s;
-  if (s == "POWER_EXPONENTIAL_FUNCTION")
-    covarianceType = GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
-  else if (s == "SQUARE_EXPONENTIAL_FUNCTION")
-    covarianceType = GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
-  else if (s == "MATERN_32_FUNCTION")
-    covarianceType = GaussianProcessEmulator::MATERN_32_FUNCTION;
-  else if (s == "MATERN_52_FUNCTION")
-    covarianceType = GaussianProcessEmulator::MATERN_52_FUNCTION;
-  else {
-    return false;
-  }
-  return true;
-}
-
-
-bool parseOutputs(
+bool GaussianProcessEmulatorDirectoryFormatIO::ParseOutputs(
     std::vector< std::string > & outputNames,
     int & numberOutputs,
     const std::string & statisticalAnalysisDirectory,
@@ -455,6 +429,33 @@ bool parseOutputs(
   numberOutputs = outputNames.size();
 
   return (numberOutputs > 0);
+}
+
+
+// anonymous namespace
+namespace {
+
+/**
+   Read the CovarianceFunctionType from the command line. */
+bool parseCovarianceFunction(
+    GaussianProcessEmulator::CovarianceFunctionType & covarianceType,
+    std::istream & input)
+{
+  if (! input.good()) return false;
+  std::string s;
+  input >> s;
+  if (s == "POWER_EXPONENTIAL_FUNCTION")
+    covarianceType = GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
+  else if (s == "SQUARE_EXPONENTIAL_FUNCTION")
+    covarianceType = GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
+  else if (s == "MATERN_32_FUNCTION")
+    covarianceType = GaussianProcessEmulator::MATERN_32_FUNCTION;
+  else if (s == "MATERN_52_FUNCTION")
+    covarianceType = GaussianProcessEmulator::MATERN_52_FUNCTION;
+  else {
+    return false;
+  }
+  return true;
 }
 
 
@@ -749,7 +750,7 @@ bool parseModelDataDirectoryStructure(
     std::cerr << "Couldn't parse parameters\n";
     return false;
   }
-  if ( !parseOutputs(
+  if ( !GaussianProcessEmulatorDirectoryFormatIO::ParseOutputs(
           gpme.m_OutputNames,
           gpme.m_NumberOutputs,
           statisticalAnalysisDirectory,

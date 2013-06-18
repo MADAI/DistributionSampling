@@ -80,6 +80,13 @@ public:
                                const std::string & statisticalAnalysisDirectory,
                                bool verbose );
 
+  /**
+    Parses a file describing the outputs of a model. */
+  static bool ParseOutputs( std::vector< std::string > & outputNames,
+                            int & numberOutputs,
+                            const std::string & statisticalAnalysisDirectory,
+                            bool verbose );
+
 protected:
   bool m_Verbose;
 
