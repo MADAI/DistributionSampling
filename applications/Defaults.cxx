@@ -74,6 +74,8 @@ const bool Defaults::EMULATE_QUIET = false;
 
 const bool Defaults::EMULATE_WRITE_HEADER = true;
 
+const std::string Defaults::POSTERIOR_ANALYSIS_DIRECTORY = "posterior_model_output";
+
 void Defaults::PrintAllDefaults(std::ostream & o) {
   o << "#\n"
     << "MODEL_OUTPUT_DIRECTORY "                           << Defaults::MODEL_OUTPUT_DIRECTORY << '\n'
@@ -108,6 +110,8 @@ void Defaults::PrintAllDefaults(std::ostream & o) {
     << "#\n"
     << "EMULATE_QUIET "                                    << Defaults::EMULATE_QUIET << '\n'
     << "EMULATE_WRITE_HEADER "                             << Defaults::EMULATE_WRITE_HEADER << '\n'
+    << "#\n"
+    << "POSTERIOR_ANALYSIS_DIRECTORY "                      << Defaults::POSTERIOR_ANALYSIS_DIRECTORY << '\n'
     << "#\n";
 }
 
