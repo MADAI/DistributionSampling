@@ -3,6 +3,8 @@
 # DistributionSamplingTest
 # This is a little test suite for the MADAI Distribution Sampling Library
 
+SRC_DIR=$(cd "$(dirname "$0")/.."; pwd;)
+
 ## useful functions
 die() { echo "$@" >&2; exit 1; }
 try() { "$@" || die "\"$@\" failed."; }
@@ -28,11 +30,11 @@ get_nproc() {
     echo 1; ## default value
 }
 
-## Build Functions  Returns 0 if build is successful.
+## Build Function.  Returns 0 if build is successful.
 build() (
 	## this is the build script
 	require mktemp make cmake
-	cd "$(mktemp -d)"
+	cd "$(mktemp -d /tmp/"$(id -un)"_madai_XXXXXX)"
 	BUILD_TYPE="$1" # Debug or Release
 	INSTALL_PREFIX="$2"
 	DEFAULT_PREFIX="/tmp/$(id -un)/local"
@@ -43,7 +45,7 @@ build() (
         -DUSE_OPENMP:BOOL=0 \
         -DUSE_GPROF:BOOL=0 \
         -DABORT_ON_COMPILER_WARNINGS:BOOL=1
-    try nice make -j"$(get_nproc)" all
+    try nice make -j"${NPROC:-$(get_nproc)}" all
     try nice make test
 	if [ "$INSTALL_PREFIX" ] ; then
 		try mkdir -p "$INSTALL_PREFIX"
@@ -55,7 +57,7 @@ build() (
 	rm -rf *; )
 
 stylecheck() (
-	TMP=`mktemp`
+	TMP="$(mktemp /tmp/"$(id -un)"_madai_XXXXXX)"
 	cd "$SRC_DIR"
 	RETCODE=0
 	for file in applications/*.cxx src/*.h src/*.cxx ; do
@@ -72,75 +74,92 @@ stylecheck() (
 	return $RETCODE
 )
 
+parabolic_test() (
+	NUMBER_OF_SAMPLES=${1:-10000}
+	if [ "$2" ]; then
+		MODE=interact
+	else
+		MODE=emulate
+	fi
+	PARALLEL_SAMPLING=$3
+	PARABEXDIR="${SRC_DIR}/tutorial/parabolic_example"
+	if [ '(' ! -d "$SRC_DIR" ')' -o ! -d "$PARABEXDIR" ] ; then
+		echo "please set the SRC_DIR environment variable."
+		return 1 ; fi
+	require mktemp python
+	# check to see that all of these got installed intp the PATH
+	require madai_catenate_traces madai_launch_multiple_madai_generate_trace
+	require madai_set_variable madai_print_default_settings
+	require madai_generate_training_points madai_pca_decompose
+	require madai_train_emulator
+
+	TMPDIR="$(mktemp -d /tmp/"$(id -un)"_madai_XXXXXX)"
+	# keep a list of tmpdirs to delete later
+	echo "rm -Rf \"${TMPDIR}\"" >> /tmp/dsllist.sh
+	try cd "$TMPDIR"
+
+	try cp "${PARABEXDIR}/observable_names.dat" .
+	try cp "${PARABEXDIR}/parameter_priors.dat" .
+	cat > ./experimental_results.dat <<-EOF
+	MEAN_X         1.14           0.1
+	MEAN_X_SQUARED 2.77634418605  0.1
+	MEAN_ENERGY    3.4925         0.1
+	# HELLO WORLD
+	EOF
+	try madai_print_default_settings > ./settings.dat
+	try madai_set_variable . VERBOSE 1
+
+	if [ "$MODE" = "interact" ] ; then
+	    try madai_set_variable . EXTERNAL_MODEL_EXECUTABLE \
+			"${PARABEXDIR}/parabolic_interactive.py"
+	else
+	    try madai_set_variable . GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS 100
+	    try madai_set_variable . GENERATE_TRAINING_POINTS_USE_MAXIMIN 1
+	    try madai_generate_training_points . > /dev/null
+	    try python "${PARABEXDIR}/parabolic_evaluate.py" \
+			./model_output/run* > /dev/null
+	    try madai_pca_decompose .
+	    #
+		try madai_set_variable . EMULATOR_SCALE 0.025
+	    try madai_train_emulator .
+	fi
+
+	try madai_set_variable . MCMC_USE_MODEL_ERROR 0
+	try madai_set_variable . MCMC_NUMBER_OF_BURN_IN_SAMPLES 200
+
+	if [ "$PARALLEL_SAMPLING" ] ; then
+		NPROC=${NPROC:-$(get_nproc)}
+		try madai_set_variable . SAMPLER_NUMBER_OF_SAMPLES \
+			$(( $NUMBER_OF_SAMPLES / $NPROC ))
+		try time madai_launch_multiple_madai_generate_trace . $NPROC output
+		try madai_catenate_traces ./trace/output_*.csv > ./trace/output.csv
+		rm ./trace/output_*.csv
+	else
+		try madai_set_variable . SAMPLER_NUMBER_OF_SAMPLES \
+			$NUMBER_OF_SAMPLES
+		try time -p nice madai_generate_trace . output.csv
+	fi
+
+	test -d "./model_output" && rm -r ./model_output
+	PDFFILE="${PWD}/$(getcommit "${SRC_DIR}")_${MODE}.pdf"
+
+	try madai_gnuplot_scatterplot_matrix ./trace/output.csv "$PDFFILE" \
+		parameter_priors.dat 50
+
+	$(getopencmd) "$PDFFILE"
+	return 0
+)
+
 ######################
-
-INTERACTIVE_MODE=''
-
+PARALLEL_SAMPLING='1'
+NUMBER_OF_SAMPLES=100000
+NPROC=''
 ######################
-
-SCRIPT_DIRECTORY=$(cd "$(dirname "$0")"; pwd;)
-SRC_DIR=$(cd "${SCRIPT_DIRECTORY}/.."; pwd;)
-require mktemp python
 INSTALL_PREFIX="/tmp/$(id -un)/local"
+PATH="${INSTALL_PREFIX}/bin:${PATH}"
 try build "Release"
 try build "Debug" "$INSTALL_PREFIX"
-#try stylecheck
-stylecheck ## commented because we can't pass the stylecheck
-
-PATH="${INSTALL_PREFIX}/bin:${PATH}"
-# check to see that all of these got installed
-require madai_catenate_traces madai_launch_multiple_madai_generate_trace
-require madai_set_variable madai_print_default_settings
-require madai_generate_training_points madai_pca_decompose
-require madai_train_emulator
-
-TMPDIR=$(mktemp -d)
-
-# keep a list of tmpdirs to delete later
-echo "rm -Rf \"${TMPDIR}\"" >> /tmp/dsllist.sh
-
-try cd "$TMPDIR"
-
-PARABEXDIR="${SRC_DIR}/tutorial/parabolic_example"
-try cp "${PARABEXDIR}/observable_names.dat" .
-try cp "${PARABEXDIR}/parameter_priors.dat" .
-cat > ./experimental_results.dat <<EOF
-MEAN_X         1.14           0.1
-MEAN_X_SQUARED 2.77634418605  0.1
-MEAN_ENERGY    3.4925         0.1
-EOF
-try madai_print_default_settings > ./settings.dat
-try madai_set_variable . VERBOSE 1
-
-if [ "$INTERACTIVE_MODE" ] ; then
-    MODE=interact
-    try madai_set_variable . EXTERNAL_MODEL_EXECUTABLE "${PARABEXDIR}/parabolic_interactive.py"
-else
-    MODE=emulate
-    try madai_set_variable . GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS 100
-    try madai_set_variable . GENERATE_TRAINING_POINTS_USE_MAXIMIN 1
-    try madai_generate_training_points . > /dev/null
-    try python "${PARABEXDIR}/parabolic_evaluate.py" ./model_output/run* > /dev/null
-    try madai_pca_decompose .
-    try madai_set_variable . EMULATOR_SCALE 0.025
-    try madai_train_emulator .
-fi
-
-try madai_set_variable . MCMC_USE_MODEL_ERROR 0
-try madai_set_variable . MCMC_NUMBER_OF_BURN_IN_SAMPLES 200
-try madai_set_variable . SAMPLER_NUMBER_OF_SAMPLES 7500
-
-try time madai_launch_multiple_madai_generate_trace . $(get_nproc) output
-try madai_catenate_traces ./trace/output_*.csv > ./trace/output.csv
-rm ./trace/output_*.csv
-
-test -d "./model_output" && rm -r ./model_output
-PDFFILE="${PWD}/$(getcommit "${SRC_DIR}")_${MODE}.pdf"
-
-try madai_gnuplot_scatterplot_matrix ./trace/output.csv "$PDFFILE" \
-	parameter_priors.dat 50
-
-$(getopencmd) "$PDFFILE"
-
+stylecheck ## can't 'try' because we don't pass the stylecheck
+try parabolic_test "$NUMBER_OF_SAMPLES" ""  "$PARALLEL_SAMPLING"
+try parabolic_test "$NUMBER_OF_SAMPLES" "1" "$PARALLEL_SAMPLING"
 exit 0
-
