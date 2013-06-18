@@ -15,6 +15,7 @@ getcommit() (
 abspath() { echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"; }
 printfilelink() { echo "\"file://$(abspath "$1")\"" ; }
 getopencmd() {
+	[ "$DISPLAY" ] || { echo printfilelink ; return; }
 	case "$(uname -s)" in
 		*WIN*|*W32*) command -v "start";;
 		Darwin) command -v "open";;
@@ -69,6 +70,7 @@ build() (
 	rm -rf *; )
 
 stylecheck() (
+	if ! command -v KWStyle > /dev/null; then return 0; fi
 	TMP="$(mktemp /tmp/"$(id -un)"_madai_XXXXXX)"
 	cd "$SRC_DIR"
 	RETCODE=0
@@ -153,12 +155,17 @@ parabolic_test() (
 	fi
 
 	test -d "./model_output" && rm -r ./model_output
-	PDFFILE="${PWD}/$(getcommit "${SRC_DIR}")_${MODE}.pdf"
 
-	try madai_gnuplot_scatterplot_matrix ./trace/output.csv "$PDFFILE" \
-		parameter_priors.dat 50
-
-	$(getopencmd) "$PDFFILE"
+	if [ "$GNUPLOT_COMMAND" ] || {
+			command -v gnuplot > /dev/null; } ; then
+		SUF="${GNUPLOT_OUTPUT_SUFFIX:-pdf}"
+		OUTFILE="${PWD}/$(getcommit "${SRC_DIR}")_${MODE}.${SUF}"
+		try madai_gnuplot_scatterplot_matrix ./trace/output.csv "$OUTFILE" \
+			parameter_priors.dat 50
+		$(getopencmd) "$OUTFILE"
+	else
+		printfilelink ./trace/output.csv
+	fi
 	return 0
 )
 
@@ -167,7 +174,7 @@ PARALLEL_SAMPLING='1'
 NUMBER_OF_SAMPLES=100000
 NPROC=''
 ######################
-INSTALL_PREFIX="/tmp/$(id -un)/local"
+INSTALL_PREFIX="${PREFIX:-/tmp/$(id -un)/local}"
 PATH="${INSTALL_PREFIX}/bin:${PATH}"
 try build "Release"
 try build "Debug" "$INSTALL_PREFIX"
