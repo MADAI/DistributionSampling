@@ -29,22 +29,24 @@ Throughout this document, commands to be entered in a terminal will be prefaced 
 \subsection{Directory Structure}
 
 First create a new directory, e.g., \path{my\_analysis}. Once in that directory, create the following subdirectories,
+
 \commandline{mkdir my\_analysis}\\
 \commandline{mkdir my\_analysis/experimental\_results}\\
 \commandline{mkdir my\_analysis/model\_output}\\
-\commandline{mkdir my\_analysis/stat1}\\
+\commandline{mkdir my\_analysis/stat1}
 
 The directory \path{my\_analysis} could have any name, and the three subdirectories could be located anywhere. The \path{experimental\_results} directory is where data from observations are stored. The \path{model\_output} directory contains output from different runs of the computational model. The names \path{model\_output} and \path{experimental\_results} can be changed in the parameters file, \path{stat1/settings.dat}, so that they point to the data locations should they be different than what was set in this example.
 
 The \path{stat1/} directory contains all the files relevant to a particular statistical analysis. This includes the parameter files, the intermediate output, and the results. If you wish to repeat an analysis with something changed, e.g., different experimental results, just make a new directory, e.g. \path{stat2/}. The parameters related to the statistical analysis are stored in the file \path{stat1/settings.dat}, which would have the form:
-\vspace*{-8pt}\begin{quote}{\tt
+\begin{quote}{\tt
 	\# This is the location of the model results relative to the \path{stat1} directory:\\
 	MODEL\_OUTPUT\_DIRECTORY "../model\_output"\\
     EXPERIMENTAL\_RESULTS\_FILE "../experimental\_results/results.dat"\\
-	$\vdots$\\
+	$\vdots$
 	}
-\end{quote}\vspace*{-8pt}
+\end{quote}
 All parameters related to the statistical analysis will be stored in \path{settings.dat}. Comments are noted by {\tt\#}. If the model output or the experimental results were in different locations than what is described in the example here, one would just change the locations defined by this file. For instance, if one wished to do a separate analysis using different experimental data stored in \path{/Users/my\_home/other\_data}, the relevant line in \path{settings.dat} would read:
+
 \begin{quote}{\tt
 EXPERIMENTAL\_RESULTS\_FILE "/Users/my\_home/other\_data/results.dat"}
 \end{quote}
@@ -56,7 +58,8 @@ For example, if one is in the \path{my\_analysis/} directory, one would perform 
 
 \commandline{madai\_pca\_decompose stat1}
 
-The command will parse the file \path{stat1/settings.dat} to determine the location of the model and observational data. If one wanted to perform a statistical analysis without overwriting results from a previous analysis, a new directory, e.g. \path{stat2/}, could be created with a new parameters file. The analysis would then proceed via\\
+The command will parse the file \path{stat1/settings.dat} to determine the location of the model and observational data. If one wanted to perform a statistical analysis without overwriting results from a previous analysis, a new directory, e.g. \path{stat2/}, could be created with a new parameters file. The analysis would then proceed via
+
 \commandline{madai\_pca\_decompose stat2}
 
 \subsection{Observational Data}
@@ -148,10 +151,12 @@ The \path{results.dat} file is in exactly the same format as the experimental re
 
 If you wish, the parameters used to run the model can be created to be consistent with the ranges described in \path{stat1/parameter\_priors.dat}. If you wish a set of parameters consistent with latin hyper-cube sampling (LHS), you can go to the main working directory and enter the command
 
-\commandline{madai\_generate\_training\_points stat1}\\
+\commandline{madai\_generate\_training\_points stat1}
+
 where $N$ is the number of points in parameter space to be sampled. The program will read the \path{stat1/parameter\_priors.dat} file and create files \path{model\_output/run}$n$\path{/parameters.dat} in the format described in the next section. Here $n$ runs from 1 to $N$, where $N$ is set in the parameters file via the line,
-\vspace*{-8pt}\begin{quote}
+
+\begin{quote}
 GENERATE\_TRAINING\_POINTS\_NUMBER\_OF\_POINTS $N$
-\end{quote}\vspace*{-8pt}
+\end{quote}
 
 Because all simulation codes have their own method for inputing parameters, it is up to you to run the full model for each of the $N$ cases, converting the values in the \path{parameters.dat} files into a format suitable for your code, and producing the $N$ model results file described below. 
