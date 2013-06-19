@@ -174,7 +174,7 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  assert( numberOfPosteriorSamples < int(lineCount) );
+  assert( numberOfPosteriorSamples <= int(lineCount) );
   for ( int isample = 0; isample < numberOfPosteriorSamples; isample++ ) {
     // Make the posterior sample model output directory
     std::stringstream ssRunDirectory;
