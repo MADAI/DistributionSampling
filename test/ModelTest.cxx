@@ -36,11 +36,6 @@ public:
 
   virtual ~TestModel() {}
 
-  virtual Model::ErrorType LoadConfigurationFile( const std::string )
-  {
-    return Model::NO_ERROR;
-  }
-
   virtual Model::ErrorType GetScalarOutputs( const std::vector< double > &,
                                              std::vector< double > & ) const
   {
@@ -61,8 +56,6 @@ int main( int, char *[] )
 {
 
   TestModel * model = new TestModel();
-
-  model->LoadConfigurationFile( std::string( "" ) );
 
   if ( model->IsReady() ) {
     std::cerr << "Model reports it is ready when it should not" << std::endl;

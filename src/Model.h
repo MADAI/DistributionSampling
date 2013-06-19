@@ -48,15 +48,6 @@ public:
   Model();
   virtual ~Model();
 
-  /** Loads a configuration from a file
-   *
-   *  Subclasses should override this method as this implementation
-   * does nothing.
-   *
-   * \param fileName Name of the configuration file to load
-   */
-  virtual ErrorType LoadConfigurationFile( const std::string fileName );
-
   /** Has the model been initialized?
    *
    * \return Returns true if the Model has been initialized, false

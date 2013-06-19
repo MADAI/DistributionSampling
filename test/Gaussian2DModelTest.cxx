@@ -32,18 +32,6 @@ int main( int, char *[] )
     return EXIT_FAILURE;
   }
 
-  // Test loading a configuration file.
-  // TODO - change the file name when LoadConfigurationFile actually
-  // parses a file.
-  std::string fileName = "filename.txt";
-  madai::Model::ErrorType error = model->LoadConfigurationFile( fileName );
-  if ( error != madai::Model::NO_ERROR )
-  {
-    std::cerr << "Error while loading configuration file '"
-              << fileName << "'" << std::endl;
-    return EXIT_FAILURE;
-  }
-
   // Check the number of parameters.
   if ( model->GetNumberOfParameters() != 2 )
   {
@@ -103,7 +91,7 @@ int main( int, char *[] )
   parameters.push_back( -14.0 );
 
   std::vector< double > scalars;
-  error = model->GetScalarOutputs( parameters, scalars );
+  madai::Model::ErrorType error = model->GetScalarOutputs( parameters, scalars );
   if ( error != madai::Model::NO_ERROR )
   {
     std::cerr << "Error encountered when computing scalar outputs."

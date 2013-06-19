@@ -52,14 +52,6 @@ Model
 }
 
 
-Model::ErrorType
-Model
-::LoadConfigurationFile( const std::string )
-{
-  return METHOD_NOT_IMPLEMENTED;
-}
-
-
 bool
 Model
 ::IsReady() const

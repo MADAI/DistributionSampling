@@ -45,13 +45,6 @@ class GaussianProcessEmulatedModel : public Model {
   virtual ~GaussianProcessEmulatedModel();
 
   /**
-   * Loads a model emulator from a directory structure
-   */
-  virtual ErrorType LoadConfiguration( const std::string StatisticsDirectory,
-                                       const std::string ModelOutputDirectory,
-                                       const std::string ExperimentalResultsDirectory  );
-
-  /**
    * Set the gaussian process emulator
    */
   virtual ErrorType SetGaussianProcessEmulator( GaussianProcessEmulator & GPME );
