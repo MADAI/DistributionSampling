@@ -27,10 +27,12 @@
 #include "Defaults.h"
 #include "ExternalModel.h"
 #include "MetropolisHastingsSampler.h"
+#include "GaussianProcessEmulator.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "GaussianProcessEmulatedModel.h"
-#include "RuntimeParameterFileReader.h"
 #include "Paths.h"
 #include "PercentileGridSampler.h"
+#include "RuntimeParameterFileReader.h"
 #include "SamplerCSVWriter.h"
 
 #include "madaisys/SystemTools.hxx"
@@ -127,14 +129,27 @@ int main(int argc, char ** argv) {
 
   madai::Model * model;
   if ( executable == "" ) { // Use emulator
-
-    if ( gpem.LoadConfiguration(
-             statisticsDirectory,
-             modelOutputDirectory,
-             experimentalResultsFile ) != madai::Model::NO_ERROR ) {
-      std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
+    madai::GaussianProcessEmulator gpe;
+    madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
+    if ( !directoryReader.LoadTrainingData( &gpe,
+                                            modelOutputDirectory,
+                                            statisticsDirectory,
+                                            experimentalResultsFile ) ) {
+      std::cerr << "Error loading training data from the directory structure.\n";
       return EXIT_FAILURE;
     }
+    if ( !directoryReader.LoadPCA( &gpe, statisticsDirectory ) ) {
+      std::cerr << "Error loading the PCA decomposition data. Did you "
+                << "run madai_pca_decompose?\n";
+      return EXIT_FAILURE;
+    }
+    if ( !directoryReader.LoadEmulator( &gpe, statisticsDirectory ) ) {
+      std::cerr << "Error loading emulator data. Did you run "
+                << "madai_train_emulator?\n";
+      return EXIT_FAILURE;
+    }
+
+    gpem.SetGaussianProcessEmulator( gpe );
 
     model = &gpem;
 
