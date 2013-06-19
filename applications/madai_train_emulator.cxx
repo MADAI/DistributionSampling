@@ -144,7 +144,8 @@ int main(int argc, char ** argv) {
   }
 
   if ( !directoryReader.LoadPCA( &gpe, statisticsDirectory ) ) {
-    std::cerr << "Error loading PCA data.\n";
+    std::cerr << "Error loading the PCA decomposition data. "
+              << "Did you run madai_pca_decompose?\n";
     return EXIT_FAILURE;
   }
   std::string outputFileName = statisticsDirectory + madai::Paths::EMULATOR_STATE_FILE;
