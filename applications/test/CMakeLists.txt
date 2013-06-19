@@ -19,6 +19,7 @@ foreach( test
   GetExperimentalResultsFileTest
   GetInactiveParameterFileTest
   GetModelOutputDirectoryTest
+  GetPosteriorAnalysisDirectoryTest
   LoadObservationsTest
   LowerCaseTest
   SetInactiveParametersTest

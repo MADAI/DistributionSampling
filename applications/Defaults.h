@@ -92,6 +92,10 @@ namespace Defaults {
   extern const bool EMULATE_WRITE_HEADER;
 
   /**
+   Posterior analysis variables */
+  extern const std::string POSTERIOR_ANALYSIS_DIRECTORY;
+
+  /**
     Print All Defaults */
   void PrintAllDefaults(std::ostream & output);
 } // end namespace Defaults

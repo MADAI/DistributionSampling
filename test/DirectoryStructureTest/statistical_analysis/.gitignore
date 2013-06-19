@@ -1,2 +1,4 @@
 emulator_state.dat
 pca_decomposition.dat
+posterior_model_output/
+trace/
