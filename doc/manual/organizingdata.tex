@@ -29,14 +29,14 @@ Throughout this document, commands to be entered in a terminal will be prefaced 
 \subsection{Directory Structure}
 \label{sec:DirectoryStructure}
 
-First create a new directory, e.g., \path{my\_analysis}. Once in that directory, create the following subdirectories,
+First create a new directory, e.g., \path{my_analysis}. Once in that directory, create the following subdirectories,
 
 \commandline{mkdir my\_analysis}\\
 \commandline{mkdir my\_analysis/experimental\_results}\\
 \commandline{mkdir my\_analysis/model\_output}\\
 \commandline{mkdir my\_analysis/stat1}
 
-The directory \path{my\_analysis} could have any name, and the three subdirectories could be located anywhere. The \path{experimental\_results} directory is where data from observations are stored. The \path{model\_output} directory contains output from different runs of the computational model. The names \path{model\_output} and \path{experimental\_results} can be changed in the parameters file, \path{stat1/settings.dat}, so that they point to the data locations should they be different than what was set in this example.
+The directory \path{my_analysis} could have any name, and the three subdirectories could be located anywhere. The \path{experimental_results} directory is where data from observations are stored. The \path{model_output} directory contains output from different runs of the computational model. The names \path{model_output} and \path{experimental_results} can be changed in the parameters file, \path{stat1/settings.dat}, so that they point to the data locations should they be different than what was set in this example.
 
 The \path{stat1/} directory contains all the files relevant to a particular statistical analysis. This includes the parameter files, the intermediate output, and the results. If you wish to repeat an analysis with something changed, e.g., different experimental results, just make a new directory, e.g. \path{stat2/}. The parameters related to the statistical analysis are stored in the file \path{stat1/settings.dat}, which would have the form:
 \begin{quote}{\tt
@@ -46,7 +46,7 @@ The \path{stat1/} directory contains all the files relevant to a particular stat
 	$\vdots$
 	}
 \end{quote}
-All parameters related to the statistical analysis will be stored in \path{settings.dat}. Comments are noted by {\tt\#}. If the model output or the experimental results were in different locations than what is described in the example here, one would just change the locations defined by this file. For instance, if one wished to do a separate analysis using different experimental data stored in \path{/Users/my\_home/other\_data}, the relevant line in \path{settings.dat} would read:
+All parameters related to the statistical analysis will be stored in \path{settings.dat}. Comments are noted by {\tt\#}. If the model output or the experimental results were in different locations than what is described in the example here, one would just change the locations defined by this file. For instance, if one wished to do a separate analysis using different experimental data stored in \path{/Users/my_home/other_data}, the relevant line in \path{settings.dat} would read:
 
 \begin{quote}{\tt
 EXPERIMENTAL\_RESULTS\_FILE "/Users/my\_home/other\_data/results.dat"}
@@ -55,7 +55,7 @@ MADAI programs for statistical analysis will usually use the form
 
 \commandline{{\it command\_name~~stat\_directory\_location}}
 
-For example, if one is in the \path{my\_analysis/} directory, one would perform the statistical analysis by entering
+For example, if one is in the \path{my_analysis/} directory, one would perform the statistical analysis by entering
 
 \commandline{madai\_pca\_decompose stat1}
 
@@ -65,7 +65,7 @@ The command will parse the file \path{stat1/settings.dat} to determine the locat
 
 \subsection{Observational Data}
 \label{sec:ObservationalData}
-The \path{experimental\_results} directory will contain the observables to which you wish to compare. This directory should contain a file \path{results.dat} which lists the observations or measurements from a real experiment. \path{results.dat} is a text file. Each line should have the format:
+The \path{experimental_results} directory will contain the observables to which you wish to compare. This directory should contain a file \path{results.dat} which lists the observations or measurements from a real experiment. \path{results.dat} is a text file. Each line should have the format:
 
 \hspace*{20pt}{\variable{name value uncertainty}}
 
@@ -94,7 +94,7 @@ Expresses the accuracy with which one can compare the experimental and model val
 
 %In the future, if {\it type} is an integer and if there is no uncertainty provided, the error will assume to be of a counting nature, i.e., Poissonian. More types of error may be incorporated into the analysis structure. For example, we may incorporate the ability to express an error matrix for some subset of the observables.
 
-An example of the \path{experimental\_results/results.dat} file is presented here:
+An example of the \path{experimental_results/results.dat} file is presented here:
 
 \begin{verbatim}
     #This is the length of the cat in inches
@@ -109,7 +109,7 @@ An example of the \path{experimental\_results/results.dat} file is presented her
 
 Note that comments are preceded by \verb+#+. Empty lines are okay.
 
-The \path{results.dat} file can contain more observations than one intends to use in the statistical analysis. In the \path{stat1} directory, you must also create a text file \path{stat1/observable\_names.dat}. This file will list only those observable you wish considered for the statistical analysis. These names must be a subset of the variable names above. As an example, the file could be:
+The \path{results.dat} file can contain more observations than one intends to use in the statistical analysis. In the \path{stat1} directory, you must also create a text file \path{stat1/observable_names.dat}. This file will list only those observable you wish considered for the statistical analysis. These names must be a subset of the variable names above. As an example, the file could be:
 
 \begin{verbatim}
     catlength
@@ -119,9 +119,9 @@ The \path{results.dat} file can contain more observations than one intends to us
 
 \subsection{Specifying Parameter Prior Distributions}
 
-The statistical analysis software requires knowledge of the prior distributions of the parameters to be investigated. This is specified in the text file \path{stat1/parameter\_priors.dat}. The file should contain $P$ parameter description lines describing each of the parameters, $x_1\cdots x_P$. Additional lines can be added as comments (beginning with \verb+#+). Empty lines are okay.
+The statistical analysis software requires knowledge of the prior distributions of the parameters to be investigated. This is specified in the text file \path{stat1/parameter_priors.dat}. The file should contain $P$ parameter description lines describing each of the parameters, $x_1\cdots x_P$. Additional lines can be added as comments (beginning with \verb+#+). Empty lines are okay.
 
-The \path{parameter\_priors.dat} file describes two possible classes of priors, a uniform distribution with a minimum and maximum, or a Gaussian with a mean and standard deviation. In the case of the uniform prior distribution, the parameter line format is
+The \path{parameter_priors.dat} file describes two possible classes of priors, a uniform distribution with a minimum and maximum, or a Gaussian with a mean and standard deviation. In the case of the uniform prior distribution, the parameter line format is
 
 \hspace*{20pt}{\tt uniform}~~{\it name~~min~~max}
 
@@ -132,13 +132,13 @@ In the case of a Gaussian prior distribution, the parameter line format is
 For the Gaussian distribution the standard deviation describes $\sigma$ for a prior of the form $P(x)\sim \exp\{-(x-\bar{x})^2/2\sigma^2\}$. 
 
 \subsection{Model Results}
-The \path{model\_outputs} directory will have subdirectories \path{run0000/}, \path{run0001/}, and so on, up to \path{runN}, where $N$ is the number of model output runs.
+The \path{model_outputs} directory will have subdirectories \path{run0000/}, \path{run0001/}, and so on, up to \path{runN}, where $N$ is the number of model output runs.
 
-The \path{model\_output/} directory contains data from the $N$ sampling runs of the full model. Information from each separate run (different points in parameter space) is stored in the subdirectories \path{model\_output/run}$n$\path{/}, where $n$ denotes the run number, i.e, from 1 to $N$. Each subdirectory will have two text files, \path{parameters.dat} and \path{results.dat} e.g., for \path{run0000}, the files are:
+The \path{model_output/} directory contains data from the $N$ sampling runs of the full model. Information from each separate run (different points in parameter space) is stored in the subdirectories \path{model_output/run}$n$\path{/}, where $n$ denotes the run number, i.e, from 1 to $N$. Each subdirectory will have two text files, \path{parameters.dat} and \path{results.dat} e.g., for \path{run0000}, the files are:
 
 \begin{verbatim}
-my_analysis/model_outputs/run0000/parameters.dat
-my_analysis/model_outputs/run0000/results.dat
+    my_analysis/model_outputs/run0000/parameters.dat
+    my_analysis/model_outputs/run0000/results.dat
 \end{verbatim}
 
 The \verb+parameters.dat+ file differs for each run. It is also a simple text file and is of the form
@@ -147,18 +147,18 @@ The \verb+parameters.dat+ file differs for each run. It is also a simple text fi
 
 There should be $P$ lines, one for each parameter. The file may also include comments (lines beginning with \verb+#+) and empty lines.
 
-The \path{results.dat} file is in exactly the same format as the experimental results file, \path{experimental\_results/results.dat}, and should have the same observable names. The list of names in the file \path{stat1/observable\_names.dat} should be a subset of the names that appear here. 
+The \path{results.dat} file is in exactly the same format as the experimental results file, \path{experimental_results/results.dat}, and should have the same observable names. The list of names in the file \path{stat1/observable_names.dat} should be a subset of the names that appear here. 
 
 \subsection{Generating Sample Points}
 
-If you wish, the parameters used to run the model can be created to be consistent with the ranges described in \path{stat1/parameter\_priors.dat}. If you wish a set of parameters consistent with latin hyper-cube sampling (LHS), you can go to the main working directory and enter the command
+If you wish, the parameters used to run the model can be created to be consistent with the ranges described in \path{stat1/parameter_priors.dat}. If you wish a set of parameters consistent with latin hyper-cube sampling (LHS), you can go to the main working directory and enter the command
 
 \commandline{madai\_generate\_training\_points stat1}
 
-where $N$ is the number of points in parameter space to be sampled. The program will read the \path{stat1/parameter\_priors.dat} file and create files \path{model\_output/run}$n$\path{/parameters.dat} in the format described in the next section. Here $n$ runs from 1 to $N$, where $N$ is set in the parameters file via the line,
+where $N$ is the number of points in parameter space to be sampled. The program will read the \path{stat1/parameter_priors.dat} file and create files \path{model_output/run}$n$\path{/parameters.dat} in the format described in the next section. Here $n$ runs from 1 to $N$, where $N$ is set in the parameters file via the line,
 
-\begin{quote}
-GENERATE\_TRAINING\_POINTS\_NUMBER\_OF\_POINTS $N$
-\end{quote}
+\begin{verbatim}
+    GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS N
+\end{verbatim}
 
 Because all simulation codes have their own method for inputing parameters, it is up to you to run the full model for each of the $N$ cases, converting the values in the \path{parameters.dat} files into a format suitable for your code, and producing the $N$ model results file described below. 
