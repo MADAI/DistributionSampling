@@ -92,7 +92,7 @@ std::string GetExperimentalResultsFile( const std::string & statisticsDirectory,
 std::string GetInactiveParametersFile( const std::string & statisticsDirectory,
                                        const RuntimeParameterFileReader & settings )
 {
-  if ( !settings.HasOption( "SAMPLER_INACTIVE_PARAMETERS_FILE" ) ) {
+  if ( settings.GetOption( "SAMPLER_INACTIVE_PARAMETERS_FILE", "" ) == "" ) {
     return std::string();
   }
 
