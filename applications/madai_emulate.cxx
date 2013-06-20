@@ -146,8 +146,8 @@ int main(int argc, char ** argv) {
               << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"
               << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
               << madai::Defaults::EXPERIMENTAL_RESULTS_FILE << ")\n"
-              << "EMULATE_QUIET <value> ("
-              << madai::Defaults::EMULATE_QUIET << ")\n"
+              << "EMULATE_WRITE_HEADER <value> (default: "
+              << madai::Defaults::EMULATE_WRITE_HEADER << ")\n"
               << "READER_VERBOSE <value> (default: "
               << madai::Defaults::READER_VERBOSE << ")\n";
 
