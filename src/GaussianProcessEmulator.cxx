@@ -737,7 +737,7 @@ bool GaussianProcessEmulator::SingleModel::BasicTraining(
   case GaussianProcessEmulator::MATERN_32_FUNCTION:
     // fall through
   case GaussianProcessEmulator::MATERN_52_FUNCTION:
-    m_Thetas.resize(3);
+    m_Thetas.resize(3+p);
     m_Thetas(0) = amplitude;
     m_Thetas(1) = defaultNugget;
     {
