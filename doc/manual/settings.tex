@@ -53,9 +53,7 @@ The file \path{settings.dat} controls the operation of most of the Distribution 
 
     \item[EXTERNAL\_MODEL\_ARGUMENTS] (default: none) Arguments to pass to the executable pointed to by EXTERNAL\_MODEL\_EXECUTABLE. All arguments must be specified on a single line.
 
-    \item[EMULATE\_QUIET] (default: 0)
-
-    \item[EMULATE\_WRITE\_HEADER] (default: 1)
+    \item[EMULATE\_WRITE\_HEADER] (default: 1) Indicates whether \path{madai_emulate} should write out header information when it first starts up. If enabled, emits information to stdout about the emulated model in the format required of executables that talk to \path{madai_generate_trace} when the EXTERNAL\_MODEL\_EXECUTABLE is set. If disabled, this information is not written to stdout and \path{madai_emulate} immediately enters query-response mode.
 
     \item[POSTERIOR\_ANALYSIS\_DIRECTORY] (default: \path{posterior_model_output}) Specifies the directory where \path{madai_generate_posterior_samples} generates its results. If specified as a relative path, the path is considered to be relative to the statistical analysis directory.
 \end{description}

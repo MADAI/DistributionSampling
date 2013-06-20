@@ -87,8 +87,6 @@ namespace Defaults {
 
   /**
    Emulate Variables */
-  extern const bool EMULATE_QUIET;
-
   extern const bool EMULATE_WRITE_HEADER;
 
   /**
