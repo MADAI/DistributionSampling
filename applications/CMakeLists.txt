@@ -46,6 +46,5 @@ install( PROGRAMS
   madai_set_variable
   madai_catenate_traces
   madai_launch_multiple_madai_generate_trace
-  madai_generate_posterior_samples
   DESTINATION bin
 )
