@@ -27,9 +27,9 @@ The file \path{settings.dat} controls the operation of most of the Distribution 
 
     \item[PCA\_FRACTION\_RESOLVING\_POWER] (default: 0.95)  When \path{madai_train_emulator} is deciding how many principal components to retain, it considers the total resolving power of the model. The resolving power of a single principal component is $\sqrt{(1 + \lambda_i)}$, where $\lambda_i$ is the eigenvalue associated with that variable. The total resolving power is the product the resolving powers of all of the components. \path{madai_train_emulator} will retain enough components to keep this fraction of the resolving power.
 
-    \item[EMULATOR\_COVARIANCE\_FUNCTION] (default: SQUARE\_EXPONENTIAL\_FUNCTION) See section \ref{sec:CovarianceFunctions}.
+    \item[EMULATOR\_COVARIANCE\_FUNCTION] (default: SQUARE\_EXPONENTIAL\_FUNCTION) See section \ref{sec:CovarianceFunctions}. Allowable values are SQUARE\_EXPONENTIAL\_FUNCTION, POWER\_EXPONENTIAL\_FUNCTION, MATERN\_32\_FUNCTION, and MATERN\_52\_FUNCTION.
 
-    \item[EMULATOR\_REGRESSION\_ORDER] (default: 1) The assumed functional form of the model before Gaussian Process Emulation. This is the order of the polynomial. 0, 1, 2,or 3.
+    \item[EMULATOR\_REGRESSION\_ORDER] (default: 1) The assumed functional form of the model before Gaussian Process Emulation. This is the order of the polynomial. 0, 1, 2, or 3.
 
     \item[EMULATOR\_NUGGET] (default: 0.001) $\theta_1$. See section \ref{sec:CovarianceFunctions}.
 
