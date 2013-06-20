@@ -35,7 +35,7 @@ The file \path{settings.dat} controls the operation of most of the Distribution 
 
     \item[EMULATOR\_AMPLITUDE] (default: 1) $\theta_0$. See section \ref{sec:CovarianceFunctions}.
 
-    \item[EMULATOR\_SCALE] (default: 0.01) See section \ref{sec:CovarianceFunctions}. The final value for each parameter's scale $\theta_{p+i}$ where $p$ depends on which covariance function has been chosen and $i$ is the parameter index will be EMULATOR\_SCALE times the width of the middle two quartiles of that parameter's prior distribution.
+    \item[EMULATOR\_SCALE] (default: 0.01) See section \ref{sec:CovarianceFunctions}. The final value for each parameter's scale $\theta_{k+i}$ where $k$ depends on which covariance function has been chosen and $i$ is the parameter index will be EMULATOR\_SCALE times the width of the middle two quartiles of that parameter's prior distribution.
 
     \item[EMULATOR\_TRAINING\_RIGOR] (default: basic) Determines the rigor with which the emulator is trained. Currently, only the default value of ``basic'' is supported.
 
