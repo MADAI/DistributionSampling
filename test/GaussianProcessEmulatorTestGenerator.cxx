@@ -18,14 +18,16 @@
 
 #include "GaussianProcessEmulatorTestGenerator.h"
 
-#include "LatinHypercubeGenerator.h"
-#include "Random.h"
-#include "Sample.h"
-#include "UniformDistribution.h"
-#include "Paths.h"
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+
+#include "LatinHypercubeGenerator.h"
+#include "Paths.h"
+#include "Random.h"
+#include "Sample.h"
+#include "System.h"
+#include "UniformDistribution.h"
 
 #include "madaisys/SystemTools.hxx"
 
@@ -79,6 +81,21 @@ bool
 GaussianProcessEmulatorTestGenerator
 ::WriteDirectoryStructure( std::string StatisticsDirectory )
 {
+
+  // Create directory if needed
+  if ( madaisys::SystemTools::FileExists( StatisticsDirectory.c_str() ) ) {
+    if ( !madai::System::IsDirectory( StatisticsDirectory ) ) {
+      std::cout << "Desired tatistics directory '" << StatisticsDirectory
+                << "' exists but is not a directory.\n";
+      return false;
+    }
+  } else {
+    if ( !madaisys::SystemTools::MakeDirectory( StatisticsDirectory.c_str() ) ) {
+      std::cerr << "Could not create directory '" << StatisticsDirectory << "'.\n";
+      return false;
+    }
+  }
+
   // Write parameter priors file
   std::string priorFile = StatisticsDirectory + madai::Paths::SEPARATOR
       + madai::Paths::PARAMETER_PRIORS_FILE;

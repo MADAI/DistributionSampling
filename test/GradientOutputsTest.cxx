@@ -61,7 +61,7 @@ int main( int, char*[] ) {
   GaussianProcessEmulatorTestGenerator generator( &model, 2, 2, N,
                                                   generatorParameters);
 
-  std::string TempDirectory = "/tmp/";
+  std::string TempDirectory = "../Testing/Temporary/GradientOutputsTest";
   if ( !generator.WriteDirectoryStructure( TempDirectory ) ) {
     std::cerr << "Error writing directory structure.\n";
     return EXIT_FAILURE;
