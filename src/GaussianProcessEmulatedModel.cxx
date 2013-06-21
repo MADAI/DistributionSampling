@@ -43,9 +43,9 @@ GaussianProcessEmulatedModel
 Model::ErrorType
 GaussianProcessEmulatedModel
 ::SetGaussianProcessEmulator(
-  GaussianProcessEmulator & GPME )
+  GaussianProcessEmulator & gpe )
 {
-  *m_GPE = GPME; // Copy entire object, not pointer.  Makes tracking ownership easy.
+  *m_GPE = gpe; // Copy entire object, not pointer.  Makes tracking ownership easy.
   if ( m_GPE->m_Status != GaussianProcessEmulator::READY )
     return Model::OTHER_ERROR;
   m_StateFlag = READY;

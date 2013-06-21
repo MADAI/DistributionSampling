@@ -43,10 +43,19 @@ class ExternalModel : public Model {
 public:
   /** Encodes covariance type */
   typedef enum {
+    /** No covariance. */
     NO_COVARIANCE,
+
+    /** Only the non-redundant half of the covariance matrix is
+     *  specified as an upper triangular matrix. */
     TRIANGULAR_COVARIANCE,
+
+    /** The covariance is specified as a full matrix. */
     FULL_MATRIX_COVARIANCE,
-    DIAGONAL_MATRIX_COVARIANCE /* VARIANCE only */
+
+    /** The covariance is specified as a diagonal matrix (variance
+    only). */
+    DIAGONAL_MATRIX_COVARIANCE
   } CovarianceMode;
 
   ExternalModel();
@@ -54,18 +63,14 @@ public:
 
   /** Start the external process and leave it open for queries
    *
-   * \param processPath Path to the process to be run
-   * \param arguments Vector of arguments to pass to the process */
+   * \param processPath Path to the process to be run.
+   * \param arguments Vector of arguments to pass to the process. */
   virtual ErrorType StartProcess( const std::string & processPath,
                                   const std::vector< std::string > & arguments );
 
   /** Stop the external process */
   virtual ErrorType StopProcess();
 
-  /** Get the scalar outputs from the model evaluated at x
-   *
-   * If an error happens, the scalar output array will be left
-   * incomplete. */
   virtual ErrorType GetScalarOutputsAndCovariance(
       const std::vector< double > & parameters,
       std::vector< double > & scalars,

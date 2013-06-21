@@ -26,6 +26,7 @@
 #include "Parameter.h"
 #include "Random.h"
 
+/** Namespace for all Distribution Sampling library classes. */
 namespace madai {
 
 /** \class Model
@@ -180,6 +181,11 @@ public:
    * If not overridden, this will simply call GetScalarOutputs() and
    * return an empty vector for scalarCovariance, representing a zero
    * matrix.
+   *
+   * \param parameters Parameter values where the model should be evaluated.
+   * \param scalars    Storage for scalar values returned by this method.
+   * \param scalarCovariance Storage for the covariance of the model
+   *                         at this point in parameter space.
    */
   virtual ErrorType GetScalarOutputsAndCovariance(
     const std::vector< double > & parameters,

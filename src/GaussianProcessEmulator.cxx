@@ -34,9 +34,10 @@
 
 #include "madaisys/Directory.hxx"
 
+namespace madai {
 
+// Anonymous namespace to hide these functions
 namespace {
-using namespace madai;
 
 inline int NumberRegressionFunctions(
     int regressionOrder,
@@ -123,8 +124,6 @@ inline void GetGradientOfHVector(
 }
 
 } // anonymous namespace
-
-namespace madai {
 
 double GaussianProcessEmulator::SingleModel::CovarianceCalc(
     const Eigen::VectorXd & v1, const Eigen::VectorXd & v2) const

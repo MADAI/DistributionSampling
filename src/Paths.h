@@ -23,6 +23,7 @@
 
 namespace madai {
 
+/** Namespace for paths used in the library. */
 namespace Paths {
 
   extern const char SEPARATOR;
