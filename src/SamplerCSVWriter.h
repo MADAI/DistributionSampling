@@ -50,10 +50,16 @@ public:
     bool UseEmulatorCovariance=true,
     std::ostream * progress=NULL);
 
+  /**
+   * Writes the header of the CSV file. This consists of the parameter
+   * names, the output names, and the log likelihood. */
   static void WriteHeader( std::ostream & o,
-                           const std::vector< Parameter > & params,
+                           const std::vector< Parameter > & parameters,
                            const std::vector< std::string > & outputs);
 
+  /**
+   * Writes one sample to the output stream.
+   */
   static void WriteSample( std::ostream & out, const Sample & sample );
 
 }; // end SamplerCSVWriter
