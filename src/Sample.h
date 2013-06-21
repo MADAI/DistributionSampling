@@ -28,25 +28,31 @@ namespace madai {
 
 /** \class Sample
  *
- * Individual sample from a distribution.
+ * An individual sample from a distribution. A sample contains
+ * parameter values (the point in parameter space where the sample was
+ * taken), output values (obtained by evaluating the Model at the
+ * sample point, and the relative log likelihood of the sample.
  */
 class Sample {
 public:
   //@{
   /**
-     If LogLikelihood is not set, it defaults to 0.0.  If
-     output_values is not specified, it defaults to an empty vector.
-  */
+   * If LogLikelihood is not set, it defaults to 0.0. If
+   * outputValues is not specified, it defaults to an empty
+   * vector. If parameterValues is not specified, it defaults to an
+   * empty vector.
+   */
   Sample( const std::vector< double > & parameterValues,
-    const std::vector< double > & OutputValues,
+    const std::vector< double > & outputValues,
     double LogLikelihood );
 
   Sample( const std::vector< double > & parameterValues,
-    const std::vector< double > & OutputValues );
+    const std::vector< double > & outputValues );
 
   Sample( const std::vector< double > & parameterValues );
 
   Sample();
+  //@}
 
   /** Clear all the parameter values, output values, and comments, and
    * set the log likelihood to 0.0. */
@@ -63,32 +69,32 @@ public:
   std::vector< double > m_OutputValues;
 
   /**
-     Given some set of field observations, the likelihood is the
-     Likelihood that m_ParameterValues is the ground truth.
-     this->m_LogLikelihood is (ln(C * Likelihood)) for some unknown
-     constant C.
+   * Given some set of field observations, the log likelihood is the
+   * relative log likelihood that m_ParameterValues is the ground
+   * truth.  this->m_LogLikelihood is (ln(C * Likelihood)) for some
+   * unknown constant C.
   */
-  double                m_LogLikelihood;
+  double m_LogLikelihood;
 
-  /** Comments may be used to store human-readable comments *or*
-  record changes to state, such as changing an optimizer type,
-  which parameters are activated, etc.. */
+  /** Comments may be used to store human-readable comments or record
+   *  changes to state, such as changing an optimizer type, which
+   *  parameters are activated, etc.. */
   std::vector< std::string > m_Comments;
 
-
   /**
-   Provide this operator so that we can do:
-
-     void SortSamples(std::vector< Sample > & s) {
-       std::sort(s.begin(),s.end());
-     }
-  */
+   * Provide this operator so that we can do:
+   * \code
+   *  void SortSamples(std::vector< Sample > & s) {
+   *    std::sort(s.begin(),s.end());
+   *  }
+   * \endcode
+   */
   bool operator<(const Sample & rhs) const;
 
 }; // class Sample
 
 /**
- Operator for printing to an ostream.
+ Operator for printing to an output stream.
 */
 std::ostream & operator<<(std::ostream & os, const Sample & sample);
 

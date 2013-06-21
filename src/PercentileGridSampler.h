@@ -28,25 +28,28 @@ namespace madai {
 /**
  * \class PercentileGridSampler
  *
- * This sampler will return ~N samples from the *prior* distribution.
+ * This Sampler generates an n-dimensional grid of Samples in the
+ * joint percentile space of the parameters of the Model on which it
+ * operates. Unlike other Samplers, it generates a fixed number of
+ * Samples as determined by calling SetNumberOfSamples().
  */
 class PercentileGridSampler : public Sampler {
 public:
-  /** Constructor. */
   PercentileGridSampler();
-  /** destructor */
   virtual ~PercentileGridSampler();
 
-  /** Get the next sample from the distribution. */
+  /** Get the next Sample from the distribution. */
   virtual Sample NextSample();
 
   //@{
   /**
-     Set/Get the N, which controls the number of samples.  N should
-     equal n^p for p=model->NumberOfParameters and n is an integer.
-     if N it not, it will be rounded up.
+   * Set/Get the number of samples desired. This number should equal
+   *  n^p where p is the number of parameters in the Model and n is an
+   *  integer.  If the pth root of the arugment is not an integer,
+   *  then the pth root is rounded up to the nearest integer n and the
+   *  number of samples will be n^p.
   */
-  virtual void SetNumberOfSamples( unsigned int N );
+  virtual void SetNumberOfSamples( unsigned int n );
   virtual unsigned int GetNumberOfSamples();
   //@}
 

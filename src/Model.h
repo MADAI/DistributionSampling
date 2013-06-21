@@ -83,7 +83,10 @@ public:
   /** Get the number of scalar outputs. */
   virtual unsigned int GetNumberOfScalarOutputs() const;
 
-  /** Get the names of the scalar outputs of the model. */
+  /** Get the names of the scalar outputs of the model.
+   *
+   * These will be in the order in which the scalar output names were
+   * added using AddScalarOutputName(). */
   virtual const std::vector< std::string > & GetScalarOutputNames() const;
 
   /** Get the scalar outputs from the model evaluated at x
@@ -149,9 +152,9 @@ public:
    * space is based on the inverse of the covariance (the precision
    * matrix).
    *
-   * If you never set this, assumes zero.  To calculate
-   * log-likelihood, either the observed value, the model outputs, or
-   * both MUST have a covariance value.
+   * If you never set this, covariances of zero are assumed. However,
+   * to calculate log-likelihood, either the observed value, the model
+   * outputs, or both MUST have a non-zero covariance value.
    */
   virtual ErrorType SetObservedScalarCovariance(
     const std::vector< double > & observedScalarCovariance);
@@ -162,10 +165,10 @@ public:
    * 1) Calculates all of the scalar values at this point in parameter
    * space.
    * 2) calculates log-likelihood, using
-   *     model scalars outputs
-   *     model scalar output covariance
-   *     observed scalar values
-   *     observed scalar covariance
+   *   - model scalars outputs
+   *   - model scalar output covariance
+   *   - observed scalar values
+   *   - observed scalar covariance
    *
    * If not overridden, this function calls
    * GetScalarOutputsAndCovariance() and uses observedScalarValues and
@@ -173,12 +176,18 @@ public:
    * log-likelihood is returned along with the output scalars.  If both
    * covariances are present, they are summed.
    *
-   * (scalars, scalarCovariance) = GetScalarOutputsAndCovariance(parameters)
+   * (scalars, scalarCovariance) =
+   * GetScalarOutputsAndCovariance(parameters)
+   *
    * logPriorLikelihood = LogPriorLikelihoodFunction(parameters)
+   *
    * covariance = observedScalarCovariance + scalarCovariance
+   *
    * differences = scalars - observedScalars
+   *
    * LogLikelihood = -0.5 * (differences^T . (covariance)^(-1) . differences);
-   * @return logPriorLikelihood + LogLikelihood
+   *
+   * \return logPriorLikelihood + LogLikelihood
    *
    * If both covariances are zero, the matrix will not be invertable
    * and the log-likelihood will be negative-infinity. */
@@ -281,7 +290,7 @@ protected:
   std::vector< double > m_ObservedScalarValues;
 
   /** A (GetNumberOfScalarOutputs x GetNumberOfScalarOutputs) matrix,
-   * flattened so that we can use a gsl_matrix_view to look at it
+   * flattened into a vector.
    *
    * If empty, assume zero matrix. */
   std::vector< double > m_ObservedScalarCovariance;

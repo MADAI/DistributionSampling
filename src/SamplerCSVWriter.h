@@ -33,13 +33,17 @@ class Model;
 /**
  * \class SamplerCSVWriter
  *
- * \todo Document this class.
+ * This class takes a Sampler and a Model and writes a requested
+ * number of Samples in comma-separated value file format to an output
+ * stream.
  */
 class SamplerCSVWriter {
 public:
   /**
-     Execute Sampler and save trace to file.
-     If progress is not NULL, will print out a progrss bar.
+   * Execute Sampler and save Samples to a comma-separated value file.
+   *
+   * If progress is not NULL, will print out a progress bar to that
+   *  output stream.
    */
   static int GenerateSamplesAndSaveToFile(
     Sampler & sampler,
