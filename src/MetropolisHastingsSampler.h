@@ -28,35 +28,28 @@ namespace madai {
 /**
  * \class MetropolisHastingsSampler
  *
- * This is a simple implemetation of the Metropolis Hastings
- * algorithm.  It is "simple" in that each step is a point whose
- * direction is uniformly chosen from the unit sphere (L2-norm) around
- * the current point in parameter space.  The magnitude (L2-norm) of
- * the step is randomly chosen from the uniform distribution on the
- * range [0, StepSize].
+ * This is an implementation of the Metropolis-Hastings
+ * sampling algorithm.
  */
 class MetropolisHastingsSampler : public Sampler {
 public:
-  /** Constructor. */
   MetropolisHastingsSampler();
-  /** destructor */
   virtual ~MetropolisHastingsSampler();
 
-  /** Get the next sample from the distribution. */
+  /** Get the next Sample from the distribution. */
   virtual Sample NextSample();
 
   //@{
-  /**
-     Set/Get the StepSize, which controls the average distance in Parameter
-     space to move.
-
-     In each direction, the step distance is given by:
-       step[i] = StepSize * StepScales[i] * RandomGaussian();
-
-     Where StepScales[i] is precalulated as:
-       = Model->GetParameters()[i].GetPriorDistribution()->GetPercentile(0.75)
-       - Model->GetParameters()[i].GetPriorDistribution()->GetPercentile(0.25);
-  */
+  /** Set/Get the StepSize, which controls the average distance in Parameter
+   *  space to move.
+   *
+   *  In each direction, the step distance is given by:
+   *    step[i] = StepSize * StepScales[i] * RandomGaussian();
+   *
+   *  where StepScales[i] is precalulated as \f$p_{0.75} - p_{0.25}\f$
+   *  and \f$p_{0.75}\f$ and \f$p_{0.25}\f$ are the third and first
+   *  quartiles of the parameter prior distributions, respectively.
+   */
   virtual void SetStepSize( double stepSize );
   virtual double GetStepSize() { return this->m_StepSize; }
   //@}

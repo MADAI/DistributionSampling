@@ -82,7 +82,7 @@ public:
   //@}
 
   /**
-   * Set/get the velocity scale. */
+   * Set/get the velocity scale for the given parameter name. */
   //@{
   virtual ErrorType SetVelocity( const std::string & parameterName, double Velocity );
   virtual std::vector< double > GetVelocities() { return m_CurrentVelocities; }
