@@ -32,13 +32,13 @@ namespace madai {
  * Reads runtime parameters for applications. */
 class RuntimeParameterFileReader {
 public:
-  // Constructor
+  /** Constructor */
   RuntimeParameterFileReader();
 
-  // Destructor
+  /** Destructor */
   ~RuntimeParameterFileReader();
 
-  // Read a file and output its contents as a character string
+  /** Read a file and initialize the options. */
   bool ParseFile( const std::string fileName );
 
   /**
@@ -106,9 +106,10 @@ public:
   const std::map<std::string, std::string> GetAllOptions() const;
 
 private:
+  /** Map between option name and value. */
   std::map<std::string, std::string> m_Options;
 
-  // Converts line to format "<name> <value1> <value1> ...\n"
+  /** Converts line to format "<name> <value1> <value1> ...\n" */
   std::string RegularizeLine( std::string line );
 
 }; // end class RuntimeParameterFileReader

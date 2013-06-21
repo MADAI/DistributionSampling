@@ -42,13 +42,6 @@ public:
     return Model::NO_ERROR;
   }
 
-  virtual ErrorType GetLikeAndPrior( const std::vector< double > &,
-                                     double &,
-                                     double &) const
-  {
-    return Model::NO_ERROR;
-  }
-
 }; // end TestModel
 
 

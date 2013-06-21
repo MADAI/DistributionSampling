@@ -212,6 +212,8 @@ public:
   void SetUseModelCovarianceToCalulateLogLikelihood(bool);
   //@}
 
+  /** Returns the constant convariance, which is the covariance of the
+   *  observed values by default. */
   virtual bool GetConstantCovariance(std::vector< double > & x) const;
 
 protected:

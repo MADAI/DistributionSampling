@@ -24,18 +24,25 @@
 
 namespace madai {
 
+/** \class System
+ * A collection of useful system-related functions. */
 class System {
 public:
 
-  /** Returns true if the path points to a file, false if it doesn't exist, and
-   * false if it is a directory. */
+  /** Returns true if the path points to a file, false if it doesn't
+   * exist or if it is a directory.
+   */
+  //@{
   static bool IsFile( const char * path );
   static bool IsFile( const std::string & path );
+  //@}
 
   /** Returns true if the path points to a directory, false if it points
-   * to a file, false if it doesn't exist. */
+   * to a file or if it doesn't exist. */
+  //@{
   static bool IsDirectory( const char * path );
   static bool IsDirectory( const std::string & path );
+  //@}
 
 };
 

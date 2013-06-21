@@ -34,7 +34,7 @@
 namespace madai {
 /**
    \class GaussianProcessEmulator
-   \fixme describe the useage of this class. */
+   \todo describe the useage of this class. */
 class GaussianProcessEmulator
 {
 
@@ -78,7 +78,7 @@ public:
    * Retains only the eigenvectors and eigenvalues necessary for the
    * desired fraction resolving power.
    *
-   * \parameter fractionResolvingPower Valid range is [0, 1].
+   * \param fractionResolvingPower Valid range is [0, 1].
    * \return true on success
    */
   bool RetainPrincipalComponents(double fractionResolvingPower);
@@ -205,8 +205,10 @@ public:
      These values are not used by the emulator, but represent the
      experimentally observed mean values of the output variables.
    */
+  //@{
   Eigen::VectorXd m_ObservedValues;
   Eigen::VectorXd m_ObservedVariances;
+  //@}
 
   /**
      These values are used for scaling the model output prior to PCA.

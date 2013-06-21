@@ -29,6 +29,10 @@ namespace madai {
 class GaussianProcessEmulator;
 class Parameter;
 
+/** \class GaussianProcessEmulatorDirectoryFormatIO
+ *
+ * Initializes a GaussianProcessEmulator from the files in a specific
+ *  directory structure. */
 class GaussianProcessEmulatorDirectoryFormatIO {
 public:
   GaussianProcessEmulatorDirectoryFormatIO();
@@ -36,8 +40,10 @@ public:
 
   /**
    Enable verbose output when reading. */
+  //@{
   void SetVerbose( bool value );
   bool GetVerbose() const;
+  //@}
 
   /**
     This takes an empty GaussianProcessEmulator and loads training data.
@@ -88,6 +94,8 @@ public:
                             bool verbose );
 
 protected:
+  /** If true, produce a lot of output about which files are being
+   *  opened, which values are read, etc. to stdout. */
   bool m_Verbose;
 
 };

@@ -78,20 +78,17 @@ class GaussianProcessEmulatedModel : public Model {
                                                  std::vector< double > & scalars,
                                                  std::vector< double > & gradient ) const;
   /**
-   * METHOD_NOT_IMPLEMENTED
+   * Gets the combined training and observed covariance.
    */
-  virtual Model::ErrorType GetLikeAndPrior(
-    const std::vector<double>&, double&, double&) const {
-    return METHOD_NOT_IMPLEMENTED;
-  }
-
   virtual bool GetConstantCovariance(std::vector< double > & x) const;
 
 protected:
-
+  /** The square root of the sum of the training data covariance and
+   *  observation covariance. */
   std::vector< double > m_TrainingAndObservedCovariance;
 
 private:
+  /** The Gaussian process emulator. */
   GaussianProcessEmulator * m_GPE;
 
 }; // end GaussianProcessEmulatedModel
