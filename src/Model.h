@@ -31,18 +31,34 @@ namespace madai {
 
 /** \class Model
  *
- * Base class for Models. */
+ * Base class for Models. A Model's primary function is to compute
+ * model values from a point in the Model's parameter space. In
+ * addition, the log likelihood that the Model's scalar values match
+ * the observed values from the system being modeled can be computed. */
 class Model {
 public:
 
   /** Error codes returned by various methods. */
   typedef enum {
+    /** No error */
     NO_ERROR = 0,
+
+    /** An invalid parameter was passed as an argument. */
     INVALID_PARAMETER_INDEX,
+
+    /** The set of active parameters is invalid. */
     INVALID_ACTIVE_PARAMETERS,
+
+    /** A file was not found. */
     FILE_NOT_FOUND_ERROR,
+
+    /** A method was not implemented. */
     METHOD_NOT_IMPLEMENTED,
+
+    /** A vector argument was not the expected length. */
     WRONG_VECTOR_LENGTH,
+
+    /** A unknown error occured. */
     OTHER_ERROR
   } ErrorType;
 
