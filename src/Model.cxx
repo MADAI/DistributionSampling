@@ -254,15 +254,6 @@ Model
 void
 Model
 ::AddParameter( const std::string & name,
-                double minimumPossibleValue,
-                double maximumPossibleValue )
-{
-  m_Parameters.push_back( Parameter(name, minimumPossibleValue, maximumPossibleValue) );
-}
-
-void
-Model
-::AddParameter( const std::string & name,
                 const Distribution & priorDistribution)
 {
   m_Parameters.push_back(

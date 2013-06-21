@@ -268,14 +268,6 @@ protected:
    */
   bool m_UseModelCovarianceToCalulateLogLikelihood;
 
-  /** Add a parameter.
-   *
-   * \deprecated Use the priorDistribution form of this command.
-   */
-  void AddParameter( const std::string & name,
-                     double minimumPossibleValue = -DBL_MAX,
-                     double maximumPossibleValue =  DBL_MAX );
-
   /** Add a parameter. */
   void AddParameter( const std::string & name,
                      const Distribution & priorDistribution);
