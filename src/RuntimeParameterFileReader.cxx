@@ -192,20 +192,6 @@ RuntimeParameterFileReader
   return m_Options; // implicit cast to const
 }
 
-bool IsSameWhitespace( char c1, char c2 )
-{
-  return ( ::isspace( c1 ) && ::isspace( c2 ) );
-}
-
-char TabToSpace( char input )
-{
-  if ( input == '\t' ) {
-    return ' ';
-  }
-
-  return input;
-}
-
 std::string
 RuntimeParameterFileReader
 ::RegularizeLine( std::string line )
