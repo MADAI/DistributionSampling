@@ -75,9 +75,13 @@ public:
    * output values nor log likelihoods.
    *
    * \param numberOfTrainingPoints The desired number of training
-   * points in each dimension. The total number of training points
-   * will be \f$numberOfTrainingPoints^p\f$ where \f$p\f$ is the number of
-   * parameters in the parameters argument.
+   *                               points in each dimension. The total
+   *                               number of training points will be
+   *                               \f$numberOfTrainingPoints^p\f$
+   *                               where \f$p\f$ is the number of
+   *                               parameters in the parameters
+   *                               argument.
+   * \param parameters List of parameters defining the parameter space.
    */
   std::vector< Sample > Generate( int numberOfTrainingPoints,
                                   const std::vector< Parameter > parameters );

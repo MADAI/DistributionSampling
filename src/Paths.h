@@ -26,22 +26,58 @@ namespace madai {
 /** Namespace for paths used in the library. */
 namespace Paths {
 
+  /**
+   * The path separator for the system. \ for Windows and / for
+   * unix-style systems.
+   */
   extern const char SEPARATOR;
 
+  /**
+   * Directory relative to the working directory where traces are
+   * stored.
+   */
   extern const std::string TRACE_DIRECTORY;
 
+  /**
+   * Name of file containing the names of the observables in the
+   * model.
+   */
   extern const std::string OBSERVABLE_NAMES_FILE;
 
+  /**
+   * Name of the file in each runXXXX directory that contains the
+   * parameter values for the model run.
+   */
   extern const std::string PARAMETERS_FILE;
 
+  /**
+   * The name of the file relative to the working directory that
+   * contains the settings.
+   */
   extern const std::string RUNTIME_PARAMETER_FILE;
 
+  /**
+   * The name of the file in each runXXXX directory that contains the
+   * results of a model run.
+   */
   extern const std::string RESULTS_FILE;
 
+  /**
+   * The name of the file relative to the working directory that
+   * contains the emulator state.
+   */
   extern const std::string EMULATOR_STATE_FILE;
 
+  /**
+   * The name of the file relative to the working directory that
+   * contains the principal componenet analysis results.
+   */
   extern const std::string PCA_DECOMPOSITION_FILE;
 
+  /**
+   * The name of the file containing the parameter names and
+   * distributions.
+   */
   extern const std::string PARAMETER_PRIORS_FILE;
 
 } // end namespace Paths

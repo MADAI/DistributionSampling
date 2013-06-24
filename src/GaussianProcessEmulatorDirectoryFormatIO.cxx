@@ -72,6 +72,10 @@ GaussianProcessEmulatorDirectoryFormatIO
 namespace {
 
 
+/**
+ * Get a line from an input file stream, breaking up the tokens by
+ * whitespace charactors, and returning a vector of tokens.
+ */
 std::vector< std::string > getLineAsTokens( std::ifstream & is,
                                             std::string & line )
 {
@@ -103,6 +107,9 @@ std::vector< std::string > getLineAsTokens( std::ifstream & is,
   return tokens;
 }
 
+/**
+ * Get rid of whitespace from an input stream.
+ */
 inline void discardWhitespace(std::istream & input)
 {
   while (std::isspace(input.peek())) {
@@ -111,8 +118,9 @@ inline void discardWhitespace(std::istream & input)
 }
 
 /**
-   Read a word from input.  If it equals the expected value, return
-   true.  Else print error message to std::cerr and return false*/
+ *  Read a word from input.  If it equals the expected value, return
+ *  true.  Else print error message to std::cerr and return false.
+ */
 inline bool CheckWord(std::istream & input, const std::string & expected)
 {
   std::string s;
@@ -130,8 +138,9 @@ inline bool CheckWord(std::istream & input, const std::string & expected)
 }
 
 /**
-   Read an integer from input.  If it equals the expected value, return
-   true.  Else print error message to std::cerr and return false*/
+ *  Read an integer from input.  If it equals the expected value, return
+ *  true.  Else print error message to std::cerr and return false.
+ */
 inline bool CheckInteger(std::istream & input, int i,
     const std::string & errorMessage)
 {
@@ -152,6 +161,9 @@ inline bool CheckInteger(std::istream & input, int i,
 }
 
 
+/**
+ * Parse an integer from an input stream.
+ */
 bool parseInteger( int & x, std::istream & input )
 {
   if (! input.good()) return false;
@@ -159,6 +171,11 @@ bool parseInteger( int & x, std::istream & input )
   return true;
 }
 
+/**
+ * Given a vector of strings and a particular string, get the index of
+ * that string in the vector. If not found, returns false and the
+ * index is set to -1. If found, returns true and the index is set
+ * appropriately. */
 inline bool getIndex(
     const std::vector< std::string > & sv,
     const std::string & s,
@@ -459,6 +476,9 @@ bool parseCovarianceFunction(
 }
 
 
+/**
+ * Parses the number of model runs.
+ */
 bool parseNumberOfModelRuns( int & x,
                              const std::string & modelOutputDirectory )
 {
@@ -486,6 +506,9 @@ bool parseNumberOfModelRuns( int & x,
 }
 
 
+/**
+ * Parse the parameter values and output values.
+ */
 template < typename TDerived >
 inline bool parseParameterAndOutputValues(
     Eigen::MatrixBase< TDerived > & parameterValues_,
@@ -736,6 +759,9 @@ inline bool parseParameterAndOutputValues(
 }
 
 
+/**
+ * Parses the model data in the directory structure.
+ */
 bool parseModelDataDirectoryStructure(
     GaussianProcessEmulator & gpme,
     const std::string & modelOutputDirectory,
@@ -803,6 +829,9 @@ bool parseComments(
 }
 
 
+/**
+ * Write the comments out to an output stream.
+ */
 std::ostream & serializeComments(
     const std::vector< std::string > & comments,
     std::ostream & o) {
@@ -915,6 +944,9 @@ const char * GetCovarianceFunctionString(
 }
 
 
+/**
+ * Parse the submodels of the emulator.
+ */
 bool parseSubmodels(
     GaussianProcessEmulator::SingleModel & m,
     int modelIndex,
@@ -955,6 +987,9 @@ bool parseSubmodels(
 }
 
 
+/**
+ * Parse the PCA decomposition data.
+ */
 bool parsePCADecomposition(
     GaussianProcessEmulator & gpme,
     std::istream & input ) {
@@ -1025,6 +1060,9 @@ bool parsePCADecomposition(
   return true;
 }
 
+/**
+ * Write the PCA decomposition to an output stream.
+ */
 std::ostream & serializePCADecomposition(
     const GaussianProcessEmulator & gpme,
     std::ostream & o ) {
@@ -1042,6 +1080,9 @@ std::ostream & serializePCADecomposition(
 }
 
 
+/**
+ * Write an emulator submodel to an output stream.
+ */
 std::ostream & serializeSubmodels(
     const GaussianProcessEmulator::SingleModel & m,
     int modelIndex,
@@ -1057,6 +1098,9 @@ std::ostream & serializeSubmodels(
 }
 
 
+/**
+ * Write the emulator to an output stream.
+ */
 std::ostream & serializeGaussianProcessEmulator(
     const GaussianProcessEmulator & gpme,
     std::ostream & o) {
@@ -1070,6 +1114,9 @@ std::ostream & serializeGaussianProcessEmulator(
 }
 
 
+/**
+ * Write the emulator to an output stream.
+ */
 bool parseGaussianProcessEmulator(
     GaussianProcessEmulator & gpme,
     const std::string & statisticalAnalysisDirectory) {

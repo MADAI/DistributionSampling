@@ -39,12 +39,18 @@ namespace madai {
 // Anonymous namespace to hide these functions
 namespace {
 
+/**
+ * Get the number of regression functions.
+ */
 inline int NumberRegressionFunctions(
     int regressionOrder,
     int numberParameters) {
   return 1 + (regressionOrder * numberParameters);
 }
 
+/**
+ * Get the number of thetas.
+ */
 inline int NumberThetas(
     GaussianProcessEmulator::CovarianceFunctionType cf,
     int numberParameters) {
@@ -65,6 +71,9 @@ inline int NumberThetas(
 }
 
 
+/**
+ * Compute the matrix H.
+ */
 template < typename TDerived >
 inline void MakeHMatrix(
     const Eigen::MatrixBase< TDerived > & X,
@@ -83,6 +92,10 @@ inline void MakeHMatrix(
     H.block(0,1+(i*p),N,p) = H.block(0,1+((i-1)*p),N,p).cwiseProduct(X);
   }
 }
+
+/**
+ * Compute the vector H.
+ */
 template < typename TDerived >
 inline void MakeHVector(
     const Eigen::MatrixBase< TDerived > & point,
@@ -102,6 +115,9 @@ inline void MakeHVector(
       = hvec.segment(1+((i-1)*p),p).cwiseProduct(point);
   }
 }
+
+/**
+ * Compute the gradient of the H vector. */
 template < typename TDerived >
 inline void GetGradientOfHVector(
   const Eigen::MatrixBase< TDerived > & point,
@@ -379,8 +395,6 @@ GaussianProcessEmulator::CheckStatus() {
 }
 
 
-/**
-   \returns m_Status */
 GaussianProcessEmulator::StatusType
 GaussianProcessEmulator::GetStatus() const {
   return m_Status;
@@ -465,8 +479,6 @@ bool GaussianProcessEmulator::GetObservedValues(
   return true;
 }
 
-/**
-   Set default values to uninitialized values. */
 GaussianProcessEmulator::SingleModel::SingleModel() :
   m_Parent(NULL),
   m_CovarianceFunction(UNKNOWN_FUNCTION),
@@ -500,10 +512,6 @@ bool GaussianProcessEmulator::BuildUncertaintyScales()
   return true;
 }
 
-/**
-   Use m_UncertaintyScales, m_TrainingOutputValues,
-   m_TrainingOutputMeans, and m_RetainedPCAEigenvectors to determine
-   m_PCADecomposedModels[i].m_ZValues; */
 bool GaussianProcessEmulator::BuildZVectors() {
   if (m_PCADecomposedModels.size() != static_cast< size_t >( m_NumberPCAOutputs ) ) {
     std::cerr << "Error [m_PCADecomposedModels.size() == "
@@ -533,11 +541,6 @@ bool GaussianProcessEmulator::BuildZVectors() {
   return true;
 }
 
-
-/**
-   Once Load(), Train(), or BasicTraining() finishes, calculate and
-   cache some data to make calling GetEmulatorOutputsAndCovariance()
-   faster. */
 bool GaussianProcessEmulator::MakeCache() {
   if ((m_Status != READY) && (m_Status != UNCACHED))
     return false;
@@ -602,8 +605,6 @@ bool GaussianProcessEmulator::SingleModel::MakeCache() {
   return true;
 }
 
-/**
-   Default to uninitialized state. */
 GaussianProcessEmulator::GaussianProcessEmulator() :
   m_Status(UNINITIALIZED),
   m_NumberParameters(0),
@@ -613,8 +614,6 @@ GaussianProcessEmulator::GaussianProcessEmulator() :
 { }
 
 
-/**
-   This takes an GPEM and trains it. \returns true on sucess. */
 bool GaussianProcessEmulator::SingleModel::Train(
     GaussianProcessEmulator::CovarianceFunctionType covarianceFunction,
     int regressionOrder)
@@ -638,8 +637,6 @@ bool GaussianProcessEmulator::SingleModel::Train(
 }
 
 
-/**
-   This takes an GPEM and trains it. \returns true on sucess. */
 bool GaussianProcessEmulator::Train(
     GaussianProcessEmulator::CovarianceFunctionType covarianceFunction,
     int regressionOrder)
@@ -663,8 +660,6 @@ bool GaussianProcessEmulator::Train(
   return true;
 }
 
-/**
-   This takes an GPEM and trains it. \returns true on sucess. */
 bool GaussianProcessEmulator::BasicTraining(
     CovarianceFunctionType covarianceFunction,
     int regressionOrder,
@@ -692,9 +687,7 @@ bool GaussianProcessEmulator::BasicTraining(
   // }
   return true;
 }
-/**
-   Sets default values for all of the hyperparameters. \returns
-   true on success. */
+
 bool GaussianProcessEmulator::SingleModel::BasicTraining(
     CovarianceFunctionType covarianceFunction,
     int regressionOrder,
@@ -857,10 +850,6 @@ bool GaussianProcessEmulator::PrincipalComponentDecompose()
   return true;
 }
 
-
-/**
-   Execute the model at an input point x.  Save a lot of time by not
-   calculating the error. */
 bool GaussianProcessEmulator::SingleModel::GetEmulatorOutputs (
     const std::vector< double > & x,
     double & mean) const {
@@ -896,8 +885,7 @@ bool GaussianProcessEmulator::SingleModel::GetEmulatorOutputs (
   mean = h_vector.dot(m_BetaVector) + kplus.dot(m_GammaVector);
   return true;
 }
-/**
-   Get the gradient of the model output at an input point x. */
+
 bool GaussianProcessEmulator::SingleModel::GetGradientOfEmulatorOutputs(
     const std::vector< double > & x,
     std::vector< double > & gradient ) const
@@ -926,9 +914,7 @@ bool GaussianProcessEmulator::SingleModel::GetGradientOfEmulatorOutputs(
   ModelGradient += h_v_Grad*m_BetaVector;
   return true;
 }
-/**
-   Execute the model at an input point x.  Save a lot of time by not
-   calculating the covaraince error. */
+
 bool GaussianProcessEmulator::GetEmulatorOutputs (
     const std::vector< double > & x,
     std::vector< double > & y) const
@@ -960,8 +946,7 @@ bool GaussianProcessEmulator::GetEmulatorOutputs (
     m_UncertaintyScales.cwiseProduct(m_RetainedPCAEigenvectors * mean_pca);
   return true;
 }
-/**
-   Get the gradients of the model outputs at an input point x. */
+
 bool GaussianProcessEmulator::GetGradientOfEmulatorOutputs(
     const std::vector< double > & x,
     std::vector< double > & gradients ) const
@@ -992,9 +977,6 @@ bool GaussianProcessEmulator::GetGradientOfEmulatorOutputs(
   return true;
 }
 
-/**
-   Execute the model at an input point x.  Save a lot of time by not
-   calculating the error. */
 bool GaussianProcessEmulator::SingleModel
 ::GetEmulatorOutputsAndCovariance (
     const std::vector< double > & x,
@@ -1047,8 +1029,6 @@ bool GaussianProcessEmulator::SingleModel
   return true;
 }
 
-/**
-   Get the gradient of the error returned by the emulator. */
 bool GaussianProcessEmulator::SingleModel
 ::GetGradientOfCovariance(
     const std::vector< double > & x,
@@ -1094,9 +1074,6 @@ bool GaussianProcessEmulator::SingleModel
   return true;
 }
 
-/**
-         Execute the model at an input point x.
-         The covariance returned will be a flattened matrix */
 bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
     const std::vector< double > & x,
     std::vector< double > & y,
@@ -1133,8 +1110,6 @@ bool GaussianProcessEmulator::GetEmulatorOutputsAndCovariance (
   return true;
 }
 
-/**
-   Get the gradients of the error returned by the emulator. */
 bool GaussianProcessEmulator::GetGradientsOfCovariances(
     const std::vector< double > & x,
     std::vector< Eigen::MatrixXd > & gradients ) const
