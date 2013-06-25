@@ -862,8 +862,13 @@ bool GaussianProcessEmulator::SingleModel::GetEmulatorOutputs (
   int F = 1 + (m_RegressionOrder * p);
   const Eigen::MatrixXd & X = m_Parent->m_TrainingParameterValues;
   Eigen::VectorXd kplus(N); // kplus is C(x,D)
+  assert((X.rows() == N) && (X.cols() == p));
   for (int j = 0; j < N; ++j) {
-    Eigen::VectorXd xrow = X.row(j);
+    Eigen::VectorXd xrow(p);
+    for (int k = 0; k < p; ++k) {
+      xrow(k) = X(j,k);
+    }
+    // Eigen::VectorXd xrow = X.row(j); /* is buggy? */
     double cov = this->CovarianceCalc(xrow, point);
     if(cov < 1e-10)
       cov = 0.0;

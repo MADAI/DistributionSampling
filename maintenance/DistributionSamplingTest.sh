@@ -53,12 +53,14 @@ build() (
 		-DCMAKE_INSTALL_PREFIX:PATH="${INSTALL_PREFIX:-$DEFAULT_PREFIX}" \
 		-DCMAKE_BUILD_TYPE:STRING="${BUILD_TYPE}" \
 		-DBUILD_TESTING:BOOL=1 \
+		-DBUILD_DOCUMENTATION:BOOL=1 \
 		-DUSE_OPENMP:BOOL=0 \
 		-DUSE_GPROF:BOOL=0 \
 		-DABORT_ON_COMPILER_WARNINGS:BOOL=1 \
 		"$BOOST_OPT" "$EIGEN3_OPT" \
 		"$SRC_DIR"
 	try nice make -j"${NPROC:-$(get_nproc)}" all
+	try nice make Documentation
 	try nice make test
 	if [ "$INSTALL_PREFIX" ] ; then
 		try mkdir -p "$INSTALL_PREFIX"

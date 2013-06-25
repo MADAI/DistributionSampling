@@ -1,17 +1,16 @@
 /**
 \mainpage MADAI Distribution Sampling Library
 
-\todo write a summary of what this library does.
+http://stat.madai.us/
 
-Impotant classes:
+This software will enable you to determine model parameters from comparing model outputs to a set of experimental measurements to determine the relative likelihood of a set of parameter values.
+
+Important classes:
 
 madai::Parameter — a Parameter represents a single variable which can
 take on any floating-point value within some range.  It has a name, a
 minimum, and a maximum.  A "parameter space" is described by some
 vector of Parameters.
-
-madai::ScalarFunction — (an abstract class) Represents a single
-scalar evaluated at a point in parameter space.
 
 madai::Model — (an abstract class) A model is a function that is
 evaluated at a point in its parameter space.  It must return a vector

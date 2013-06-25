@@ -7,6 +7,6 @@ add_custom_target( Documentation
   WORKING_DIRECTORY ${DistributionSampling_SOURCE_DIR}/doc
 )
 
-install( DIRECTORY ${DistributionSampling_SOURCE_DIR}/doc/html
+install( DIRECTORY ${DistributionSampling_BINARY_DIR}/doc/html
   DESTINATION doc/madai/
 )

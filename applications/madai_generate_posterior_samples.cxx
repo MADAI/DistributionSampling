@@ -132,19 +132,18 @@ int main(int argc, char ** argv) {
     }
   }
 
-  size_t numberOfFields = headers.size();
-  assert(static_cast<int>(numberOfFields) == numberOfParameters + numberOfObservables + 1);
+  assert(static_cast<int>(headers.size())
+         == numberOfParameters + numberOfObservables + 1);
 
   std::string line;
-  size_t lineCount = 0, bestIndex = 0;
+  size_t lineCount = 0;
   std::vector< std::vector< double > > values(numberOfParameters);
   std::vector< std::vector< double > > observables(numberOfObservables);
-
-  double bestLogLikelihood = -std::numeric_limits< double >::infinity();
+  // std::vector< double > logLikelihoods;
 
   while ( std::getline( trace, line ) ) {
     std::vector<std::string> fields = madai::SplitString( line, ',' );
-    assert( numberOfFields == fields.size() );
+    assert( headers.size() == fields.size() );
 
     for ( int i = 0; i < numberOfParameters; ++i ) {
       double value = std::atof( fields[i].c_str() );
@@ -156,11 +155,9 @@ int main(int argc, char ** argv) {
       observables[i].push_back( value );
     }
 
-    double logLikelihood = std::atof( fields[numberOfFields - 1].c_str() );
-    if ( logLikelihood > bestLogLikelihood ) {
-      bestLogLikelihood = logLikelihood;
-      bestIndex = lineCount;
-    }
+    // double logLikelihood = std::atof( fields[numberOfFields - 1].c_str() );
+    // logLikelihoods.push_back(logLikelihood);
+    // // should we include this information in the posterior samples?
     ++lineCount;
   }
   trace.close();
