@@ -1,7 +1,7 @@
 Project: DistributionSampling
 README.txt author: Cory Quammen <cquammen@cs.unc.edu>,
     Hal Canary <cs.unc.edu/~hal>
-Last updated: 2013-06-01
+Last updated: 2013-06-26
 
 *** BUILD INSTRUCTIONS FOR LINUX AND MAC ***
 
@@ -42,7 +42,9 @@ Last updated: 2013-06-01
 
 2). Navigate to the build directory created in step 1.
 
-3). Type ("$ " represents your shell prompt.)
+3). In the instructions below, "$ " represents your shell prompt.
+
+    Type
 
     $ cmake ".../stat/DistributionSampling" \
           -DBUILD_TESTING:BOOL="1" \
@@ -78,3 +80,31 @@ Last updated: 2013-06-01
     $ make Documentation
 
     This generates HTML documentation of the library with doxygen.
+
+** CONFIGURATION OPTIONS **
+
+ABORT_ON_COMPILER_WARNINGS (boolean)
+
+    Tells the compiler to treat warnings as errors.
+
+USE_OPENMP (boolean)
+
+    Look for and use OpenMP if found. This parallelizes part of the
+    sample generation code.
+
+    WARNING: OpenMP on Mac OS X appears to be buggy.
+
+USE_GPROF (boolean)
+
+    Add compiler flags to support profiling the library code with gprof.
+
+BUILD_DOCUMENTATION (boolean)
+
+    Look for doxygen. If it is found, use it to generate HTML
+    documentation of the library source code.
+
+BUILD_TESTING (boolean)
+
+    Build all the regression tests for the library. This is usually only needed
+    if you are planning to modify the library and want to ensure that
+    you do not introduce a regression in the code.
