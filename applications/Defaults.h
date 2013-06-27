@@ -93,6 +93,13 @@ public:
   /**
     Print All Defaults */
   static void PrintAllDefaults(std::ostream & output);
+
+  /**
+    Aposteriori Analysis */
+  static const int GENERATE_POSTERIOR_PARAMETERS_NUMBER_OF_POINTS;
+
+
+
 };
 
 

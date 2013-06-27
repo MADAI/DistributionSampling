@@ -72,6 +72,8 @@ const bool Defaults::EMULATE_QUIET = false;
 
 const bool Defaults::EMULATE_WRITE_HEADER = true;
 
+const int Defaults::GENERATE_POSTERIOR_PARAMETERS_NUMBER_OF_POINTS = 20;
+
 void Defaults::PrintAllDefaults(std::ostream & o) {
   o << "#\n"
     << "MODEL_OUTPUT_DIRECTORY "                           << Defaults::MODEL_OUTPUT_DIRECTORY << '\n'

@@ -30,9 +30,11 @@
 #include "GaussianProcessEmulatorDirectoryReader.h"
 #include "Paths.h"
 #include "System.h"
+#include "Defaults.h"
+#include "RuntimeParameterFileReader.h"
 
 int main(int argc, char ** argv) {
-  if (argc < 4) {
+  if (argc < 3) {
     std::cerr
       << "Usage\n  " << argv[0]
       << " statistics_directory trace_file N_samples\n\n";
@@ -57,7 +59,13 @@ int main(int argc, char ** argv) {
   traceFile.append( madai::Paths::TRACE_DIRECTORY );
   traceFile.append( "/" );
   traceFile.append( argv[2] );
-  int N_samples=atoi(argv[3]);
+
+  madai::RuntimeParameterFileReader settings;
+  std::string settingsFile = statisticsDirectory + madai::Paths::RUNTIME_PARAMETER_FILE;
+  if ( !settings.ParseFile( settingsFile ) ) {
+    std::cerr << "Could not open runtime parameter file '" << settingsFile << "'\n";
+    return EXIT_FAILURE;
+  }
 
   if ( !madai::System::IsFile( traceFile ) ) {
     std::cerr << "Trace file '" << traceFile << "' does not exist or is a directory.\n";
@@ -101,13 +109,18 @@ int main(int argc, char ** argv) {
   }
   trace.close();
 
+  
+  int N_samples = settings.GetOptionAsInt(
+      "GENERATE_POSTERIOR_PARAMETERS_NUMBER_OF_POINTS",
+      madai::Defaults::GENERATE_POSTERIOR_PARAMETERS_NUMBER_OF_POINTS);
+
   int iline,ipar;
   assert(N_samples > int(lineCount));
   std::ofstream parfile;
   std::string filename;
   std::stringstream sst;
   for(int isample=0;isample<N_samples;isample++){
-    sst << "posterior_model_output/run" << isample << "parameters.dat";
+    sst << statisticsDirectory << "/posterior_model_output/run" << std::setw(4) << isample << "parameters.dat";
     filename=sst.str();
     parfile.open(filename.c_str());
     iline=lrint(-1+(isample+1)*lineCount/N_samples);
