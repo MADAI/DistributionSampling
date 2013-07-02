@@ -300,6 +300,21 @@ Model
 }
 
 
+const std::vector< double > &
+Model
+::GetObservedScalarValues() const
+{
+  return m_ObservedScalarValues; // cast to const
+}
+
+const std::vector< double > &
+Model
+::GetObservedScalarCovariance() const
+{
+  return m_ObservedScalarCovariance; // cast to const;
+}
+
+
 Model::ErrorType
 Model
 ::GetScalarOutputsAndCovariance(

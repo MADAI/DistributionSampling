@@ -159,6 +159,12 @@ public:
   virtual ErrorType SetObservedScalarCovariance(
     const std::vector< double > & observedScalarCovariance);
 
+  /** \return the current m_ObservedScalarValues */
+  const std::vector< double > & GetObservedScalarValues() const;
+
+  /** \return the current m_ObservedScalarCovariance */
+  const std::vector< double > & GetObservedScalarCovariance() const;
+
   /** Gets the scalar outputs and log-likelihood of the model for a
    * point in parameter space
    *
