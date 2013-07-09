@@ -745,10 +745,8 @@ bool GaussianProcessEmulator::SingleModel::Train(
       lowestScore = score;
       bestScale = scale;
     }
-    std::cerr << "SCALE=" << scale << " \t SCORE=" <<score << '\n';
     scale *= factor;
   }
-  std::cerr << "BEST=" << bestScale << " \t BEST=" <<lowestScore << '\n';
   setThetasByScale(*this, bestScale);
   return true;
 }
