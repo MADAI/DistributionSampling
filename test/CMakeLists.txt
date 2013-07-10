@@ -31,10 +31,11 @@ foreach( test
   GaussianDistributionTest
   LatinHypercubeGeneratorTest
   ModelTest
+  PrincipalComponentDecomposeTest
   RandomTest
+  RuntimeParameterFileReaderTest
   SampleTest
   UniformDistributionTest
-  RuntimeParameterFileReaderTest
   )
   add_executable( ${test} ${test}.cxx )
   target_link_libraries( ${test} ${LIBRARIES} )
