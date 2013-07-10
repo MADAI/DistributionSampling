@@ -33,6 +33,7 @@ foreach( test
   ModelTest
   PrincipalComponentDecomposeTest
   RandomTest
+  RetainPrincipalComponentsTest
   RuntimeParameterFileReaderTest
   SampleTest
   UniformDistributionTest
