@@ -148,6 +148,102 @@ inline void GetGradientOfHVector(
   }
 }
 
+/**
+   Score the trainingModel based on points in the originalModel; */
+static double Score(
+    const GaussianProcessEmulator::SingleModel & originalModel,
+    const GaussianProcessEmulator::SingleModel & trainingModel)
+{
+  int N = originalModel.m_Parent->m_NumberTrainingPoints;
+  int p = originalModel.m_Parent->m_NumberParameters;
+  const Eigen::MatrixXd & orig_Params =
+    originalModel.m_Parent->m_TrainingParameterValues;
+  const Eigen::VectorXd & orig_ZValues = originalModel.m_ZValues;
+  double score = 0.0; //low scores are better
+  std::vector< double > x(p);
+  for (int i = 0; i < N; ++i) {
+    for (int j = 0; j < p; ++j) {
+      x[j] = orig_Params(i,j);
+    }
+    double zval;
+    if (! trainingModel.GetEmulatorOutputs(x, zval)) {
+      std::cerr << "ERROR in " __FILE__ ":" << __LINE__ << "\n";
+      return std::numeric_limits<double>::signaling_NaN();
+    }
+    score += std::pow(zval - orig_ZValues(i), 2);
+  }
+  return score / N;
+}
+
+/**
+   Use K-fold cross-validation to test hyper-parameters. */
+static double Score(
+    const GaussianProcessEmulator::SingleModel & originalModel)
+{
+  static const int PARTITIONS = 8;
+
+  int N = originalModel.m_Parent->m_NumberTrainingPoints;
+  int p = originalModel.m_Parent->m_NumberParameters;
+  const Eigen::MatrixXd & trainingParameterValues =
+    originalModel.m_Parent->m_TrainingParameterValues;
+  int number_to_leave_out = N / PARTITIONS;
+  int number_to_keep = N - number_to_leave_out;
+  // assume Training Points are totally unsorted.
+  GaussianProcessEmulator dummy;
+  dummy.m_NumberParameters = p;
+  dummy.m_Parameters = originalModel.m_Parent->m_Parameters;
+  dummy.m_NumberTrainingPoints = number_to_keep;
+  dummy.m_TrainingParameterValues.resize(number_to_keep, p);
+  GaussianProcessEmulator::SingleModel testModel;
+  testModel.m_Parent = &dummy;
+  testModel.m_CovarianceFunction = originalModel.m_CovarianceFunction;
+  testModel.m_RegressionOrder = originalModel.m_RegressionOrder;
+  testModel.m_Thetas.resize(originalModel.m_Thetas.size());
+  testModel.m_Thetas = originalModel.m_Thetas;
+  testModel.m_ZValues.resize(number_to_keep);
+  double score = 0.0;
+  for (int k = 0; k < PARTITIONS; ++k) {
+    // K-fold cross-validation
+    int first_index_to_skip = k * number_to_leave_out;
+    for (int i = 0; i < number_to_keep; ++i) {
+      int src_index = (i < first_index_to_skip) ? i : (i + number_to_leave_out);
+      for (int j = 0; j < p; ++j) {
+        dummy.m_TrainingParameterValues(i,j) =
+          trainingParameterValues(src_index,j);
+      }
+      testModel.m_ZValues(i) = originalModel.m_ZValues(src_index);
+    }
+    if (! testModel.MakeCache()) {
+      std::cerr << "ERROR in " __FILE__ ":" << __LINE__ <<  "\n";
+      return std::numeric_limits<double>::signaling_NaN();
+    }
+    score += Score(originalModel, testModel);
+  }
+  return score / PARTITIONS;
+}
+
+
+/**
+   Simplest way to set length-scale hyperparameters.  scale is
+   multiplied by the width of the middle-two quartiles of the prior
+   distribution.  Used by both train() and basictrain().  */
+static void setThetasByScale(
+    GaussianProcessEmulator::SingleModel & model,
+    double scale)
+{
+  int p = model.m_Parent->m_NumberParameters;
+  int offset = ThetaOffset(model.m_CovarianceFunction);
+  model.m_Thetas.resize(offset + p);
+  for (int j = 0; j < p; ++j) {
+    const madai::Distribution * priordist =
+      model.m_Parent->m_Parameters[j].m_PriorDistribution;
+    assert(priordist);
+    model.m_Thetas(offset + j) = scale * std::abs(
+        priordist->GetPercentile(0.75) - priordist->GetPercentile(0.25));
+  }
+
+}
+
 
 } // anonymous namespace
 
@@ -534,19 +630,24 @@ bool GaussianProcessEmulator::BuildZVectors() {
 }
 
 bool GaussianProcessEmulator::MakeCache() {
-  if ((m_Status != READY) && (m_Status != UNCACHED))
+  if ((m_Status != READY) && (m_Status != UNCACHED)) {
+    std::cerr << "ERROR in " __FILE__ ":" << __LINE__ << "\n";
     return false;
+  }
   assert(m_NumberPCAOutputs == static_cast<int>(m_PCADecomposedModels.size()));
   bool errorflag = false;
 #if defined( OPENMP_FOUND )
   #pragma omp parallel for
 #endif // OPENMP_FOUND
   for (int i = 0; i < m_NumberPCAOutputs; ++i) {
-    if (! m_PCADecomposedModels[i].MakeCache())
+    if (! m_PCADecomposedModels[i].MakeCache()) {
+      std::cerr << "ERROR in " __FILE__ ":" << __LINE__ << " (" << i << ")\n";
       errorflag = true;
+    }
   }
-  if (errorflag)
+  if (errorflag) {
     return false;
+  }
   m_Status = READY;
   return true;
 }
@@ -610,22 +711,44 @@ bool GaussianProcessEmulator::SingleModel::Train(
     GaussianProcessEmulator::CovarianceFunctionType covarianceFunction,
     int regressionOrder)
 {
-  if (regressionOrder < 0) {
-    /* \todo error message to stderr */
-    return false;
-  }
-  if (regressionOrder > 3) {
-    /* \todo error message to stderr */
+  int N = m_Parent->m_NumberTrainingPoints;
+  if ((regressionOrder < 0) || (regressionOrder > 3)) {
+    std::cerr << "regressionOrder out of range (" << regressionOrder << ")\n";
     return false;
   }
   m_CovarianceFunction = covarianceFunction;
   m_RegressionOrder = regressionOrder;
-  int numberThetas
-    = NumberThetas(covarianceFunction, m_Parent->m_NumberParameters);
-  m_Thetas.resize(numberThetas);
-  std::cerr << "Sorry, but this function is not yet implemented.\n";
-  // FIXME
-  return false;
+  int offset = ThetaOffset(m_CovarianceFunction);
+  m_Thetas.resize(offset + m_Parent->m_NumberParameters);
+
+  // FIXME - are we sensitive to these hyperparameters?
+  m_Thetas(0) = 1.0; // default value    // amplitude
+  m_Thetas(1) = 1.0e-5; // default value // nugget
+  if (offset == 3)
+    m_Thetas(2) = 2.0; // default value  // power
+
+  double minimumScale = 4.0 / static_cast<double>(N);
+  double maximumScale = 1.0;
+  static const int NUMBER_OF_TRIES = 20; // assert (NUMBER_OF_TRIES > 0);
+
+  double factor
+    = std::pow(maximumScale / minimumScale, 1.0 / (NUMBER_OF_TRIES - 1));
+  double scale = minimumScale;
+  double bestScale = std::numeric_limits<double>::signaling_NaN();
+  double lowestScore = std::numeric_limits<double>::infinity();
+  for (int i = 0; i < NUMBER_OF_TRIES; ++i) {
+    setThetasByScale(*this, scale);
+    /* This as a hack.  We assume that the best scale works equally
+       well for each parameter.  There is no reason to believe this. */
+    double score = Score(*this);
+    if (score < lowestScore) {
+      lowestScore = score;
+      bestScale = scale;
+    }
+    scale *= factor;
+  }
+  setThetasByScale(*this, bestScale);
+  return true;
 }
 
 
@@ -641,12 +764,22 @@ bool GaussianProcessEmulator::Train(
   for (int i = 0; i < t; ++i) {
     m_PCADecomposedModels[i].m_Parent = this;
   }
+  bool errorflag = false;
+  #if defined( OPENMP_FOUND )
+  #pragma omp parallel for
+  #endif // OPENMP_FOUND
   for (int i = 0; i < t; ++i) {
-    if (! m_PCADecomposedModels[i].Train(covarianceFunction,regressionOrder))
-      return false;
+    if (! m_PCADecomposedModels[i].Train(covarianceFunction,regressionOrder)) {
+      std::cerr << "errror in GaussianProcessEmulator::SingleModel::Train()\n";
+      errorflag = true;
+    }
   }
+  if (errorflag)
+    return false;
+  m_Status = UNCACHED;
   if (! this->MakeCache()) {
-    std::cerr << "FIXME need error message\n";
+    std::cerr << "Error in this->MakeCache()\n  " __FILE__ ":"
+              << __LINE__ << '\n';
     return false;
   }
   return true;
@@ -707,13 +840,7 @@ bool GaussianProcessEmulator::SingleModel::BasicTraining(
   m_Thetas(0) = amplitude;
   m_Thetas(1) = defaultNugget;
 
-  for (int j = 0; j < p; ++j) {
-    const madai::Distribution * priordist =
-      m_Parent->m_Parameters[j].m_PriorDistribution;
-    assert(priordist);
-    m_Thetas(offset + j) = scale * std::abs(
-        priordist->GetPercentile(0.75) - priordist->GetPercentile(0.25));
-  }
+  setThetasByScale(*this, scale);
   return true;
 }
 
