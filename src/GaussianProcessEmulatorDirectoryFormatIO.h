@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef madai_GaussianProcessEmulatorDirectoryReader_h_included
-#define madai_GaussianProcessEmulatorDirectoryReader_h_included
+#ifndef madai_GaussianProcessEmulatorDirectoryFormatIO_h_included
+#define madai_GaussianProcessEmulatorDirectoryFormatIO_h_included
 
 #include <string>
 #include <vector>
@@ -29,18 +29,24 @@ namespace madai {
 class GaussianProcessEmulator;
 class Parameter;
 
-class GaussianProcessEmulatorDirectoryReader {
+/** \class GaussianProcessEmulatorDirectoryFormatIO
+ *
+ * Initializes a GaussianProcessEmulator from the files in a specific
+ *  directory structure. */
+class GaussianProcessEmulatorDirectoryFormatIO {
 public:
-  GaussianProcessEmulatorDirectoryReader();
-  ~GaussianProcessEmulatorDirectoryReader();
+  GaussianProcessEmulatorDirectoryFormatIO();
+  ~GaussianProcessEmulatorDirectoryFormatIO();
 
   /**
    Enable verbose output when reading. */
+  //@{
   void SetVerbose( bool value );
   bool GetVerbose() const;
+  //@}
 
   /**
-    This takes an empty GPEM and loads training data.
+    This takes an empty GaussianProcessEmulator and loads training data.
     \returns true on success. */
   bool LoadTrainingData(GaussianProcessEmulator * gpe,
                         std::string modelOutputDirectory,
@@ -48,10 +54,23 @@ public:
                         std::string experimentalResultsFileName);
 
   /**
-    This takes a GPEM and loads PCA data.
+    This takes a GaussianProcessEmulator and loads principal component
+    analysis data.
     \returns true on success. */
   bool LoadPCA( GaussianProcessEmulator * gpe,
                 const std::string & statisticalAnalysisDirectory);
+
+  /**
+    Writes current state to file.  \returns true on success. */
+  bool Write(GaussianProcessEmulator * gpe,std::ostream & output) const;
+
+  /**
+    Writes current state of PCADecomposition to file. */
+  bool WritePCA( GaussianProcessEmulator * gpe, std::ostream & output) const;
+
+  /**
+     Writes current state to file.  \returns true on sucess. */
+  bool PrintThetas( GaussianProcessEmulator * gpe, std::ostream & output) const;
 
   /**
     This takes a GPEM and loads the emulator specific
@@ -67,11 +86,20 @@ public:
                                const std::string & statisticalAnalysisDirectory,
                                bool verbose );
 
+  /**
+    Parses a file describing the outputs of a model. */
+  static bool ParseOutputs( std::vector< std::string > & outputNames,
+                            int & numberOutputs,
+                            const std::string & statisticalAnalysisDirectory,
+                            bool verbose );
+
 protected:
+  /** If true, produce a lot of output about which files are being
+   *  opened, which values are read, etc. to stdout. */
   bool m_Verbose;
 
 };
 
 } // end namespace madai
 
-#endif // madai_GaussianProcessEmulatorDirectoryReader_h_included
+#endif // madai_GaussianProcessEmulatorDirectoryFormatIO_h_included

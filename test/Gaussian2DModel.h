@@ -32,13 +32,6 @@ public:
   Gaussian2DModel();
   ~Gaussian2DModel() {};
 
-  /** Loads a configuration from a file. For this model, the
-   * configuration file is a text file containing four numbers
-   * separated by whitespace (space, tab, newline). The numbers are
-   * the mean in x, mean in y, standard deviation in x and standard
-   * deviation in y of the 2D Gaussian function. */
-  ErrorType LoadConfigurationFile( const std::string fileName );
-
   /** Get the scalar outputs from the model evaluated at x. */
   ErrorType GetScalarOutputs( const std::vector< double > & parameters,
                               std::vector< double > & scalars ) const;

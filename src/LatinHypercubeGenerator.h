@@ -37,26 +37,34 @@ class Random;
  * parameter space. */
 class LatinHypercubeGenerator {
 public:
-  /** Constructor */
   LatinHypercubeGenerator();
-
-  /** Destructor */
   virtual ~LatinHypercubeGenerator();
 
   /** Set the number of standard deviations about the mean used to
-   * determine the bounds of the latin hypercube sampling for
-   * parameters with Gaussian priors. Defaults to 3.0.
+   * determine the bounds of the Latin hypercube sampling for
+   * parameters with Gaussian priors.
    *
-   * This is only used when DivideSpaceByPercentile is enabled. */
+   * \param standardDeviations Defaults to 3.0.
+   *
+   * This is only used when DivideSpaceByPercentile is enabled.
+   */
   void SetStandardDeviations( double standardDeviations );
+
+  /** Get the number of standard deviations about the mean used to
+   * determine the bounds of the Latin hypercube sampling for
+   * parameters with Gaussian priors.
+   */
   double GetStandardDeviations() const;
 
   /** If enabled, this option partitions the parameter space according to
    * the percentile of the prior distribution in each dimension. If
    * disabled, each dimension is divided up evenly. This is off by
-   * default. */
+   * default.
+   */
+  //@{
   void SetPartitionSpaceByPercentile( bool value );
   bool GetPartitionSpaceByPercentile() const;
+  //@}
 
 
   /** Generates a list of parameters distributed in a high-dimensional
@@ -64,7 +72,17 @@ public:
    * http://en.wikipedia.org/wiki/Latin_hypercube_sampling
    *
    * Note that the output Samples have only parameter values, no
-   * output values nor log likelihoods. */
+   * output values nor log likelihoods.
+   *
+   * \param numberOfTrainingPoints The desired number of training
+   *                               points in each dimension. The total
+   *                               number of training points will be
+   *                               \f$numberOfTrainingPoints^p\f$
+   *                               where \f$p\f$ is the number of
+   *                               parameters in the parameters
+   *                               argument.
+   * \param parameters List of parameters defining the parameter space.
+   */
   std::vector< Sample > Generate( int numberOfTrainingPoints,
                                   const std::vector< Parameter > parameters );
 
@@ -75,7 +93,7 @@ public:
    * Note that the output Samples have only parameter values, no
    * output values nor log likelihoods.
    *
-   * Repeat the process @param numberOfTries times, and return the
+   * Repeat the process numberOfTries times, and return the
    * Latin hypercube sampling with the best spacing.
    */
   std::vector< Sample > GenerateMaxiMin(
@@ -84,12 +102,22 @@ public:
       int numberOfTries);
 
 protected:
+  /** Instance of random number generator for generating random
+   *  numbers. */
   Random * m_Random;
 
+  /** Determines the parameter minimum and maximum as a function of
+   *  the parameters of a Gaussian-distributed parameter. */
   double m_StandardDeviations;
 
+  /** Determines whether the parameter space should be divided evenly
+   *  in the parameter space itself or in the percentile space of the
+   *  priors. */
   bool m_PartitionSpaceByPercentile;
 
+  /** Partition a dimension of the parameter space into
+   *  numberOfTrainingPoints points and store parameter values in the
+   *  subdivisions parameter. */
   void PartitionDimension( int numberOfTrainingPoints,
                            const Parameter & parameter,
                            std::vector< double > & subdivisions );

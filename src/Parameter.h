@@ -29,13 +29,15 @@ namespace madai {
 
 /**
  * \class Parameter
- * represents one input to a Model or ScalarFunction
+ *
+ * Represents one input to a Model. A Parameter has a name and a prior
+ * distribution.
  */
 class Parameter {
 public:
   /** Constructor
    *
-   * Default is a uniform prior on [0, 1] */
+   * Defaults to a uniform prior distribution with range [0, 1]. */
   Parameter( std::string nm);
 
   /** Constructor
@@ -50,7 +52,8 @@ public:
 
   /** Constructor
    *
-   * Makes a copy of the supplied Distribution. */
+   * Makes a copy of the supplied Distribution so the one passed in as
+   * an arugment may be disposed of after this constructor is called. */
   Parameter( std::string nm, const Distribution & distribution);
 
   //@{

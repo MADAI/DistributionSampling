@@ -27,7 +27,7 @@
 #include <limits> // inifity
 
 #include "ApplicationUtilities.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "Paths.h"
 #include "System.h"
 
@@ -44,7 +44,7 @@ int main(int argc, char ** argv) {
   std::vector< madai::Parameter > parameters;
   int numberOfParameters = 0;
 
-  if ( ! madai::GaussianProcessEmulatorDirectoryReader::ParseParameters(
+  if ( ! madai::GaussianProcessEmulatorDirectoryFormatIO::ParseParameters(
            parameters, numberOfParameters, statisticsDirectory, false )) {
     std::cerr
       << "Could not read parameters from prior file '"
@@ -129,6 +129,10 @@ int main(int argc, char ** argv) {
       << std::setw(14) << values[i][bestIndex]
       << '\n';
   }
+
+  // Print the relative log-likelihood from the best point
+  std::cout << "\nbest log likelihood\n";
+  std::cout << std::setw(14) << bestLogLikelihood << "\n";
 
   std::vector< std::vector< double > > covariancematrix;
   for (int i = 0; i < numberOfParameters; ++i)

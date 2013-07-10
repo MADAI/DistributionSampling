@@ -19,8 +19,6 @@
 #include <iostream>
 
 #include "GaussianProcessEmulatedModel.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
-#include "GaussianProcessEmulatorSingleFileReader.h"
 #include "GaussianProcessEmulator.h"
 
 namespace madai {
@@ -39,54 +37,15 @@ GaussianProcessEmulatedModel
   delete m_GPE;
 }
 
-
-/**
- * Loads a configuration from a directory structure. The format of the file
- * is defined by this function.
- */
-Model::ErrorType
-GaussianProcessEmulatedModel
-::LoadConfiguration( const std::string StatisticsDirectory,
-                     const std::string ModelOutputDirectory,
-                     const std::string ExperimentalResultsDirectory )
-{
-  GaussianProcessEmulatorDirectoryReader directoryReader;
-  if ( !directoryReader.LoadTrainingData( m_GPE, ModelOutputDirectory,
-                                          StatisticsDirectory, ExperimentalResultsDirectory ) ) {
-    std::cerr << "Error loading from the directory structure.\n";
-    return Model::OTHER_ERROR;
-  }
-  if ( !directoryReader.LoadPCA( m_GPE, StatisticsDirectory ) ) {
-    std::cerr << "Error loading the PCA decomposition data.\n";
-    return Model::OTHER_ERROR;
-  }
-  if ( !directoryReader.LoadEmulator( m_GPE, StatisticsDirectory ) ) {
-    std::cerr << "Error loading Emulator data.\n";
-    return Model::OTHER_ERROR;
-  }
-
-  if ( m_GPE->m_Status != GaussianProcessEmulator::READY )
-    return Model::OTHER_ERROR;
-  m_StateFlag = READY;
-  m_Parameters = m_GPE->m_Parameters;
-  m_ScalarOutputNames = m_GPE->m_OutputNames;
-  if ( !m_GPE->GetUncertaintyScalesAsCovariance( m_TrainingAndObservedCovariance ) ) {
-    std::cerr << "Error setting the covariance containing experimental and model"
-              << " output data.\n";
-    return Model::OTHER_ERROR;
-  }
-  return Model::NO_ERROR;
-}
-
 /**
  * Set the gaussian process emulator
  */
 Model::ErrorType
 GaussianProcessEmulatedModel
 ::SetGaussianProcessEmulator(
-  GaussianProcessEmulator & GPME )
+  GaussianProcessEmulator & gpe )
 {
-  *m_GPE = GPME; // Copy entire object, not pointer.  Makes tracking ownership easy.
+  *m_GPE = gpe; // Copy entire object, not pointer.  Makes tracking ownership easy.
   if ( m_GPE->m_Status != GaussianProcessEmulator::READY )
     return Model::OTHER_ERROR;
   m_StateFlag = READY;

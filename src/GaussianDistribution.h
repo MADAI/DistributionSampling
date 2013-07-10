@@ -48,9 +48,9 @@ public:
   /** Get the standard deviation of the Gaussian distribution. */
   virtual double GetStandardDeviation() const;
 
-  virtual double GetLogProbabilityDensity( double value ) const;
-  virtual double GetGradientLogProbabilityDensity( double value ) const;
-  virtual double GetProbabilityDensity( double value ) const;
+  virtual double GetLogProbabilityDensity( double x ) const;
+  virtual double GetGradientLogProbabilityDensity( double x ) const;
+  virtual double GetProbabilityDensity( double x ) const;
   virtual double GetPercentile( double percentile ) const;
   virtual double GetSample(madai::Random & r) const;
 
@@ -65,11 +65,14 @@ protected:
   /** Standard deviation of the distribution. */
   double m_StandardDeviation;
 
-  /** Compute the normalization. */
+  /** Get the normalization factor (the portion of the Gaussian
+   *  function that multiplies the exponential). */
   inline double GetNormalizationFactor() const;
 
-  /** Compute the exponent. */
-  inline double GetExponent( double value ) const;
+  /** Get the exponent passed to the exponential function.
+   *
+   * \param x The argument to the probability density function. */
+  inline double GetExponent( double x ) const;
 
 private:
   /** Explicitly disallowed */

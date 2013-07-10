@@ -26,36 +26,44 @@
 #include "Parameter.h"
 #include "Random.h"
 
+/** Namespace for all Distribution Sampling library classes. */
 namespace madai {
 
 /** \class Model
  *
- * Base class for Models. */
+ * Base class for Models. A Model's primary function is to compute
+ * model values from a point in the Model's parameter space. In
+ * addition, the log likelihood that the Model's scalar values match
+ * the observed values from the system being modeled can be computed. */
 class Model {
 public:
 
   /** Error codes returned by various methods. */
   typedef enum {
+    /** No error */
     NO_ERROR = 0,
+
+    /** An invalid parameter was passed as an argument. */
     INVALID_PARAMETER_INDEX,
+
+    /** The set of active parameters is invalid. */
     INVALID_ACTIVE_PARAMETERS,
+
+    /** A file was not found. */
     FILE_NOT_FOUND_ERROR,
+
+    /** A method was not implemented. */
     METHOD_NOT_IMPLEMENTED,
+
+    /** A vector argument was not the expected length. */
     WRONG_VECTOR_LENGTH,
+
+    /** A unknown error occured. */
     OTHER_ERROR
   } ErrorType;
 
   Model();
   virtual ~Model();
-
-  /** Loads a configuration from a file
-   *
-   *  Subclasses should override this method as this implementation
-   * does nothing.
-   *
-   * \param fileName Name of the configuration file to load
-   */
-  virtual ErrorType LoadConfigurationFile( const std::string fileName );
 
   /** Has the model been initialized?
    *
@@ -75,7 +83,10 @@ public:
   /** Get the number of scalar outputs. */
   virtual unsigned int GetNumberOfScalarOutputs() const;
 
-  /** Get the names of the scalar outputs of the model. */
+  /** Get the names of the scalar outputs of the model.
+   *
+   * These will be in the order in which the scalar output names were
+   * added using AddScalarOutputName(). */
   virtual const std::vector< std::string > & GetScalarOutputNames() const;
 
   /** Get the scalar outputs from the model evaluated at x
@@ -141,12 +152,18 @@ public:
    * space is based on the inverse of the covariance (the precision
    * matrix).
    *
-   * If you never set this, assumes zero.  To calculate
-   * log-likelihood, either the observed value, the model outputs, or
-   * both MUST have a covariance value.
+   * If you never set this, covariances of zero are assumed. However,
+   * to calculate log-likelihood, either the observed value, the model
+   * outputs, or both MUST have a non-zero covariance value.
    */
   virtual ErrorType SetObservedScalarCovariance(
     const std::vector< double > & observedScalarCovariance);
+
+  /** \return the current m_ObservedScalarValues */
+  const std::vector< double > & GetObservedScalarValues() const;
+
+  /** \return the current m_ObservedScalarCovariance */
+  const std::vector< double > & GetObservedScalarCovariance() const;
 
   /** Gets the scalar outputs and log-likelihood of the model for a
    * point in parameter space
@@ -154,10 +171,10 @@ public:
    * 1) Calculates all of the scalar values at this point in parameter
    * space.
    * 2) calculates log-likelihood, using
-   *     model scalars outputs
-   *     model scalar output covariance
-   *     observed scalar values
-   *     observed scalar covariance
+   *   - model scalars outputs
+   *   - model scalar output covariance
+   *   - observed scalar values
+   *   - observed scalar covariance
    *
    * If not overridden, this function calls
    * GetScalarOutputsAndCovariance() and uses observedScalarValues and
@@ -165,12 +182,18 @@ public:
    * log-likelihood is returned along with the output scalars.  If both
    * covariances are present, they are summed.
    *
-   * (scalars, scalarCovariance) = GetScalarOutputsAndCovariance(parameters)
+   * (scalars, scalarCovariance) =
+   * GetScalarOutputsAndCovariance(parameters)
+   *
    * logPriorLikelihood = LogPriorLikelihoodFunction(parameters)
+   *
    * covariance = observedScalarCovariance + scalarCovariance
+   *
    * differences = scalars - observedScalars
+   *
    * LogLikelihood = -0.5 * (differences^T . (covariance)^(-1) . differences);
-   * @return logPriorLikelihood + LogLikelihood
+   *
+   * \return logPriorLikelihood + LogLikelihood
    *
    * If both covariances are zero, the matrix will not be invertable
    * and the log-likelihood will be negative-infinity. */
@@ -189,6 +212,11 @@ public:
    * If not overridden, this will simply call GetScalarOutputs() and
    * return an empty vector for scalarCovariance, representing a zero
    * matrix.
+   *
+   * \param parameters Parameter values where the model should be evaluated.
+   * \param scalars    Storage for scalar values returned by this method.
+   * \param scalarCovariance Storage for the covariance of the model
+   *                         at this point in parameter space.
    */
   virtual ErrorType GetScalarOutputsAndCovariance(
     const std::vector< double > & parameters,
@@ -221,13 +249,8 @@ public:
   void SetUseModelCovarianceToCalulateLogLikelihood(bool);
   //@}
 
-  /**
-     Load a file with experimental observations in it.  The model will
-     be comared against this.  Will call
-     this->SetObservedScalarValues() and
-     this->SetObservedScalarCovariance(). */
-  virtual ErrorType LoadObservations(std::istream & i);
-
+  /** Returns the constant convariance, which is the covariance of the
+   *  observed values by default. */
   virtual bool GetConstantCovariance(std::vector< double > & x) const;
 
 protected:
@@ -260,14 +283,6 @@ protected:
    */
   bool m_UseModelCovarianceToCalulateLogLikelihood;
 
-  /** Add a parameter.
-   *
-   * \deprecated Use the priorDistribution form of this command.
-   */
-  void AddParameter( const std::string & name,
-                     double minimumPossibleValue = -DBL_MAX,
-                     double maximumPossibleValue =  DBL_MAX );
-
   /** Add a parameter. */
   void AddParameter( const std::string & name,
                      const Distribution & priorDistribution);
@@ -281,7 +296,7 @@ protected:
   std::vector< double > m_ObservedScalarValues;
 
   /** A (GetNumberOfScalarOutputs x GetNumberOfScalarOutputs) matrix,
-   * flattened so that we can use a gsl_matrix_view to look at it
+   * flattened into a vector.
    *
    * If empty, assume zero matrix. */
   std::vector< double > m_ObservedScalarCovariance;

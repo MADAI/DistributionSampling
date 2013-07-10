@@ -23,7 +23,7 @@ namespace madai {
 
 /** \class Random
  *
- * A random number generator.  contains a seed.
+ * A reentrant random number generator.
  */
 class Random {
 public:
@@ -38,7 +38,6 @@ public:
    */
   Random(unsigned long int seed);
 
-  /** Destructor */
   virtual ~Random();
 
   /** Reseed the random number generator
@@ -85,7 +84,7 @@ private:
 
   struct RandomPrivate;
 
-  /** Opaque Pointer for Private Implementation */
+  /** Opaque Pointer for private implementation */
   RandomPrivate * m_RandomImplementation;
 };
 

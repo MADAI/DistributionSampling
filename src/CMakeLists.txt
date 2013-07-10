@@ -2,9 +2,7 @@ set( SRC_FILES
   Random.cxx
   GaussianProcessEmulator.cxx
   GaussianProcessEmulatedModel.cxx
-  GaussianProcessEmulatorDirectoryReader.cxx
-  GaussianProcessEmulatorSingleFileReader.cxx
-  GaussianProcessEmulatorSingleFileWriter.cxx
+  GaussianProcessEmulatorDirectoryFormatIO.cxx
   Parameter.cxx
   Distribution.cxx
   ExternalModel.cxx
@@ -19,7 +17,6 @@ set( SRC_FILES
   RuntimeParameterFileReader.cxx
   Sample.cxx
   MetropolisHastingsSampler.cxx
-  Trace.cxx
   UniformDistribution.cxx
   PercentileGridSampler.cxx
   SamplerCSVWriter.cxx

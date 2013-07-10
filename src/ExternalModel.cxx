@@ -368,9 +368,7 @@ inline static bool read_double(std::FILE * fptr, double * d) {
   return (1 == fscanf(fptr, "%lf%*c", d));
 }
 
-/** Get the scalar outputs from the model evaluated at x.
- *
- * \todo Consider using this as default implementation in Model */
+
 ExternalModel::ErrorType
 ExternalModel
 ::GetScalarOutputs( const std::vector< double > & parameters,
@@ -379,10 +377,7 @@ ExternalModel
   return this->GetScalarOutputsAndCovariance(parameters, scalars, scalarCovariance);
 }
 
-/**
- * Get the scalar outputs from the model evaluated at x.  If an
- * error happens, the scalar output array will be left incomplete.
- */
+
 ExternalModel::ErrorType
 ExternalModel
 ::GetScalarOutputsAndCovariance(

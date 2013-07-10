@@ -24,7 +24,6 @@
 #include "ExternalModel.h"
 #include "GaussianDistribution.h"
 #include "MetropolisHastingsSampler.h"
-#include "Trace.h"
 #include "UniformDistribution.h"
 
 
@@ -179,19 +178,13 @@ int main(int argc, char ** argv) {
 
   simple_mcmc.SetStepSize(0.1);
 
-  madai::Trace trace;
   unsigned int numberIter = 500;
   for (unsigned int count = 0; count < numberIter; count ++) {
     madai::Sample sample = simple_mcmc.NextSample();
-    trace.Add( sample );
   }
 
   // Stop the external process
   externalModel.StopProcess();
-
-  trace.WriteCSVOutput( std::cout,
-                   externalModel.GetParameters(),
-                   externalModel.GetScalarOutputNames() );
 
   return EXIT_SUCCESS;
 }

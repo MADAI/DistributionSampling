@@ -23,6 +23,8 @@
 #include <cassert>
 #include <cmath>
 #include <limits>
+#include <set>
+
 
 template<class S, class T>
 int static findIndex(const S & v, const T & s)
@@ -47,14 +49,6 @@ Model
 Model
 ::~Model()
 {
-}
-
-
-Model::ErrorType
-Model
-::LoadConfigurationFile( const std::string )
-{
-  return METHOD_NOT_IMPLEMENTED;
 }
 
 
@@ -257,65 +251,6 @@ Model
 }
 
 
-/**
-   Load a file with experimental observations in it.  The model will
-   be comared against this. */
-Model::ErrorType
-Model
-::LoadObservations(std::istream & i)
-{
-  if ( !i.good() ) {
-    return Model::FILE_NOT_FOUND_ERROR;
-  }
-
-  // std::ifstream i("DIRECTORY/experimental_results/results.dat");
-  const std::vector< std::string > & scalarOutputNames = this->GetScalarOutputNames();
-  unsigned int numberOfScalarOutputs = this->GetNumberOfScalarOutputs();
-  assert(scalarOutputNames.size() == numberOfScalarOutputs);
-  assert (numberOfScalarOutputs > 0);
-  std::vector< double > observedScalarValues(numberOfScalarOutputs, 0.0);
-  std::vector< double > observedScalarCovariance(
-      numberOfScalarOutputs * numberOfScalarOutputs, 0.0);
-  for (unsigned int j = 0; j < numberOfScalarOutputs; ++j)
-    observedScalarCovariance[j * (1 + numberOfScalarOutputs)] = 1.0;
-  while (true) { // will loop forever if input stream lasts forever.
-    std::string name;
-    double value, uncertainty;
-    if(! (i >> name >> value >> uncertainty))
-      break;
-    int index = findIndex(scalarOutputNames, name);
-    if (index != -1) {
-      observedScalarValues[index] = value;
-      // observedScalarCovariance is a square matrix;
-      observedScalarCovariance[index * (1 + numberOfScalarOutputs)] = std::pow(uncertainty, 2);
-      // uncertainty^2 is variance.
-    }
-  }
-  // assume extra values are all zero.
-  Model::ErrorType e;
-  e = this->SetObservedScalarValues(observedScalarValues);
-  if (e != madai::Model::NO_ERROR) {
-    std::cerr << "Error in Model::SetObservedScalarValues\n";
-    return e;
-  }
-  e = this->SetObservedScalarCovariance(observedScalarCovariance);
-  if (e != madai::Model::NO_ERROR) {
-    std::cerr << "Error in Model::SetObservedScalarCovariance\n";
-    return e;
-  }
-  return madai::Model::NO_ERROR;
-}
-
-
-void
-Model
-::AddParameter( const std::string & name,
-                double minimumPossibleValue,
-                double maximumPossibleValue )
-{
-  m_Parameters.push_back( Parameter(name, minimumPossibleValue, maximumPossibleValue) );
-}
-
 void
 Model
 ::AddParameter( const std::string & name,
@@ -362,6 +297,21 @@ Model
     return WRONG_VECTOR_LENGTH;
   this->m_ObservedScalarCovariance = observedScalarCovariance;
   return NO_ERROR;
+}
+
+
+const std::vector< double > &
+Model
+::GetObservedScalarValues() const
+{
+  return m_ObservedScalarValues; // cast to const
+}
+
+const std::vector< double > &
+Model
+::GetObservedScalarCovariance() const
+{
+  return m_ObservedScalarCovariance; // cast to const;
 }
 
 

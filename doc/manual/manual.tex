@@ -1,7 +1,8 @@
 \documentclass[pdftex,12pt]{article}
 \usepackage{graphicx}
 \usepackage{amsmath, amssymb}
-\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
 
 \parskip 4pt
 \parindent 0pt
@@ -10,14 +11,15 @@
 \textheight 9.5in
 \voffset -1.0in
 
-\newcommand{\path}[1]{\texttt{#1}}
+\usepackage[colorlinks]{hyperref}
+
+
 \newcommand{\commandprompt}{\texttt{\$> }}
 \newcommand{\commandline}[1]{\texttt{\commandprompt{}#1}}
 \newcommand{\type}[1]{\texttt{#1}}
 \newcommand{\variable}[1]{\textit{#1}}
 \newcommand{\continueline}{{\char`\\}\\{\phantom{1234}}}
 
-\usepackage[colorlinks]{hyperref}
 
 \begin{document}
 \thispagestyle{empty}
@@ -59,9 +61,6 @@ Jeff Wyka (wykajeff@msu.edu)
 \input organizingdata.tex
 
 \newpage
-\input settings.tex
-
-\newpage
 \input pca.tex
 
 \newpage
@@ -72,6 +71,9 @@ Jeff Wyka (wykajeff@msu.edu)
 
 \newpage
 \input mcmc.tex
+
+\newpage
+\input settings.tex
 
 %\newpage
 %\input biblio.tex

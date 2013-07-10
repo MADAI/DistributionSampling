@@ -68,113 +68,74 @@ Random::RandomPrivate::RandomPrivate() :
 {
 }
 
-/**
- * Constructor.  Uses time() for seed.
- */
 Random::Random() :
   m_RandomImplementation(new Random::RandomPrivate())
 {
   this->Reseed();
 }
 
-/**
- * Constructor.
- */
 Random::Random(unsigned long int seed) :
   m_RandomImplementation(new Random::RandomPrivate())
 {
   this->Reseed(seed);
 }
 
-/**
- * Destructor.
- */
 Random::~Random()
 {
   delete m_RandomImplementation;
 }
 
-/**
- * reseed
- */
 void Random::Reseed(unsigned long int seed)
 {
   m_RandomImplementation->m_BaseGenerator.seed( seed );
 }
 
-/**
- * reseed with time() and current process id.
- */
 void Random::Reseed()
 {
   madaisys::SystemInformation systemInformation;
   this->Reseed(time(NULL) ^ (systemInformation.GetProcessId() << 16));
 }
 
-/**
- * Returns an integer < N and >= 0
- */
 int Random::Integer( int N )
 {
   return m_RandomImplementation->m_UniformIntDistribution(
       m_RandomImplementation->m_BaseGenerator, N );
 }
 
-/**
- * Returns an integer < N and >= 0
- */
 int Random::operator()( int N )
 {
   return m_RandomImplementation->m_UniformIntDistribution(
       m_RandomImplementation->m_BaseGenerator, N );
 }
 
-/**
- * Returns a long < N and >= 0
- */
 long Random::Integer( long N )
 {
   return m_RandomImplementation->m_UniformLongDistribution(
       m_RandomImplementation->m_BaseGenerator, N );
 }
 
-/**
- * Returns a long < N and >= 0
- */
 long Random::operator()( long N )
 {
   return m_RandomImplementation->m_UniformLongDistribution(
       m_RandomImplementation->m_BaseGenerator, N );
 }
 
-/**
- * min=0.0, max=1.0
- */
 double Random::Uniform()
 {
   return m_RandomImplementation->m_UniformRealGenerator();
 }
 
-/**
- *
- */
 double Random::Uniform(double min, double max)
 {
   return this->Uniform() * ( max - min ) + min;
 }
 
-/**
- * mean=0.0, var=1.0
- */
 double Random::Gaussian()
 {
   return m_RandomImplementation->m_NormalDistribution(
       m_RandomImplementation->m_UniformRealGenerator );
 }
 
-/**
- *
- */
 double Random::Gaussian(double mean, double standardDeviation)
 {
   return standardDeviation * this->Gaussian() + mean;

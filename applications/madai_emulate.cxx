@@ -30,14 +30,12 @@ ACKNOWLEDGMENTS:
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
 #include "GaussianDistribution.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
-#include "GaussianProcessEmulatorSingleFileReader.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "RuntimeParameterFileReader.h"
 #include "UniformDistribution.h"
 #include "Paths.h"
 #include "Defaults.h"
 
-using madai::Paths;
 
 std::ostream & operator <<(std::ostream & o, const madai::Distribution * d) {
   const madai::UniformDistribution * uniformPriorDist
@@ -140,16 +138,16 @@ int main(int argc, char ** argv) {
               << "\n"
               << "<StatisticsDirectory> is the directory in which all \n"
               << "statistics data are stored. It contains the parameter file "
-              << Paths::RUNTIME_PARAMETER_FILE << "\n"
+              << madai::Paths::RUNTIME_PARAMETER_FILE << "\n"
               << "\n"
-              << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+              << "Format of entries in " << madai::Paths::RUNTIME_PARAMETER_FILE
               << ":\n\n"
               << "MODEL_OUTPUT_DIRECTORY <value> (default: "
               << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"
               << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
               << madai::Defaults::EXPERIMENTAL_RESULTS_FILE << ")\n"
-              << "EMULATE_QUIET <value> ("
-              << madai::Defaults::EMULATE_QUIET << ")\n"
+              << "EMULATE_WRITE_HEADER <value> (default: "
+              << madai::Defaults::EMULATE_WRITE_HEADER << ")\n"
               << "READER_VERBOSE <value> (default: "
               << madai::Defaults::READER_VERBOSE << ")\n";
 
@@ -175,7 +173,7 @@ int main(int argc, char ** argv) {
       madai::Defaults::EMULATE_WRITE_HEADER);
 
   madai::GaussianProcessEmulator gpe;
-  madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
   bool verbose = settings.GetOptionAsBool(
       "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
   directoryReader.SetVerbose( verbose );

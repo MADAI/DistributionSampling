@@ -17,6 +17,7 @@
  *=========================================================================*/
 
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -24,11 +25,9 @@
 #include "Defaults.h"
 #include "GaussianProcessEmulatorTestGenerator.h"
 #include "GaussianProcessEmulatedModel.h"
-#include "GaussianProcessEmulatorSingleFileWriter.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "GaussianProcessEmulator.h"
 #include "Random.h"
-#include "Trace.h"
 #include "Paths.h"
 
 inline double LogisticFunction(double x) {
@@ -62,7 +61,7 @@ int main( int, char*[] ) {
   GaussianProcessEmulatorTestGenerator generator( &model, 2, 2, N,
                                                   generatorParameters);
 
-  std::string TempDirectory = "/tmp/";
+  std::string TempDirectory = "../Testing/Temporary/GradientOutputsTest";
   if ( !generator.WriteDirectoryStructure( TempDirectory ) ) {
     std::cerr << "Error writing directory structure.\n";
     return EXIT_FAILURE;
@@ -74,7 +73,7 @@ int main( int, char*[] ) {
     madai::Defaults::EXPERIMENTAL_RESULTS_FILE;
 
   madai::GaussianProcessEmulator gpe;
-  madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
   if ( !directoryReader.LoadTrainingData( &gpe, MOD, TempDirectory, ERD ) ) {
     std::cerr << "Error loading from created directory structure.\n";
     return EXIT_FAILURE;
@@ -101,8 +100,8 @@ int main( int, char*[] ) {
     return EXIT_FAILURE;
   }
 
-  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
-  singleFileWriter.WritePCA( &gpe, PCAFile );
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryFormatIO;
+  directoryFormatIO.WritePCA( &gpe, PCAFile );
   PCAFile.close();
 
   if ( !gpe.RetainPrincipalComponents( fractionResolvingPower ) ) {
@@ -127,7 +126,7 @@ int main( int, char*[] ) {
     return EXIT_FAILURE;
   }
 
-  singleFileWriter.Write( &gpe, EmulatorStateFile );
+  directoryFormatIO.Write( &gpe, EmulatorStateFile );
   EmulatorStateFile.close();
 
   if ( !gpe.MakeCache() ) {

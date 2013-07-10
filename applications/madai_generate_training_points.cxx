@@ -26,7 +26,7 @@
 
 #include "ApplicationUtilities.h"
 #include "GaussianDistribution.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "LatinHypercubeGenerator.h"
 #include "Parameter.h"
 #include "Paths.h"
@@ -36,7 +36,6 @@
 
 #include "madaisys/SystemTools.hxx"
 
-using madai::Paths;
 
 bool WriteDirectories( const std::string modelOutputDirectory,
                        const std::vector< madai::Parameter > & parameters,
@@ -69,7 +68,7 @@ bool WriteDirectories( const std::string modelOutputDirectory,
     }
 
     // Write the parameters to parameters.dat file
-    std::string parametersFile( runDirectory + Paths::SEPARATOR + Paths::PARAMETERS_FILE );
+    std::string parametersFile( runDirectory + madai::Paths::SEPARATOR + madai::Paths::PARAMETERS_FILE );
     std::ofstream outfile( parametersFile.c_str() );
     if ( !outfile ) {
       std::cerr << "Could not open file '" << parametersFile << "'\n";
@@ -96,12 +95,12 @@ int main( int argc, char * argv[] ) {
       << "    " << argv[0] << " <StatisticsDirectory>\n"
       << "\n"
       << "This program reads from <StatisticsDirectory>/"
-      << Paths::PARAMETER_PRIORS_FILE << " in\n"
+      << madai::Paths::PARAMETER_PRIORS_FILE << " in\n"
       << "and uses the parameter prior distribution to generate a series of\n"
       << "parameter files on which to run a model according to a latin hypercube\n"
       << "sampling pattern.\n"
       << "\n"
-      << "The format of the " << Paths::PARAMETER_PRIORS_FILE << " file is:\n"
+      << "The format of the " << madai::Paths::PARAMETER_PRIORS_FILE << " file is:\n"
       << "uniform name min max\n"
       << "gaussian name mean std_dev\n"
       << "\n"
@@ -109,9 +108,9 @@ int main( int argc, char * argv[] ) {
       << "\n"
       << "<StatisticsDirectory> is the directory in which all \n"
       << "statistics data are stored. It contains the parameter file "
-      << Paths::RUNTIME_PARAMETER_FILE << "\n"
+      << madai::Paths::RUNTIME_PARAMETER_FILE << "\n"
       << "\n"
-      << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+      << "Format of entries in " << madai::Paths::RUNTIME_PARAMETER_FILE
       << ":\n\n"
       << "MODEL_OUTPUT_DIRECTORY <value> (default: "
       << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"
@@ -157,7 +156,7 @@ int main( int argc, char * argv[] ) {
       madai::Defaults::READER_VERBOSE);
 
   int numberOfParameters = 0;
-  bool parametersRead = madai::GaussianProcessEmulatorDirectoryReader::
+  bool parametersRead = madai::GaussianProcessEmulatorDirectoryFormatIO::
     ParseParameters( parameters,
                      numberOfParameters,
                      statisticsDirectory,

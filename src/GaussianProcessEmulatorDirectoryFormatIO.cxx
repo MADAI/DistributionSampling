@@ -16,7 +16,7 @@
  *
  *=========================================================================*/
 
-#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 
 #include "GaussianDistribution.h"
 #include "GaussianProcessEmulator.h"
@@ -40,21 +40,21 @@ using madaisys::SystemTools;
 
 namespace madai {
 
-GaussianProcessEmulatorDirectoryReader
-::GaussianProcessEmulatorDirectoryReader() :
+GaussianProcessEmulatorDirectoryFormatIO
+::GaussianProcessEmulatorDirectoryFormatIO() :
   m_Verbose( false )
 {
 }
 
 
-GaussianProcessEmulatorDirectoryReader
-::~GaussianProcessEmulatorDirectoryReader()
+GaussianProcessEmulatorDirectoryFormatIO
+::~GaussianProcessEmulatorDirectoryFormatIO()
 {
 }
 
 
 void
-GaussianProcessEmulatorDirectoryReader
+GaussianProcessEmulatorDirectoryFormatIO
 ::SetVerbose( bool value )
 {
   m_Verbose = value;
@@ -62,7 +62,7 @@ GaussianProcessEmulatorDirectoryReader
 
 
 bool
-GaussianProcessEmulatorDirectoryReader
+GaussianProcessEmulatorDirectoryFormatIO
 ::GetVerbose() const
 {
   return m_Verbose;
@@ -72,6 +72,10 @@ GaussianProcessEmulatorDirectoryReader
 namespace {
 
 
+/**
+ * Get a line from an input file stream, breaking up the tokens by
+ * whitespace charactors, and returning a vector of tokens.
+ */
 std::vector< std::string > getLineAsTokens( std::ifstream & is,
                                             std::string & line )
 {
@@ -103,6 +107,9 @@ std::vector< std::string > getLineAsTokens( std::ifstream & is,
   return tokens;
 }
 
+/**
+ * Get rid of whitespace from an input stream.
+ */
 inline void discardWhitespace(std::istream & input)
 {
   while (std::isspace(input.peek())) {
@@ -111,8 +118,9 @@ inline void discardWhitespace(std::istream & input)
 }
 
 /**
-   Read a word from input.  If it equals the expected value, return
-   true.  Else print error message to std::cerr and return false*/
+ *  Read a word from input.  If it equals the expected value, return
+ *  true.  Else print error message to std::cerr and return false.
+ */
 inline bool CheckWord(std::istream & input, const std::string & expected)
 {
   std::string s;
@@ -130,8 +138,9 @@ inline bool CheckWord(std::istream & input, const std::string & expected)
 }
 
 /**
-   Read an integer from input.  If it equals the expected value, return
-   true.  Else print error message to std::cerr and return false*/
+ *  Read an integer from input.  If it equals the expected value, return
+ *  true.  Else print error message to std::cerr and return false.
+ */
 inline bool CheckInteger(std::istream & input, int i,
     const std::string & errorMessage)
 {
@@ -152,6 +161,9 @@ inline bool CheckInteger(std::istream & input, int i,
 }
 
 
+/**
+ * Parse an integer from an input stream.
+ */
 bool parseInteger( int & x, std::istream & input )
 {
   if (! input.good()) return false;
@@ -159,6 +171,11 @@ bool parseInteger( int & x, std::istream & input )
   return true;
 }
 
+/**
+ * Given a vector of strings and a particular string, get the index of
+ * that string in the vector. If not found, returns false and the
+ * index is set to -1. If found, returns true and the index is set
+ * appropriately. */
 inline bool getIndex(
     const std::vector< std::string > & sv,
     const std::string & s,
@@ -263,7 +280,7 @@ bool parseExperimentalResults(
 /**
    Read the parameter_priors.dat file in statistical_analysis. */
 bool
-GaussianProcessEmulatorDirectoryReader
+GaussianProcessEmulatorDirectoryFormatIO
 ::ParseParameters(
     std::vector< madai::Parameter > & parameters,
     int & numberParameters,
@@ -372,34 +389,8 @@ GaussianProcessEmulatorDirectoryReader
   return ( numberParameters > 0 );
 }
 
-// anonymous namespace
-namespace {
 
-/**
-   Read the CovarianceFunctionType from the command line. */
-bool parseCovarianceFunction(
-    GaussianProcessEmulator::CovarianceFunctionType & covarianceType,
-    std::istream & input)
-{
-  if (! input.good()) return false;
-  std::string s;
-  input >> s;
-  if (s == "POWER_EXPONENTIAL_FUNCTION")
-    covarianceType = GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
-  else if (s == "SQUARE_EXPONENTIAL_FUNCTION")
-    covarianceType = GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
-  else if (s == "MATERN_32_FUNCTION")
-    covarianceType = GaussianProcessEmulator::MATERN_32_FUNCTION;
-  else if (s == "MATERN_52_FUNCTION")
-    covarianceType = GaussianProcessEmulator::MATERN_52_FUNCTION;
-  else {
-    return false;
-  }
-  return true;
-}
-
-
-bool parseOutputs(
+bool GaussianProcessEmulatorDirectoryFormatIO::ParseOutputs(
     std::vector< std::string > & outputNames,
     int & numberOutputs,
     const std::string & statisticalAnalysisDirectory,
@@ -458,6 +449,36 @@ bool parseOutputs(
 }
 
 
+// anonymous namespace
+namespace {
+
+/**
+   Read the CovarianceFunctionType from the command line. */
+bool parseCovarianceFunction(
+    GaussianProcessEmulator::CovarianceFunctionType & covarianceType,
+    std::istream & input)
+{
+  if (! input.good()) return false;
+  std::string s;
+  input >> s;
+  if (s == "POWER_EXPONENTIAL_FUNCTION")
+    covarianceType = GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION;
+  else if (s == "SQUARE_EXPONENTIAL_FUNCTION")
+    covarianceType = GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION;
+  else if (s == "MATERN_32_FUNCTION")
+    covarianceType = GaussianProcessEmulator::MATERN_32_FUNCTION;
+  else if (s == "MATERN_52_FUNCTION")
+    covarianceType = GaussianProcessEmulator::MATERN_52_FUNCTION;
+  else {
+    return false;
+  }
+  return true;
+}
+
+
+/**
+ * Parses the number of model runs.
+ */
 bool parseNumberOfModelRuns( int & x,
                              const std::string & modelOutputDirectory )
 {
@@ -485,6 +506,9 @@ bool parseNumberOfModelRuns( int & x,
 }
 
 
+/**
+ * Parse the parameter values and output values.
+ */
 template < typename TDerived >
 inline bool parseParameterAndOutputValues(
     Eigen::MatrixBase< TDerived > & parameterValues_,
@@ -735,13 +759,16 @@ inline bool parseParameterAndOutputValues(
 }
 
 
+/**
+ * Parses the model data in the directory structure.
+ */
 bool parseModelDataDirectoryStructure(
     GaussianProcessEmulator & gpme,
     const std::string & modelOutputDirectory,
     const std::string & statisticalAnalysisDirectory,
     bool verbose )
 {
-  if ( !GaussianProcessEmulatorDirectoryReader::ParseParameters(
+  if ( !GaussianProcessEmulatorDirectoryFormatIO::ParseParameters(
           gpme.m_Parameters,
           gpme.m_NumberParameters,
           statisticalAnalysisDirectory,
@@ -749,7 +776,7 @@ bool parseModelDataDirectoryStructure(
     std::cerr << "Couldn't parse parameters\n";
     return false;
   }
-  if ( !parseOutputs(
+  if ( !GaussianProcessEmulatorDirectoryFormatIO::ParseOutputs(
           gpme.m_OutputNames,
           gpme.m_NumberOutputs,
           statisticalAnalysisDirectory,
@@ -803,6 +830,19 @@ bool parseComments(
 
 
 /**
+ * Write the comments out to an output stream.
+ */
+std::ostream & serializeComments(
+    const std::vector< std::string > & comments,
+    std::ostream & o) {
+  for (unsigned int i = 0; i < comments.size(); ++i) {
+    o << comments[i] << '\n';
+  }
+  return o;
+}
+
+
+/**
    Populates a matrix from a istream.  Expects positive integers
    number_rows and number_columns to be listed first. Reads elements
    in row-major order.
@@ -830,6 +870,25 @@ inline bool ReadMatrix(
 
 
 /**
+   Print a Matrix to output stream, preceded by its dimensions.  Use
+   row-major order. */
+template < typename TDerived >
+static inline std::ostream & PrintMatrix(
+    const Eigen::MatrixBase< TDerived > & m,
+    std::ostream & o)
+{
+  o << m.rows() << ' ' << m.cols() << '\n';
+  if (m.cols() > 0) {
+    for (int i = 0; i < m.rows(); ++i) {
+      for (int j = 0; j < (m.cols() - 1); ++j)
+        o << m(i, j) << '\t';
+      o << m(i, m.cols() - 1) << '\n';
+    }
+  }
+  return o;
+}
+
+/**
    Populates a Vector from a istream.  Expects positive integers
    number_elements to be listed first. Reads elements in order.
 
@@ -853,6 +912,41 @@ inline bool ReadVector(
   return true;
 }
 
+/**
+   Print a Vector to output stream, preceded by its size. */
+template < typename TDerived >
+static inline std::ostream & PrintVector(
+    const Eigen::MatrixBase< TDerived > & v,
+    std::ostream & o)
+{
+  o << v.size() << '\n';
+  for (int i = 0; i < v.size(); ++i) {
+    o << v(i) << '\n';
+  }
+  return o;
+}
+
+
+/**
+ * A covariance function can be represented as a string. */
+const char * GetCovarianceFunctionString(
+  GaussianProcessEmulator::CovarianceFunctionType cov)
+{
+  switch (cov) {
+  case GaussianProcessEmulator::POWER_EXPONENTIAL_FUNCTION:  return "POWER_EXPONENTIAL_FUNCTION";
+  case GaussianProcessEmulator::SQUARE_EXPONENTIAL_FUNCTION: return "SQUARE_EXPONENTIAL_FUNCTION";
+  case GaussianProcessEmulator::MATERN_32_FUNCTION:  return "MATERN_32_FUNCTION";
+  case GaussianProcessEmulator::MATERN_52_FUNCTION:  return "MATERN_52_FUNCTION";
+  default:
+    assert(false);
+    return "UNKNOWN";
+  }
+}
+
+
+/**
+ * Parse the submodels of the emulator.
+ */
 bool parseSubmodels(
     GaussianProcessEmulator::SingleModel & m,
     int modelIndex,
@@ -893,6 +987,9 @@ bool parseSubmodels(
 }
 
 
+/**
+ * Parse the PCA decomposition data.
+ */
 bool parsePCADecomposition(
     GaussianProcessEmulator & gpme,
     std::istream & input ) {
@@ -963,7 +1060,63 @@ bool parsePCADecomposition(
   return true;
 }
 
+/**
+ * Write the PCA decomposition to an output stream.
+ */
+std::ostream & serializePCADecomposition(
+    const GaussianProcessEmulator & gpme,
+    std::ostream & o ) {
+  serializeComments(gpme.m_Comments,o);
+  o << "OUTPUT_MEANS\n";
+  PrintVector(gpme.m_TrainingOutputMeans, o);
+  o << "OUTPUT_UNCERTAINTY_SCALES\n";
+  PrintVector(gpme.m_UncertaintyScales, o);
+  o << "OUTPUT_PCA_EIGENVALUES\n";
+  PrintVector(gpme.m_PCAEigenvalues, o);
+  o << "OUTPUT_PCA_EIGENVECTORS\n";
+  PrintMatrix(gpme.m_PCAEigenvectors, o);
+  o << "END_OF_FILE\n";
+  return o;
+}
 
+
+/**
+ * Write an emulator submodel to an output stream.
+ */
+std::ostream & serializeSubmodels(
+    const GaussianProcessEmulator::SingleModel & m,
+    int modelIndex,
+    std::ostream & o) {
+  o << "MODEL " << modelIndex << '\n';
+  o << "COVARIANCE_FUNCTION\t"
+    << GetCovarianceFunctionString(m.m_CovarianceFunction) << '\n';
+  o << "REGRESSION_ORDER\t" << m.m_RegressionOrder << '\n';
+  o << "THETAS\n";
+  PrintVector(m.m_Thetas, o);
+  o << "END_OF_MODEL\n";
+  return o;
+}
+
+
+/**
+ * Write the emulator to an output stream.
+ */
+std::ostream & serializeGaussianProcessEmulator(
+    const GaussianProcessEmulator & gpme,
+    std::ostream & o) {
+  o << "SUBMODELS\t"
+    << gpme.m_NumberPCAOutputs << "\n";
+  for (int i = 0; i < gpme.m_NumberPCAOutputs; ++i) {
+    serializeSubmodels(gpme.m_PCADecomposedModels[i],i,o);
+  }
+  o << "END_OF_FILE\n";
+  return o;
+}
+
+
+/**
+ * Write the emulator to an output stream.
+ */
 bool parseGaussianProcessEmulator(
     GaussianProcessEmulator & gpme,
     const std::string & statisticalAnalysisDirectory) {
@@ -1021,7 +1174,7 @@ bool parseGaussianProcessEmulator(
   This takes an empty GPEM and loads training data.
   \returns true on success. */
 bool
-GaussianProcessEmulatorDirectoryReader
+GaussianProcessEmulatorDirectoryFormatIO
 ::LoadTrainingData(GaussianProcessEmulator * gpe,
                     std::string modelOutputDirectory,
                     std::string statisticalAnalysisDirectory,
@@ -1047,7 +1200,7 @@ GaussianProcessEmulatorDirectoryReader
   This takes a GPEM and loads PCA data.
   \returns true on success. */
 bool
-GaussianProcessEmulatorDirectoryReader
+GaussianProcessEmulatorDirectoryFormatIO
 ::LoadPCA(GaussianProcessEmulator * gpe,
           const std::string & statisticsDirectory)
 {
@@ -1088,12 +1241,58 @@ GaussianProcessEmulatorDirectoryReader
 }
 
 
+bool
+GaussianProcessEmulatorDirectoryFormatIO
+::Write(GaussianProcessEmulator * gpe, std::ostream & output) const
+{
+  output.precision(17);
+  serializeGaussianProcessEmulator(*gpe, output);
+
+  return true;
+}
+
+
+bool
+GaussianProcessEmulatorDirectoryFormatIO
+::WritePCA(GaussianProcessEmulator * gpe, std::ostream & output) const
+{
+  output.precision(17);
+  serializePCADecomposition(*gpe,output);
+
+  return true;
+}
+
+
+bool
+GaussianProcessEmulatorDirectoryFormatIO
+::PrintThetas(GaussianProcessEmulator * gpe, std::ostream & output) const
+{
+  output.precision(17);
+  serializeComments(gpe->m_Comments,output);
+  output << "THETAS_FILE\n";
+  output << "SUBMODELS\t"
+    << gpe->m_NumberPCAOutputs << "\n\n";
+  for (int i = 0; i < gpe->m_NumberPCAOutputs; ++i) {
+    const GaussianProcessEmulator::SingleModel & m = gpe->m_PCADecomposedModels[i];
+    output << "MODEL " << i << '\n';
+    output << "COVARIANCE_FUNCTION\t"
+      << GetCovarianceFunctionString(m.m_CovarianceFunction) << '\n';
+    output << "REGRESSION_ORDER\t" << m.m_RegressionOrder << '\n';
+    output << "THETAS\n";
+    PrintVector(m.m_Thetas, output);
+    output << "END_OF_MODEL\n\n";
+  }
+  output << "END_OF_FILE\n";
+  return true;
+}
+
+
 /**
   This takes a GPEM and loads the emulator specific
   data (submodels with their thetas).
   \returns true on success. */
 bool
-GaussianProcessEmulatorDirectoryReader
+GaussianProcessEmulatorDirectoryFormatIO
 ::LoadEmulator(GaussianProcessEmulator * gpe,
                const std::string & statisticalAnalysisDirectory)
 {

@@ -17,6 +17,7 @@
  *=========================================================================*/
 
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -24,11 +25,8 @@
 #include "GaussianProcessEmulatorTestGenerator.h"
 #include "MetropolisHastingsSampler.h"
 #include "GaussianProcessEmulatedModel.h"
-#include "GaussianProcessEmulatorSingleFileReader.h"
-#include "GaussianProcessEmulatorSingleFileWriter.h"
-#include "GaussianProcessEmulatorDirectoryReader.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "GaussianProcessEmulator.h"
-#include "Trace.h"
 #include "Paths.h"
 
 const char DEFAULT_MODEL_OUTPUT_DIRECTORY[] = "model_output";
@@ -65,7 +63,7 @@ int main( int, char *[] ) {
   GaussianProcessEmulatorTestGenerator generator( &model,2,2,N,
                                                   generatorParameters);
 
-  std::string TempDirectory = "/tmp/";
+  std::string TempDirectory = "../Testing/Temporary/GaussianProcessEmulatedModelTest";
   if ( !generator.WriteDirectoryStructure(TempDirectory) ) {
     std::cerr << "Error writing directory structure\n";
     return EXIT_FAILURE;
@@ -77,7 +75,7 @@ int main( int, char *[] ) {
     DEFAULTS_EXPERIMENTAL_RESULTS_FILE;
 
   madai::GaussianProcessEmulator gpe;
-  madai::GaussianProcessEmulatorDirectoryReader directoryReader;
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
   if ( !directoryReader.LoadTrainingData( &gpe, MOD, TempDirectory, ERF ) ) {
     std::cerr << "error loading from created directory structure\n";
     return EXIT_FAILURE;
@@ -104,8 +102,8 @@ int main( int, char *[] ) {
     return EXIT_FAILURE;
   }
 
-  madai::GaussianProcessEmulatorSingleFileWriter singleFileWriter;
-  singleFileWriter.WritePCA( &gpe, PCAFile );
+  madai::GaussianProcessEmulatorDirectoryFormatIO directoryFormatIO;
+  directoryFormatIO.WritePCA( &gpe, PCAFile );
   PCAFile.close();
 
   if ( !gpe.RetainPrincipalComponents( fractionResolvingPower ) ) {
@@ -131,7 +129,7 @@ int main( int, char *[] ) {
     return EXIT_FAILURE;
   }
 
-  singleFileWriter.Write( &gpe, EmulatorStateFile );
+  directoryFormatIO.Write( &gpe, EmulatorStateFile );
   EmulatorStateFile.close();
 
   if (! gpe.MakeCache()) {
@@ -161,24 +159,18 @@ int main( int, char *[] ) {
     observedScalarCovariance[i + (t * i)] = 0.05;
   gpem.SetObservedScalarCovariance(observedScalarCovariance);
 
-  madai::Trace trace;
   unsigned int numberIter = 500;
   for (unsigned int count = 0; count < numberIter; count ++) {
     madai::Sample sample = mcmc.NextSample();
-    trace.Add( sample );
+    std::cout << sample << "\n";
   }
 
   gpem.SetUseModelCovarianceToCalulateLogLikelihood(false);
 
   for (unsigned int count = 0; count < numberIter; count ++) {
     madai::Sample sample = mcmc.NextSample();
-    trace.Add( sample );
+    std::cout << sample << "\n";
   }
-
-
-  trace.WriteCSVOutput( std::cout,
-                   gpem.GetParameters(),
-                   gpem.GetScalarOutputNames() );
 
   return EXIT_SUCCESS;
 }

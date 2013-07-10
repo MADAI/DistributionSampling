@@ -109,17 +109,17 @@ GaussianDistribution
 
 double
 GaussianDistribution
-::GetLogProbabilityDensity( double value ) const
+::GetLogProbabilityDensity( double x ) const
 {
-  return log( this->GetNormalizationFactor() ) + this->GetExponent( value );
+  return log( this->GetNormalizationFactor() ) + this->GetExponent( x );
 }
 
 
 double
 GaussianDistribution
-::GetGradientLogProbabilityDensity( double value ) const
+::GetGradientLogProbabilityDensity( double x ) const
 {
-  double diff = value - m_Mean;
+  double diff = x - m_Mean;
   double variance = m_StandardDeviation * m_StandardDeviation;
   return ( - diff / variance );
 }
@@ -127,11 +127,11 @@ GaussianDistribution
 
 double
 GaussianDistribution
-::GetProbabilityDensity( double value ) const
+::GetProbabilityDensity( double x ) const
 {
-  //return this->GetNormalizationFactor() * exp( this->GetExponent( value ) );
+  //return this->GetNormalizationFactor() * exp( this->GetExponent( x ) );
   return boost::math::pdf(
-      m_GaussianDistributionImplementation->m_InternalDistribution, value );
+      m_GaussianDistributionImplementation->m_InternalDistribution, x );
 }
 
 
@@ -163,10 +163,10 @@ GaussianDistribution
 
 double
 GaussianDistribution
-::GetExponent( double value ) const
+::GetExponent( double x ) const
 {
   double variance = m_StandardDeviation * m_StandardDeviation;
-  double exponent = -( value - m_Mean ) * ( value - m_Mean ) / ( 2.0 * variance );
+  double exponent = -( x - m_Mean ) * ( x - m_Mean ) / ( 2.0 * variance );
 
   return exponent;
 }

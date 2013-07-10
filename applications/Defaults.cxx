@@ -58,6 +58,8 @@ const std::string Defaults::SAMPLER = "MetropolisHastings";
 
 const int Defaults::SAMPLER_NUMBER_OF_SAMPLES = 100;
 
+const std::string Defaults::SAMPLER_INACTIVE_PARAMETERS_FILE = "";
+
 const bool Defaults::MCMC_USE_MODEL_ERROR = false;
 
 const int Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES = 0;
@@ -68,11 +70,9 @@ const std::string Defaults::EXTERNAL_MODEL_EXECUTABLE = "";
 
 const std::string Defaults::EXTERNAL_MODEL_ARGUMENTS = "";
 
-const bool Defaults::EMULATE_QUIET = false;
-
 const bool Defaults::EMULATE_WRITE_HEADER = true;
 
-const int Defaults::GENERATE_POSTERIOR_PARAMETERS_NUMBER_OF_POINTS = 20;
+const std::string Defaults::POSTERIOR_ANALYSIS_DIRECTORY = "posterior_model_output";
 
 void Defaults::PrintAllDefaults(std::ostream & o) {
   o << "#\n"
@@ -97,6 +97,7 @@ void Defaults::PrintAllDefaults(std::ostream & o) {
     << "#\n"
     << "SAMPLER "                                          << Defaults::SAMPLER << '\n'
     << "SAMPLER_NUMBER_OF_SAMPLES "                        << Defaults::SAMPLER_NUMBER_OF_SAMPLES << '\n'
+    << "SAMPLER_INACTIVE_PARAMETERS_FILE "                  << Defaults::SAMPLER_INACTIVE_PARAMETERS_FILE << '\n'
     << "#\n"
     << "MCMC_USE_MODEL_ERROR "                             << Defaults::MCMC_USE_MODEL_ERROR << '\n'
     << "MCMC_NUMBER_OF_BURN_IN_SAMPLES "                   << Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES << '\n'
@@ -105,8 +106,9 @@ void Defaults::PrintAllDefaults(std::ostream & o) {
     << "EXTERNAL_MODEL_EXECUTABLE "                        << Defaults::EXTERNAL_MODEL_EXECUTABLE << '\n'
     << "EXTERNAL_MODEL_ARGUMENTS "                         << Defaults::EXTERNAL_MODEL_ARGUMENTS << '\n'
     << "#\n"
-    << "EMULATE_QUIET "                                    << Defaults::EMULATE_QUIET << '\n'
     << "EMULATE_WRITE_HEADER "                             << Defaults::EMULATE_WRITE_HEADER << '\n'
+    << "#\n"
+    << "POSTERIOR_ANALYSIS_DIRECTORY "                      << Defaults::POSTERIOR_ANALYSIS_DIRECTORY << '\n'
     << "#\n";
 }
 

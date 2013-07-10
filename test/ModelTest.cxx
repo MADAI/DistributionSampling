@@ -20,6 +20,7 @@
 #include <iostream>
 
 #include "Model.h"
+#include "UniformDistribution.h"
 
 /** \class Test class for Model.
  *
@@ -29,27 +30,26 @@ class TestModel : public madai::Model {
 public:
   TestModel()
   {
-    this->AddParameter( "A" );             // Range is -DBL_MAX, DBL_MAX
-    this->AddParameter( "BB", 0.0 );       // Rand is 0, DBL_MAX
-    this->AddParameter( "CCC", 0.0, 1.0 ); // Range is 0, 1
+    madai::UniformDistribution u0;
+    u0.SetMinimum( -DBL_MAX );
+    u0.SetMaximum(  DBL_MAX );
+    this->AddParameter( "A", u0 );
+
+    madai::UniformDistribution u1;
+    u1.SetMinimum( 0.0 );
+    u1.SetMaximum( DBL_MAX );
+    this->AddParameter( "BB", u1 );
+
+    madai::UniformDistribution u2;
+    u2.SetMinimum( 0.0 );
+    u2.SetMaximum( 1.0 );
+    this->AddParameter( "CCC", u2 );
   }
 
   virtual ~TestModel() {}
 
-  virtual Model::ErrorType LoadConfigurationFile( const std::string )
-  {
-    return Model::NO_ERROR;
-  }
-
   virtual Model::ErrorType GetScalarOutputs( const std::vector< double > &,
                                              std::vector< double > & ) const
-  {
-    return Model::NO_ERROR;
-  }
-
-  virtual ErrorType GetLikeAndPrior( const std::vector< double > &,
-                                     double &,
-                                     double &) const
   {
     return Model::NO_ERROR;
   }
@@ -61,8 +61,6 @@ int main( int, char *[] )
 {
 
   TestModel * model = new TestModel();
-
-  model->LoadConfigurationFile( std::string( "" ) );
 
   if ( model->IsReady() ) {
     std::cerr << "Model reports it is ready when it should not" << std::endl;

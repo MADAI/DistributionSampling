@@ -53,6 +53,13 @@ Sample
 }
 
 
+Sample
+::Sample() :
+  m_LogLikelihood(0.0)
+{
+}
+
+
 void
 Sample
 ::Reset()
@@ -70,13 +77,6 @@ Sample
   return ( m_ParameterValues.size() > 0
      || m_OutputValues.size() > 0
      || m_Comments.size() > 0 );
-}
-
-
-Sample
-::Sample() :
-  m_LogLikelihood(0.0)
-{
 }
 
 /**

@@ -3,10 +3,10 @@ configure_file( Doxyfile.in ${DistributionSampling_BINARY_DIR}/doc/Doxyfile @ONL
 
 add_custom_target( Documentation
   COMMAND ${DOXYGEN_EXECUTABLE} ${DistributionSampling_BINARY_DIR}/doc/Doxyfile
-  SOURCES ${DistributionSampling_SOURCE_DIR}/doc/html/index.html
+  SOURCES ${DistributionSampling_SOURCE_DIR}/doc/Doxyfile.in
   WORKING_DIRECTORY ${DistributionSampling_SOURCE_DIR}/doc
 )
 
-install( DIRECTORY ${DistributionSampling_SOURCE_DIR}/doc/html
+install( DIRECTORY ${DistributionSampling_BINARY_DIR}/doc/html
   DESTINATION doc/madai/
 )

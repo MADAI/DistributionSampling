@@ -23,29 +23,65 @@
 
 namespace madai {
 
-class Paths {
-public:
+/** Namespace for paths used in the library. */
+namespace Paths {
 
-  static const char SEPARATOR;
+  /**
+   * The path separator for the system. \ for Windows and / for
+   * unix-style systems.
+   */
+  extern const char SEPARATOR;
 
-  static const std::string TRACE_DIRECTORY;
+  /**
+   * Directory relative to the working directory where traces are
+   * stored.
+   */
+  extern const std::string TRACE_DIRECTORY;
 
-  static const std::string OBSERVABLE_NAMES_FILE;
+  /**
+   * Name of file containing the names of the observables in the
+   * model.
+   */
+  extern const std::string OBSERVABLE_NAMES_FILE;
 
-  static const std::string PARAMETERS_FILE;
+  /**
+   * Name of the file in each runXXXX directory that contains the
+   * parameter values for the model run.
+   */
+  extern const std::string PARAMETERS_FILE;
 
-  static const std::string RUNTIME_PARAMETER_FILE;
+  /**
+   * The name of the file relative to the working directory that
+   * contains the settings.
+   */
+  extern const std::string RUNTIME_PARAMETER_FILE;
 
-  static const std::string RESULTS_FILE;
+  /**
+   * The name of the file in each runXXXX directory that contains the
+   * results of a model run.
+   */
+  extern const std::string RESULTS_FILE;
 
-  static const std::string EMULATOR_STATE_FILE;
+  /**
+   * The name of the file relative to the working directory that
+   * contains the emulator state.
+   */
+  extern const std::string EMULATOR_STATE_FILE;
 
-  static const std::string PCA_DECOMPOSITION_FILE;
+  /**
+   * The name of the file relative to the working directory that
+   * contains the principal componenet analysis results.
+   */
+  extern const std::string PCA_DECOMPOSITION_FILE;
 
-  static const std::string PARAMETER_PRIORS_FILE;
+  /**
+   * The name of the file containing the parameter names and
+   * distributions.
+   */
+  extern const std::string PARAMETER_PRIORS_FILE;
 
-};
+} // end namespace Paths
 
 } // end namespace madai
 
-#endif // madai_DirectoryPaths_h_included
+#endif // madai_Paths_h_included

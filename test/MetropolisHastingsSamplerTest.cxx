@@ -22,7 +22,6 @@
 
 #include "Gaussian2DModel.h"
 #include "MetropolisHastingsSampler.h"
-#include "Trace.h"
 
 
 int main( int, char *[] )
@@ -36,10 +35,9 @@ int main( int, char *[] )
   sampler.SetParameterValue( "X", 21.0 );
   sampler.SetParameterValue( "Y", -13.5 );
 
-  madai::Trace trace;
-
   for ( int i = 0; i < 100; ++i ) {
-    trace.Add( sampler.NextSample() );
+    madai::Sample sample = sampler.NextSample();
+    std::cout << sample << "\n";
   }
 
   return EXIT_SUCCESS;

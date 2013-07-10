@@ -275,8 +275,6 @@ Sampler
     return "NO_ERROR";
   case INVALID_PARAMETER_INDEX_ERROR:
     return "INVALID_PARAMETER_INDEX_ERROR";
-  case INVALID_OUTPUT_SCALAR_INDEX_ERROR:
-    return "INVALID_OUTPUT_SCALAR_INDEX_ERROR";
   default:
     return "UNKNOWN";
   }

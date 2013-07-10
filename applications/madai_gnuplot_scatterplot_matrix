@@ -165,7 +165,12 @@ def madai_gnuplot_scatterplot_matrix(
 	for param in parameter_list:
 		w('#   %r\n' % (param,))
 	w('# \n')
-	w('set term pdf enh font "%s" size %g,%g\n' % (bfont,totalsizex,totalsizey))
+	if 'GNUPLOT_TERMINAL' in os.environ:
+		gnuplotTerminal = os.environ['GNUPLOT_TERMINAL']
+	else:
+		gnuplotTerminal = 'pdf'
+	w('set term %s enh font "%s" size %g,%g\n' %
+	  (gnuplotTerminal,bfont,totalsizex,totalsizey))
 	w('set output "%s"\n' % output_file_name)
 	w('set multiplot;\n')	# get into multiplot mode
 	w('unset key;\n')

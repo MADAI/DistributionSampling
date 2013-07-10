@@ -27,6 +27,8 @@
 #include "Sampler.h"
 #include "System.h"
 
+#include <boost/algorithm/string.hpp>
+
 #include <madaisys/SystemTools.hxx>
 
 using madaisys::SystemTools;
@@ -41,53 +43,72 @@ void EnsurePathSeparatorAtEnd( std::string & path )
   }
 }
 
-std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
-                                     const RuntimeParameterFileReader & settings )
+/** General-purpose function for getting a file or directory relative
+* to the statistics directory. */
+std::string GetStatisticsDirectoryRelativePath(
+  const std::string & statisticsDirectory,
+  const RuntimeParameterFileReader & settings,
+  const std::string & settingName,
+  const std::string & settingDefault )
 {
-  std::string modelOutputDirectory = settings.GetOption(
-      "MODEL_OUTPUT_DIRECTORY", Defaults::MODEL_OUTPUT_DIRECTORY);
+  std::string path = settings.GetOption( settingName, settingDefault );
 
   // Check for quotes around directory name
-  if ( ( modelOutputDirectory[0] == '"'  && *(modelOutputDirectory.end()-1) == '"' ) ||
-       ( modelOutputDirectory[0] == '\'' && *(modelOutputDirectory.end()-1) == '\'' ) ) {
+  if ( ( path[0] == '"'  && *(path.end()-1) == '"' ) ||
+       ( path[0] == '\'' && *(path.end()-1) == '\'' ) ) {
     // Truncate path to remove quotes
-    modelOutputDirectory = modelOutputDirectory.substr( 1, modelOutputDirectory.size()-2 );
+    path = path.substr( 1, path.size()-2 );
   }
 
   std::string statisticsDirectoryCopy( statisticsDirectory );
   EnsurePathSeparatorAtEnd( statisticsDirectoryCopy );
 
-  if ( modelOutputDirectory[0] != Paths::SEPARATOR ) {
-    modelOutputDirectory.insert( 0, statisticsDirectoryCopy );
+  if ( path[0] != Paths::SEPARATOR ) {
+    path.insert( 0, statisticsDirectoryCopy );
   }
 
-  return modelOutputDirectory;
+  return path;
+}
+
+
+std::string GetModelOutputDirectory( const std::string & statisticsDirectory,
+                                     const RuntimeParameterFileReader & settings )
+{
+  return GetStatisticsDirectoryRelativePath(
+    statisticsDirectory, settings,
+    "MODEL_OUTPUT_DIRECTORY",
+    Defaults::MODEL_OUTPUT_DIRECTORY );
 }
 
 std::string GetExperimentalResultsFile( const std::string & statisticsDirectory,
                                         const RuntimeParameterFileReader & settings )
 {
-  std::string experimentalResultsFile = settings.GetOption(
-      "EXPERIMENTAL_RESULTS_FILE", Defaults::EXPERIMENTAL_RESULTS_FILE);
+  return GetStatisticsDirectoryRelativePath(
+    statisticsDirectory, settings,
+    "EXPERIMENTAL_RESULTS_FILE",
+    Defaults::EXPERIMENTAL_RESULTS_FILE );
+}
 
-  // Check for quotes around directory name
-  if ( ( experimentalResultsFile[0] == '"' &&
-         *(experimentalResultsFile.end()-1) == '"' ) ||
-       ( experimentalResultsFile[0] == '\'' &&
-         *(experimentalResultsFile.end()-1) == '\'' ) ) {
-    // Truncate path to remove quotes
-    experimentalResultsFile =
-      experimentalResultsFile.substr( 1, experimentalResultsFile.size()-2 );
+std::string GetInactiveParametersFile( const std::string & statisticsDirectory,
+                                       const RuntimeParameterFileReader & settings )
+{
+  if ( settings.GetOption( "SAMPLER_INACTIVE_PARAMETERS_FILE", "" ) == "" ) {
+    return std::string();
   }
 
-  std::string statisticsDirectoryCopy( statisticsDirectory );
-  EnsurePathSeparatorAtEnd( statisticsDirectoryCopy );
+  return GetStatisticsDirectoryRelativePath(
+    statisticsDirectory, settings,
+    "SAMPLER_INACTIVE_PARAMETERS_FILE",
+    Defaults::SAMPLER_INACTIVE_PARAMETERS_FILE );
+}
 
-  if ( experimentalResultsFile[0] != Paths::SEPARATOR ) {
-    experimentalResultsFile.insert( 0, statisticsDirectoryCopy );
-  }
-
-  return experimentalResultsFile;
+std::string GetPosteriorAnalysisDirectory( const std::string & statisticsDirectory,
+                                           const RuntimeParameterFileReader & settings )
+{
+  return GetStatisticsDirectoryRelativePath(
+    statisticsDirectory, settings,
+    "POSTERIOR_ANALYSIS_DIRECTORY",
+    Defaults::POSTERIOR_ANALYSIS_DIRECTORY );
 }
 
 bool IsFile( const char * path )
@@ -145,6 +166,37 @@ std::vector< std::string > SplitString( const std::string & input, char separato
   return tokens;
 }
 
+std::vector< std::string > ReadLineAsTokens( std::istream & is,
+                                             std::string & line )
+{
+  std::vector< std::string > tokens;
+
+  std::getline( is, line );
+
+  // First, split on comment character
+  std::vector< std::string > contentAndComments;
+  boost::split( contentAndComments, line, boost::is_any_of("#") );
+
+  if ( contentAndComments.size() == 0 ) {
+    return tokens;
+  }
+
+  // Trim any leading or trailing spaces in the content
+  boost::trim( contentAndComments[0] );
+
+  // Next, split only the non-comment content
+  boost::split( tokens, contentAndComments[0], boost::is_any_of("\t "),
+                boost::token_compress_on );
+
+  // If first token is empty string, remove it and return
+  if ( tokens[0] == "" ) {
+    tokens.erase( tokens.begin() );
+    return tokens;
+  }
+
+  return tokens;
+}
+
 /**
    Load a file with experimental observations in it.  The model will
    be compared against this. */
@@ -158,32 +210,71 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i)
   unsigned int numberOfScalarOutputs = model->GetNumberOfScalarOutputs();
   assert(scalarOutputNames.size() == numberOfScalarOutputs);
   assert(numberOfScalarOutputs > 0);
+
+  // Assume unset values and covariance are all zero.
   std::vector< double > observedScalarValues(numberOfScalarOutputs, 0.0);
   std::vector< double > observedScalarCovariance(
       numberOfScalarOutputs * numberOfScalarOutputs, 0.0);
+
   for (unsigned int j = 0; j < numberOfScalarOutputs; ++j) {
     observedScalarCovariance[j * (1 + numberOfScalarOutputs)] = 1.0;
   }
-  while (true) { // will loop forever if input stream lasts forever.
-    std::string name;
-    double value, uncertainty;
-    if(! (i >> name >> value >> uncertainty))
-      break;
+
+  // Keep track of which scalar names haven't yet been read
+  std::set< std::string > scalarNamesRemaining;
+  scalarNamesRemaining.insert(scalarOutputNames.begin(), scalarOutputNames.end());
+
+  while (!i.eof()) { // will loop while there is still content
+                      // remaining in the file
+    std::string line;
+    std::vector< std::string > tokens = ReadLineAsTokens( i, line );
+
+    if ( tokens.size() == 0 )
+      continue;
+
+    std::string formatMessage( "<observed scalar name> <observed scalar value> "
+                               "<observed scalar variance>" );
+    if ( tokens.size() < 3 ) {
+      std::cerr << "Too few tokens in line '" << line << "' of experimental "
+                << "results file. Format should be " << formatMessage << "\n";
+      return madai::Model::OTHER_ERROR;
+    } else if (tokens.size() > 3) {
+      std::cerr << "Too many tokens in line '" << line << "' of experimental "
+                << "results file. Format should be " << formatMessage << "\n";
+    }
+
+    std::string name = tokens[0];
+    double value = atof( tokens[1].c_str() );
+    double uncertainty = atof( tokens[2].c_str() );
+
     int index = madai::FindIndex(scalarOutputNames, name);
     if (index != -1) {
       observedScalarValues[index] = value;
+
       // observedScalarCovariance is a square matrix;
-      observedScalarCovariance[index * (1 + numberOfScalarOutputs)] = std::pow(uncertainty, 2);
       // uncertainty^2 is variance.
+      observedScalarCovariance[index * (1 + numberOfScalarOutputs)] = std::pow(uncertainty, 2);
+
+      scalarNamesRemaining.erase(name);
+    } else {
+      std::cout << "Unknown observed scalar name '" << name << "'. Ignoring.\n";
     }
   }
-  // assume extra values are all zero.
+
+  // Report any observed scalars with unread values
+  for ( std::set< std::string >::iterator iter = scalarNamesRemaining.begin();
+        iter != scalarNamesRemaining.end(); ++iter ) {
+    std::cout << "Value for observed scalar '" << *iter << "' was not "
+              << "specified. Assuming its value is zero.\n";
+  }
+
   Model::ErrorType e;
   e = model->SetObservedScalarValues(observedScalarValues);
   if (e != madai::Model::NO_ERROR) {
     std::cerr << "Error in Model::SetObservedScalarValues\n";
     return e;
   }
+
   e = model->SetObservedScalarCovariance(observedScalarCovariance);
   if (e != madai::Model::NO_ERROR) {
     std::cerr << "Error in Model::SetObservedScalarCovariance\n";
@@ -205,7 +296,8 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i)
   */
 bool SetInactiveParameters(
     const std::string & inactiveParametersFile,
-    madai::Sampler & sampler)
+    madai::Sampler & sampler,
+    bool verbose )
 {
   if (inactiveParametersFile == "")
     return true; // an empty filename is taken to mean no parameters
@@ -233,6 +325,9 @@ bool SetInactiveParameters(
     if (settings.HasOption(parameterName)) {
       parameterValues[i] = settings.GetOptionAsDouble(parameterName);
       sampler.DeactivateParameter( i );
+      if ( verbose ) {
+        std::cout << "Deactivating parameter '" << parameterName << "'.\n";
+      }
     }
   }
   if (sampler.SetParameterValues( parameterValues) !=

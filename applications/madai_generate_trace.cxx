@@ -27,16 +27,15 @@
 #include "Defaults.h"
 #include "ExternalModel.h"
 #include "MetropolisHastingsSampler.h"
+#include "GaussianProcessEmulator.h"
+#include "GaussianProcessEmulatorDirectoryFormatIO.h"
 #include "GaussianProcessEmulatedModel.h"
-#include "RuntimeParameterFileReader.h"
 #include "Paths.h"
 #include "PercentileGridSampler.h"
-#include "Trace.h"
+#include "RuntimeParameterFileReader.h"
 #include "SamplerCSVWriter.h"
 
 #include "madaisys/SystemTools.hxx"
-
-using madai::Paths;
 
 
 int main(int argc, char ** argv) {
@@ -55,13 +54,13 @@ int main(int argc, char ** argv) {
       << "\n"
       << "<StatisticsDirectory> is the directory in which all \n"
       << "statistics data are stored. It contains the parameter file "
-      << Paths::RUNTIME_PARAMETER_FILE << "\n"
+      << madai::Paths::RUNTIME_PARAMETER_FILE << "\n"
       << "\n"
       << "<OutputFileName> is the name of the comma-separated value-format \n"
       << "file in which the trace will be written. This file will be \n"
       << "written in the directory <StatisticsDirectory>/trace/.\n"
       << "\n"
-      << "Format of entries in " << Paths::RUNTIME_PARAMETER_FILE
+      << "Format of entries in " << madai::Paths::RUNTIME_PARAMETER_FILE
       << ":\n\n"
       << "MODEL_OUTPUT_DIRECTORY <value> (default: "
       << madai::Defaults::MODEL_OUTPUT_DIRECTORY << ")\n"
@@ -71,6 +70,8 @@ int main(int argc, char ** argv) {
       << madai::Defaults::SAMPLER << ")\n"
       << "SAMPLER_NUMBER_OF_SAMPLES <value> (default: "
       << madai::Defaults::SAMPLER_NUMBER_OF_SAMPLES << ")\n"
+      << "SAMPLER_INACTIVE_PARAMETERS_FILE <value> (default: "
+      << madai::Defaults::SAMPLER_INACTIVE_PARAMETERS_FILE << ")\n"
       << "MCMC_NUMBER_OF_BURN_IN_SAMPLES <value> (default: "
       << madai::Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES << ")\n"
       << "MCMC_USE_MODEL_ERROR <value> (default: "
@@ -128,14 +129,27 @@ int main(int argc, char ** argv) {
 
   madai::Model * model;
   if ( executable == "" ) { // Use emulator
-
-    if ( gpem.LoadConfiguration(
-             statisticsDirectory,
-             modelOutputDirectory,
-             experimentalResultsFile ) != madai::Model::NO_ERROR ) {
-      std::cerr << "Error in GaussianProcessEmulatedModel::LoadConfiguration\n";
+    madai::GaussianProcessEmulator gpe;
+    madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
+    if ( !directoryReader.LoadTrainingData( &gpe,
+                                            modelOutputDirectory,
+                                            statisticsDirectory,
+                                            experimentalResultsFile ) ) {
+      std::cerr << "Error loading training data from the directory structure.\n";
       return EXIT_FAILURE;
     }
+    if ( !directoryReader.LoadPCA( &gpe, statisticsDirectory ) ) {
+      std::cerr << "Error loading the PCA decomposition data. Did you "
+                << "run madai_pca_decompose?\n";
+      return EXIT_FAILURE;
+    }
+    if ( !directoryReader.LoadEmulator( &gpe, statisticsDirectory ) ) {
+      std::cerr << "Error loading emulator data. Did you run "
+                << "madai_train_emulator?\n";
+      return EXIT_FAILURE;
+    }
+
+    gpem.SetGaussianProcessEmulator( gpe );
 
     model = &gpem;
 
@@ -162,18 +176,17 @@ int main(int argc, char ** argv) {
       return EXIT_FAILURE;
     }
 
-    std::ifstream experimentalResults(experimentalResultsFile.c_str());
-    if ( madai::Model::NO_ERROR !=
-         externalModel.LoadObservations( experimentalResults ) ) {
-      std::cerr << "Error loading observations.\n";
-      externalModel.StopProcess();
-
-      return EXIT_FAILURE;
-    }
-    experimentalResults.close();
-
     model = &externalModel;
   }
+
+  std::ifstream experimentalResults(experimentalResultsFile.c_str());
+  if ( madai::Model::NO_ERROR !=
+       madai::LoadObservations( model, experimentalResults ) ) {
+    std::cerr << "Error loading observations.\n";
+    externalModel.StopProcess();
+    return EXIT_FAILURE;
+  }
+  experimentalResults.close();
 
   madai::Sampler * sampler;
 
@@ -197,6 +210,7 @@ int main(int argc, char ** argv) {
       std::cout << "Using PercentileGridSampler for sampling\n";
     }
   } else { // Default to Metropolis Hastings
+    mhs.SetModel( model );
     mhs.SetStepSize( stepSize );
 
     sampler = &mhs;
@@ -206,12 +220,24 @@ int main(int argc, char ** argv) {
     }
   }
 
+  // Potentially set some parameters to inactive
+  std::string samplerInactiveParametersFile =
+    madai::GetInactiveParametersFile( statisticsDirectory, settings );
+  if ( samplerInactiveParametersFile != "" ) {
+    if ( ! madai::SetInactiveParameters( samplerInactiveParametersFile,
+                                         *sampler, verbose ) ) {
+      std::cerr << "Error when setting inactive parameters from file '"
+                << samplerInactiveParametersFile << "'.\n";
+      return EXIT_FAILURE;
+    }
+  }
+
   std::string traceDirectory =
     statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
   madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
   std::string outputFileName( argv[2] );
   std::string outputFilePath =
-    traceDirectory + Paths::SEPARATOR + outputFileName;
+    traceDirectory + madai::Paths::SEPARATOR + outputFileName;
 
   std::ofstream outFile(outputFilePath.c_str());
   if ( !outFile.good() ) {

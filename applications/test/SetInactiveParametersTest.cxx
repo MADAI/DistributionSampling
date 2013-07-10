@@ -15,7 +15,9 @@
  *  limitations under the License.
  *
  *=========================================================================*/
+
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -49,7 +51,7 @@ int main( int, char *[] ) {
   madai::MetropolisHastingsSampler sampler;
   sampler.SetModel( &model );
 
-  bool result = madai::SetInactiveParameters( settingsFile, sampler );
+  bool result = madai::SetInactiveParameters( settingsFile, sampler, false );
 
   if ( result != true ) {
     std::cerr << "Error when setting inactive parameters.\n";

@@ -58,16 +58,6 @@ Gaussian2DModel
 
 Model::ErrorType
 Gaussian2DModel
-::LoadConfigurationFile( const std::string )
-{
-  // Member variables should be set from values ready from a file.
-
-  return Model::NO_ERROR;
-}
-
-
-Model::ErrorType
-Gaussian2DModel
 ::GetScalarOutputs( const std::vector< double > & parameters,
                     std::vector< double > & scalars ) const
 {
