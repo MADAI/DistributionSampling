@@ -93,21 +93,35 @@ function toggleViz(name) {
 <!--=========================================================================-->
 <h2 id="Introduction">0. Introduction</h2>
 
-<p>This software will enable you to determine model parameters from
-comparing model outputs to a set of experimental measurements to
-  determine the relative likelihood of a set of parameter values.</p>
+<p>The MADAI Distribution Sampling tools enable you to estimate the
+most likely parameters of a model and the surrounding probability
+density by comparing the output from the model at a given set of
+parameters to a set of values obtained through actual experiment. The
+tools are intended to help answer which parameters of a model of a
+system best explain aspects of the system being modeled.</p>
 
-<p>Before starting, You will need to build an effectively parametrized
- model.  Decide which parameters you want to vary in your model and
- what you think the prior distribution of each parameter is (this may
- be as simple as a uniform distribution between <code>value_min</code>
- and <code>value_max</code>).</p>
+<p>This tutorial will introduce you to the MADAI Distribution Sampling
+tools. It will walk you through generating a probability distribution
+of an example model in two different ways, computing information about
+the samples in the distribution, and visualizating the
+distribution.</p>
 
-<p>Next, decide which model outputs you want to use.  These should be
-numbers which can be readily compared to your experimental/
-  observational data.</p>
+<!-- <p>Before starting, you will need to build an effectively parametrized
+ model. Decide which parameters you want to vary in your model and
+ what you think the prior distribution of each parameter is. Often,
+ the prior distribution may be specified as a uniform distribution
+ between some minimum and maximum values. Specifying the prior
+ distribution of this parameter this way means that the likelihood of
+ the model taking on a parameter value outside that range is
+ zero. Though not covered in this tutorial, Gaussian-distributed
+ parameter priors are also supported.</p> -->
 
-<p><img src="images/MADAI_Stats_and_Vis2.png" alt=""></p>
+<!-- <p>Next, you need to decide which model outputs you want to use.
+These should be numbers which can be readily compared to your
+experimental/observational data.</p> -->
+
+
+<!-- <p><img src="images/MADAI_Stats_and_Vis2.png" alt=""></p> -->
 
 <!-- \todo insert background for what we want to accomplish -->
 
