@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>MADAI Distribution-Sampling Tutorial</title>
+<title>MADAI Distribution Sampling Tutorial</title>
 <style>
 div.column { color:black; background-color:white; margin-left:auto;
 	margin-right:auto; margin-top:0px; margin-bottom:0px;
@@ -67,7 +67,7 @@ function toggleViz(name) {
 <body>
 <div class="column">
 <!--=========================================================================-->
-<h1>MADAI Distribution-Sampling Tutorial</h1>
+<h1>MADAI Distribution Sampling Tutorial</h1>
 
 <hr>
 <p><strong>Contents</strong></p>
@@ -76,7 +76,7 @@ function toggleViz(name) {
 <li>1. <a href="#Installing">Installing Software</a></li>
 		<ul style="list-style-type:none;">
 
-		<li>a. <a href="#DST">The Distribution-Sampling Tools</a></li>
+		<li>a. <a href="#DST">The Distribution Sampling Tools</a></li>
 		<li>b. <a href="#other">Other software</a></li>
 		</ul>
 <li>2. <a href="#Running">Running the Software </a></li>
@@ -114,7 +114,7 @@ numbers which can be readily compared to your experimental/
 <!--=========================================================================-->
 <h2 id="Installing">1. Installing Software</h2>
 
-<h3 id="DST">1a. The Distribution-Sampling Tools</h3>
+<h3 id="DST">1a. The Distribution Sampling Tools</h3>
 
 <ol>
   <li>Install the prerequisite packages
@@ -128,7 +128,8 @@ $ <span class="input">sudo apt-get -y install \
     build-essential \
     cmake \
     libboost-dev \
-    libeigen3-dev</span></pre>
+    libeigen3-dev \
+    gnuplot</span></pre>
 	  </li>
 	  <li>Red Hat-based:
 <pre>
@@ -136,10 +137,11 @@ $ <span class="input">sudo yum -y groupinstall "Development Tools"</span>
 $ <span class="input">sudo yum -y install \
     cmake \
     boost-devel \
-    eigen3-devel</span></pre>
+    eigen3-devel \
+    gnuplot</span></pre>
 	  </li>
 	  <li>MacOS 10.x with macports:
-	    <pre>$ <span class="input">port install cmake boost eigen3</span></pre>
+	    <pre>$ <span class="input">port install cmake boost eigen3 gnuplot</span></pre>
 	  </li>
 	</ul>
   </li>
@@ -197,6 +199,8 @@ path:</p>
 <p><em>Aside:</em> If you wish to compile your own software that links against the library, the include files are in <code>${HOME}/local/include</code> and the library is in <code>${HOME}/local/lib/madai</code> . </p></div>
 
 <h3 id="other">1b. Other software</h3>
+
+This additional software may be useful to you. Except for Python, none of it is required for the tutorial.
 
 <ul>
 <li>Python (used in tutorial examples) &mdash;
@@ -379,14 +383,14 @@ $ <span class="input">head trace/mcmc.csv</span>
 
 <p>The <code>madai_generate_trace</code> program will produce the
  number of points specified in the <code>settings.dat</code> under in
- the <code>MCMC_NUMBER_OF_SAMPLES</code> variable.  Depending on the
+ the <code>SAMPLER_NUMBER_OF_SAMPLES</code> variable.  Depending on the
  number of the parameters, a larger or smaller number of samples will
  need to be drawn.  Once you are sure that the program is working
- correctly, set <code>MCMC_NUMBER_OF_SAMPLES</code> to a large number
+ correctly, set <code>SAMPLER_NUMBER_OF_SAMPLES</code> to a large number
  (a million or ten million) and let the program run for a
  while.</p>
 
-<p>Suppose we set <code>MCMC_NUMBER_OF_SAMPLES</code> to <code>1000000</code> and wish to sub-sample the distribution for analysis or visualization.  The <code>madai_subsample_text_file</code> will sample every <em>N</em>th point from a csv file into a new csv file.
+<p>Suppose we set <code>SAMPLER_NUMBER_OF_SAMPLES</code> to <code>1000000</code> and wish to sub-sample the distribution for analysis or visualization.  The <code>madai_subsample_text_file</code> will sample every <em>N</em>th point from a csv file into a new csv file.
 
 <pre>$ <span class="input">madai_subsample_text_file 20 trace/mcmc.csv trace/mcmc_50000.csv</span></pre>
 
@@ -460,7 +464,7 @@ MEAN_X_SQUARED
 MEAN_ENERGY
 </pre>
 
-<p>We are now ready to run the first Distribution-Sampling
+<p>We are now ready to run the first Distribution Sampling
 utility, <code>madai_generate_training_points</code>.  This program
 will generate a Latin hypercube in the parameter space.  The number of
 sample points is set by
@@ -593,10 +597,10 @@ $ <span class="input">head trace/mcmc.csv</span>
 
 <p>The <code>madai_generate_trace</code> program will produce the
 number of points specified in the <code>settings.dat</code> under in
-the <code>MCMC_NUMBER_OF_SAMPLES</code> variable.  Depending on the
+the <code>SAMPLER_NUMBER_OF_SAMPLES</code> variable.  Depending on the
 number of the parameters, a larger or smaller number of samples will
 need to be drawn.  Once you are sure that the program is working
-correctly, set <code>MCMC_NUMBER_OF_SAMPLES</code> to a large number
+correctly, set <code>SAMPLER_NUMBER_OF_SAMPLES</code> to a large number
 (a million or more) and let the program run for a while.</p>
 
 <pre>
