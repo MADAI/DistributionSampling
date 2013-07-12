@@ -129,7 +129,7 @@ parabolic_test() (
 		try madai_set_variable . EXTERNAL_MODEL_EXECUTABLE \
 			"${PARABEXDIR}/parabolic_interactive.py"
 	else
-		try madai_set_variable . EMULATOR_TRAINING_RIGOR full
+		try madai_set_variable . EMULATOR_TRAINING_ALGORITHM exhaustive_geometric_kfold_common
 		try madai_set_variable . GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS 100
 		try madai_set_variable . GENERATE_TRAINING_POINTS_USE_MAXIMIN 1
 		try madai_generate_training_points . > /dev/null

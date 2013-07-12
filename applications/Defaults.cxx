@@ -52,7 +52,7 @@ const double Defaults::EMULATOR_AMPLITUDE = 1.0;
 
 const double Defaults::EMULATOR_SCALE  = 0.01;
 
-const std::string Defaults::EMULATOR_TRAINING_RIGOR = "basic";
+const std::string Defaults::EMULATOR_TRAINING_ALGORITHM = "basic";
 
 const std::string Defaults::SAMPLER = "MetropolisHastings";
 
@@ -93,11 +93,11 @@ void Defaults::PrintAllDefaults(std::ostream & o) {
     << "EMULATOR_NUGGET "                                  << Defaults::EMULATOR_NUGGET << '\n'
     << "EMULATOR_AMPLITUDE "                               << Defaults::EMULATOR_AMPLITUDE << '\n'
     << "EMULATOR_SCALE "                                   << Defaults::EMULATOR_SCALE << '\n'
-    << "EMULATOR_TRAINING_RIGOR "                          << Defaults::EMULATOR_TRAINING_RIGOR << '\n'
+    << "EMULATOR_TRAINING_ALGORITHM "                      << Defaults::EMULATOR_TRAINING_ALGORITHM << '\n'
     << "#\n"
     << "SAMPLER "                                          << Defaults::SAMPLER << '\n'
     << "SAMPLER_NUMBER_OF_SAMPLES "                        << Defaults::SAMPLER_NUMBER_OF_SAMPLES << '\n'
-    << "SAMPLER_INACTIVE_PARAMETERS_FILE "                  << Defaults::SAMPLER_INACTIVE_PARAMETERS_FILE << '\n'
+    << "SAMPLER_INACTIVE_PARAMETERS_FILE "                 << Defaults::SAMPLER_INACTIVE_PARAMETERS_FILE << '\n'
     << "#\n"
     << "MCMC_USE_MODEL_ERROR "                             << Defaults::MCMC_USE_MODEL_ERROR << '\n'
     << "MCMC_NUMBER_OF_BURN_IN_SAMPLES "                   << Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES << '\n'
@@ -108,7 +108,7 @@ void Defaults::PrintAllDefaults(std::ostream & o) {
     << "#\n"
     << "EMULATE_WRITE_HEADER "                             << Defaults::EMULATE_WRITE_HEADER << '\n'
     << "#\n"
-    << "POSTERIOR_ANALYSIS_DIRECTORY "                      << Defaults::POSTERIOR_ANALYSIS_DIRECTORY << '\n'
+    << "POSTERIOR_ANALYSIS_DIRECTORY "                     << Defaults::POSTERIOR_ANALYSIS_DIRECTORY << '\n'
     << "#\n";
 }
 

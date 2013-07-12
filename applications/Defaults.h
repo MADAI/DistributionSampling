@@ -61,7 +61,7 @@ namespace Defaults {
 
   extern const double EMULATOR_SCALE;
 
-  extern const std::string EMULATOR_TRAINING_RIGOR;
+  extern const std::string EMULATOR_TRAINING_ALGORITHM;
 
   /**
    Sampler variables */

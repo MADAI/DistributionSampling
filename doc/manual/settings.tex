@@ -37,7 +37,15 @@ The file \path{settings.dat} controls the operation of most of the Distribution 
 
     \item[EMULATOR\_SCALE] (default: 0.01) See section \ref{sec:CovarianceFunctions}. The final value for each parameter's scale $\theta_{k+i}$ where $k$ depends on which covariance function has been chosen and $i$ is the parameter index will be EMULATOR\_SCALE times the width of the middle two quartiles of that parameter's prior distribution.
 
-    \item[EMULATOR\_TRAINING\_RIGOR] (default: basic) Determines the rigor with which the emulator is trained. Currently, only the default value of ``basic'' is supported.
+    \item[EMULATOR\_TRAINING\_ALGORITHM] (default: basic) Determines the rigor with which the emulator is trained. Currently, two algorithms are supported.
+
+    \begin{itemize}
+
+      \item The ``basic'' algorithm sets the emulator parameter $\theta_i$ to the interquartile range of the parameter prior distribution.
+
+      \item The ``exhaustive_geometric_kfold_common'' performs an exhaustive search over a range of potential $\theta_i$ hyperparameters using a geometric series to increment between a minimum and maximum possible $\theta_i$ hyperparameter. The minimum value is $4 / N$ where $N$ is the number of training points and the maximum value is 1.0. The common setting of all $\theta_i$ hyperparameters is chosen to maximize a $k$-fold cross validation of the training data.
+
+    \end{itemize}
 
     \item[SAMPLER] (default: ``MetropolisHastings'') Determines which sampler to use to generate sample points. Available samplers are ``MetropolisHastings'' and ``PercentileGrid''.
 
