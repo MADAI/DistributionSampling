@@ -101,6 +101,7 @@ class GaussianProcessEmulatedModel : public Model {
     std::vector< double > & scalars,
     std::vector< double > & gradient ) const;
 
+#if 0
   /**
    * Returns the combined training and observed covariance at point \c
    * x in the parameter space.
@@ -108,6 +109,7 @@ class GaussianProcessEmulatedModel : public Model {
    * \param x The point in the parameter space.
    */
   virtual bool GetConstantCovariance(std::vector< double > & x) const;
+#endif
 
 protected:
   /** The square root of the sum of the training data covariance and

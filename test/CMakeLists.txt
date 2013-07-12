@@ -74,8 +74,9 @@ add_test( GaussianProcessEmulatorDirectoryReaderTest
   GaussianProcessEmulatorDirectoryReaderTest
   ${TEST_BASE_DIR}/DirectoryStructureTest/statistical_analysis
 )
-add_executable( GradientOutputsTest
-  GradientOutputsTest.cxx
-  GaussianProcessEmulatorTestGenerator.cxx )
-target_link_libraries( GradientOutputsTest ${LIBRARIES} ApplicationUtilities )
-add_test( GradientOutputsTest GradientOutputsTest )
+
+#add_executable( GradientOutputsTest
+#  GradientOutputsTest.cxx
+#  GaussianProcessEmulatorTestGenerator.cxx )
+#target_link_libraries( GradientOutputsTest ${LIBRARIES} ApplicationUtilities )
+#add_test( GradientOutputsTest GradientOutputsTest )

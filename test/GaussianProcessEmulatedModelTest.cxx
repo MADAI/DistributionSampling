@@ -143,11 +143,6 @@ int main( int, char *[] ) {
     return EXIT_FAILURE;
   }
 
-  madai::MetropolisHastingsSampler mcmc;
-  mcmc.SetModel( &gpem );
-
-  mcmc.SetStepSize(0.1);
-
   assert (2 == gpem.GetNumberOfScalarOutputs());
   int t = gpem.GetNumberOfScalarOutputs();
   std::vector< double > observedScalarValues;
@@ -158,6 +153,13 @@ int main( int, char *[] ) {
   for(int i = 0; i < t; ++i)
     observedScalarCovariance[i + (t * i)] = 0.05;
   gpem.SetObservedScalarCovariance(observedScalarCovariance);
+
+  madai::MetropolisHastingsSampler mcmc;
+  // The Model needs to be completely set up before passing to the
+  // Sampler because the sampler might evaluate the Model right away.
+  mcmc.SetModel( &gpem );
+
+  mcmc.SetStepSize(0.1);
 
   unsigned int numberIter = 50;
   for (unsigned int count = 0; count < numberIter; count ++) {
