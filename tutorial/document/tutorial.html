@@ -187,13 +187,16 @@ $ <span class="input">sudo yum -y install \
 	</ul>
   </li>
   <li>Download the file <code>DistributionSampling-VERSION.tgz</code> from <a href="https://madai-public.cs.unc.edu/statistical-tools/distribution-sampling-library/">the MADAI web site</a>.</li>
-  <li>Extract
+  <li>Navigate to the directory where you downloaded the Distribution
+  Sampling tools.</li>
+  <li>Extract the tools archive.
 
 <pre>
-$ <span class="input">tar -x -z -f .../DistributionSampling.tar.gz</span></pre></li>
+$ <span class="input">tar -x -z -f DistributionSampling.tar.gz</span></pre></li>
   <li>Build and install.  In this example, we will install in <code>${HOME}/local</code>.
 <pre>
-$ <span class="input">DistributionSampling/build.sh "${HOME}/local"</span></pre>
+$ <span class="input">cd DistributionSampling</span>
+$ <span class="input">build.sh "${HOME}/local"</span></pre>
   </li>
 </ol>
 
@@ -201,7 +204,7 @@ $ <span class="input">DistributionSampling/build.sh "${HOME}/local"</span></pre>
 <p><em>Aside:</em> MacOS 10.x users who do not have macports and need Boost or Eigen3 can still install this library.  You must get CMake
 from <a href="http://www.cmake.org/cmake/resources/software.html#latest">www.cmake.org</a>. Then run the command:</p>
 <pre>
-$ <span class="input">DistributionSampling/full_build.sh "${HOME}/local"</span></pre>
+$ <span class="input">full_build.sh "${HOME}/local"</span></pre>
 <p>This will download the necessary Boost and Eigen3 headers into a temporary directory for the compilation. </p>
 </div>
 
@@ -210,6 +213,7 @@ $ <span class="input">DistributionSampling/full_build.sh "${HOME}/local"</span><
 and <code>full_build.sh</code> scripts simply call CMake.  You can
 also run CMake directly.</p>
 <pre>
+$ <span class="input">cd ..</span>
 $ <span class="input">mkdir build</span>
 $ <span class="input">cd build</span>
 $ <span class="input">cmake "../DistributionSampling" \
@@ -223,41 +227,43 @@ $ <span class="input">cmake "../DistributionSampling" \
 $ <span class="input">make</span>
 $ <span class="input">make install</span>
 $ <span class="input">PATH=&quot;${PATH}:${HOME}/local/bin&quot;</span>
+$ <span class="input">cd ../DistributionSampling</span>
 </pre></div>
 
 <p>Your executables will be in the
-directory <code>${HOME}/local/bin</code>. You can
+directory <code>${HOME}/local/bin</code>. You should
 make these executables available by including this directory in your
-path:</p>
+path. If you use bash, write</p>
 <pre>$ <span class="input">PATH=&quot;${PATH}:${HOME}/local/bin&quot;</span></pre>
 
-<div class="box">
-<p><em>Aside:</em> csh/tcsh users:</p>
-<pre>&gt; <span class="input">set path = ($path &quot;${HOME}/local/bin&quot;)</span></pre>
-</div>
+<p>If you have csh/tcsh as your shell, write:</p>
+<pre>
+$ <span class="input">set path = ($path &quot;${HOME}/local/bin&quot;)</span></pre>
+
+<p>If you do not know your shell type, write:</p>
+<pre>
+$ <span class="input">echo $SHELL</span></pre>
 
 <div class="box">
 <p><em>Aside:</em> If you wish to compile your own software that links against the library, the include files are in <code>${HOME}/local/include</code> and the library is in <code>${HOME}/local/lib/madai</code> . </p></div>
 
 <h3 id="other">1b. Other software</h3>
 
-This additional software may be useful to you. Except for Python, none of it is required for the tutorial.
+<p>This additional software may be useful to you, but is not necessary for the tutorial.</p>
 
 <ul>
-<li>Python (used in tutorial examples) &mdash;
-	<a href="http://www.python.org/">python.org/</a>
 
-<li>MADAI Workbench (customized ParaView) <a href="http://vis.madai.us/">http://vis.madai.us</a></li>
+  <li>MADAI Workbench (customized ParaView) <a href="http://vis.madai.us/">http://vis.madai.us</a></li>
 
-<li>ParaView &mdash; <a href="http://www.paraview.org/paraview/resources/software.php">paraview.org</a>
-<pre>$ <span class="input">sudo apt-get -y install paraview</span></pre>
-<pre>$ <span class="input">sudo yum -y install paraview</span></pre>
-</li>
+  <li>ParaView &mdash; <a href="http://www.paraview.org/paraview/resources/software.php">paraview.org</a>
+    <pre>$ <span class="input">sudo apt-get -y install paraview</span></pre>
+    <pre>$ <span class="input">sudo yum -y install paraview</span></pre>
+  </li>
 
-<li>GGobi &mdash; <a href="http://www.ggobi.org/downloads/">ggobi.org</a>
-<pre>$ <span class="input">sudo apt-get -y install ggobi</span></pre>
-<pre>$ <span class="input">sudo yum -y install ggobi</span></pre>
-</li>
+  <li>GGobi &mdash; <a href="http://www.ggobi.org/downloads/">ggobi.org</a>
+    <pre>$ <span class="input">sudo apt-get -y install ggobi</span></pre>
+    <pre>$ <span class="input">sudo yum -y install ggobi</span></pre>
+  </li>
 
 </ul>
 
@@ -313,6 +319,7 @@ and the observables <code>MEAN_X</code>, <code>MEAN_X_SQUARED</code>, and
 program looks like:</p>
 
 <pre>
+$ <span class="input">cd DistributionSampling/tutorial</span>
 $ <span class="input">python parabolic_interactive.py</span>
 # ParabolicPotentialModel
 VERSION 1
@@ -364,7 +371,7 @@ MEAN_ENERGY    2.8          1.9
 <pre>$ <span class="input">madai_print_default_settings &gt; ./settings.dat</span></pre>
 
 <div class="box">
-<p><em>Aside:</em> A detailed description of the options in <code>settings.dat</code> can be found in the manual.</p></div>
+<p><em>Aside:</em> A detailed description of the options in <code>settings.dat</code> can be found in the MADAI Statistics Manual.</p></div>
 
 <p>Now use you favorite text editor to edit the settings.dat file. Set
 the variable EXTERNAL_MODEL_EXECUTABLE to
@@ -388,14 +395,6 @@ routine on your model.  The <code>madai_generate_trace</code> program
 uses the external model to produce model outputs for points in
 parameter space.  These model outputs are compared to the experimental
 values to calculate likelihood.</p>
-
-<p class="centered"><em>L</em> &#8733; exp((-0.5) &times; sum((
-(<em>Y<sub>_observed</sub></em>[<em>i</em>] - <em>Y<sub>_model</sub></em>[<em>i</em>]) /
-&sigma;[<em>i</em>] ))^<sup>2</sup>)</p>
-
-<p class="centered">ln(<em>L</em>) = C - 0.5 &times; sum((
-(<em>Y<sub>_observed</sub></em>[<em>i</em>] - <em>Y<sub>_model</sub></em>[<em>i</em>]) /
-&sigma;[<em>i</em>] )^<sup>2</sup>)</p>
 
 <p>The Metropolis-Hastings MCMC algorithm is used to draw a large
 number of samples from the distribution proportional to likelihood.
@@ -453,8 +452,6 @@ you will need the parameter values and the model outputs.</p>
   and <code>TEMP</code>; and the observables <code>MEAN_X</code>,
   <code>MEAN_X_SQUARED</code>, and <code>MEAN_ENERGY</code>.</p>
 
-<p>The <code>parabolic_evaluate.py</code> program can be found in the directory <code>DistributionSampling/tutorial/parabolic_example/</code></p>
-
 <p>First move into the <code>DistributionSampling/tutorial</code> directory.</p>
 <pre>$ <span class="input">cd ..../DistributionSampling/tutorial</span></pre>
 <p>Then make a working directory:</p>
@@ -471,7 +468,7 @@ DistributionSampling utilities will look for this file.</p>
 <pre>$ <span class="input">madai_print_default_settings &gt; ./settings.dat</span></pre>
 
 <div class="box">
-<p><em>Aside:</em> A detailed description of the options in <code>settings.dat</code> can be found in the manual.</p></div>
+<p><em>Aside:</em> A detailed description of the options in <code>settings.dat</code> can be found in the MADAI Statistics Manual.</p></div>
 
 <p>Next, we need to create a parameter_priors.dat file that contains
 our assumptions about prior probability distribution for the values
@@ -526,7 +523,10 @@ TEMP 5.0125</pre>
 
 <p>The next task is to actually evaluate the model at this point in
 parameter space.  We have written a little Python program to do just
-that.</p>
+that. The <code>parabolic_evaluate.py</code> program can be found in
+the
+directory <code>DistributionSampling/tutorial/parabolic_example/</code>. To
+run it, write</p>
 
 <pre>$ <span class="input">../parabolic_example/parabolic_evaluate.py model_output/run*</span></pre>
 
@@ -565,6 +565,10 @@ program generates &ldquo;okay&rdquo; values for the
 hyper-parameters.</p>
 
 <div class="box">
+<p><em>Aside:</em> For more information about covariance functions and hyperparameters, please see the MADAI Statistics Manual.</p>
+</div>
+
+<!-- <div class="box">
 <p><em>Aside:</em> The default covariance function is a square
 exponential function:</p>
 
@@ -589,7 +593,7 @@ scale of the <em>i</em>th parameter times
 the <code>EMULATOR_SCALE</code> option.</p>
 
 <p>For more information, see the manual.</p>
-</div>
+</div> -->
 
 <p>To run the basic training program:</p>
 
