@@ -269,57 +269,36 @@ $ <span class="input">echo $SHELL</span></pre>
 
 <!--=========================================================================-->
 <h2 id="Running">2. Running the Software</h2>
-<h3 id="Fast">2a. Markov chain Monte Carlo with a Fast Model</h3>
+<h3 id="Fast">2a. Markov Chain Monte Carlo with a Fast Model</h3>
 
-<p>By a "fast model" we mean that you can wait while it runs millions
-of times.</p>
+<p>This section describes how to perform Markov Chain Monte Carlo
+sampling with a "fast model". By a "fast model" we mean that it can
+execute millions of times in the time it takes to get a cup of
+coffee.</p>
 
-<p>You will need to build an executable program to interface with
-  the <code>madai_generate_trace</code> program.</p>
+<p>To invoke such a model from the MADAI Distribution Tools, you will
+need to build an executable program to interface with
+the <code>madai_generate_trace</code> program. Your program will write
+information about the model to <code>stdout</code>, read parameter
+values from <code>stdin</code>, and write model outputs
+to <code>stdout</code>. <code>madai_generate_trace</code> will start
+your program and interactively query it for model outputs at given
+parameter vectors.</p>
 
-<p><code>madai_generate_trace</code> will call your executable
-and interactively query it for model outputs at given parameter
-vectors.</p>
+<p>In this example, we have written a program that models a parabolic
+potential. In this case, the program,
+named <code>parabolic_interactive.py</code>, is written in Python. It
+is located in the
+directory <code>DistributionSampling/tutorial/parabolic_example/</code></p>
 
-<div class="box">
-<p><em>Aside:</em> The Interactive Model Language.</p>
-<ol>
-<li>First the <strong>external model</strong> (your program) will
-output on standard output (stdout) a list of comments (each beginning with a '#' and ending with a '\n').</li>
-<li>Then it will output the string &quot;VERSION 1 \n&quot;</li>
-<li>Then it will output the string &quot;PARAMETERS <em>Nparam</em>
-\n&quot;, where <em>Nparam</em> is the number of parameters.</li>
-<li>Then, for each parameter, it will output the name of the parameter
-(a string without whitespace), whitespace, the prior distribution, and
-'\n'
-<ul>
-<li>A uniform prior distribution is in the format &quot;UNIFORM <em>MIN</em> <em>MAX</em>&quot;</li>
-<li>A Gaussian prior distribution is in the format &quot;GAUSSIAN <em>MEAN</em> <em>STDDEV</em>&quot;</li>
-</ul></li>
-<li>Then the string &quot;OUTPUTS <em>Nouts</em> \n&quot;, where <em>Nouts</em> is the number of outputs.</li>
-<li>Then, for each parameter, it will output the name of the output (a string without whitespace), followed by a '\n'</li>
-<li>Then it either outputs:
-<ul>
-  <li>&quot;VARIANCE <em>Nouts</em> \n&quot; (<em>Nouts</em> is still the number of outputs), <br>or</li>
-  <li>&quot;COVARIANCE TRIANGULAR_MATRIX <em>M</em> \n&quot;, where <em>M</em>=<em>Nouts</em>&times;(<em>Nouts</em>+1)/2)<br>or</li>
-  <li>&quot;COVARIANCE FULL_MATRIX <em>K</em> \n&quot;, where <em>K</em>=<em>Nouts</em>^<sup>2</sup></li>
-</ul></li>
-<li>The external model them prints &quot;END_OF_HEADER \n&quot; </li>
-<li>The external model will then wait for <em>Nparam</em> ASCII-encode floating-point numbers on standard input.  These will be interpreted as a set of parameter values.</li>
-<li>The external model should calculate model outputs at that point in parameter space, as well as (co)variance.  It will then print those numbers (ASCII-encoded) onto standard output.  Remember to flush standard out after writing.</li>
-<li>The external model should then wait for the next set of parameters and repeat the output calculation</li>
-<li>The external model should exit when it reads the string &quot;STOP&quot; or end-of-file or received an interrupt signal.</li>
-</ol>
-</div>
-
-<p>Our example will be the parabolic potential model.  This
-model has the parameters <code>X0</code>, <code>K</code>, and <code>TEMP</code>;
-and the observables <code>MEAN_X</code>, <code>MEAN_X_SQUARED</code>, and
-<code>MEAN_ENERGY</code>.  Here's what the preamble of the interactive
-program looks like:</p>
+ This model has the
+parameters <code>X0</code>, <code>K</code>, and <code>TEMP</code>; and
+the observables <code>MEAN_X</code>, <code>MEAN_X_SQUARED</code>, and
+<code>MEAN_ENERGY</code>. When we run the program, the output looks
+like:</p>
 
 <pre>
-$ <span class="input">cd DistributionSampling/tutorial</span>
+$ <span class="input">cd tutorial</span>
 $ <span class="input">python parabolic_interactive.py</span>
 # ParabolicPotentialModel
 VERSION 1
@@ -335,9 +314,42 @@ VARIANCE 3
 END_OF_HEADER
 <span class="input">STOP</span></pre>
 
+<ul>
+
+  <li><p>Line 1 (# ParabolicPotentialModel) is a comment. In this
+      case, it reports the name of the model.</p></li>
+
+  <li><p>Line 2 (VERSION 1) indicates the version of the input/output
+      format the Distribution Sampling tools use to interface with
+      external programs.</p></li>
+
+  <li><p>Line 3 (PARAMETERS 3) begins the parameters description
+      section and indicates how many parameters are in the
+      model.</p></li>
+
+  <li><p>Lines 4-6 describe the parameters. The first item is the parameter
+      name, the second item is the type of prior distribution for the
+      parameter, the third and fourth items indicate the minimum and maximum
+      values where the uniform distribution is non-zero.</p></li>
+
+  <li><p>Line 7 (OUTPUTS 3) begins the output description
+  section.</p></li>
+
+  <li><p>Lines 8-10 gives the output parameter names.</p></li>
+
+  <li><p>Line 11 (VARIANCE 3) gives the form of the model output
+  covariance.</p></li>
+
+  <li><p>Line 12 (END_OF_HEADER) indicates that the header describing
+  the model inputs and outputs has ended.</p></li>
+
+</ul>
+
 <p>The external model then waits for a list of parameter values
 (encoded as text) on stdin.  Then it returns the model outputs
-followed by the model covariances.  For example:
+followed by the model covariances.  For example, if you type the first
+line shown below, you will get the output values from the model (the
+second line) and the output variances (the third line):
 
 <pre>
 <span class="input">0.0 2.25 5.25</span>
@@ -345,16 +357,72 @@ followed by the model covariances.  For example:
 1.0801234497346435 1.6499158227686113 3.712310601229375
 </pre>
 
-<p>The <code>parabolic_interactive.py</code> program can be found in the directory <code>DistributionSampling/tutorial/parabolic_example/</code></p>
+<div class="box">
+  <p><em>Aside:</em> The Interactive Model Language.</p>
+  <ol>
+    <li>First the <strong>external model</strong> (your program) will
+      output on standard output (stdout) a list of comments (each
+      beginning with a '#' and ending with a '\n').</li>
 
-<p>First move into the <code>DistributionSampling/tutorial</code> directory.</p>
-<pre>$ <span class="input">cd ..../DistributionSampling/tutorial</span></pre>
+    <li>Then it will output the string &quot;VERSION 1 \n&quot;</li>
+
+    <li>Then it will output the string &quot;PARAMETERS <em>Nparam</em>
+      \n&quot;, where <em>Nparam</em> is the number of parameters.</li>
+
+    <li>Then, for each parameter, it will output the name of the
+      parameter (a string without whitespace), whitespace, the prior
+      distribution, and '\n'
+
+      <ul>
+
+        <li>A uniform prior distribution is in the format &quot;UNIFORM <em>MIN</em> <em>MAX</em>&quot;</li>
+
+        <li>A Gaussian prior distribution is in the format &quot;GAUSSIAN <em>MEAN</em> <em>STDDEV</em>&quot;</li>
+
+      </ul>
+
+    </li>
+
+    <li>Then the string &quot;OUTPUTS <em>Nouts</em> \n&quot;, where <em>Nouts</em> is the number of outputs.</li>
+
+    <li>Then, for each parameter, it will output the name of the output (a string without whitespace), followed by a '\n'</li>
+
+    <li>Then it either outputs:
+
+      <ul>
+
+        <li>&quot;VARIANCE <em>Nouts</em> \n&quot; (<em>Nouts</em> is still the number of outputs), <br>or</li>
+
+        <li>&quot;COVARIANCE TRIANGULAR_MATRIX <em>M</em> \n&quot;, where <em>M</em>=<em>Nouts</em>&times;(<em>Nouts</em>+1)/2)<br>or</li>
+
+        <li>&quot;COVARIANCE FULL_MATRIX <em>K</em> \n&quot;, where <em>K</em>=<em>Nouts</em>^<sup>2</sup></li>
+    
+      </ul>
+
+    </li>
+
+    <li>The external model them prints &quot;END_OF_HEADER \n&quot; </li>
+
+    <li>The external model will then wait for <em>Nparam</em> ASCII-encode floating-point numbers on standard input.  These will be interpreted as a set of parameter values.</li>
+
+    <li>The external model should calculate model outputs at that point in parameter space, as well as (co)variance.  It will then print those numbers (ASCII-encoded) onto standard output.  Remember to flush standard out after writing.</li>
+
+    <li>The external model should then wait for the next set of parameters and repeat the output calculation</li>
+
+    <li>The external model should exit when it reads the string &quot;STOP&quot; or end-of-file or received an interrupt signal.</li>
+  </ol>
+</div>
+
+<p>To create a distribution sampling from the example model, first make sure you are in the <code>DistributionSampling/tutorial</code> directory.</p>
+
 <p>Then make a working directory:</p>
-<pre>$ <span class="input">mkdir -p parabolic_ext</span></pre>
-<pre>$ <span class="input">cd parabolic_ext</span></pre>
+<pre>
+$ <span class="input">mkdir -p parabolic_fast</span>
+$ <span class="input">cd parabolic_fast</span></pre>
 
-<p>(From here on out, we will assume that you are in your working
-directory and will refer to it as <code>.</code> (a single dot).)</p>
+<p>For the rest of this section, we will assume that you are in your
+working directory and will refer to it as <code>.</code> (a single
+dot).)</p>
 
 <p>Next, copy the “experimental” results file into the working directory.  This specifies all of the experimentally observed measurements and errors. (If you skip that step, it assumes that the measurements are 0.0 and the error is 1.0.)
 </p>
@@ -367,15 +435,15 @@ MEAN_ENERGY    2.8          1.9
 
 <p>Next, we  will create a <code>settings.dat</code> file in
   this directory with some default values in it. All of the
-  DistributionSampling utilities will look for this file.</p>
+  Distribution Sampling tools will look for this file.</p>
 <pre>$ <span class="input">madai_print_default_settings &gt; ./settings.dat</span></pre>
 
 <div class="box">
 <p><em>Aside:</em> A detailed description of the options in <code>settings.dat</code> can be found in the MADAI Statistics Manual.</p></div>
 
-<p>Now use you favorite text editor to edit the settings.dat file. Set
+<p>Now, use you favorite text editor to edit the settings.dat file. Set
 the variable EXTERNAL_MODEL_EXECUTABLE to
-../parabolic_example/parabolic_interactive.py .
+<code>../parabolic_example/parabolic_interactive.py</code>.
 Alternatively, use the <code>madai_set_variable</code> program:
 </p>
 
@@ -398,7 +466,7 @@ values to calculate likelihood.</p>
 
 <p>The Metropolis-Hastings MCMC algorithm is used to draw a large
 number of samples from the distribution proportional to likelihood.
-These values are stored in a comma-separated-value (csv) file
+These values are stored in a comma-separated-value (CSV) file
 specified in the arguments.</p>
 
 <pre>
@@ -455,11 +523,12 @@ you will need the parameter values and the model outputs.</p>
 <p>First move into the <code>DistributionSampling/tutorial</code> directory.</p>
 <pre>$ <span class="input">cd ..../DistributionSampling/tutorial</span></pre>
 <p>Then make a working directory:</p>
-<pre>$ <span class="input">mkdir -p parabolic_emu</span></pre>
-<pre>$ <span class="input">cd parabolic_emu</span></pre>
+<pre>$ <span class="input">mkdir -p parabolic_emulator</span></pre>
+<pre>$ <span class="input">cd parabolic_emulator</span></pre>
 
-<p>From here on out, we will assume that you are in your working
-directory and will refer to it as <code>.</code> (a single dot).</p>
+<p>For the rest of this section, we will assume that you are in your
+working directory and will refer to it as <code>.</code> (a single
+dot).)</p>
 
 <p>The first thing we will do is create a <code>setting.dat</code>
 file in this directory with some default values in it. All of the
