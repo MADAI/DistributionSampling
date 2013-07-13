@@ -554,21 +554,24 @@ density of the sample points in each dimension.</p>
 <!--=========================================================================-->
 <h3 id="Slow">2b. Use an Emulator for a Slow Model</h3>
 
-<p>The DistributionSampling library uses a Gaussian Process Emulator
-to emulate a slow model much more quickly.  To train the Emulator, the
-software requires hundreds of sample points.  At each training point,
-you will need the parameter values and the model outputs.</p>
+<p>The Distribution Sampling tools use a Gaussian Process Emulator to
+emulate a slow model much more quickly. An emulator is basically an
+interpolator that reports the uncertainty associated with the outputs
+it produces.  To train the emulator, the software requires hundreds of
+sample points.  At each training point, you will need the parameter
+values and the model outputs.</p>
 
-<p> We will use the parabolic potential model as an example again.
-  This model has the parameters <code>X0</code>, <code>K</code>,
-  and <code>TEMP</code>; and the observables <code>MEAN_X</code>,
-  <code>MEAN_X_SQUARED</code>, and <code>MEAN_ENERGY</code>.</p>
+<p>We will use the parabolic potential model as an example again.
+This model has the parameters <code>X0</code>, <code>K</code>,
+and <code>TEMP</code>; and the observables <code>MEAN_X</code>,
+<code>MEAN_X_SQUARED</code>, and <code>MEAN_ENERGY</code>.</p>
 
 <p>First move into the <code>DistributionSampling/tutorial</code> directory.</p>
-<pre>$ <span class="input">cd ..../DistributionSampling/tutorial</span></pre>
+
 <p>Then make a working directory:</p>
-<pre>$ <span class="input">mkdir -p parabolic_emulator</span></pre>
-<pre>$ <span class="input">cd parabolic_emulator</span></pre>
+<pre>
+$ <span class="input">mkdir -p parabolic_emulator</span>
+$ <span class="input">cd parabolic_emulator</span></pre>
 
 <p>For the rest of this section, we will assume that you are in your
 working directory and will refer to it as <code>.</code> (a single
@@ -576,12 +579,9 @@ dot).)</p>
 
 <p>The first thing we will do is create a <code>setting.dat</code>
 file in this directory with some default values in it. All of the
-DistributionSampling utilities will look for this file.</p>
+Distribution Sampling tools will look for this file.</p>
 
 <pre>$ <span class="input">madai_print_default_settings &gt; ./settings.dat</span></pre>
-
-<div class="box">
-<p><em>Aside:</em> A detailed description of the options in <code>settings.dat</code> can be found in the MADAI Statistics Manual.</p></div>
 
 <p>Next, we need to create a parameter_priors.dat file that contains
 our assumptions about prior probability distribution for the values
@@ -599,9 +599,9 @@ measurements and errors:</p>
 
 <pre>$ <span class="input">cp ../parabolic_example/experimental_results.dat .</span>
 $ <span class="input">cat experimental_results.dat</span>
-MEAN_X         1.14           0.1
-MEAN_X_SQUARED 2.77634418605  0.1
-MEAN_ENERGY    3.4925         0.1
+MEAN_X         1.14          0.1
+MEAN_X_SQUARED 2.77634418605 0.1
+MEAN_ENERGY    3.4925        0.1
 </pre>
 
 <p>Finally, we create a file that contains the list of observables
@@ -615,18 +615,18 @@ MEAN_X_SQUARED
 MEAN_ENERGY
 </pre>
 
-<p>We are now ready to run the first Distribution Sampling
-utility, <code>madai_generate_training_points</code>.  This program
-will generate a Latin hypercube in the parameter space.  The number of
-sample points is determined by
+<p>We are now ready to run the first Distribution Sampling tool in
+this workflow, <code>madai_generate_training_points</code>.  This
+program will generate a Latin hypercube in the parameter space.  The
+number of sample points is determined by
 the <code>GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS</code>
-setting. (The command-line argument is the name of the working
-directory.)</p>
+setting. Like the other Distribution Sampling tools, the command-line
+argument is the name of the working directory.</p>
 <pre>
 $ <span class="input">madai_generate_training_points .</span>
 </pre>
 
-<p>The output of <code>generateTrainingPoints</code> is a series of
+<p>The output of <code>madai_generate_training_points</code> is a series of
 files <code>model_output/run*/parameters.dat</code>.  For example:</p>
 
 <pre>$ <span class="input">cat ./model_output/run0001/parameters.dat</span>
@@ -635,20 +635,27 @@ K 2.3025
 TEMP 5.0125</pre>
 
 <p>The next task is to actually evaluate the model at this point in
-parameter space.  We have written a little Python program to do just
-that. The <code>parabolic_evaluate.py</code> program can be found in
-the
+parameter space. This step is typically left up to you because your
+modeling program likely has its own way of reading in parameters and
+writing outputs. You will need to read in the parameter values in
+the <code>parameters.dat</code> files and write results as described
+below.</p>
+
+<p>For this tutorial, we have written a little Python
+program to generate model outputs from the files and directories
+created by <code>madai_generate_training_points</code>. The
+ <code>parabolic_evaluate.py</code> program can be found in the
 directory <code>DistributionSampling/tutorial/parabolic_example/</code>. To
 run it, write</p>
 
 <pre>$ <span class="input">../parabolic_example/parabolic_evaluate.py model_output/run*</span></pre>
 
 <p><code>parabolic_evaluate.py</code> takes as command-line arguments
-the names of a directory that contains a
-file <code>parameters.dat</code> and write a file
-called <code>results.dat</code>.</p>
+the names of a directories that contain a file
+named <code>parameters.dat</code> and writes a file
+called <code>results.dat</code> in each directory.</p>
 
-Verify that it works
+<p>Verify that it works:</p>
 
 <pre>$ <span class="input">cat ./model_output/run0001/results.dat</span>
 MEAN_X 0.94 1.04330761087
@@ -724,13 +731,13 @@ program uses the trained Gaussian Process model emulator to produce
 model outputs for points in parameter space.  These model outputs are
 compared to observed values to calculate likelihood.</p>
 
-<p class="centered"><em>L</em> &#8733; exp((-0.5) sum(
+<!-- <p class="centered"><em>L</em> &#8733; exp((-0.5) sum(
 ((<em>Y<sub>_observed</sub></em>[<em>i</em>] - <em>Y<sub>_model</sub></em>[<em>i</em>]) /
-&sigma;[<em>i</em>] ))^<sup>2</sup>)</p>
+&sigma;[<em>i</em>] ))^<sup>2</sup>)</p> -->
 
 <p>The Metropolis-Hastings MCMC algorithm is used to draw a large
 number of samples from the distribution proportional to likelihood.
-These values are stored in a comma-separated-value (csv) file
+These values are stored in a comma-separated-value (CSV) file
 specified in the arguments.</p>
 
 <pre>
@@ -782,6 +789,18 @@ points down to a fifty thousand, pick out every 20th line:</p>
 <pre>
 $ <span class="input">madai_subsample_text_file 20 trace/million.csv trace/mcmc_50000.csv</span>
 </pre>
+
+<p>
+<a href="images/mcmc_fast_50000.png"><img width="40%" height="40%" src="images/mcmc_fast_50000.png"/></a>
+
+<a href="images/mcmc_emulator_50000_basic.png"><img width="40%" height="40%" src="images/mcmc_emulator_50000_basic.png"/></a>
+</p>
+
+<p>
+<a href="images/mcmc_emulator_50000_better.png"><img width="40%" height="40%" src="images/mcmc_emulator_50000_better.png"/></a>
+
+<a href="images/mcmc_fast_50000.png"><img width="40%" height="40%" src="images/mcmc_fast_50000.png"/></a>
+</p>
 
 <h3 id="BasicStatistics">Basic Statistics</h3>
 
