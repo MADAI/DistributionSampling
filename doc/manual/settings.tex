@@ -43,7 +43,7 @@ The file \path{settings.dat} controls the operation of most of the Distribution 
 
       \item The ``basic'' algorithm sets the emulator parameter $\theta_i$ to the interquartile range of the parameter prior distribution.
 
-      \item The ``exhaustive_geometric_kfold_common'' performs an exhaustive search over a range of potential $\theta_i$ hyperparameters using a geometric series to increment between a minimum and maximum possible $\theta_i$ hyperparameter. The minimum value is $4 / N$ where $N$ is the number of training points and the maximum value is 1.0. The common setting of all $\theta_i$ hyperparameters is chosen to maximize a $k$-fold cross validation of the training data.
+      \item The ``exhaustive\_geometric\_kfold\_common'' performs an exhaustive search over a range of potential $\theta_i$ hyperparameters using a geometric series to increment between a minimum and maximum possible $\theta_i$ hyperparameter. The minimum value is $4 / N$ where $N$ is the number of training points and the maximum value is 1.0. The common setting of all $\theta_i$ hyperparameters is chosen to maximize a $k$-fold cross validation of the training data.
 
     \end{itemize}
 
