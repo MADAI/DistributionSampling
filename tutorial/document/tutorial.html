@@ -69,7 +69,10 @@ function toggleViz(name) {
 <!--=========================================================================-->
 <h1>MADAI Distribution Sampling Tutorial</h1>
 
-<hr>
+<hr/>
+<p><strong>Authors:</strong> Hal Canary and Cory Quammen</p>
+
+<hr/>
 <p><strong>Contents</strong></p>
 <ul style="list-style-type:none;">
 <li>0. <a href="#Introduction">Introduction</a></li>
@@ -88,7 +91,7 @@ function toggleViz(name) {
 
 </ul>
 
-<hr>
+<hr/>
 
 <!--=========================================================================-->
 <h2 id="Introduction">0. Introduction</h2>
@@ -182,7 +185,7 @@ $ <span class="input">sudo yum -y install \
     gnuplot</span></pre>
 	  </li>
 	  <li>MacOS 10.x with macports:
-	    <pre>$ <span class="input">port install cmake boost eigen3 gnuplot</span></pre>
+	    <pre>$ <span class="input">sudo port install cmake boost eigen3 gnuplot</span></pre>
 	  </li>
 	</ul>
   </li>
@@ -299,7 +302,7 @@ like:</p>
 
 <pre>
 $ <span class="input">cd tutorial</span>
-$ <span class="input">python parabolic_interactive.py</span>
+$ <span class="input">python parabolic_example/parabolic_interactive.py</span>
 # ParabolicPotentialModel
 VERSION 1
 PARAMETERS 3
@@ -417,7 +420,7 @@ second line) and the output variances (the third line):
 
 <p>Then make a working directory:</p>
 <pre>
-$ <span class="input">mkdir -p parabolic_fast</span>
+$ <span class="input">mkdir parabolic_fast</span>
 $ <span class="input">cd parabolic_fast</span></pre>
 
 <p>For the rest of this section, we will assume that you are in your
@@ -428,9 +431,9 @@ dot).)</p>
 </p>
 <pre>$ <span class="input">cp ../parabolic_example/experimental_results.dat .</span>
 $ <span class="input">cat experimental_results.dat</span>
-MEAN_X         1.0          0.6
-MEAN_X_SQUARED 1.411764706  1.4
-MEAN_ENERGY    2.8          1.9
+MEAN_X         1.14          0.1
+MEAN_X_SQUARED 2.77634418605 0.1
+MEAN_ENERGY    3.4925        0.1
 </pre>
 
 <p>Next, we  will create a <code>settings.dat</code> file in
@@ -478,6 +481,9 @@ specified in the arguments.</p>
 $ <span class="input">madai_generate_trace . &quot;mcmc.csv&quot;</span>
 </pre>
 
+<p>We use the term "trace" to refer to the samples generated from the
+MCMC algorithm.</p>
+
 <p>The output file is left in the <code>trace</code> directory:</p>
 
 <pre>
@@ -495,17 +501,17 @@ $ <span class="input">head trace/mcmc.csv</span>
 </pre>
 
 <p>The <code>madai_generate_trace</code> program will produce the
-number of points specified in the <code>settings.dat</code> under in
-the <code>SAMPLER_NUMBER_OF_SAMPLES</code> variable.  The more
+number of points specified in the <code>settings.dat</code> under
+the <code>SAMPLER_NUMBER_OF_SAMPLES</code> setting.  The more
 parameters a model has, the larger the number of samples that will
 need to be drawn to fill the parameter space.  Once you are sure that
 the program is working correctly,
-set <code>SAMPLER_NUMBER_OF_SAMPLES</code> to a large number (a
-million or ten million) and let the program run for a while.</p>
+set <code>SAMPLER_NUMBER_OF_SAMPLES</code> to a large number (e.g.,
+one million) and let the program run for a while.</p>
 
 <p>Suppose we set <code>SAMPLER_NUMBER_OF_SAMPLES</code>
 to <code>1000000</code> (one million) and wish to sub-sample the
-distribution for analysis or visualization.
+distribution for quicker preliminary analysis or visualization.
 The <code>madai_subsample_text_file</code> program will sample
 every <em>N</em>th point from a CSV file into a new CSV file.
 
@@ -515,6 +521,35 @@ every <em>N</em>th point from a CSV file into a new CSV file.
 <p><em>Aside:</em> A faster way to interface with the DistributionSampling library is to link directly to it. For a complete example, look in the <code>DistributionSampling/tutorial/examples/ParabolicPotentialModelCxx</code> directory.</p>
 <p>A skeleton for your own C++ model can be found in <code>DistributionSampling/tutorial/examples/MCMC_Example</code> .
 </div>
+
+<p>Now that the distribution samples have been computed, it is useful
+to visualize the distribution. One way to do this is to create a
+scatterplot matrix that shows pair-wise scatterplots of the parameter
+values. We first need to create a file listing the names of the
+parameters. We will borrow a file used in the next section to do this:
+</p>
+
+<pre>
+$ <span class="input">cp ../parabolic_example/parameter_priors.dat .</span></pre>
+
+<p>This file lists the property names and some other information. Next, generate the scatterplot matrix with</p>
+
+<pre>
+$ <span class="input">madai_gnuplot_scatterplot_matrix trace/mcmc.csv mcmc.pdf parameter_priors.dat 50</span></pre>
+
+<p>You will see this figure.</p>
+
+<p><a href="images/mcmc_fast_50000.png"><img width="75%" height="75%" src="images/mcmc_fast_50000.png"/></a></p>
+
+<p>The horizontal axis is labeled with the input parameter names. The
+left vertical axis also lists the input parameter names except for the
+first row which is labeled "likelihood". Each plot in the matrix,
+which the exception of plots on the diagonal, is the scatterplot of
+the parameter by which it is labeled in the horizontal axis and the
+parameter by which it is labeled in the vertical axis. The plots in
+the upper right of the matrix are redundant with the plots in the
+lower left. Each plot on the diagonal is a histogram that shows the
+density of the sample points in each dimension.</p>
 
 <!--=========================================================================-->
 <h3 id="Slow">2b. Use an Emulator for a Slow Model</h3>
@@ -583,9 +618,9 @@ MEAN_ENERGY
 <p>We are now ready to run the first Distribution Sampling
 utility, <code>madai_generate_training_points</code>.  This program
 will generate a Latin hypercube in the parameter space.  The number of
-sample points is set by
+sample points is determined by
 the <code>GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS</code>
-variable. (The command-line argument is the name of the working
+setting. (The command-line argument is the name of the working
 directory.)</p>
 <pre>
 $ <span class="input">madai_generate_training_points .</span>
@@ -719,8 +754,8 @@ $ <span class="input">head trace/mcmc.csv</span>
 </pre>
 
 <p>The <code>madai_generate_trace</code> program will produce the
-number of points specified in the <code>settings.dat</code> under in
-the <code>SAMPLER_NUMBER_OF_SAMPLES</code> variable.  Depending on the
+number of points specified in the <code>settings.dat</code> under
+the <code>SAMPLER_NUMBER_OF_SAMPLES</code> setting.  Depending on the
 number of the parameters, a larger or smaller number of samples will
 need to be drawn.  Once you are sure that the program is working
 correctly, set <code>SAMPLER_NUMBER_OF_SAMPLES</code> to a large number
