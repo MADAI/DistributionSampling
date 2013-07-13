@@ -439,12 +439,17 @@ MEAN_ENERGY    2.8          1.9
 <pre>$ <span class="input">madai_print_default_settings &gt; ./settings.dat</span></pre>
 
 <div class="box">
-<p><em>Aside:</em> A detailed description of the options in <code>settings.dat</code> can be found in the MADAI Statistics Manual.</p></div>
+<p><em>Aside:</em> <code>madai_print_default_settings</code> produces
+numerous settings. A detailed description of the options
+in <code>settings.dat</code> can be found in the MADAI Statistics
+Manual.</p></div>
 
-<p>Now, use you favorite text editor to edit the settings.dat file. Set
-the variable EXTERNAL_MODEL_EXECUTABLE to
+<p>Now, use you favorite text editor to edit
+the <code>settings.dat</code> file. Change the setting
+EXTERNAL_MODEL_EXECUTABLE to
 <code>../parabolic_example/parabolic_interactive.py</code>.
-Alternatively, use the <code>madai_set_variable</code> program:
+Alternatively, use the <code>madai_set_variable</code> program to
+change the setting:
 </p>
 
 <pre>
@@ -490,15 +495,19 @@ $ <span class="input">head trace/mcmc.csv</span>
 </pre>
 
 <p>The <code>madai_generate_trace</code> program will produce the
- number of points specified in the <code>settings.dat</code> under in
- the <code>SAMPLER_NUMBER_OF_SAMPLES</code> variable.  Depending on the
- number of the parameters, a larger or smaller number of samples will
- need to be drawn.  Once you are sure that the program is working
- correctly, set <code>SAMPLER_NUMBER_OF_SAMPLES</code> to a large number
- (a million or ten million) and let the program run for a
- while.</p>
+number of points specified in the <code>settings.dat</code> under in
+the <code>SAMPLER_NUMBER_OF_SAMPLES</code> variable.  The more
+parameters a model has, the larger the number of samples that will
+need to be drawn to fill the parameter space.  Once you are sure that
+the program is working correctly,
+set <code>SAMPLER_NUMBER_OF_SAMPLES</code> to a large number (a
+million or ten million) and let the program run for a while.</p>
 
-<p>Suppose we set <code>SAMPLER_NUMBER_OF_SAMPLES</code> to <code>1000000</code> and wish to sub-sample the distribution for analysis or visualization.  The <code>madai_subsample_text_file</code> will sample every <em>N</em>th point from a csv file into a new csv file.
+<p>Suppose we set <code>SAMPLER_NUMBER_OF_SAMPLES</code>
+to <code>1000000</code> (one million) and wish to sub-sample the
+distribution for analysis or visualization.
+The <code>madai_subsample_text_file</code> program will sample
+every <em>N</em>th point from a CSV file into a new CSV file.
 
 <pre>$ <span class="input">madai_subsample_text_file 20 trace/mcmc.csv trace/mcmc_50000.csv</span></pre>
 
