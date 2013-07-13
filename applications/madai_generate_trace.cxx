@@ -16,6 +16,7 @@
  *
  *=========================================================================*/
 
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -195,12 +196,6 @@ int main(int argc, char ** argv) {
   if ( samplerType == "PercentileGrid" ) {
     pgs.SetModel( model );
 
-    pgs.SetNumberOfSamples(numberOfSamples);
-    numberOfSamples = pgs.GetNumberOfSamples();
-    if ( verbose ) {
-      std::cout << "Number of grid samples: " << numberOfSamples << "\n";
-    }
-
     // Burn-in samples don't exist for a percentile grid sampling
     numberOfBurnInSamples = 0;
 
@@ -229,6 +224,15 @@ int main(int argc, char ** argv) {
       std::cerr << "Error when setting inactive parameters from file '"
                 << samplerInactiveParametersFile << "'.\n";
       return EXIT_FAILURE;
+    }
+  }
+
+  if ( samplerType == "PercentileGrid" ) {
+    assert( pgs.GetModel() != NULL );
+    pgs.SetNumberOfSamples(numberOfSamples);
+    numberOfSamples = pgs.GetNumberOfSamples();
+    if ( verbose ) {
+      std::cout << "Number of grid samples: " << numberOfSamples << "\n";
     }
   }
 
