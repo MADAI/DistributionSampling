@@ -11,6 +11,8 @@ div.column { color:black; background-color:white; margin-left:auto;
 div.box { margin: 16px 2em;; border:2px solid #56A0D3;
 		padding:0 0.5ex;  }
 div.box p { margin: 0px 0; padding: 8px 0; }
+div.figure { margin: 16px 2em;; border:2px solid #56A0D3;
+		padding:0 0.5ex; text-align:center;  }
 div.wide { color:black; background-color:white; margin-left:0.5em;
 	margin-right:0.5em; padding:0.5em; }
 body { color:#000000; background-color:#56A0D3; padding:0; margin:0;
@@ -509,17 +511,32 @@ the program is working correctly,
 set <code>SAMPLER_NUMBER_OF_SAMPLES</code> to a large number (e.g.,
 one million) and let the program run for a while.</p>
 
-<p>Suppose we set <code>SAMPLER_NUMBER_OF_SAMPLES</code>
-to <code>1000000</code> (one million) and wish to sub-sample the
-distribution for quicker preliminary analysis or visualization.
-The <code>madai_subsample_text_file</code> program will sample
-every <em>N</em>th point from a CSV file into a new CSV file.
+<h3 id="Downsampling">Downsampling</h3>
+
+<p>While visualization software is capable of displaying ten million
+points in space, for analysis you may need to reduce the number of
+points.  To keep the same random distribution, it may be easiest to
+pick out every <em>N</em>-th line.  For example, to reduce one million
+points down to a fifty thousand, pick out every 20th line:</p>
+
+<pre>
+$ <span class="input">madai_subsample_text_file 20 trace/million.csv trace/mcmc_50000.csv</span>
+</pre>
+
+<p>The <code>madai_subsample_text_file</code> program will sample
+every <em>N</em>-th sample point from a CSV file into a new CSV file.</p>
 
 <pre>$ <span class="input">madai_subsample_text_file 20 trace/mcmc.csv trace/mcmc_50000.csv</span></pre>
 
 <div class="box">
-<p><em>Aside:</em> A faster way to interface with the DistributionSampling library is to link directly to it. For a complete example, look in the <code>DistributionSampling/tutorial/examples/ParabolicPotentialModelCxx</code> directory.</p>
-<p>A skeleton for your own C++ model can be found in <code>DistributionSampling/tutorial/examples/MCMC_Example</code> .
+<p><em>Aside:</em> A faster way to interface with the Distribution
+Sampling tools is to link directly to the Distribution Sampling
+library. For a complete example, look in
+the <code>DistributionSampling/tutorial/examples/ParabolicPotentialModelCxx</code>
+directory.</p>
+
+<p>A skeleton for your own C++ model can be found
+in <code>DistributionSampling/tutorial/examples/MCMC_Example</code> .
 </div>
 
 <p>Now that the distribution samples have been computed, it is useful
@@ -539,7 +556,12 @@ $ <span class="input">madai_gnuplot_scatterplot_matrix trace/mcmc.csv mcmc.pdf p
 
 <p>You will see this figure.</p>
 
-<p><a href="images/mcmc_fast_50000.png"><img width="75%" height="75%" src="images/mcmc_fast_50000.png"/></a></p>
+<div class="figure">
+  <a href="images/mcmc_fast_50000.png"><img src="images/mcmc_fast_50000.png" width="75%" height="75%"/></a>
+  <div>
+    <p>Figure 1: Scatterplot matrix of the trace data.</p>
+  </div>
+</div>
 
 <p>The horizontal axis is labeled with the input parameter names. The
 left vertical axis also lists the input parameter names except for the
@@ -709,7 +731,7 @@ define the characteristic length scale of a parameter value as the
 difference between the 75th percentile and the 25th percentile of the
 prior distribution.  For a uniform prior, this is half the range.  The
 default value for &theta;[2+<em>i</em>] the characteristic length
-scale of the <em>i</em>th parameter times
+scale of the <em>i</em>-th parameter times
 the <code>EMULATOR_SCALE</code> option.</p>
 
 <p>For more information, see the manual.</p>
@@ -778,29 +800,32 @@ new: MCMC_NUMBER_OF_BURN_IN_SAMPLES 200
 $ <span class="input">madai_generate_trace . &quot;million.csv&quot;</span>
 </pre>
 
-<h3 id="Downsampling">Downsampling</h3>
+<div class="figure">
+  <a href="images/mcmc_fast_50000.png"><img src="images/mcmc_fast_50000.png" width="40%" height="40%"/></a>
 
-<p>While visualization software is capable of displaying ten million
-points in space, for analysis you may need to reduce the number of
-points.  To keep the same random distribution, it may be easiest to
-pick out every <em>N</em>th line.  For example, to reduce one million
-points down to a fifty thousand, pick out every 20th line:</p>
+  <a href="images/mcmc_emulator_50000_basic.png"><img src="images/mcmc_emulator_50000_basic.png" width="40%" height="40%"/></a>
+  <div>
+    <p>Figure 2: Left - Scatterplot matrix of the parabolic potential
+    model sampled directly. Right - Scatterplot matrix of the emulated
+    parabolic potential model with basic training of the Gaussian
+    Process Emulator enabled.
+    </p>
+  </div>
+</div>
 
-<pre>
-$ <span class="input">madai_subsample_text_file 20 trace/million.csv trace/mcmc_50000.csv</span>
-</pre>
+<div class="figure">
+  <a href="images/mcmc_emulator_50000_better.png"><img src="images/mcmc_emulator_50000_better.png" width="40%" height="40%"/></a>
 
-<p>
-<a href="images/mcmc_fast_50000.png"><img width="40%" height="40%" src="images/mcmc_fast_50000.png"/></a>
+  <a href="images/mcmc_fast_50000.png"><img src="images/mcmc_fast_50000.png" width="40%" height="40%"/></a>
 
-<a href="images/mcmc_emulator_50000_basic.png"><img width="40%" height="40%" src="images/mcmc_emulator_50000_basic.png"/></a>
-</p>
-
-<p>
-<a href="images/mcmc_emulator_50000_better.png"><img width="40%" height="40%" src="images/mcmc_emulator_50000_better.png"/></a>
-
-<a href="images/mcmc_fast_50000.png"><img width="40%" height="40%" src="images/mcmc_fast_50000.png"/></a>
-</p>
+  <div>
+    <p>Figure 3: Left - Scatterplot matrix of the parabolic potential
+    model sampled directly. Right - Scatterplot matrix of the emulated
+    parabolic potential model with more advanced Gaussian Process
+    Emulator training.
+    </p>
+  </div>
+</div>
 
 <h3 id="BasicStatistics">Basic Statistics</h3>
 
