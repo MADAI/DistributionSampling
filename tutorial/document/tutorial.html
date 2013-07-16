@@ -541,7 +541,8 @@ by <code>SAMPLER_NUMBER_OF_SAMPLES</code>.</p>
 <h3 id="BasicStatistics">2b. Basic Statistics</h3>
 
 <p>The utility <code>madai_analyze_trace</code> computes some basic
-statistics about the samples in the generated trace.</p>
+statistics about the samples in the generated trace that may be useful
+to know. Example output from this program is shown below.</p>
 
 <pre>
 $ <span class="input">madai_analyze_trace . million.csv</span>
@@ -807,6 +808,69 @@ $ <span class="input">madai_train_emulator .</span>
 file called <code>emulator_state.dat</code> which contains hyper-parameters
 for each of the retained pca-decomposed sub-models.
 
+<p>One of the Distribution Sampling tools is a program that follows
+the same communication protocol as
+the <code>parabolic_interactive.py</code> program used in Section
+2a. This program, called <code>madai_emulate</code>, can be run
+interactively at the command line.</p>
+
+<pre>
+$ <span class="input">madai_emulate .</span>
+VERSION 1
+PARAMETERS
+3
+X0 UNIFORM -2 2
+K UNIFORM 0.5 4
+TEMP UNIFORM 0.5 10
+OUTPUTS
+3
+MEAN_X
+MEAN_X_SQUARED
+MEAN_ENERGY
+COVARIANCE
+TRIANGULAR_MATRIX
+6
+END_OF_HEADER</pre>
+
+<p>As with the <code>parabolic_interactive.py</code>
+program, <code>madai_emulate</code> waits for the number of parameters
+in the model to be written to standard input and writes the model
+outputs and covariance to standard output. Below is what you should
+see when you enter <code>-0.6 3.5 3.4</code> at the terminal.</p>
+
+<pre>
+<span class="input">-0.6 3.5 3.4</span>
+1.2625668462354174
+3.3999999999999906
+1.3742299842431596
+5.3750608013222107e-17
+1.1870809445509954e-16
+11.71851496421888
+1.1157686618007746e-15
+14.289153193363873</pre>
+
+<p>Now we need to set <code>madai_emulate</code> as
+the <code>EXTERNAL_MODEL_EXECUTABLE</code> and set its single argument.
+
+<pre>
+$ <span class="input">madai_set_variable . EXTERNAL_MODEL_EXECUTABLE madai_emulate</span>
+old: EXTERNAL_MODEL_EXECUTABLE
+new: EXTERNAL_MODEL_EXECUTABLE madai_emulate</pre>
+
+<p>It may be possible that an external program requires command-line
+arguments. The setting <code>EXTERNAL_MODEL_ARGUMENTS</code>
+provides this capability. Arguments should all be specified on
+one line and separated by white space. Double quotation marks should
+surround arguments with spaces.</p>
+
+<p><code>madai_emulate</code> takes a single argument, the
+current working directory. Set that argument as shown below.</p>
+
+<pre>
+$ <span class="input">madai_set_variable . EXTERNAL_MODEL_ARGUMENTS .</span>
+old: EXTERNAL_MODEL_ARGUMENTS
+new: EXTERNAL_MODEL_ARGUMENTS .</pre>
+
 <p>The final step is to run the Markov chain Monte Carlo (MCMC)
 routine on the code.  The <code>madai_generate_trace</code> program
 uses the trained Gaussian Process model emulator to produce model
@@ -816,11 +880,6 @@ compared to observed values to calculate relative likelihood.</p>
 <!-- <p class="centered"><em>L</em> &#8733; exp((-0.5) sum(
 ((<em>Y<sub>_observed</sub></em>[<em>i</em>] - <em>Y<sub>_model</sub></em>[<em>i</em>]) /
 &sigma;[<em>i</em>] ))^<sup>2</sup>)</p> -->
-
-<p>The Metropolis-Hastings MCMC algorithm is used to draw a large
-number of samples from the distribution proportional to likelihood.
-These values are stored in a comma-separated-value (CSV) file
-specified in the arguments.</p>
 
 <pre>
 $ <span class="input">madai_generate_trace . &quot;mcmc.csv&quot;</span>
@@ -841,6 +900,20 @@ $ <span class="input">head trace/mcmc.csv</span>
 -0.19968,1.6921,0.574281,-0.19968,1.75331,0.574281,-6.61224
 -0.19968,1.6921,0.574281,-0.19968,1.75331,0.574281,-6.61224
 </pre>
+
+<p>We expect the emulator to be used frequently enough that we have
+written <code>madai_generate_trace</code> to use the emulator internally if
+<code>EXTERNAL_MODEL_EXECUTABLE</code> is not set or is set to an
+empty value. In fact, this the default behavior
+of <code>madai_generate_trace</code> is to use the emulator. You may
+use the <code>madai_emulate</code> program to access the emulator if
+you wish, but it will typically be slower than if you use the built-in
+emulator.</p>
+
+<p>To use the internal emulator, run</p>
+
+<pre>
+$ <span class="input">madai_set_variable . EXTERNAL_MODEL_EXECUTABLE &quot;&quot;</span></pre>
 
 <p>The <code>madai_generate_trace</code> program will produce the
 number of points specified by
