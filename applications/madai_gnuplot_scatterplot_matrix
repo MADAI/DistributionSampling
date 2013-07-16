@@ -78,7 +78,7 @@ def madai_gnuplot_scatterplot_matrix(
 	densities = [[twoDBins() for j in xrange(i)] for i in xrange(Npars)];
 
 	probability = 'PROBABILITY'
-	probability = 'likelihood'
+	probability = 'Likelihood'
 
 	# Using the generator pattern (an iterable)
 	class CSVRead(object):
@@ -259,7 +259,7 @@ def madai_gnuplot_scatterplot_matrix(
 			w('unset label;\n')
 			w('set xtics offset 0;\n')
 
-	w('set size %g,%g\n' % (0.75 * fsizex, 0.75 * fsizey))
+	w('set size %g,%g\n' % (0.78 * fsizex, 0.78 * fsizey))
 	for i in xrange(Npars):
 		param = params[i]
 		w('unset ylabel;\n')
@@ -272,16 +272,16 @@ def madai_gnuplot_scatterplot_matrix(
 		w('unset y2tics;\n')
 		w('set ytics %g,%g;\n' % (0 , 0.5 * (maxhistogram[i])))
 		w('set origin %g,%g;\n' % (
-				(2 * margin) + (0.14 * fsizex) + (fsizex * i),
-				(2 * margin) + (0.14 * fsizey) + (fsizey * (Npars - i - 1))))
+				(2 * margin) + (0.138 * fsizex) + (fsizex * i),
+				(2 * margin) + (0.125 * fsizey) + (fsizey * (Npars - i - 1))))
 		if i == Npars - 1:
 			w('set xlabel "%s" font "%s" offset 0,1.0;\n'%(param.name, bfont))
 			w('set xtics format "%g";\n')
 			w('set xtics font "%s" offset 0.0,0.3;\n' %(sfont))
-			w('set y2label "%s" font "%s" rotate by 270 offset -1.5,0;\n' % (
+			w('set y2label "%s" font "%s" rotate by 270 offset -0.5,0;\n' % (
 					probability, bfont))
 		if i == 0:
-			w('set ylabel "%s" font "%s" offset 0.6,0;\n' % (
+			w('set ylabel "%s" font "%s" offset 2,0;\n' % (
 					probability, bfont))
 			#w('set ytics format "%g"\n')
 		w('set xrange [%g:%g];\n' %(param.minv, param.maxv))
