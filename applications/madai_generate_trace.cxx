@@ -236,13 +236,7 @@ int main(int argc, char ** argv) {
     }
   }
 
-  std::string traceDirectory =
-    statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
-  madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
-  std::string outputFileName( argv[2] );
-  std::string outputFilePath =
-    traceDirectory + madai::Paths::SEPARATOR + outputFileName;
-
+  std::string outputFilePath( argv[2] );
   std::ofstream outFile(outputFilePath.c_str());
   if ( !outFile.good() ) {
     std::cerr << "Could not open trace file '" << outputFilePath << "' for writing.\n";
