@@ -26,7 +26,7 @@ def Interact(model):
 			if line == '':
 				break
 			for token in line.split():
-				if token == "STOP":
+				if token.lower() == "stop":
 					return
 				yield token
 	o = sys.stdout
