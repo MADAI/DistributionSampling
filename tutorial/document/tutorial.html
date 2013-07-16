@@ -88,7 +88,11 @@ function toggleViz(name) {
 <li>2. <a href="#Running">Running the Software </a></li>
 		<ul style="list-style-type:none;">
 		<li>a. <a href="#Fast">Markov chain Monte Carlo with a Fast 			Model</a></li>
-		<li>b. <a href="#Slow">Use an Emulator for a Slow Model</a></li>
+                <li>b. <a href="#BasicStatistics">Basic Statistics</a></li>
+                <li>c. <a href="#Downsampling">Downsampling</a></li>
+                <li>d. <a href="#Plotting">Plotting</a></li>
+
+		<li>e. <a href="#Slow">Use an Emulator for a Slow Model</a></li>
 		</ul>
 <li>3. <a href="#Visualizing">Visualizing the Results</a></li>
 
@@ -127,7 +131,7 @@ finish.</p>
 These should be numbers which can be readily compared to your
 experimental/observational data.</p> -->
 
-<h3 id="DST">Tutorial Notation</h3>
+<h3>0a. Tutorial Notation</h3>
 
 <p>Throughout the document, some special notation is used</p>
 
@@ -534,7 +538,7 @@ algorithm. Note that the number of burn-in samples are not subtracted
 from the number of samples specified
 by <code>SAMPLER_NUMBER_OF_SAMPLES</code>.</p>
 
-<h3 id="BasicStatistics">Basic Statistics</h3>
+<h3 id="BasicStatistics">2b. Basic Statistics</h3>
 
 <p>The utility <code>madai_analyze_trace</code> computes some basic
 statistics about the samples in the generated trace.</p>
@@ -562,7 +566,7 @@ scaled covariance:
           TEMP  -4.68003e-05    0.00148937    0.00134246
 </pre>
 
-<h3 id="Downsampling">Downsampling</h3>
+<h3 id="Downsampling">2c. Downsampling</h3>
 
 <p>While visualization and analysis software is capable of handling
 tens of millions of points, for faster visualization and analysis you
@@ -591,7 +595,7 @@ directory.</p>
 in <code>DistributionSampling/tutorial/examples/MCMC_Example</code> .
 </div>
 
-<h3 id="Plotting">Plotting</h3>
+<h3 id="Plotting">2d. Plotting</h3>
 
 <p>Now that the distribution samples have been computed, it is useful
 to visualize the distribution. One way to do this is to create a
@@ -629,7 +633,7 @@ $ <span class="input">madai_gnuplot_scatterplot_matrix trace/mcmc.csv mcmc.pdf p
 </div>
 
 <!--=========================================================================-->
-<h3 id="Slow">2b. Use an Emulator for a Slow Model</h3>
+<h3 id="Slow">2e. Use an Emulator for a Slow Model</h3>
 
 <p>The Distribution Sampling tools use a Gaussian Process Emulator to
 emulate a slow model much more quickly than if the model were run
