@@ -54,4 +54,7 @@ def Interact(model):
 		except (StopIteration,KeyboardInterrupt,ValueError,):
 			break
 if __name__ == '__main__':
-	Interact(ParabolicPotentialModel())
+	try:
+		Interact(ParabolicPotentialModel())
+	except (KeyboardInterrupt):
+		pass
