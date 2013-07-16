@@ -1,9 +1,9 @@
 #!/bin/sh
 if [ $# -ne 3 ] ; then
   echo "Usage:"
-  echo "  madai_set_variable DIRECTORY NAME VALUE"
+  echo "  $0 DIRECTORY NAME VALUE"
   echo "Example:"
-  echo "  madai_set_variable . VERBOSE 1"
+  echo "  $0 . VERBOSE 1"
   exit 1;
 fi
 DIR="$1"
