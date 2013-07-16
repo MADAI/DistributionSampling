@@ -18,7 +18,6 @@ class ParabolicPotentialModel(object):
 		'MEAN_ENERGY']
 	@staticmethod
 	def Run(x):
-		x = map(float,x)
 		for i in xrange(1,3):
 			if x[i] <= 0:
 				raise Exception('Parameter %d cannot be non-positive' % (i+1))

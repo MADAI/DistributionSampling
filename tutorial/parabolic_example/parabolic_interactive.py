@@ -44,14 +44,14 @@ def Interact(model):
 	nparams = len(parameters)
 	while True:
 		try:
-			v,e = model.Run([it.next() for i in xrange(nparams)])
+			v,e = model.Run([float(it.next()) for i in xrange(nparams)])
 			assert len(v) == len(e) == len(outputs)
 			o.write(' '.join(map(repr, v)))
 			o.write('\n')
 			o.write(' '.join(map(repr, e)))
 			o.write('\n')
 			o.flush()
-		except (StopIteration,KeyboardInterrupt,):
+		except (StopIteration,KeyboardInterrupt,ValueError,):
 			break
 if __name__ == '__main__':
 	Interact(ParabolicPotentialModel())
