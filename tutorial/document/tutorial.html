@@ -458,12 +458,12 @@ Manual.</p></div>
 the <code>settings.dat</code> file. Change the setting
 EXTERNAL_MODEL_EXECUTABLE to
 <code>../parabolic_example/parabolic_interactive.py</code>.
-Alternatively, use the <code>madai_set_variable</code> program to
+Alternatively, use the <code>madai_change_setting</code> program to
 change the setting:
 </p>
 
 <pre>
-$ <span class="input">madai_set_variable . EXTERNAL_MODEL_EXECUTABLE \
+$ <span class="input">madai_change_setting . EXTERNAL_MODEL_EXECUTABLE \
     &quot;../parabolic_example/parabolic_interactive.py&quot;</span></pre>
 
 <!--
@@ -527,7 +527,7 @@ that discards the first <em>N</em> samples.
 </p>
 
 <pre>
-$ <span class="input">madai_set_variable . MCMC_NUMBER_OF_BURN_IN_SAMPLES 200</span>
+$ <span class="input">madai_change_setting . MCMC_NUMBER_OF_BURN_IN_SAMPLES 200</span>
 old: MCMC_NUMBER_OF_BURN_IN_SAMPLES 0
 new: MCMC_NUMBER_OF_BURN_IN_SAMPLES 200
 $ <span class="input">madai_generate_trace . &quot;million.csv&quot;</span>
@@ -853,7 +853,7 @@ see when you enter <code>-0.6 3.5 3.4</code> at the terminal.</p>
 the <code>EXTERNAL_MODEL_EXECUTABLE</code> and set its single argument.
 
 <pre>
-$ <span class="input">madai_set_variable . EXTERNAL_MODEL_EXECUTABLE madai_emulate</span>
+$ <span class="input">madai_change_setting . EXTERNAL_MODEL_EXECUTABLE madai_emulate</span>
 old: EXTERNAL_MODEL_EXECUTABLE
 new: EXTERNAL_MODEL_EXECUTABLE madai_emulate</pre>
 
@@ -867,7 +867,7 @@ surround arguments with spaces.</p>
 current working directory. Set that argument as shown below.</p>
 
 <pre>
-$ <span class="input">madai_set_variable . EXTERNAL_MODEL_ARGUMENTS .</span>
+$ <span class="input">madai_change_setting . EXTERNAL_MODEL_ARGUMENTS .</span>
 old: EXTERNAL_MODEL_ARGUMENTS
 new: EXTERNAL_MODEL_ARGUMENTS .</pre>
 
@@ -913,7 +913,7 @@ emulator.</p>
 <p>To use the internal emulator, run</p>
 
 <pre>
-$ <span class="input">madai_set_variable . EXTERNAL_MODEL_EXECUTABLE &quot;&quot;</span></pre>
+$ <span class="input">madai_change_setting . EXTERNAL_MODEL_EXECUTABLE &quot;&quot;</span></pre>
 
 <p>The <code>madai_generate_trace</code> program will produce the
 number of points specified by
@@ -925,7 +925,7 @@ set <code>SAMPLER_NUMBER_OF_SAMPLES</code> to a large number (a
 million or more) and let the program run for a while.</p>
 
 <pre>
-$ <span class="input">madai_set_variable . SAMPLER_NUMBER_OF_SAMPLES 1000000</span>
+$ <span class="input">madai_change_setting . SAMPLER_NUMBER_OF_SAMPLES 1000000</span>
 old: SAMPLER_NUMBER_OF_SAMPLES 100
 new: SAMPLER_NUMBER_OF_SAMPLES 1000000
 </pre>
@@ -965,7 +965,7 @@ more thorough emulator training algorithm.</p>
 <p>Change the setting <code>EMULATOR_TRAINING_ALGORITHM</code> to the following:</p>
 
 <pre>
-$ <span class="input">madai_set_variable . EMULATOR_TRAINING_ALGORITHM exhaustive_geometric_kfold_common</span></pre>
+$ <span class="input">madai_change_setting . EMULATOR_TRAINING_ALGORITHM exhaustive_geometric_kfold_common</span></pre>
 
 <p>Now retrain the emulator with</p>
 
