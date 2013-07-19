@@ -27,9 +27,11 @@
 #include <cmath>        // std::exp std::amp
 #include <limits>       // std::numeric_limits
 #include <fstream>      // std::ofstream std::ifstream
+
+#include "Configuration.h"
 #include "GaussianProcessEmulator.h"
-#include "UniformDistribution.h"
 #include "GaussianDistribution.h"
+#include "UniformDistribution.h"
 #include "Paths.h"
 
 #include "madaisys/Directory.hxx"
