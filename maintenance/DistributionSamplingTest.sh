@@ -149,8 +149,8 @@ parabolic_test() (
 		try madai_change_setting . SAMPLER_NUMBER_OF_SAMPLES \
 			$(( $NUMBER_OF_SAMPLES / $NPROC ))
 		try time madai_launch_multiple_madai_generate_trace . $NPROC output
-		try madai_catenate_traces ./trace/output_*.csv > ./trace/output.csv
-		rm ./trace/output_*.csv
+		try madai_catenate_traces ./output_*.csv > ./output.csv
+		rm ./output_*.csv
 	else
 		try madai_change_setting . SAMPLER_NUMBER_OF_SAMPLES \
 			$NUMBER_OF_SAMPLES
@@ -163,11 +163,11 @@ parabolic_test() (
 			command -v gnuplot > /dev/null; } ; then
 		SUF="${GNUPLOT_OUTPUT_SUFFIX:-pdf}"
 		OUTFILE="${PWD}/$(getcommit "${SRC_DIR}")_${MODE}.${SUF}"
-		try madai_gnuplot_scatterplot_matrix ./trace/output.csv "$OUTFILE" \
+		try madai_gnuplot_scatterplot_matrix ./output.csv "$OUTFILE" \
 			parameter_priors.dat 50
 		$(getopencmd) "$OUTFILE"
 	else
-		printfilelink ./trace/output.csv
+		printfilelink ./output.csv
 	fi
 	return 0
 )

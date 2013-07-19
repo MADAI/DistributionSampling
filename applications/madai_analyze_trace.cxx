@@ -54,8 +54,6 @@ int main(int argc, char ** argv) {
   assert (numberOfParameters = parameters.size());
 
   std::string traceFile( statisticsDirectory );
-  traceFile.append( madai::Paths::TRACE_DIRECTORY );
-  traceFile.append( "/" );
   traceFile.append( argv[2] );
 
   if ( !madai::System::IsFile( traceFile ) ) {

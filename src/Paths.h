@@ -33,12 +33,6 @@ namespace Paths {
   extern const char SEPARATOR;
 
   /**
-   * Directory relative to the working directory where traces are
-   * stored.
-   */
-  extern const std::string TRACE_DIRECTORY;
-
-  /**
    * Name of file containing the names of the observables in the
    * model.
    */

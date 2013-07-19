@@ -491,10 +491,8 @@ $ <span class="input">madai_generate_trace . &quot;mcmc.csv&quot;</span>
 <p>We use the term "trace" to refer to the samples generated from the
 MCMC algorithm.</p>
 
-<p>The output file is left in the <code>trace</code> directory:</p>
-
 <pre>
-$ <span class="input">head trace/mcmc.csv</span>
+$ <span class="input">head mcmc.csv</span>
 &quot;X0&quot;,&quot;K&quot;,&quot;TEMP&quot;,&quot;MEAN_X&quot;,&quot;MEAN_X_SQUARED&quot;,&quot;MEAN_ENERGY&quot;,&quot;LogLikelihood&quot;
 -0.687954,3.69012,3.48753,-0.687954,0.945831,3.48753,-11.6557
 -0.68372,3.76719,3.42022,-0.68372,0.921423,3.42022,-11.3976
@@ -577,13 +575,13 @@ example, to reduce one million points down to a fifty thousand, pick
 out every 20th line:</p>
 
 <pre>
-$ <span class="input">madai_subsample_text_file 20 trace/million.csv trace/mcmc_50000.csv</span>
+$ <span class="input">madai_subsample_text_file 20 million.csv mcmc_50000.csv</span>
 </pre>
 
 <p>The <code>madai_subsample_text_file</code> program will sample
 every <em>N</em>-th sample point from a CSV file into a new CSV file.</p>
 
-<pre>$ <span class="input">madai_subsample_text_file 20 trace/mcmc.csv trace/mcmc_50000.csv</span></pre>
+<pre>$ <span class="input">madai_subsample_text_file 20 mcmc.csv mcmc_50000.csv</span></pre>
 
 <div class="box">
 <p><em>Aside:</em> A faster way to interface with the Distribution
@@ -611,7 +609,7 @@ $ <span class="input">cp ../parabolic_example/parameter_priors.dat .</span></pre
 <p>This file lists the property names and some other information. Next, generate the scatterplot matrix with</p>
 
 <pre>
-$ <span class="input">madai_gnuplot_scatterplot_matrix trace/mcmc.csv mcmc.pdf parameter_priors.dat 50</span></pre>
+$ <span class="input">madai_gnuplot_scatterplot_matrix mcmc.csv mcmc.pdf parameter_priors.dat 50</span></pre>
 
 <p>You will see the plot shown in Figure 1.</p>
 
@@ -885,10 +883,8 @@ compared to observed values to calculate relative likelihood.</p>
 $ <span class="input">madai_generate_trace . &quot;mcmc.csv&quot;</span>
 </pre>
 
-<p>The output file is left in the <code>trace</code> directory:</p>
-
 <pre>
-$ <span class="input">head trace/mcmc.csv</span>
+$ <span class="input">head mcmc.csv</span>
 &quot;X0&quot;,&quot;K&quot;,&quot;TEMP&quot;,&quot;MEAN_X&quot;,&quot;MEAN_X_SQUARED&quot;,&quot;MEAN_ENERGY&quot;,&quot;LogLikelihood&quot;
 -0.167188,1.63734,0.790651,0,0,0,-7.0052
 -0.176625,1.60696,0.673026,-0.176625,1.87896,0.673026,-6.89768
@@ -940,7 +936,7 @@ the correct place in parameter space on the right scatterplot matrix,
 the shape of the distribution is quite different.</p>
 
 <pre>
-$ <span class="input">madai_gnuplot_scatterplot_matrix trace/mcmc.csv mcmc.pdf parameter_priors.dat 50</span></pre>
+$ <span class="input">madai_gnuplot_scatterplot_matrix mcmc.csv mcmc.pdf parameter_priors.dat 50</span></pre>
 
 <div class="figure">
   <div class="centered">
