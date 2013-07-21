@@ -87,12 +87,15 @@ function toggleViz(name) {
 		</ul>
 <li>2. <a href="#Running">Running the Software </a></li>
 		<ul style="list-style-type:none;">
-		<li>a. <a href="#Fast">Markov chain Monte Carlo with a Fast 			Model</a></li>
-                <li>b. <a href="#BasicStatistics">Basic Statistics</a></li>
-                <li>c. <a href="#Downsampling">Downsampling</a></li>
-                <li>d. <a href="#Plotting">Plotting</a></li>
+		<li>a. <a href="#Fast">Markov chain Monte Carlo with a Fast
+ 			Model</a></li>
+		<li>b. <a href="#BasicStatistics">Basic Statistics</a></li>
+		<li>c. <a href="#Downsampling">Downsampling</a></li>
+		<li>d. <a href="#Plotting">Plotting</a></li>
 
 		<li>e. <a href="#Slow">Use an Emulator for a Slow Model</a></li>
+		<li>f. <a href="#Slices">Uniform Sampling of a Slice of
+            Parameter Space</a></li>
 		</ul>
 <li>3. <a href="#Visualizing">Visualizing the Results</a></li>
 
@@ -116,20 +119,6 @@ of an example model in two different ways, computing information about
 the samples in the distribution, and visualizating the
 distribution. The tutorial is designed to be read from start to
 finish.</p>
-
-<!-- <p>Before starting, you will need to build an effectively parametrized
- model. Decide which parameters you want to vary in your model and
- what you think the prior distribution of each parameter is. Often,
- the prior distribution may be specified as a uniform distribution
- between some minimum and maximum values. Specifying the prior
- distribution of this parameter this way means that the likelihood of
- the model taking on a parameter value outside that range is
- zero. Though not covered in this tutorial, Gaussian-distributed
- parameter priors are also supported.</p> -->
-
-<!-- <p>Next, you need to decide which model outputs you want to use.
-These should be numbers which can be readily compared to your
-experimental/observational data.</p> -->
 
 <h3>0a. Tutorial Notation</h3>
 
@@ -175,21 +164,13 @@ $ <span class="input">command</span></pre>
 	<ul>
 	  <li>Ubuntu/Debian-based:
 		<pre>
-$ <span class="input">sudo apt-get -y install \
-    build-essential \
-    cmake \
-    libboost-dev \
-    libeigen3-dev \
-    gnuplot</span></pre>
+$ <span class="input">sudo apt-get -y install build-essential</span>
+$ <span class="input">sudo apt-get -y install cmake libboost-dev libeigen3-dev gnuplot</span></pre>
 	  </li>
 	  <li>Red Hat-based:
 <pre>
 $ <span class="input">sudo yum -y groupinstall "Development Tools"</span>
-$ <span class="input">sudo yum -y install \
-    cmake \
-    boost-devel \
-    eigen3-devel \
-    gnuplot</span></pre>
+$ <span class="input">sudo yum -y install cmake boost-devel eigen3-devel gnuplot</span></pre>
 	  </li>
 	  <li>MacOS 10.x with macports:
 	    <pre>$ <span class="input">sudo port install cmake boost eigen3 gnuplot</span></pre>
@@ -385,9 +366,9 @@ second line) and the output variances (the third line):
 
       <ul>
 
-        <li>A uniform prior distribution is in the format &quot;UNIFORM <em>MIN</em> <em>MAX</em>&quot;</li>
+	<li>A uniform prior distribution is in the format &quot;UNIFORM <em>MIN</em> <em>MAX</em>&quot;</li>
 
-        <li>A Gaussian prior distribution is in the format &quot;GAUSSIAN <em>MEAN</em> <em>STDDEV</em>&quot;</li>
+	<li>A Gaussian prior distribution is in the format &quot;GAUSSIAN <em>MEAN</em> <em>STDDEV</em>&quot;</li>
 
       </ul>
 
@@ -401,12 +382,12 @@ second line) and the output variances (the third line):
 
       <ul>
 
-        <li>&quot;VARIANCE <em>Nouts</em> \n&quot; (<em>Nouts</em> is still the number of outputs), <br>or</li>
+	<li>&quot;VARIANCE <em>Nouts</em> \n&quot; (<em>Nouts</em> is still the number of outputs), <br>or</li>
 
-        <li>&quot;COVARIANCE TRIANGULAR_MATRIX <em>M</em> \n&quot;, where <em>M</em>=<em>Nouts</em>&times;(<em>Nouts</em>+1)/2)<br>or</li>
+	<li>&quot;COVARIANCE TRIANGULAR_MATRIX <em>M</em> \n&quot;, where <em>M</em>=<em>Nouts</em>&times;(<em>Nouts</em>+1)/2)<br>or</li>
 
-        <li>&quot;COVARIANCE FULL_MATRIX <em>K</em> \n&quot;, where <em>K</em>=<em>Nouts</em>^<sup>2</sup></li>
-    
+	<li>&quot;COVARIANCE FULL_MATRIX <em>K</em> \n&quot;, where <em>K</em>=<em>Nouts</em>^<sup>2</sup></li>
+
       </ul>
 
     </li>
@@ -465,13 +446,6 @@ change the setting:
 <pre>
 $ <span class="input">madai_change_setting . EXTERNAL_MODEL_EXECUTABLE \
     &quot;../parabolic_example/parabolic_interactive.py&quot;</span></pre>
-
-<!--
-<pre>
-$ <span class="input">KEY=&quot;EXTERNAL_MODEL_EXECUTABLE&quot;</span>
-$ <span class="input">VAL=&quot;../parabolic_example/parabolic_interactive.py&quot;</span>
-$ <span class="input">sed -i &quot;s#^[[:space:]]*${KEY}\([[:space:]].*\)*\$#${KEY} ${VAL}#&quot; ./settings.dat</span></pre>
--->
 
 <p>The final step is to run the Markov chain Monte Carlo (MCMC)
 routine on your model.  The <code>madai_generate_trace</code> program
@@ -766,35 +740,9 @@ program generates &ldquo;okay&rdquo; values for the
 hyper-parameters by default.</p>
 
 <div class="box">
-<p><em>Aside:</em> For more information about covariance functions and hyperparameters, please see the MADAI Statistics Manual.</p>
+<p><em>Aside:</em> For more information about covariance functions and
+hyperparameters, please see the MADAI Statistics Manual.</p>
 </div>
-
-<!-- <div class="box">
-<p><em>Aside:</em> The default covariance function is a square
-exponential function:</p>
-
-<p class="centered">dist(<em>u</em>,<em>v</em>) = sqrt(sum(
-((<em>u</em>[<em>i</em>]-<em>v</em>[<em>i</em>]) /
-&theta;[<em>i</em>+2])^<sup>2</sup> ))</p>
-<p class="centered">Cov(<em>u</em>,<em>v</em>) = &theta;[0] exp(
-(-0.5) dist(<em>u</em>,<em>v</em>)^<sup>2</sup>) + &theta;[1]
-&delta;[<em>u</em>,<em>v</em>]</p>
-
-<p>Where <em>u</em> and <em>v</em> are points in parameter space,
-&theta; is a list of hyper-parameters and &delta; is the Kronecker
-delta.</p>
-
-<p>By default, the nugget (&theta;[1]) is <code>EMULATOR_NUGGET</code>
-and the amplitude (&theta;[0]) is <code>EMULATOR_AMPLITUDE</code>. We
-define the characteristic length scale of a parameter value as the
-difference between the 75th percentile and the 25th percentile of the
-prior distribution.  For a uniform prior, this is half the range.  The
-default value for &theta;[2+<em>i</em>] the characteristic length
-scale of the <em>i</em>-th parameter times
-the <code>EMULATOR_SCALE</code> option.</p>
-
-<p>For more information, see the manual.</p>
-</div> -->
 
 <p>To run the basic training program:</p>
 
@@ -993,37 +941,105 @@ from the parabolic potential model directly (left plot).</p>
   </div>
 </div>
 
+<h3 id="Slices">2f. Uniform Sampling of a Slice of Parameter Space</h3>
+
+<p>The Distribution Sampling tools can also uniformly sample from the
+parameter space.  In the next example, the model has four input
+parameters, but we want to visualize first, a two-dimensional slice
+through parameter space and secondly, a three-dimensional.</p>
+
+<p>To produce a <em>slice</em>, set the <code>SAMPLER</code> setting
+to <code>PercentileGrid</code> and set
+the <code>SAMPLER_INACTIVE_PARAMETERS_FILE</code> setting to point at
+a file that specifies which parameters should be <em>inactivated</em>
+or locked down to a single constant value.</p>
+
+<p>For this example, first make sure you are in the
+<code>DistributionSampling/tutorial</code> directory.
+
+<p>Then make a working directory:</p>
+
+<pre>
+$ <span class="input">mkdir slice</span>
+$ <span class="input">cd slice</span></pre>
+
+<p>Next, point <code>EXTERNAL_MODEL_EXECUTABLE</code> at the example
+program.</p>
+
+<pre>$ <span class="input">madai_change_setting . EXTERNAL_MODEL_EXECUTABLE \
+    ../cup_example/cup.py</span></pre>
+
+<p>Set the <code>EXPERIMENTAL_RESULTS_FILE</code> location:
+
+<pre>$ <span class="input">madai_change_setting . EXPERIMENTAL_RESULTS_FILE \
+    ../cup_example/experimental_results.dat</span></pre>
+
+<p>Then we set the inactive parameters file,
+
+<pre>$ <span class="input">madai_change_setting . SAMPLER_INACTIVE_PARAMETERS_FILE \
+    ../cup_example/inactive_parameters_2d.dat</span></pre>
+
+<p>Let's take a look at the format of the inactive parameters file.
+It has one line for each inactive parameter. Each parameter line is
+followed by the value that it will be fixed at.  Active parameters are
+not listed in this file.</p>
+
+<pre>$ <span class="input">cat ../cup_example/inactive_parameters_2d.dat</span>
+x2 0.0
+x4 0.0</pre>
+
+<p>Finally, we need to change the sampler method from the
+default <code>MetropolisHastings</code>, which returns samples whose
+equilibrium distribution is proportional to posterior likelihood, to
+<code>PercentileGrid</code>, which (non-randomly) samples from
+the <em>prior</em> distribution.  If the prior distribution is a
+uniform distribution from 0 to 100, and we ask
+the <code>PercentileGrid</code> sampler for 50 samples, it will return
+{1,3,5,...97,99}.  If the prior is a Gaussian distribution, then the
+samples will be clustered more tightly near the mean of the
+distribution.
+
+<pre>$ <span class="input">madai_change_setting . SAMPLER PercentileGrid</span></pre>
+
+<p>Since we have two active parameters, the <code>PercentileGrid</code> sampler will return a rectangular grid of points.  If we want 300 samples in each direction, we will need 300&sup2; samples.
+
+<pre>$ <span class="input">madai_change_setting . SAMPLER_NUMBER_OF_SAMPLES 90000</span></pre>
+
+<p>We will use the same <code>madai_generate_trace</code> program to
+
+<pre>$ <span class="input">madai_generate_trace . grid.csv</span></pre>
+
+<h4>Viewing the Slice</h4>
+
+<p>To visualize this slice, open the <code>grid.csv</code> file in the
+MADAI Workbench or ParaView.</p>
+
+<p class="centered"><img src="images/madai_dsl_grid_0.png"></p>
+
+<p>Convert from tabular data to 2-d spacial data using the Table To
+Points filter.  Set <code>X</code> and <code>Y</code>
+to <code>x1</code> and <code>x3</code>.  Set “2D Points” to “yes”.
+After applying the filter, create a new 3D View to see the points in
+space. If you zoom in, you should see discrete points.
+
+<p class="centered"><img src="images/madai_dsl_grid_1.png"></p>
+
+Use the Delaunay2D filter to make the points into a surface.  I've
+colored this surface with LogLikelihood.
+
+<p class="centered"><img src="images/madai_dsl_grid_2.png"></p>
+
+If you want to see Likelihood rather than LogLikelihood, use the
+Calculator filter to calculate it.  I turned on the grid and colored
+using the Black-Body Radiation color map.
+
+<p class="centered"><img src="images/madai_dsl_grid_3.png"></p>
+
+
 <h2 id="Visualizing">3. Visualizing the Results</h2>
 
 <p>TO BE FIXED BEFORE THE TUTORIAL</p>
 
-<!-- <h3>3a. ParaView</h3> -->
-<!-- <p>CSV files can be opened in ParaView or the MADAI Workbench.</p> -->
-
-<p><a href="images/screenshot_001.png">
-<img src="images/screenshot_001.png" alt="" width="218" height="209"></a>
-<a href="images/screenshot_002.png">
-<img src="images/screenshot_002.png" alt="" width="218" height="209"></a>
-<a href="images/scatterplot.png"><img src="images/scatterplot.png" alt="" width="218" height="189"></a>
-<a href="images/screenshot_003.png"><img src="images/screenshot_003.png" alt="" width="218" height="187"></a>
-<a href="images/screenshot_004.png"><img src="images/screenshot_004.png" alt="" width="178" height="141"></a></p>
-
-<!-- <h3>3b. Scatterplot Matrix</h3> -->
-
-<!-- <p>This image was created via <a href="http://matplotlib.org/">Matplotlib</a>.</p> -->
-
-<!-- <h3>3c. GGobi</h3> -->
-<!-- <p>CSV files can be directly loaded by GGobi.</p> -->
-
-<!-- <h3>3d. Percentile Surface</h3> -->
-<!-- <p>This is a stand-alone program that links against VTK. Compiling -->
-<!--   instructions are located inside the file.</p> -->
-<!-- <p><a href="/~hal/pub/PercentileSurface.tgz">PercentileSurface.tgz</a></p> -->
-<!-- <p>This is the 95% surface</p> -->
-<!-- <p><img src="images/screenshot_003.png" alt=""></p> -->
-<!-- <p>This is a comparison of the the 95% surface to a scatterplot of the -->
-<!-- samples.</p> -->
-<!-- <p><img src="images/screenshot_004.png" alt=""></p> -->
 
 <hr>
 
@@ -1034,11 +1050,11 @@ from the parabolic potential model directly (left plot).</p>
 <!--  LocalWords:  px pre moz dddddd MaxOS RedHat Eigen sudo cmake cd
       LocalWords:  libboost dev libeigen groupinstall devel eigen src
       LocalWords:  MacOS macports mkdir executables EOF PCA py mcmc
-      LocalWords:  csv utf os sys Wyka xrange elif sqrt
+      LocalWords:  csv utf os sys Wyka xrange elif sqrt ParaView
       LocalWords:  GetGaussianIntegral MeanX MeanE ErrorX ErrorE dat
       LocalWords:  rundir params IOError len argv arg tt ffffff th td
       LocalWords:  DistributionSampling cbracket preproc specialchar
-      LocalWords:  madai_generate_trace stdout endin
+      LocalWords:  madai_generate_trace stdout endin PercentileGrid
       LocalWords:  STDDEV ParabolicPotentialModel stdin LogLikelihood
       LocalWords:  pca Cov awk ln MyModel cxx iostream fstream madai
       LocalWords:  ErrorType GetScalarOutputsAndCovariance const cerr
@@ -1047,5 +1063,7 @@ from the parabolic potential model directly (left plot).</p>
       LocalWords:  SetObservedScalarCovariance SetStepSize Makefile
       LocalWords:  MetropolisHastingsSampler SamplerCSVWriter Wextra
       LocalWords:  GenerateSamplesAndSaveToFile CXXFLAGS LDFLAGS
-      LocalWords:  lDistributionSampling subsample whitespace
+      LocalWords:  lDistributionSampling subsample whitespace gnuplot
+ -->
+<!--  LocalWords:  hyperparameters
  -->
