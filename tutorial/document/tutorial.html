@@ -21,7 +21,7 @@ body { color:#000000; background-color:#56A0D3; padding:0; margin:0;
 	repeat; background-attachment:fixed; background-size:cover; }
 code { color:#001A57;background-color:#ffffff;}
 pre .input { color:#001A57; background-color:#f0f0f0; }
-pre { color:#000000; background-color:#f0f0f0;
+pre { color:#333300; background-color:#f0f0f0;
 	overflow:auto; overflow-y:visible;
 	border-left:2px #dddddd solid; margin-left:15px;
 	padding-left:10px; padding-top:2px; padding-bottom:2px;
@@ -98,6 +98,9 @@ function toggleViz(name) {
             Parameter Space</a></li>
 		</ul>
 <li>3. <a href="#Visualizing">Visualizing the Results</a></li>
+		<ul style="list-style-type:none;">
+		<li>a. <a href="#PercentileSurfaceFilter">Percentile Surface Filter</a></li>
+		</ul>
 
 </ul>
 
@@ -1020,7 +1023,7 @@ MADAI Workbench or ParaView.</p>
 Points filter.  Set <code>X</code> and <code>Y</code>
 to <code>x1</code> and <code>x3</code>.  Set “2D Points” to “yes”.
 After applying the filter, create a new 3D View to see the points in
-space. If you zoom in, you should see discrete points.
+space. If you zoom in, you should see discrete points.</p>
 
 <p class="centered"><img src="images/madai_dsl_grid_1.png"></p>
 
@@ -1035,11 +1038,63 @@ using the Black-Body Radiation color map.
 
 <p class="centered"><img src="images/madai_dsl_grid_3.png"></p>
 
+<h4>Homework:</h4>
+
+<p>Make a three-dimensional “slice” through this model's parameter
+space.  Hints: you only need to deactivate one parameter; use a
+smaller number of samples; use the Delaunay3D filter; and use the
+Contour filter to find the high-likelihood region.</p>
 
 <h2 id="Visualizing">3. Visualizing the Results</h2>
 
-<p>TO BE FIXED BEFORE THE TUTORIAL</p>
+<h3 id="PercentileSurfaceFilter">3a. Percentile Surface Filter</h3>
 
+<p>There are limitations to viewing the results of the MCMC sampling
+using a scatter-plot matrix, so we will use the MADAI Workbench to
+project those points into three dimensions.</p>
+
+<p>First, use <code>madai_subsample_text_file</code> to reduce the
+size of your MCMC trace down to about 10000 points.  Then load the CSV
+file in the MADAI Workbench/</p>
+
+<p class="centered"><img src="images/madai_dsl_parab_0.png"></p>
+
+<p>After loading the CSV file, convert from tabular data to 3-d
+spacial data using the Table To Points filter.  Set <code>X</code>,
+ <code>Y</code>, and <code>Z</code> to the three model
+parameters <code>X0</code>, <code>K</code>, and <code>TEMP</code>.
+After applying the filter, create a new 3D View to see the points in
+space.
+
+<p class="centered"><img src="images/madai_dsl_parab_1.png"></p>
+
+<p>In general, the scales for each parameter will not be comparable,
+sometimes by many orders of magnitude.  You may need to apply the
+Rescale Points Filter<sup title="Only available in the MADAI
+Workbench, not ParaView"
+style="text-decoration:underline">&#65121;</sup>
+to rescale each dimension.
+
+<p class="centered"><img src="images/madai_dsl_parab_2.png"></p>
+
+<p>Understanding the shape of a collection of points in space is
+difficult, which is why we provide the Percentile Surface
+Filter<sup title="Only available in the MADAI Workbench, not ParaView"
+style="text-decoration:underline">&#65121;</sup>, which draws a
+surface around the densest part of the point cloud.</p>
+
+<p>To figure out which part of the cloud is densest, the filter does
+not calculate density, but makes use of the fact that the density
+increases with log(Likelihood).  It simply draws as surface around the
+95% of the points with the highest log(Likelihood).  Before running
+the filter, be sure that “Point Scalars to Use for Percentile” is set
+to LogLikelihood.</p>
+
+<p class="centered"><img src="images/madai_dsl_parab_3.png"></p>
+
+<p>The resulting surface can be colored with one of the other
+variables to see the relationship between that variable and the three
+parameters we used as spacial dimensions.</p>
 
 <hr>
 
@@ -1050,7 +1105,7 @@ using the Black-Body Radiation color map.
 <!--  LocalWords:  px pre moz dddddd MaxOS RedHat Eigen sudo cmake cd
       LocalWords:  libboost dev libeigen groupinstall devel eigen src
       LocalWords:  MacOS macports mkdir executables EOF PCA py mcmc
-      LocalWords:  csv utf os sys Wyka xrange elif sqrt ParaView
+      LocalWords:  csv utf os sys Wyka xrange elif sqrt ParaView png
       LocalWords:  GetGaussianIntegral MeanX MeanE ErrorX ErrorE dat
       LocalWords:  rundir params IOError len argv arg tt ffffff th td
       LocalWords:  DistributionSampling cbracket preproc specialchar
@@ -1062,8 +1117,8 @@ using the Black-Body Radiation color map.
       LocalWords:  SetObservedScalarValues outputCovariance ofstream
       LocalWords:  SetObservedScalarCovariance SetStepSize Makefile
       LocalWords:  MetropolisHastingsSampler SamplerCSVWriter Wextra
-      LocalWords:  GenerateSamplesAndSaveToFile CXXFLAGS LDFLAGS
+      LocalWords:  GenerateSamplesAndSaveToFile CXXFLAGS LDFLAGS dsl
       LocalWords:  lDistributionSampling subsample whitespace gnuplot
  -->
-<!--  LocalWords:  hyperparameters
+<!--  LocalWords:  hyperparameters Delaunay parab
  -->
