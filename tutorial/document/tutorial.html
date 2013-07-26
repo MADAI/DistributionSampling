@@ -949,7 +949,7 @@ from the parabolic potential model directly (left plot).</p>
 <p>The Distribution Sampling tools can also uniformly sample from the
 parameter space.  In the next example, the model has four input
 parameters, but we want to visualize first, a two-dimensional slice
-through parameter space and secondly, a three-dimensional.</p>
+through parameter space and secondly, a three-dimensional slice.</p>
 
 <p>To produce a <em>slice</em>, set the <code>SAMPLER</code> setting
 to <code>PercentileGrid</code> and set
@@ -1096,7 +1096,57 @@ to LogLikelihood.</p>
 variables to see the relationship between that variable and the three
 parameters we used as spacial dimensions.</p>
 
+
+
+<h3 id="OptimalPercentileSurfaceProjection">3b. Optimal Percentile Surface Projection</h3>
+
+<p>The <code>MaximizeNormalizedShapeIndexProjectionFilter</code> will search for a percentile surface projection with the most interesting shape.	</p>
+
+
+<pre>
+$ <span class="input">tar -x -z -f f_gomez_emu_reg0_2013.tar.gz</span>
+$ <span class="input">mkdir galaxy</span>
+$ <span class="input">cd galaxy</span>
+$ <span class="input">cp ../f_gomez_emu_reg0_2013/parameter_priors.dat .</span>
+$ <span class="input">cp ../f_gomez_emu_reg0_2013/observable_names.dat .</span>
+$ <span class="input">cat &gt; settings.dat &lt;&lt;EOF
+MODEL_OUTPUT_DIRECTORY ../f_gomez_emu_reg0_2013/model_output
+EXPERIMENTAL_RESULTS_FILE ../f_gomez_emu_reg0_2013/experimental_results.dat
+VERBOSE 1
+EMULATOR_TRAINING_ALGORITHM exhaustive_geometric_kfold_common
+MCMC_NUMBER_OF_BURN_IN_SAMPLES 200
+SAMPLER_NUMBER_OF_SAMPLES 1000000
+EXTERNAL_MODEL_EXECUTABLE madai_emulate
+EXTERNAL_MODEL_ARGUMENTS .
+EOF</span>		
+$ <span class="input">madai_pca_decompose .</span>
+PCA decomposition succeeded.
+Wrote PCA decomposition file './pca_decomposition.dat'.
+$ <span class="input">nice madai_train_emulator .</span>
+Emulator training succeeded.
+Wrote emulator state file './emulator_state.dat'.
+$ <span class="input">nice madai_generate_trace . mcmc-1000000.csv</span>
+Using external model executable 'madai_emulate'.
+Using MetropolisHastingsSampler for sampling
+Succeeded writing trace file 'mcmc-1000000.csv'.
+$ <span class="input">madai_analyze_trace . mcmc-1000000.csv > mcmc-analysis.csv</span>
+$ <span class="input">madai_gnuplot_scatterplot_matrix mcmc-1000000.csv mcmc.pdf parameter_priors.dat 100</span>
+input:   /d/data/galaxy/mcmc-1000000.csv
+output:  /d/data/galaxy/mcmc.pdf
+gnuplot file: /tmp/madai_gnuplot_scatterplot_matrix_1jkDqq/scatterplot_matrix.gplt
+$ <span class="input">madai_subsample_text_file 10 mcmc-1000000.csv mcmc-100000.csv</span>
+$ <span class="input">madai_subsample_text_file 100 mcmc-1000000.csv mcmc-10000.csv</span>
+</pre>
+<p>Let's open <code>mcmc-10000.csv</code> in the workbench and apply the Maximize Normalized Shape Index Projection filter.</p>
+
+<p class="centered"><img src="images/madai_dsl_optimal_0.png"></p>
+<p class="centered"><img src="images/madai_dsl_optimal_1.png"></p>
+<p class="centered"><img src="images/madai_dsl_optimal_2.png" width="860"></p>
+
 <hr>
+
+<p>&nbsp;</p>
+
 
 </div>
 </body>
