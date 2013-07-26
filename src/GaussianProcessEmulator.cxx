@@ -27,9 +27,11 @@
 #include <cmath>        // std::exp std::amp
 #include <limits>       // std::numeric_limits
 #include <fstream>      // std::ofstream std::ifstream
+
+#include "Configuration.h"
 #include "GaussianProcessEmulator.h"
-#include "UniformDistribution.h"
 #include "GaussianDistribution.h"
+#include "UniformDistribution.h"
 #include "Paths.h"
 
 #include "madaisys/Directory.hxx"
@@ -186,34 +188,35 @@ static double Score(
   int p = originalModel.m_Parent->m_NumberParameters;
   const Eigen::MatrixXd & trainingParameterValues =
     originalModel.m_Parent->m_TrainingParameterValues;
-  int number_to_leave_out = N / PARTITIONS;
-  int number_to_keep = N - number_to_leave_out;
-  // assume Training Points are totally unsorted.
+  int numberToLeaveOut = N / PARTITIONS;
+  int numberToKeep = N - numberToLeaveOut;
+  // assume Training Points are not sorted in any particular order
   GaussianProcessEmulator dummy;
   dummy.m_NumberParameters = p;
   dummy.m_Parameters = originalModel.m_Parent->m_Parameters;
-  dummy.m_NumberTrainingPoints = number_to_keep;
-  dummy.m_TrainingParameterValues.resize(number_to_keep, p);
+  dummy.m_NumberTrainingPoints = numberToKeep;
+  dummy.m_TrainingParameterValues.resize(numberToKeep, p);
   GaussianProcessEmulator::SingleModel testModel;
   testModel.m_Parent = &dummy;
   testModel.m_CovarianceFunction = originalModel.m_CovarianceFunction;
   testModel.m_RegressionOrder = originalModel.m_RegressionOrder;
   testModel.m_Thetas.resize(originalModel.m_Thetas.size());
   testModel.m_Thetas = originalModel.m_Thetas;
-  testModel.m_ZValues.resize(number_to_keep);
+  testModel.m_ZValues.resize(numberToKeep);
   double score = 0.0;
   for (int k = 0; k < PARTITIONS; ++k) {
     // K-fold cross-validation
-    int first_index_to_skip = k * number_to_leave_out;
-    for (int i = 0; i < number_to_keep; ++i) {
-      int src_index = (i < first_index_to_skip) ? i : (i + number_to_leave_out);
+    int firstIndexToSkip = k * numberToLeaveOut;
+    for (int i = 0; i < numberToKeep; ++i) {
+      int sourceIndex = (i < firstIndexToSkip) ? i : (i + numberToLeaveOut);
       for (int j = 0; j < p; ++j) {
         dummy.m_TrainingParameterValues(i,j) =
-          trainingParameterValues(src_index,j);
+          trainingParameterValues(sourceIndex,j);
       }
-      testModel.m_ZValues(i) = originalModel.m_ZValues(src_index);
+      testModel.m_ZValues(i) = originalModel.m_ZValues(sourceIndex);
     }
-    if (! testModel.MakeCache()) {
+    if ( !testModel.MakeCache() ) {
+      std::cerr << "Error when making cache in test model.\n";
       std::cerr << "ERROR in " __FILE__ ":" << __LINE__ <<  "\n";
       return std::numeric_limits<double>::signaling_NaN();
     }

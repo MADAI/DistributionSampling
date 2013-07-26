@@ -54,8 +54,6 @@ int main(int argc, char ** argv) {
   assert (numberOfParameters = parameters.size());
 
   std::string traceFile( statisticsDirectory );
-  traceFile.append( madai::Paths::TRACE_DIRECTORY );
-  traceFile.append( "/" );
   traceFile.append( argv[2] );
 
   if ( !madai::System::IsFile( traceFile ) ) {
@@ -108,7 +106,7 @@ int main(int argc, char ** argv) {
       parameters[i].GetPriorDistribution()->GetStandardDeviation();
   }
   std::cout << std::setw(14) << "parameter";
-  std::cout << std::setw(14) << "average";
+  std::cout << std::setw(14) << "mean";
   std::cout << std::setw(14) << "std.dev.";
   std::cout << std::setw(14) << "scaled dev.";
   std::cout << std::setw(14) << "best value";

@@ -254,6 +254,7 @@ GaussianProcessEmulatedModel
   return NO_ERROR;
 }
 
+#if 0
 bool
 GaussianProcessEmulatedModel
 ::GetConstantCovariance(std::vector< double > & x)  const
@@ -270,5 +271,6 @@ GaussianProcessEmulatedModel
   x = m_TrainingAndObservedCovariance;
   return true;
 }
+#endif
 
 } // namespace madai

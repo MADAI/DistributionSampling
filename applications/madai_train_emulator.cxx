@@ -59,8 +59,8 @@ int main(int argc, char ** argv) {
       << "EXPERIMENTAL_RESULTS_FILE <value> (default: "
       << madai::Defaults::EXPERIMENTAL_RESULTS_FILE << ")\n"
       << "PCA_FRACTION_RESOLVING_POWER <value> (default: 0.95)\n"
-      << "EMULATOR_TRAINING_RIGOR <value> (default: "
-      << madai::Defaults::EMULATOR_TRAINING_RIGOR << ")\n"
+      << "EMULATOR_TRAINING_ALGORITHM <value> (default: "
+      << madai::Defaults::EMULATOR_TRAINING_ALGORITHM << ")\n"
       << "EMULATOR_COVARIANCE_FUNCTION <value> (default: "
       << madai::Defaults::EMULATOR_COVARIANCE_FUNCTION << ")\n"
       << "EMULATOR_REGRESSION_ORDER <value> (default: "
@@ -124,7 +124,7 @@ int main(int argc, char ** argv) {
     "EMULATOR_SCALE", madai::Defaults::EMULATOR_SCALE);
 
   std::string emulatorTrainingRigor = settings.GetOption(
-    "EMULATOR_TRAINING_RIGOR",  madai::Defaults::EMULATOR_TRAINING_RIGOR );
+    "EMULATOR_TRAINING_ALGORITHM",  madai::Defaults::EMULATOR_TRAINING_ALGORITHM );
   std::transform( emulatorTrainingRigor.begin(), emulatorTrainingRigor.end(),
                   emulatorTrainingRigor.begin(), ::tolower );
 
@@ -151,7 +151,7 @@ int main(int argc, char ** argv) {
   std::string outputFileName = statisticsDirectory + madai::Paths::EMULATOR_STATE_FILE;
 
   // Switch between full and basic training
-  if ( emulatorTrainingRigor == "full" ) {
+  if ( emulatorTrainingRigor == "exhaustive_geometric_kfold_common" ) {
     if (! gpe.Train( emulatorCovarianceFunction,
                      emulatorRegressionOrder ) ) {
       std::cerr << "Error while performing full emulator training.\n";

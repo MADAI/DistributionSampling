@@ -16,7 +16,7 @@ def process_model_output_directory(model, rundir):
 			if len(line) > 0 and line[0] != '#':
 				name, value = line.split()[:2]
 				index = parameter_names.index(name)
-				params[index] = value
+				params[index] = float(value)
 	outputs, errors = model.Run(params)
 	with open(os.path.join(rundir, 'results.dat'), 'w') as o:
 		for name, value, error in zip(output_names, outputs, errors):

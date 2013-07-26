@@ -31,10 +31,12 @@ foreach( test
   GaussianDistributionTest
   LatinHypercubeGeneratorTest
   ModelTest
+  PrincipalComponentDecomposeTest
   RandomTest
+  RetainPrincipalComponentsTest
+  RuntimeParameterFileReaderTest
   SampleTest
   UniformDistributionTest
-  RuntimeParameterFileReaderTest
   )
   add_executable( ${test} ${test}.cxx )
   target_link_libraries( ${test} ${LIBRARIES} )
@@ -72,8 +74,9 @@ add_test( GaussianProcessEmulatorDirectoryReaderTest
   GaussianProcessEmulatorDirectoryReaderTest
   ${TEST_BASE_DIR}/DirectoryStructureTest/statistical_analysis
 )
-add_executable( GradientOutputsTest
-  GradientOutputsTest.cxx
-  GaussianProcessEmulatorTestGenerator.cxx )
-target_link_libraries( GradientOutputsTest ${LIBRARIES} ApplicationUtilities )
-add_test( GradientOutputsTest GradientOutputsTest )
+
+#add_executable( GradientOutputsTest
+#  GradientOutputsTest.cxx
+#  GaussianProcessEmulatorTestGenerator.cxx )
+#target_link_libraries( GradientOutputsTest ${LIBRARIES} ApplicationUtilities )
+#add_test( GradientOutputsTest GradientOutputsTest )

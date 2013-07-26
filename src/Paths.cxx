@@ -26,8 +26,6 @@ const char Paths::SEPARATOR = '\\';
 const char Paths::SEPARATOR = '/';
 #endif
 
-const std::string Paths::TRACE_DIRECTORY( "trace" );
-
 const std::string Paths::OBSERVABLE_NAMES_FILE( "observable_names.dat" );
 
 const std::string Paths::PARAMETERS_FILE( "parameters.dat" );

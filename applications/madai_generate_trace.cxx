@@ -16,6 +16,7 @@
  *
  *=========================================================================*/
 
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -195,12 +196,6 @@ int main(int argc, char ** argv) {
   if ( samplerType == "PercentileGrid" ) {
     pgs.SetModel( model );
 
-    pgs.SetNumberOfSamples(numberOfSamples);
-    numberOfSamples = pgs.GetNumberOfSamples();
-    if ( verbose ) {
-      std::cout << "Number of grid samples: " << numberOfSamples << "\n";
-    }
-
     // Burn-in samples don't exist for a percentile grid sampling
     numberOfBurnInSamples = 0;
 
@@ -232,13 +227,16 @@ int main(int argc, char ** argv) {
     }
   }
 
-  std::string traceDirectory =
-    statisticsDirectory + madai::Paths::TRACE_DIRECTORY;
-  madaisys::SystemTools::MakeDirectory( traceDirectory.c_str() );
-  std::string outputFileName( argv[2] );
-  std::string outputFilePath =
-    traceDirectory + madai::Paths::SEPARATOR + outputFileName;
+  if ( samplerType == "PercentileGrid" ) {
+    assert( pgs.GetModel() != NULL );
+    pgs.SetNumberOfSamples(numberOfSamples);
+    numberOfSamples = pgs.GetNumberOfSamples();
+    if ( verbose ) {
+      std::cout << "Number of grid samples: " << numberOfSamples << "\n";
+    }
+  }
 
+  std::string outputFilePath( argv[2] );
   std::ofstream outFile(outputFilePath.c_str());
   if ( !outFile.good() ) {
     std::cerr << "Could not open trace file '" << outputFilePath << "' for writing.\n";

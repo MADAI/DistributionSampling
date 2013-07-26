@@ -143,11 +143,6 @@ int main( int, char *[] ) {
     return EXIT_FAILURE;
   }
 
-  madai::MetropolisHastingsSampler mcmc;
-  mcmc.SetModel( &gpem );
-
-  mcmc.SetStepSize(0.1);
-
   assert (2 == gpem.GetNumberOfScalarOutputs());
   int t = gpem.GetNumberOfScalarOutputs();
   std::vector< double > observedScalarValues;
@@ -159,10 +154,30 @@ int main( int, char *[] ) {
     observedScalarCovariance[i + (t * i)] = 0.05;
   gpem.SetObservedScalarCovariance(observedScalarCovariance);
 
-  unsigned int numberIter = 500;
+  madai::MetropolisHastingsSampler mcmc;
+  // The Model needs to be completely set up before passing to the
+  // Sampler because the sampler might evaluate the Model right away.
+  mcmc.SetModel( &gpem );
+
+  mcmc.SetStepSize(0.1);
+
+  unsigned int numberIter = 50;
   for (unsigned int count = 0; count < numberIter; count ++) {
     madai::Sample sample = mcmc.NextSample();
     std::cout << sample << "\n";
+
+    // Emulated value
+    std::vector< double > emulatedOutput;
+    gpe.GetEmulatorOutputs( sample.m_ParameterValues, emulatedOutput );
+    std::cout << "\n";
+
+    for ( size_t i = 0; i < emulatedOutput.size(); ++i ) {
+      if ( std::fabs( emulatedOutput[i] - sample.m_OutputValues[i] ) > 1e-5 ) {
+        std::cerr << "Difference found in GaussianProcessEmulatedModel result "
+                  << "and direct GaussianProcessEmulator result.\n";
+        return EXIT_FAILURE;
+      }
+    }
   }
 
   gpem.SetUseModelCovarianceToCalulateLogLikelihood(false);
@@ -170,6 +185,24 @@ int main( int, char *[] ) {
   for (unsigned int count = 0; count < numberIter; count ++) {
     madai::Sample sample = mcmc.NextSample();
     std::cout << sample << "\n";
+
+    // Emulated value
+    std::vector< double > emulatedOutput;
+    gpe.GetEmulatorOutputs( sample.m_ParameterValues, emulatedOutput );
+
+    std::cout << "Direct emulator result: ";
+    for ( size_t i = 0; i < emulatedOutput.size(); ++i ) {
+      std::cout << emulatedOutput[i] << ", ";
+    }
+    std::cout << "\n";
+
+    for ( size_t i = 0; i < emulatedOutput.size(); ++i ) {
+      if ( std::fabs( emulatedOutput[i] - sample.m_OutputValues[i] ) > 1e-5 ) {
+        std::cerr << "Difference found in GaussianProcessEmulatedModel result "
+                  << "and direct GaussianProcessEmulator result.\n";
+        return EXIT_FAILURE;
+      }
+    }
   }
 
   return EXIT_SUCCESS;

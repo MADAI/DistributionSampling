@@ -105,7 +105,7 @@ parabolic_test() (
 	require mktemp python
 	# check to see that all of these got installed intp the PATH
 	require madai_catenate_traces madai_launch_multiple_madai_generate_trace
-	require madai_set_variable madai_print_default_settings
+	require madai_change_setting madai_print_default_settings
 	require madai_generate_training_points madai_pca_decompose
 	require madai_train_emulator
 
@@ -123,36 +123,36 @@ parabolic_test() (
 	# HELLO WORLD
 	EOF
 	try madai_print_default_settings > ./settings.dat
-	try madai_set_variable . VERBOSE 1
+	try madai_change_setting . VERBOSE 1
 
 	if [ "$MODE" = "interact" ] ; then
-		try madai_set_variable . EXTERNAL_MODEL_EXECUTABLE \
+		try madai_change_setting . EXTERNAL_MODEL_EXECUTABLE \
 			"${PARABEXDIR}/parabolic_interactive.py"
 	else
-		try madai_set_variable . EMULATOR_TRAINING_RIGOR full
-		try madai_set_variable . GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS 100
-		try madai_set_variable . GENERATE_TRAINING_POINTS_USE_MAXIMIN 1
+		try madai_change_setting . EMULATOR_TRAINING_ALGORITHM exhaustive_geometric_kfold_common
+		try madai_change_setting . GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS 100
+		try madai_change_setting . GENERATE_TRAINING_POINTS_USE_MAXIMIN 1
 		try madai_generate_training_points . > /dev/null
 		try python "${PARABEXDIR}/parabolic_evaluate.py" \
 			./model_output/run* > /dev/null
 		try madai_pca_decompose .
 
-		try madai_set_variable . EMULATOR_SCALE 0.025
+		try madai_change_setting . EMULATOR_SCALE 0.025
 		try madai_train_emulator .
 	fi
 
-	try madai_set_variable . MCMC_USE_MODEL_ERROR 0
-	try madai_set_variable . MCMC_NUMBER_OF_BURN_IN_SAMPLES 200
+	try madai_change_setting . MCMC_USE_MODEL_ERROR 0
+	try madai_change_setting . MCMC_NUMBER_OF_BURN_IN_SAMPLES 200
 
 	if [ "$PARALLEL_SAMPLING" ] ; then
 		NPROC=${NPROC:-$(get_nproc)}
-		try madai_set_variable . SAMPLER_NUMBER_OF_SAMPLES \
+		try madai_change_setting . SAMPLER_NUMBER_OF_SAMPLES \
 			$(( $NUMBER_OF_SAMPLES / $NPROC ))
 		try time madai_launch_multiple_madai_generate_trace . $NPROC output
-		try madai_catenate_traces ./trace/output_*.csv > ./trace/output.csv
-		rm ./trace/output_*.csv
+		try madai_catenate_traces ./output_*.csv > ./output.csv
+		rm ./output_*.csv
 	else
-		try madai_set_variable . SAMPLER_NUMBER_OF_SAMPLES \
+		try madai_change_setting . SAMPLER_NUMBER_OF_SAMPLES \
 			$NUMBER_OF_SAMPLES
 		try time -p nice madai_generate_trace . output.csv
 	fi
@@ -163,11 +163,11 @@ parabolic_test() (
 			command -v gnuplot > /dev/null; } ; then
 		SUF="${GNUPLOT_OUTPUT_SUFFIX:-pdf}"
 		OUTFILE="${PWD}/$(getcommit "${SRC_DIR}")_${MODE}.${SUF}"
-		try madai_gnuplot_scatterplot_matrix ./trace/output.csv "$OUTFILE" \
+		try madai_gnuplot_scatterplot_matrix ./output.csv "$OUTFILE" \
 			parameter_priors.dat 50
 		$(getopencmd) "$OUTFILE"
 	else
-		printfilelink ./trace/output.csv
+		printfilelink ./output.csv
 	fi
 	return 0
 )
