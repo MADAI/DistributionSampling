@@ -298,8 +298,8 @@ $ <span class="input">python parabolic_example/parabolic_interactive.py</span>
 VERSION 1
 PARAMETERS 3
 X0	UNIFORM	-2.0	2.0
-K	UNIFORM	0.5	4.0
-TEMP	UNIFORM	0.5	10.0
+Kinv	UNIFORM	0.25	4.0
+TEMP	UNIFORM	0.25	4.0
 OUTPUTS 3
 MEAN_X
 MEAN_X_SQUARED
@@ -321,10 +321,11 @@ END_OF_HEADER
       section and indicates how many parameters are in the
       model.</p></li>
 
-  <li><p>Lines 4-6 describe the parameters. The first item is the parameter
-      name, the second item is the type of prior distribution for the
-      parameter, the third and fourth items indicate the minimum and maximum
-      values where the uniform distribution is non-zero.</p></li>
+  <li><p>Lines 4-6 describe the parameters. The first item is the
+      parameter name, the second item is the type of prior
+      distribution for the parameter, the third and fourth items
+      indicate the minimum and maximum values where the uniform
+      distribution is non-zero.</p></li>
 
   <li><p>Line 7 (OUTPUTS 3) begins the output description
   section.</p></li>
@@ -346,9 +347,9 @@ line shown below, you will get the output values from the model (the
 second line) and the output variances (the third line):
 
 <pre>
-<span class="input">0.0 2.25 5.25</span>
-0.0 1.166666666666667 5.250000000000001
-1.0801234497346435 1.6499158227686113 3.712310601229375
+<span class="input">0 2.25 2.25</span>
+1.7952402618064471 5.0625 2.25
+0.1125 0.6570540589064506 0.25851201309032235
 </pre>
 
 <div class="box">
@@ -422,9 +423,9 @@ dot).)</p>
 </p>
 <pre>$ <span class="input">cp ../parabolic_example/experimental_results.dat .</span>
 $ <span class="input">cat experimental_results.dat</span>
-MEAN_X         1.14          0.1
-MEAN_X_SQUARED 2.77634418605 0.1
-MEAN_ENERGY    3.4925        0.1
+MEAN_X         1.28759997   0.050
+MEAN_X_SQUARED 2.28759997   0.179
+MEAN_ENERGY    0.856200015  0.139
 </pre>
 
 <p>Next, we  will create a <code>settings.dat</code> file in
@@ -470,16 +471,16 @@ MCMC algorithm.</p>
 
 <pre>
 $ <span class="input">head mcmc.csv</span>
-&quot;X0&quot;,&quot;K&quot;,&quot;TEMP&quot;,&quot;MEAN_X&quot;,&quot;MEAN_X_SQUARED&quot;,&quot;MEAN_ENERGY&quot;,&quot;LogLikelihood&quot;
--0.687954,3.69012,3.48753,-0.687954,0.945831,3.48753,-11.6557
--0.68372,3.76719,3.42022,-0.68372,0.921423,3.42022,-11.3976
--0.71932,3.75696,3.38807,-0.71932,0.968327,3.38807,-11.3574
--0.624684,3.82671,3.49921,-0.624684,0.847438,3.49921,-11.5668
--0.648931,3.91341,3.55124,-0.648931,0.874838,3.55124,-11.7892
--0.653541,3.92884,3.58919,-0.653541,0.883891,3.58919,-11.9357
--0.626959,3.95924,3.46898,-0.626959,0.831164,3.46898,-11.4492
--0.626959,3.95924,3.46898,-0.626959,0.831164,3.46898,-11.4492
--0.542122,3.93226,3.24617,-0.542122,0.706659,3.24617,-10.5558
+&quot;X0&quot;,&quot;Kinv&quot;,&quot;TEMP&quot;,&quot;MEAN_X&quot;,&quot;MEAN_X_SQUARED&quot;,&quot;MEAN_ENERGY&quot;,&quot;LogLikelihood&quot;
+0.753519,1.57836,0.899513,1.28201,2.38578,0.77336,-4.36406
+0.753519,1.57836,0.899513,1.28201,2.38578,0.77336,-4.36406
+0.746218,1.66737,0.818389,1.26077,2.30536,0.703248,-4.78413
+0.767981,1.59083,0.805214,1.24539,2.2374,0.689978,-5.1405
+0.772022,1.54362,0.861303,1.26323,2.30477,0.738468,-4.5119
+0.772022,1.54362,0.861303,1.26323,2.30477,0.738468,-4.5119
+0.772022,1.54362,0.861303,1.26323,2.30477,0.738468,-4.5119
+0.695059,1.4549,0.863633,1.19886,2.08978,0.743292,-6.54539
+0.695059,1.4549,0.863633,1.19886,2.08978,0.743292,-6.54539
 </pre>
 
 <p>The <code>madai_generate_trace</code> program will produce the
@@ -491,12 +492,18 @@ the program is working correctly,
 set <code>SAMPLER_NUMBER_OF_SAMPLES</code> to a large number (e.g.,
 one million) and let the program run for a while.</p>
 
+<pre>
+$ <span class="input">madai_change_setting . SAMPLER_NUMBER_OF_SAMPLES 1000000</span>
+old: SAMPLER_NUMBER_OF_SAMPLES 100
+new: SAMPLER_NUMBER_OF_SAMPLES 1000000
+</pre>
+
 <p>
 It is not unusual for the MCMC algorithm to start in a region of low
 likelihood. The result is that some of the first samples in the
 generated trace appear to stick out from the main regions of high
 likelihood in the distribution. We refer to this phase of the MCMC
-evolution as the "burn-in" phase. To remove these samples, you can
+evolution as the &quot;burn-in&quot; phase. To remove these samples, you can
 specify a setting called <code>MCMC_NUMBER_OF_BURN_IN_SAMPLES</code>
 that discards the first <em>N</em> samples.
 </p>
@@ -521,25 +528,25 @@ to know. Example output from this program is shown below.</p>
 
 <pre>
 $ <span class="input">madai_analyze_trace . million.csv</span>
-     parameter       average      std.dev.   scaled dev.    best value
-            X0        1.1806      0.109746      0.095043       1.14122
-             K       1.33947      0.370098      0.366302       1.15308
-          TEMP        3.4952      0.100481     0.0366396       3.49317
+     parameter          mean      std.dev.   scaled dev.    best value
+            X0      0.644224      0.475285      0.411609      0.999923
+          Kinv       1.68241      0.903106      0.834254       1.00104
+          TEMP      0.929729      0.158476      0.146394      0.998231
 
 best log likelihood
-      -4.89046
+       -4.0299
 
 covariance:
-                          X0             K          TEMP
-            X0     0.0120442     0.0330516  -0.000148201
-             K     0.0330516      0.136973    0.00412681
-          TEMP  -0.000148201    0.00412681     0.0100964
+                          X0          Kinv          TEMP
+            X0      0.225896     -0.401274      0.014398
+          Kinv     -0.401274        0.8156    -0.0649426
+          TEMP      0.014398    -0.0649426     0.0251147
 
 scaled covariance:
-                          X0             K          TEMP
-            X0    0.00903318     0.0283299  -4.68003e-05
-             K     0.0283299      0.134177    0.00148937
-          TEMP  -4.68003e-05    0.00148937    0.00134246
+                          X0          Kinv          TEMP
+            X0      0.169422     -0.321019     0.0115184
+          Kinv     -0.321019      0.695979    -0.0554177
+          TEMP     0.0115184    -0.0554177     0.0214312
 </pre>
 
 <h3 id="Downsampling">2c. Downsampling</h3>
@@ -620,7 +627,7 @@ training point, you will need the parameter values and the model
 outputs.</p>
 
 <p>We will use the parabolic potential model as an example again.
-This model has the parameters <code>X0</code>, <code>K</code>,
+This model has the parameters <code>X0</code>, <code>Kinv</code>,
 and <code>TEMP</code>; and the observables <code>MEAN_X</code>,
 <code>MEAN_X_SQUARED</code>, and <code>MEAN_ENERGY</code>.</p>
 
@@ -647,9 +654,9 @@ for the parameters.
 
 <pre>$ <span class="input">cp ../parabolic_example/parameter_priors.dat .</span>
 $ <span class="input">cat parameter_priors.dat</span>
-uniform X0   &#0045;2.0 2.0
-uniform K    0.5  4.0
-uniform TEMP 0.5  10.0
+UNIFORM X0      -2.0    2.0
+UNIFORM Kinv    0.25    4.0
+UNIFORM TEMP    0.25    4.0
 </pre>
 
 <p>Next, we specify all of the experimentally observed
@@ -657,9 +664,9 @@ measurements and errors:</p>
 
 <pre>$ <span class="input">cp ../parabolic_example/experimental_results.dat .</span>
 $ <span class="input">cat experimental_results.dat</span>
-MEAN_X         1.14          0.1
-MEAN_X_SQUARED 2.77634418605 0.1
-MEAN_ENERGY    3.4925        0.1
+MEAN_X         1.28759997   0.050
+MEAN_X_SQUARED 2.28759997   0.179
+MEAN_ENERGY    0.856200015  0.139
 </pre>
 
 <p>Finally, we create a file that contains the list of observables
@@ -688,9 +695,10 @@ $ <span class="input">madai_generate_training_points .</span>
 files <code>model_output/run*/parameters.dat</code>.  For example:</p>
 
 <pre>$ <span class="input">cat ./model_output/run0001/parameters.dat</span>
-X0 0.94
-K 2.3025
-TEMP 5.0125</pre>
+X0 -1.5
+Kinv 2.51875
+TEMP 3.45625
+</pre>
 
 <p>The next task is to actually evaluate the model at this point in
 parameter space. This step is typically left up to you because your
@@ -716,9 +724,9 @@ called <code>results.dat</code> in each directory.</p>
 <p>Verify that it works:</p>
 
 <pre>$ <span class="input">cat ./model_output/run0001/results.dat</span>
-MEAN_X 0.94 1.04330761087
-MEAN_X_SQUARED 1.9720907709 2.49334837063
-MEAN_ENERGY 5.0125 3.5443727407</pre>
+MEAN_X 1.88486922161 0.147524825771
+MEAN_X_SQUARED 5.87812585509 0.991401491412
+MEAN_ENERGY 4.46415150519 0.369616766285</pre>
 
 <div class="box">
 <p><em>Aside:</em> It doesn't matter how you populate
@@ -768,9 +776,9 @@ $ <span class="input">madai_emulate .</span>
 VERSION 1
 PARAMETERS
 3
-X0 UNIFORM -2 2
-K UNIFORM 0.5 4
-TEMP UNIFORM 0.5 10
+X0	UNIFORM	-2	2
+Kinv	UNIFORM	0.25	4
+TEMP	UNIFORM	0.25	4
 OUTPUTS
 3
 MEAN_X
@@ -789,14 +797,15 @@ see when you enter <code>-0.6 3.5 3.4</code> at the terminal.</p>
 
 <pre>
 <span class="input">-0.6 3.5 3.4</span>
-1.2625668462354174
-3.3999999999999906
-1.3742299842431596
-5.3750608013222107e-17
-1.1870809445509954e-16
-11.71851496421888
-1.1157686618007746e-15
-14.289153193363873</pre>
+2.4367666912344625
+9.5582566165380527
+3.8049408478401152
+0.012703386214090669
+-8.7378171278191194e-18
+-7.839420506032379e-19
+0.41323617041363248
+7.7322297868210109e-19
+0.08618840459630378</pre>
 
 <p>Now we need to set <code>madai_emulate</code> as
 the <code>EXTERNAL_MODEL_EXECUTABLE</code> and set its single argument.
@@ -931,9 +940,8 @@ from the parabolic potential model directly (left plot).</p>
 
 <div class="figure">
   <div class="centered">
-    <a href="images/mcmc_emulator_50000_better.png"><img src="images/mcmc_emulator_50000_better.png" width="40%" height="40%"/></a>
-
     <a href="images/mcmc_fast_50000.png"><img src="images/mcmc_fast_50000.png" width="40%" height="40%"/></a>
+    <a href="images/mcmc_emulator_50000_better.png"><img src="images/mcmc_emulator_50000_better.png" width="40%" height="40%"/></a>
   </div>
   <div>
     <p>Figure 3: Left - Scatterplot matrix of the parabolic potential
