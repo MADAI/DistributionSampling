@@ -1,83 +1,46 @@
 import math
+
 class ParabolicPotentialModel(object):
 	"""
 	Parabolic Potential Model
 	Copyright 2012-2013, Michigan State University.
-	The software was written in 2013 by Jeffrey Wyka
+	The software was written in 2013 by Scott Pratt
 	while working for the MADAI project <http://madai.us/>
 	This is inteded as an example of a parameterized model of a
 	physical system with a parabolic potential
 	"""
 	Parameters = [
 		('X0',   'UNIFORM',   (-2.0,    2.0)),
-		('K',    'UNIFORM',    (0.5,    4.0)),
-		('TEMP', 'UNIFORM',    (0.5,   10.0))]
+		('Kinv', 'UNIFORM',    (0.25,   4.0)),
+		('TEMP', 'UNIFORM',    (0.25,   4.0))]
 	Outputs = [
 		'MEAN_X',
 		'MEAN_X_SQUARED',
 		'MEAN_ENERGY']
 	@staticmethod
 	def Run(x):
-		for i in xrange(1,3):
-			if x[i] <= 0:
-				raise Exception('Parameter %d cannot be non-positive' % (i+1))
+		def CalcObservables(X0, Kinv, T):
+			root2 = math.sqrt(2.0)
+			PI = math.pi
+			I0 = math.sqrt(PI * Kinv * T / 2.0) * math.erfc(
+				- X0 * math.sqrt(1.0 / (Kinv * T)) / root2)
+			f = math.exp(-0.5 * (X0 ** 2) / (Kinv * T))
+			I1 = (Kinv * T) * math.exp(-0.5 * (X0 ** 2) / (Kinv * T)) + X0 * I0
+			I2 = (Kinv * T) * (I0 - (X0 * f)) + 2.0 * X0 * I1 - (X0 ** 2) * I0
+			xbar = I1 / I0;
+			x2bar = I2 / I0;
+			ebar = (0.5 * T) + (0.5 / Kinv) * (x2bar + (X0 ** 2) - 2.0 * X0 * xbar)
+			return (xbar,x2bar,ebar)
 
-		x0, k, T = x[:3]
+		def CalcObservablesAndError(X0, Kinv, T, uncertainty_scale):
+			xbar, x2bar, ebar = CalcObservables(X0, Kinv, T)
+			sigmax = math.sqrt(Kinv * T);
+			xbar_error = uncertainty_scale * sigmax
+			x2bar_error = uncertainty_scale * ((sigmax ** 2) + (2.0 * xbar * sigmax))
+			ebar_error = uncertainty_scale * T + (0.5 / Kinv) * uncertainty_scale * (
+				(sigmax ** 2) + (2.0 * xbar * sigmax))
+			return ( [xbar, x2bar, ebar], [xbar_error, x2bar_error, ebar_error] )
 
-		def GetGaussianIntegral( power, scale  ):
-			n = int(power)
-			alpha = float(scale)
-			Integral = float(1.0)
-			if n % 2 == 1:
-				Integral = 0.0
-			elif n % 2 == 0:
-				for i in xrange(n/2, n):
-					Integral *= float(i + 1)
-				Integral *= (2.0 * math.sqrt(3.14159265))
-				Integral /= ( 2.0 * math.sqrt(alpha) )**( n+1 )
-			return Integral
-
-		# Calculate the normalization
-		# Integrate( e^( -k/T*(x-x0)^2 ) )
-		normalization = float(GetGaussianIntegral(0, k/T))
-
-		# Calculate Mean X
-		# Integrate( x e^( -k/T*(x - x0)^2 ) ) / normalization
-		MeanX = (float(GetGaussianIntegral(1, k/T))
-				 + x0*float(GetGaussianIntegral(0, k/T)))
-		MeanX /= normalization
-
-		# Calculate Mean X^2
-		# Integrate( x^2 e^( -k/T*(x - x0)^2 ) ) / normalization
-		MeanX2 = float(GetGaussianIntegral(2, k/T))
-		MeanX2 += 2.0*x0*float(GetGaussianIntegral(1, k/T))
-		MeanX2 += x0*x0*float(GetGaussianIntegral(0, k/T))
-		MeanX2 /=normalization
-
-		# Calculate Mean Energy
-		# Integrate( k (x - x0)^2 * e^( -k/T*(x - x0)^2 ) ) /
-		#					 normalization + T/2
-		MeanE = k*float(GetGaussianIntegral(2, k/T))/normalization + T/2.0
-
-		# Calculate Mean X^4 for getting the model error
-		# Integrate( x^4 e^( -k/T*(x-x0)^2 ) ) / normalization
-		MeanX4 = float(GetGaussianIntegral(4, k/T))
-		MeanX4 += 4.0*x0*float(GetGaussianIntegral(3, k/T))
-		MeanX4 += 6.0*x0*x0*float(GetGaussianIntegral(2, k/T))
-		MeanX4 += 4.0*(x0**3)*float(GetGaussianIntegral(1, k/T))
-		MeanX4 += (x0**4)*float(GetGaussianIntegral(0, k/T))
-		MeanX4 /= normalization
-
-		# Calculate Mean Energy^2 for getting the model error
-		# Integrate( ( k^2*(x - x0)^4 + k*T*(x - x0)^2 )
-		#					  * e^( -k/T*(x-x0)^2 ) ) + 0.25*T^2
-		MeanE2 = k*k*float(GetGaussianIntegral(4, k/T))/normalization
-		MeanE2 += k*T*float(GetGaussianIntegral(2, k/T))/normalization
-		MeanE2 += T*T/4.0
-
-		# Calculate Errors
-		ErrorX = (MeanX2 - MeanX**2)**(0.5)
-		ErrorX2 = (MeanX4 - MeanX2**2)**(0.5)
-		ErrorE = (MeanE2 - MeanE**2)**(0.5)
-
-		return ( [ MeanX, MeanX2, MeanE], [ErrorX, ErrorX2, ErrorE ])
+		X0, Kinv, T = map(float, x[:3])
+		uncertainty_scale = 0.05
+		return CalcObservablesAndError(X0, Kinv, T, uncertainty_scale)
