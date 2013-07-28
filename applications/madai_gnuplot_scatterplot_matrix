@@ -262,7 +262,7 @@ def madai_gnuplot_scatterplot_matrix(
 				w('set label "%s" at %g,%g rotate by 270 font "%s" center\n' % (
 						xparam.name,xposition,yposition,bfont));
 				w('set ytics format "%g";\n')
-				w('set ytics font "%s" offset 24,0.0;\n' % sfont)
+				w('set ytics font "%s" offset 19,0.0;\n' % sfont)
 			w('splot "%s" using ($1):($2):($3) with image;\n' % (datafilename))
 			w('unset xlabel;\n')
 			w('unset ylabel;\n')
