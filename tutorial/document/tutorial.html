@@ -83,7 +83,8 @@ function toggleViz(name) {
 		<ul style="list-style-type:none;">
 
 		<li>a. <a href="#DST">The Distribution Sampling Tools</a></li>
-		<li>b. <a href="#other">Other software</a></li>
+    <li>b. <a href="#MADAIWorkbench">MADAI Workbench</a></li>
+		<li>c. <a href="#other">Other software</a></li>
 		</ul>
 <li>2. <a href="#Running">Running the Software </a></li>
 		<ul style="list-style-type:none;">
@@ -140,11 +141,11 @@ $ <span class="input">command</span></pre>
     <pre>output</pre>
   </li>
   <li>
-    <p>Indicates additional information that is not critical to
-    completing the tutorial but which may be useful to know. You may
-    opt to skip these sections and come back to them later.</p>
     <div class="box">
-    <p><em>Aside:</em></p>
+    <p><em>Aside:</em> Indicates additional information that is not
+    critical to completing the tutorial but which may be useful to
+    know. You may opt to skip these sections and come back to them
+    later.</p>
     </div>
   </li>
 
@@ -241,13 +242,18 @@ $ <span class="input">echo $SHELL</span></pre>
 <div class="box">
 <p><em>Aside:</em> If you wish to compile your own software that links against the library, the include files are in <code>${HOME}/local/include</code> and the library is in <code>${HOME}/local/lib/madai</code> . </p></div>
 
-<h3 id="other">1b. Other software</h3>
+<h3 id="MADAIWorkbench">1b. MADAI Workbench</h3>
+
+<p>The <a href="http://vis.madai.us">MADAI Workbench</a> version 1.8
+or higher is required for Section 3 of the tutorial. The MADAI
+Workbench is a customized version of ParaView with additional filters
+that support visualization of high dimensional data.</p>
+
+<h3 id="other">1c. Other software</h3>
 
 <p>This additional software may be useful to you, but is not necessary for the tutorial.</p>
 
 <ul>
-
-  <li>MADAI Workbench (customized ParaView) <a href="http://vis.madai.us/">http://vis.madai.us</a></li>
 
   <li>ParaView &mdash; <a href="http://www.paraview.org/paraview/resources/software.php">paraview.org</a>
     <pre>$ <span class="input">sudo apt-get -y install paraview</span></pre>
@@ -1046,7 +1052,7 @@ using the Black-Body Radiation color map.
 
 <p class="centered"><img src="images/madai_dsl_grid_3.png"></p>
 
-<h4>Homework:</h4>
+<h4>Exercise:</h4>
 
 <p>Make a three-dimensional “slice” through this model's parameter
 space.  Hints: you only need to deactivate one parameter; use a
@@ -1063,12 +1069,12 @@ project those points into three dimensions.</p>
 
 <p>First, use <code>madai_subsample_text_file</code> to reduce the
 size of your MCMC trace down to about 10000 points.  Then load the CSV
-file in the MADAI Workbench/</p>
+file in the MADAI Workbench.</p>
 
 <p class="centered"><img src="images/madai_dsl_parab_0.png"></p>
 
 <p>After loading the CSV file, convert from tabular data to 3-d
-spacial data using the Table To Points filter.  Set <code>X</code>,
+spatial data using the Table To Points filter.  Set <code>X</code>,
  <code>Y</code>, and <code>Z</code> to the three model
 parameters <code>X0</code>, <code>K</code>, and <code>TEMP</code>.
 After applying the filter, create a new 3D View to see the points in
