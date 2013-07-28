@@ -79,6 +79,9 @@ function toggleViz(name) {
 <p><strong>Contents</strong></p>
 <ul style="list-style-type:none;">
 <li>0. <a href="#Introduction">Introduction</a></li>
+    <ul style="list-style-type:none;">
+      <li>a. <a href="#notation">Tutorial Notation</a></li>
+    </ul>
 <li>1. <a href="#Installing">Installing Software</a></li>
 		<ul style="list-style-type:none;">
 
@@ -95,12 +98,11 @@ function toggleViz(name) {
 		<li>d. <a href="#Plotting">Plotting</a></li>
 
 		<li>e. <a href="#Slow">Use an Emulator for a Slow Model</a></li>
-		<li>f. <a href="#Slices">Uniform Sampling of a Slice of
-            Parameter Space</a></li>
 		</ul>
 <li>3. <a href="#Visualizing">Visualizing the Results</a></li>
 		<ul style="list-style-type:none;">
-		<li>a. <a href="#PercentileSurfaceFilter">Percentile Surface Filter</a></li>
+		<li>a. <a href="#Slices">Visualizing a Slice of Parameter Space</a></li>
+		<li>b. <a href="#PercentileSurfaceFilter">Percentile Surface Filter</a></li>
 		</ul>
 
 </ul>
@@ -124,7 +126,7 @@ the samples in the distribution, and visualizating the
 distribution. The tutorial is designed to be read from start to
 finish.</p>
 
-<h3>0a. Tutorial Notation</h3>
+<h3 id="notation">0a. Tutorial Notation</h3>
 
 <p>Throughout the document, some special notation is used</p>
 
@@ -962,7 +964,9 @@ from the parabolic potential model directly (left plot).</p>
   </div>
 </div>
 
-<h3 id="Slices">2f. Uniform Sampling of a Slice of Parameter Space</h3>
+<h2 id="Visualizing">3. Visualizing the Results</h2>
+
+<h3 id="Slices">3a. Visualizing a Slice of Parameter Space</h3>
 
 <p>The Distribution Sampling tools can also uniformly sample from the
 parameter space.  In the next example, the model has four input
@@ -1063,9 +1067,7 @@ space.  Hints: you only need to deactivate one parameter; use a
 smaller number of samples; use the Delaunay3D filter; and use the
 Contour filter to find the high-likelihood region.</p>
 
-<h2 id="Visualizing">3. Visualizing the Results</h2>
-
-<h3 id="PercentileSurfaceFilter">3a. Percentile Surface Filter</h3>
+<h3 id="PercentileSurfaceFilter">3b. Percentile Surface Filter</h3>
 
 <p>There are limitations to viewing the results of the MCMC sampling
 using a scatter-plot matrix, so we will use the MADAI Workbench to
