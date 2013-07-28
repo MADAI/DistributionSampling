@@ -103,6 +103,7 @@ function toggleViz(name) {
 	<ul style="list-style-type:none;">
 		<li>a. <a href="#Slices">Visualizing a Slice of Parameter Space</a></li>
 		<li>b. <a href="#PercentileSurfaceFilter">Percentile Surface Filter</a></li>
+		<li>c. <a href="#OptimalPercentileSurfaceFilter">Optimal Percentile Surface Projection</a></li>
 	</ul>
 
 </ul>
@@ -1116,20 +1117,45 @@ to LogLikelihood.</p>
 variables to see the relationship between that variable and the three
 parameters we used as spacial dimensions.</p>
 
+<!-- *********************************************************************** -->
+<h3 id="OptimalPercentileSurfaceFilter">
+  3c. Optimal Percentile Surface Projection</h3>
 
+<p>The <code>MaximizeNormalizedShapeIndexProjectionFilter</code> will
+search for a percentile surface projection with the most interesting
+shape.  </p>
 
-<h3 id="OptimalPercentileSurfaceProjection">3b. Optimal Percentile Surface Projection</h3>
-
-<p>The <code>MaximizeNormalizedShapeIndexProjectionFilter</code> will search for a percentile surface projection with the most interesting shape.	</p>
-
+<p>For this example, we will use the
+dataset <code>f_gomez_emu_reg0</code> (Facundo Gómez's Galaxy
+Formation Model Emulator).  First we will extract the tarfile:</p>
 
 <pre>
 $ <span class="input">tar -x -z -f f_gomez_emu_reg0_2013.tar.gz</span>
+</pre>
+
+<p>Next, we will make a working directory and move to it.</p>
+
+<pre>
 $ <span class="input">mkdir galaxy</span>
 $ <span class="input">cd galaxy</span>
+</pre>
+
+<p>Next, copy over the <code>parameter_priors.dat</code> and <code>observable_names.dat</code> files.</p>
+
+<pre>
 $ <span class="input">cp ../f_gomez_emu_reg0_2013/parameter_priors.dat .</span>
 $ <span class="input">cp ../f_gomez_emu_reg0_2013/observable_names.dat .</span>
-$ <span class="input">cat &gt; settings.dat &lt;&lt;EOF
+</pre>
+
+<p>Next, make a <code>settings.dat</code> file and be sure to point
+the <code>MODEL_OUTPUT_DIRECTORY</code>
+and <code>EXPERIMENTAL_RESULTS_FILE</code>.  We also suggest
+setting <code>EMULATOR_TRAINING_ALGORITHM</code>
+to <code>exhaustive_geometric_kfold_common</code> for the best
+results.</p>
+
+<pre>
+### settings.dat ###
 MODEL_OUTPUT_DIRECTORY ../f_gomez_emu_reg0_2013/model_output
 EXPERIMENTAL_RESULTS_FILE ../f_gomez_emu_reg0_2013/experimental_results.dat
 VERBOSE 1
@@ -1138,29 +1164,75 @@ MCMC_NUMBER_OF_BURN_IN_SAMPLES 200
 SAMPLER_NUMBER_OF_SAMPLES 1000000
 EXTERNAL_MODEL_EXECUTABLE madai_emulate
 EXTERNAL_MODEL_ARGUMENTS .
-EOF</span>		
+</pre>
+
+<p>We are ready to train the emulator:</p>
+
+<pre>
 $ <span class="input">madai_pca_decompose .</span>
 PCA decomposition succeeded.
 Wrote PCA decomposition file './pca_decomposition.dat'.
-$ <span class="input">nice madai_train_emulator .</span>
+$ <span class="input">madai_train_emulator .</span>
 Emulator training succeeded.
 Wrote emulator state file './emulator_state.dat'.
+</pre>
+
+<p>That should take about a minute.  Next, we will run the MCMC on the
+emulator.</p>
+
+<pre>
 $ <span class="input">nice madai_generate_trace . mcmc-1000000.csv</span>
 Using external model executable 'madai_emulate'.
 Using MetropolisHastingsSampler for sampling
 Succeeded writing trace file 'mcmc-1000000.csv'.
-$ <span class="input">madai_analyze_trace . mcmc-1000000.csv > mcmc-analysis.csv</span>
+</pre>
+
+<p>This should take a while.  (Around half an hour.)  If you want to
+devote <em>N</em> times the resources to the this, you can divide
+<code>SAMPLER_NUMBER_OF_SAMPLES</code> by <em>N</em> and
+run <em>N</em> parallel jobs.>
+
+<pre>
+$ <span class="input">madai_change_setting . SAMPLER_NUMBER_OF_SAMPLES 250000</span>
+old: SAMPLER_NUMBER_OF_SAMPLES 1000000
+new: SAMPLER_NUMBER_OF_SAMPLES 250000
+$ <span class="input">madai_launch_multiple_madai_generate_trace . 4 mcmc_parallel</span>
+$ <span class="input">madai_catenate_traces mcmc_parallel_*.csv > mcmc-1000000.csv</span>
+</pre>
+
+<p>Either way you create <code>mcmc-1000000.csv</code>, we can analyze and plot it:</p>
+
+<pre>
+$ <span class="input">madai_analyze_trace . mcmc-1000000.csv > mcmc-analysis.txt</span>
 $ <span class="input">madai_gnuplot_scatterplot_matrix mcmc-1000000.csv mcmc.pdf parameter_priors.dat 100</span>
 input:   /d/data/galaxy/mcmc-1000000.csv
 output:  /d/data/galaxy/mcmc.pdf
 gnuplot file: /tmp/madai_gnuplot_scatterplot_matrix_1jkDqq/scatterplot_matrix.gplt
-$ <span class="input">madai_subsample_text_file 10 mcmc-1000000.csv mcmc-100000.csv</span>
+</pre>
+
+<p>Let's subsample down to ten thousand points.</p>
+
+<pre>
 $ <span class="input">madai_subsample_text_file 100 mcmc-1000000.csv mcmc-10000.csv</span>
 </pre>
-<p>Let's open <code>mcmc-10000.csv</code> in the workbench and apply the Maximize Normalized Shape Index Projection filter.</p>
+
+<p>Now we can open <code>mcmc-10000.csv</code> in the workbench and
+apply the Maximize Normalized Shape Index Projection filter.</p>
 
 <p class="centered"><img src="images/madai_dsl_optimal_0.png"></p>
+
+<p>This filter operates directly on the table data.  Be sure to check
+only the parameters, and select LogLikelihood for the column to use
+for the percentile.</p>
+
 <p class="centered"><img src="images/madai_dsl_optimal_1.png"></p>
+
+<p>The filter has two outputs: the projected points and the percentile
+surface around those points.</p>
+
+<p>To find out which projection was used, look at the field data
+attache to the output.</p>
+
 <p class="centered"><img src="images/madai_dsl_optimal_2.png" width="860"></p>
 
 <hr>
