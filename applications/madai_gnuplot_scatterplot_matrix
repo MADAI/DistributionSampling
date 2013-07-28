@@ -112,8 +112,18 @@ def madai_gnuplot_scatterplot_matrix(
 	maxdensity = [[0 for j in xrange(i)] for i in xrange(Npars)]
 	maxhistogram = [0 for j in xrange(Npars)]
 
-	gnuplot_directory = tempfile.mkdtemp(
-		prefix='madai_gnuplot_scatterplot_matrix_')
+	UseTmpDir = ('MADAI_GNUPLOT_USE_TMPDIR' in os.environ and (
+			os.environ['MADAI_GNUPLOT_USE_TMPDIR'] != ''))
+
+	if UseTmpDir:
+		gnuplot_directory = tempfile.mkdtemp(
+			prefix='madai_gnuplot_scatterplot_matrix_')
+	else:
+		gnuplot_directory = 'gnuplot_temp'
+		try:
+			os.mkdir(gnuplot_directory)
+		except (OSError,):
+			pass
 
 	for i in xrange(Npars):
 		parameteri = params[i]
