@@ -967,18 +967,25 @@ from the parabolic potential model directly (left plot).</p>
 
 <h2 id="Visualizing">3. Visualizing the Results</h2>
 
+<p>So far, we have been visualizing the results of the MCMC sampling
+with scatterplot matrices. This section describes more advanced
+visualizations available in the MADAI Workbench.</p>
+
 <h3 id="Slices">3a. Visualizing a Slice of Parameter Space</h3>
 
 <p>The Distribution Sampling tools can also uniformly sample from the
 parameter space.  In the next example, the model has four input
-parameters, but we want to visualize first, a two-dimensional slice
-through parameter space and secondly, a three-dimensional slice.</p>
+parameters. We will first visualize a two-dimensional slice through
+parameter space. After that, we will visualize a three-dimensional
+volume.</p>
 
 <p>To produce a <em>slice</em>, set the <code>SAMPLER</code> setting
 to <code>PercentileGrid</code> and set
 the <code>SAMPLER_INACTIVE_PARAMETERS_FILE</code> setting to point at
 a file that specifies which parameters should be <em>inactivated</em>
-or locked down to a single constant value.</p>
+or locked down to a single constant value. The inactivated parameters
+are inactive in the sense that they are not changed by the MCMC
+sampler.</p>
 
 <p>For this example, first make sure you are in the
 <code>DistributionSampling/tutorial</code> directory.
@@ -1017,17 +1024,22 @@ x4 0.0</pre>
 <p>Finally, we need to change the sampler method from the
 default <code>MetropolisHastings</code>, which returns samples whose
 equilibrium distribution is proportional to posterior likelihood, to
-<code>PercentileGrid</code>, which (non-randomly) samples from
-the <em>prior</em> distribution.  If the prior distribution is a
-uniform distribution from 0 to 100, and we ask
-the <code>PercentileGrid</code> sampler for 50 samples, it will return
-{1,3,5,...97,99}.  If the prior is a Gaussian distribution, then the
+<code>PercentileGrid</code>, which generates non-random samples evenly
+spaced in the active parameter space according to the <em>prior</em>
+distribution distributions assigned to each parameter.  If the prior
+distribution for a parameter is a uniform distribution from 0 to 100,
+and we ask the <code>PercentileGrid</code> sampler for 50 samples,
+that parameter will have the values {1,3,5,...97,99}.  If the prior
+distribution for a parameter is a Gaussian distribution, then the
 samples will be clustered more tightly near the mean of the
-distribution.
+distribution in that parameter dimension.</p>
 
 <pre>$ <span class="input">madai_change_setting . SAMPLER PercentileGrid</span></pre>
 
-<p>Since we have two active parameters, the <code>PercentileGrid</code> sampler will return a rectangular grid of points.  If we want 300 samples in each direction, we will need 300&sup2; samples.
+<p>Since we have two active parameters,
+the <code>PercentileGrid</code> sampler will return a rectangular grid
+of points.  If we want 300 samples in each direction, we will need
+300&sup2; samples.</p>
 
 <pre>$ <span class="input">madai_change_setting . SAMPLER_NUMBER_OF_SAMPLES 90000</span></pre>
 
@@ -1042,22 +1054,24 @@ MADAI Workbench or ParaView.</p>
 
 <p class="centered"><img src="images/madai_dsl_grid_0.png"></p>
 
-<p>Convert from tabular data to 2-d spacial data using the Table To
+<p>Convert from tabular data to 2D spatial data using the Table To
 Points filter.  Set <code>X</code> and <code>Y</code>
 to <code>x1</code> and <code>x3</code>.  Set “2D Points” to “yes”.
 After applying the filter, create a new 3D View to see the points in
-space. If you zoom in, you should see discrete points.</p>
+space. When you zoom in, you should see discrete points.</p>
 
 <p class="centered"><img src="images/madai_dsl_grid_1.png"></p>
 
-Use the Delaunay2D filter to make the points into a surface.  I've
-colored this surface with LogLikelihood.
+<p>Use the Delaunay2D filter to make the points into a surface.  Here,
+this surface is colored with LogLikelihood.</p>
 
 <p class="centered"><img src="images/madai_dsl_grid_2.png"></p>
 
-If you want to see Likelihood rather than LogLikelihood, use the
-Calculator filter to calculate it.  I turned on the grid and colored
-using the Black-Body Radiation color map.
+<p>If you want to see Likelihood rather than LogLikelihood, use the
+Calculator filter to calculate it. Make the settings of the Calculator
+match what is shown below. Next, change the color map to the
+Black-Body Radiation color map. This color map better emphasizes the
+regions of high likelihood.</p>
 
 <p class="centered"><img src="images/madai_dsl_grid_3.png"></p>
 
@@ -1071,8 +1085,8 @@ Contour filter to find the high-likelihood region.</p>
 <h3 id="PercentileSurfaceFilter">3b. Percentile Surface Filter</h3>
 
 <p>There are limitations to viewing the results of the MCMC sampling
-using a scatter-plot matrix, so we will use the MADAI Workbench to
-project those points into three dimensions.</p>
+using either scatterplot matrices or slices, so we will use the MADAI
+Workbench to project those points into three dimensions.</p>
 
 <p>First, use <code>madai_subsample_text_file</code> to reduce the
 size of your MCMC trace down to about 10000 points.  Then load the CSV
@@ -1080,42 +1094,38 @@ file in the MADAI Workbench.</p>
 
 <p class="centered"><img src="images/madai_dsl_parab_0.png"></p>
 
-<p>After loading the CSV file, convert from tabular data to 3-d
+<p>After loading the CSV file, convert from tabular data to 3D
 spatial data using the Table To Points filter.  Set <code>X</code>,
  <code>Y</code>, and <code>Z</code> to the three model
 parameters <code>X0</code>, <code>K</code>, and <code>TEMP</code>.
 After applying the filter, create a new 3D View to see the points in
-space.
+space.</p>
 
 <p class="centered"><img src="images/madai_dsl_parab_1.png"></p>
 
 <p>In general, the scales for each parameter will not be comparable,
 sometimes by many orders of magnitude.  You may need to apply the
-Rescale Points Filter<sup title="Only available in the MADAI
-Workbench, not ParaView"
-style="text-decoration:underline">&#65121;</sup>
-to rescale each dimension.
+Rescale Points Filter to rescale each dimension.
 
 <p class="centered"><img src="images/madai_dsl_parab_2.png"></p>
 
 <p>Understanding the shape of a collection of points in space is
-difficult, which is why we provide the Percentile Surface
-Filter<sup title="Only available in the MADAI Workbench, not ParaView"
-style="text-decoration:underline">&#65121;</sup>, which draws a
-surface around the densest part of the point cloud.</p>
+difficult, which is why we provide the Percentile Surface Filter,
+which draws a surface around the densest part of the point cloud.</p>
 
 <p>To figure out which part of the cloud is densest, the filter does
 not calculate density, but makes use of the fact that the density
-increases with log(Likelihood).  It simply draws as surface around the
-95% of the points with the highest log(Likelihood).  Before running
+increases with log-likelihood.  It simply draws as surface around the
+95% of the points with the highest log-likelihood.  Before running
 the filter, be sure that “Point Scalars to Use for Percentile” is set
 to LogLikelihood.</p>
 
 <p class="centered"><img src="images/madai_dsl_parab_3.png"></p>
 
 <p>The resulting surface can be colored with one of the other
-variables to see the relationship between that variable and the three
-parameters we used as spacial dimensions.</p>
+parameters not used for projection to see the relationship between
+that parameter and the three parameters we used as spatial
+dimensions.</p>
 
 <!-- *********************************************************************** -->
 <h3 id="OptimalPercentileSurfaceFilter">
@@ -1123,7 +1133,8 @@ parameters we used as spacial dimensions.</p>
 
 <p>The <code>MaximizeNormalizedShapeIndexProjectionFilter</code> will
 search for a percentile surface projection with the most interesting
-shape.  </p>
+shape. We define the most interesting shape to be the one with the
+largest normalized shape index.</p>
 
 <p>For this example, we will use the
 dataset <code>f_gomez_emu_reg0</code> (Facundo Gómez's Galaxy
@@ -1181,16 +1192,17 @@ Wrote emulator state file './emulator_state.dat'.
 emulator.</p>
 
 <pre>
-$ <span class="input">nice madai_generate_trace . mcmc-1000000.csv</span>
+$ <span class="input">madai_generate_trace . mcmc-1000000.csv</span>
 Using external model executable 'madai_emulate'.
 Using MetropolisHastingsSampler for sampling
 Succeeded writing trace file 'mcmc-1000000.csv'.
 </pre>
 
-<p>This should take a while.  (Around half an hour.)  If you want to
-devote <em>N</em> times the resources to the this, you can divide
+<p>This should take a while (around half an hour). The sampling
+process runs on at most one core. If your system has <em>N</em> cores,
+you can divide
 <code>SAMPLER_NUMBER_OF_SAMPLES</code> by <em>N</em> and
-run <em>N</em> parallel jobs.>
+run <em>N</em> jobs in parallel.</p>
 
 <pre>
 $ <span class="input">madai_change_setting . SAMPLER_NUMBER_OF_SAMPLES 250000</span>
@@ -1231,13 +1243,21 @@ for the percentile.</p>
 surface around those points.</p>
 
 <p>To find out which projection was used, look at the field data
-attache to the output.</p>
+attached to the output. Click the "+" sign next to the tab named
+"Layout #1" over the visualization window. In the list of buttons that
+appears, click on "Spreadsheet View". Select
+"MaximizeNormalizedShapeIndexProjection1" as the dataset to show in
+the spreadsheet view and select the attribute "Field Data".</p> Under
+the "Best Dimensions" column, you will see the three parameters that,
+when assigned to the spatial dimensions X, Y, and Z, produce the most
+interesting shape.</p>
 
 <p class="centered"><img src="images/madai_dsl_optimal_2.png" width="860"></p>
 
 <hr>
 
-<p>&nbsp;</p>
+<p>Congratulations! You have successfully complete the tutorial for
+the Distribution Sampling tools.</p>
 
 
 </div>
