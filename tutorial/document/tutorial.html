@@ -537,7 +537,14 @@ by <code>SAMPLER_NUMBER_OF_SAMPLES</code>.</p>
 
 <p>The utility <code>madai_analyze_trace</code> computes some basic
 statistics about the samples in the generated trace that may be useful
-to know. Example output from this program is shown below.</p>
+to know. Before doing that, we first need to create a file listing the
+names of the parameters. We will borrow a file used in the next
+section to do this:</p>
+
+<pre>
+$ <span class="input">cp ../parabolic_example/parameter_priors.dat .</span></pre>
+
+<p>Example output from this program is shown below.</p>
 
 <pre>
 $ <span class="input">madai_analyze_trace . million.csv</span>
@@ -594,12 +601,8 @@ in <code>DistributionSampling/tutorial/examples/MCMC_Example</code> .
 <p>Now that the distribution samples have been computed, it is useful
 to visualize the distribution. One way to do this is to create a
 scatterplot matrix that shows pair-wise scatterplots of the parameter
-values. We first need to create a file listing the names of the
-parameters. We will borrow a file used in the next section to do this:
+values.
 </p>
-
-<pre>
-$ <span class="input">cp ../parabolic_example/parameter_priors.dat .</span></pre>
 
 <p>This file lists the property names and some other information. Next, generate the scatterplot matrix with</p>
 
