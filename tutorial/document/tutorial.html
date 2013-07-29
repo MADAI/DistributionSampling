@@ -1004,23 +1004,20 @@ $ <span class="input">cd slice</span></pre>
 <p>Next, point <code>EXTERNAL_MODEL_EXECUTABLE</code> at the example
 program.</p>
 
-<pre>$ <span class="input">madai_change_setting . EXTERNAL_MODEL_EXECUTABLE \
-    ../cup_example/cup.py</span></pre>
+<pre>$ <span class="input">madai_change_setting . EXTERNAL_MODEL_EXECUTABLE ../cup_example/cup.py</span></pre>
 
 <p>Set the <code>EXPERIMENTAL_RESULTS_FILE</code> location:
 
-<pre>$ <span class="input">madai_change_setting . EXPERIMENTAL_RESULTS_FILE \
-    ../cup_example/experimental_results.dat</span></pre>
+<pre>$ <span class="input">madai_change_setting . EXPERIMENTAL_RESULTS_FILE ../cup_example/experimental_results.dat</span></pre>
 
 <p>Then we set the inactive parameters file,
 
-<pre>$ <span class="input">madai_change_setting . SAMPLER_INACTIVE_PARAMETERS_FILE \
-    ../cup_example/inactive_parameters_2d.dat</span></pre>
+<pre>$ <span class="input">madai_change_setting . SAMPLER_INACTIVE_PARAMETERS_FILE ../cup_example/inactive_parameters_2d.dat</span></pre>
 
 <p>Let's take a look at the format of the inactive parameters file.
 It has one line for each inactive parameter. Each parameter line is
-followed by the value that it will be fixed at.  Active parameters are
-not listed in this file.</p>
+followed by the value at which it will be fixed.  Active parameters
+are not listed in this file.</p>
 
 <pre>$ <span class="input">cat ../cup_example/inactive_parameters_2d.dat</span>
 x2 0.0
@@ -1055,13 +1052,13 @@ of points.  If we want 300 samples in each direction, we will need
 <h4>Viewing the Slice</h4>
 
 <p>To visualize this slice, open the <code>grid.csv</code> file in the
-MADAI Workbench or ParaView.</p>
+MADAI Workbench.</p>
 
 <p class="centered"><img src="images/madai_dsl_grid_0.png"></p>
 
 <p>Convert from tabular data to 2D spatial data using the Table To
 Points filter.  Set <code>X</code> and <code>Y</code>
-to <code>x1</code> and <code>x3</code>.  Set “2D Points” to “yes”.
+to <code>x1</code> and <code>x3</code>. Check the “2D Points” checkbox
 After applying the filter, create a new 3D View to see the points in
 space. When you zoom in, you should see discrete points.</p>
 
@@ -1093,9 +1090,14 @@ Contour filter to find the high-likelihood region.</p>
 using either scatterplot matrices or slices, so we will use the MADAI
 Workbench to project those points into three dimensions.</p>
 
-<p>First, use <code>madai_subsample_text_file</code> to reduce the
-size of your MCMC trace down to about 10000 points.  Then load the CSV
-file in the MADAI Workbench.</p>
+<p>First, change to the <code>parabolic_emulator</code> directory.</p>
+
+<pre>$ <span class="input">cd ../parabolic_emulator</span></pre>
+
+<p>Then use <code>madai_subsample_text_file</code> to reduce the
+size of your MCMC trace down to about 10000 points.
+
+<p>Next, load the CSV file in the MADAI Workbench.</p>
 
 <p class="centered"><img src="images/madai_dsl_parab_0.png"></p>
 
@@ -1261,7 +1263,7 @@ interesting shape.</p>
 
 <hr>
 
-<p>Congratulations! You have successfully complete the tutorial for
+<p>Congratulations! You have successfully completed the tutorial for
 the Distribution Sampling tools.</p>
 
 
