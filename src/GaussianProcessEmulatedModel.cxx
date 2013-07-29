@@ -49,6 +49,12 @@ GaussianProcessEmulatedModel
   if ( m_GPE->m_Status != GaussianProcessEmulator::READY )
     return Model::OTHER_ERROR;
   m_StateFlag = READY;
+
+  // Change the parent of the PCA decomposed models
+  for ( size_t i = 0; i < m_GPE->m_PCADecomposedModels.size(); ++i ) {
+    m_GPE->m_PCADecomposedModels[i].m_Parent = m_GPE;
+  }
+
   m_Parameters = m_GPE->m_Parameters;
   m_ScalarOutputNames = m_GPE->m_OutputNames;
   if ( !m_GPE->GetUncertaintyScalesAsCovariance( m_TrainingAndObservedCovariance ) ) {
