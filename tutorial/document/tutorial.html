@@ -298,7 +298,30 @@ named <code>parabolic_interactive.py</code>, is written in Python. It
 is located in the
 directory <code>DistributionSampling/tutorial/parabolic_example/</code></p>
 
- This model has the
+<div class="box">
+<p><em>Aside:</em> The Parabolic Potential Example.</p>
+<p>This is a simple model with three inputs and three outputs. It is
+based on a picture of a thermalized particle in a one-dimensional
+harmonic oscillator potential at constant temperature, with the
+complication that the particle is constrained to <em>x</em> &gt;
+0. The particle has mass <em>m</em> = 1 and the potential has the
+form</p>
+<p class="centered">
+<em>V</em>(<em>x</em>) = (<em>x</em> - <em>X0</em>)^2 / (2 × <em>Kinv</em>)
+    &nbsp; if <em>x</em> &gt; 0 <br>
+<em>V</em>(<em>x</em>) =  ∞
+    &nbsp; if <em>x</em> &le; 0</p>
+<p>The three parameters are the temperature <em>TEMP</em>, the offset of
+the potential <em>X0</em>, and the inverse spring
+constant, <em>Kinv</em>. We use <em>Kinv</em> = 1/<em>K</em> instead
+of <em>K</em> because some of the model dependencies will go as
+1/<em>K</em>, and it's a bad idea to pick parameters for which the
+behavior is singular. The three observables are the average energy
+⟨<em>E</em>⟩, the average position, ⟨<em>x</em>⟩ and the average
+squared position ⟨<em>x</em>^2⟩.</p>
+</div>
+
+<p>This model has the
 parameters <code>X0</code>, <code>K</code>, and <code>TEMP</code>; and
 the observables <code>MEAN_X</code>, <code>MEAN_X_SQUARED</code>, and
 <code>MEAN_ENERGY</code>. When we run the program, the output looks
