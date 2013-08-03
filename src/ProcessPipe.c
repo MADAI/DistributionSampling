@@ -18,9 +18,8 @@
 
 #include "ProcessPipe.h"
 
-#include "Configuration.h"
-
-#if defined( HAS_POSIX_PIPES )
+#if defined(__unix__) || ( defined(__APPLE__) && defined(__MACH__) )
+/* to do: test this out under MacOSX */
 
 #include <unistd.h> /* fork, pipe, dup2, close, execvp */
 #include <stdio.h>  /* ANSI C standard calls (FILE*) */
@@ -39,8 +38,6 @@ int CreateProcessPipe( ProcessPipe * pp, char * const * argv ) {
   int question_pipe[2];
   int answer_pipe[2];
   pid_t pid;
-
-  //printf("argv[0]: %s\n", argv[0]);
 
   if ( argv == NULL ) {
     return perror_failure("argv is NULL :(");
@@ -85,7 +82,7 @@ int CreateProcessPipe( ProcessPipe * pp, char * const * argv ) {
     /* if you reach this line, huge error. */
     fprintf( stderr, "Error while trying to execute \"%s\"\n", argv[0] );
     perror( "execvp" );
-    exit( EXIT_FAILURE );
+    exit(EXIT_FAILURE);
   } else {
     /* parent */
     if ( -1 == close( question_pipe[0] ) )
@@ -102,20 +99,78 @@ int CreateProcessPipe( ProcessPipe * pp, char * const * argv ) {
 
 #elif defined _WIN32
 
-#include <stdio.h>  /* fprintf() */
-#include <stdlib.h> /* exit() */
+/* I learned about CreatePipe, SetHandleInformation, and CreateProcess
+   from <http://support.microsoft.com/kb/190351>. What I have added is
+   moving that code into a cross-platform ANSI C framework. */
+#include <stdio.h>   /* ANSI C standard calls (FILE*) */
+#include <io.h>
+#define _WIN32_WINNT 0x501 /* enable GetProcessId() function */
 #include <windows.h>
+#include <fcntl.h>
 int CreateProcessPipe( ProcessPipe * pp, char * const * argv ) {
-  /* FIXME */
-  pp->question = NULL;
-  pp->answer = NULL;
-  pp->pid = -1;
-  fprintf( stderr, "Not Implemented Yet :(" );
-  exit( EXIT_FAILURE );
+  HANDLE OutReadHandle = NULL;
+  HANDLE OutWriteHandle = NULL;
+  HANDLE InReadHandle = NULL;
+  HANDLE InWriteHandle = NULL;
+  SECURITY_ATTRIBUTES saAttr;
+  saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+  saAttr.bInheritHandle = TRUE;
+  saAttr.lpSecurityDescriptor = NULL;
+
+  if ( ! CreatePipe(&OutReadHandle, &OutWriteHandle, &saAttr, 0) ) {
+    fprintf(stderr,"Error in " __FILE__ ":%d\n",__LINE__);
+    return EXIT_FAILURE;
+  }
+  if ( ! SetHandleInformation(OutReadHandle, HANDLE_FLAG_INHERIT, 0) ) {
+    fprintf(stderr,"Error in " __FILE__ ":%d\n",__LINE__);
+    return EXIT_FAILURE;
+  }
+  if ( ! CreatePipe(&InReadHandle, &InWriteHandle, &saAttr, 0) ) {
+    fprintf(stderr,"Error in " __FILE__ ":%d\n",__LINE__);
+    return EXIT_FAILURE;
+  }
+  if ( ! SetHandleInformation(InWriteHandle, HANDLE_FLAG_INHERIT, 0) ) {
+    fprintf(stderr,"Error in " __FILE__ ":%d\n",__LINE__);
+    return EXIT_FAILURE;
+  }
+  PROCESS_INFORMATION piProcInfo;
+  ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
+  STARTUPINFO siStartInfo;
+  ZeroMemory( &siStartInfo, sizeof(STARTUPINFO) );
+  siStartInfo.cb = sizeof(STARTUPINFO);
+  siStartInfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+  siStartInfo.hStdOutput = OutWriteHandle;
+  siStartInfo.hStdInput = InReadHandle;
+  siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+  if (! CreateProcess(
+    NULL,
+    argv[0],        /* command line */
+    NULL,           /* process security attributes */
+    NULL,           /* primary thread security attributes */
+    TRUE,           /* handles are inherited */
+    0,              /* creation flags */
+    NULL,           /* use parent's environment */
+    NULL,           /* use parent's current directory */
+    &siStartInfo,   /* STARTUPINFO pointer */
+    &piProcInfo)) { /* receives PROCESS_INFORMATION  */
+    fprintf(stderr,"Error in " __FILE__ ":%d\n",__LINE__);
+    return EXIT_FAILURE;
+  }
+
+  pp->question = _fdopen(_open_osfhandle((intptr_t)(InWriteHandle), 0), "w");
+  pp->answer = _fdopen(_open_osfhandle(
+    (intptr_t)(OutReadHandle), _O_RDONLY), "r");
+  pp->pid = (long int)(GetProcessId(piProcInfo.hProcess));
+
+  CloseHandle(piProcInfo.hProcess);
+  CloseHandle(piProcInfo.hThread);
+
+  return EXIT_SUCCESS;
 }
 
 #else
 
-#error "Posix pipes could not be found on this system. Cannot compile."
+#error "We only support WIN32 and POSIX.  Sorry."
 
 #endif
