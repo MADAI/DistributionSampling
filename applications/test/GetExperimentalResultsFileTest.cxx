@@ -43,7 +43,8 @@ int main( int, char *[] ) {
 
   // Try current directory
   std::string statisticsDirectory( "." );
-  std::string expectedFile( "./experimental_results.dat" );
+  std::string expectedFile =
+    statisticsDirectory + madai::Paths::SEPARATOR + "experimental_results.dat";
   std::string actualFile =
     madai::GetExperimentalResultsFile( statisticsDirectory, settings );
   if ( expectedFile != actualFile ) {

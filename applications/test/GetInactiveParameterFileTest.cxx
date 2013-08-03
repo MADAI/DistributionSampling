@@ -43,7 +43,8 @@ int main( int, char *[] ) {
 
   // Try current directory
   std::string statisticsDirectory( "." );
-  std::string expectedFile( "./inactive_parameters.dat" );
+  std::string expectedFile =
+    statisticsDirectory + madai::Paths::SEPARATOR + "inactive_parameters.dat";
   std::string actualFile =
     madai::GetInactiveParametersFile( statisticsDirectory, settings );
   if ( expectedFile != actualFile ) {

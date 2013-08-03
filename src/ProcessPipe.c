@@ -114,7 +114,7 @@ int CreateProcessPipe( ProcessPipe * pp, char * const * argv ) {
 #include <fcntl.h>
 
 void KillProcess(ProcessPipe * pp) {
-  if (pp->pid != NULL)
+  if (pp->pid != 0)
     TerminateProcess((HANDLE)(pp->pid), 0);
 }
 
