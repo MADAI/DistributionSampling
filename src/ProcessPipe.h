@@ -53,6 +53,10 @@ typedef struct ProcessPipe {
  may need to pass an absolute path. argv should be NULL terminated. */
  int CreateProcessPipe(ProcessPipe * pp, char * const * argv);
 
+ /**
+    OS-dependent way of killing a process */
+ void KillProcess(ProcessPipe * pp);
+
 #ifdef __cplusplus
   }
 }

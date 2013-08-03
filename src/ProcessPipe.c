@@ -24,8 +24,13 @@
 #include <unistd.h> /* fork, pipe, dup2, close, execvp */
 #include <stdio.h>  /* ANSI C standard calls (FILE*) */
 #include <stdlib.h>
+#include <signal.h> // kill, SIGINT
 
-int perror_failure(const char *s) {
+void KillProcess(ProcessPipe * pp) {
+  kill((pid_t)(pp->pid), SIGINT);
+}
+
+static int perror_failure(const char *s) {
   perror( s );
   return EXIT_FAILURE;
 }
@@ -107,6 +112,12 @@ int CreateProcessPipe( ProcessPipe * pp, char * const * argv ) {
 #define _WIN32_WINNT 0x501 /* enable GetProcessId() function */
 #include <windows.h>
 #include <fcntl.h>
+
+void KillProcess(ProcessPipe * pp) {
+  if (pp->pid != NULL)
+    TerminateProcess((HANDLE)(pp->pid), 0);
+}
+
 int CreateProcessPipe( ProcessPipe * pp, char * const * argv ) {
   HANDLE OutReadHandle = NULL;
   HANDLE OutWriteHandle = NULL;
@@ -161,7 +172,8 @@ int CreateProcessPipe( ProcessPipe * pp, char * const * argv ) {
   pp->question = _fdopen(_open_osfhandle((intptr_t)(InWriteHandle), 0), "w");
   pp->answer = _fdopen(_open_osfhandle(
     (intptr_t)(OutReadHandle), _O_RDONLY), "r");
-  pp->pid = (long int)(GetProcessId(piProcInfo.hProcess));
+  // store the process handle, not PID.
+  pp->pid = (long int)(piProcInfo.hProcess);
 
   CloseHandle(piProcInfo.hProcess);
   CloseHandle(piProcInfo.hThread);

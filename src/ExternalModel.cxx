@@ -24,10 +24,6 @@
 #include <string> // std::string
 #include <cstring> // std::strcmp
 
-/** \todo Add macro defined at configure time that states whether
-* signal.h is available to the compiler. */
-#include <signal.h> // kill, SIGINT
-
 #include "ExternalModel.h"
 #include "GaussianDistribution.h"
 #include "UniformDistribution.h"
@@ -61,9 +57,8 @@ ExternalModel
     // stdin is closed for reading.
   }
   // If it doesn't clean itself up, we send a ctrl-c.
-  if ( m_Process.pid != -1 ) {
-    kill((pid_t)(m_Process.pid), SIGINT);
-  }
+  // KillProcess() is OS-independent way of doing that.
+  KillProcess( &(m_Process) );
 }
 
 

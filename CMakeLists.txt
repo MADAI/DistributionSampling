@@ -67,20 +67,6 @@ if ( BUILD_DOCUMENTATION )
   endif()
 endif()
 
-## Compile time checks for the existence of required headers
-set( try_compile_directory ${DistributionSampling_BINARY_DIR}/TryCompiles )
-try_compile( HAS_POSIX_PIPES ${try_compile_directory}
-  ${DistributionSampling_SOURCE_DIR}/CMake/HasPosixPipes.cxx
-  OUTPUT_VARIABLE HAS_POSIX_PIPES_COMPILE_OUTPUT
-)
-
-if ( HAS_POSIX_PIPES )
-  message( STATUS "posix pipes found" )
-else()
-  message( FATAL_ERROR "No posix pipes are available on this system!" )
-  message( ${HAS_POSIX_PIPES_COMPILE_OUTPUT} )
-endif()
-
 ## Distribution Library configuration file
 configure_file( src/Configuration.h.in ${DistributionSampling_BINARY_DIR}/Configuration.h )
 list(APPEND DistributionSampling_INCLUDE_DIRS ${DistributionSampling_BINARY_DIR} )

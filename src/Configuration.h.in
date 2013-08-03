@@ -19,8 +19,6 @@
 #ifndef madai_Configuration_h_included
 #define madai_Configuration_h_included
 
-#cmakedefine HAS_POSIX_PIPES
-
 #cmakedefine OPENMP_FOUND
 
 #endif // madai_Configuration_h_included
