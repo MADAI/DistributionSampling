@@ -36,29 +36,12 @@ ExternalModel
 ::ExternalModel() :
   m_CovarianceMode(NO_COVARIANCE)
 {
-  // Mark the question and answer fields in the ProcessPipe as NULL so
-  // that if they are not NULL at destruction we will know to close them.
-  m_Process.question = NULL;
-  m_Process.answer   = NULL;
-  m_Process.pid      = -1;
 }
 
 
 ExternalModel
 ::~ExternalModel()
 {
-  if ( m_Process.question != NULL ) {
-    std::fclose( m_Process.question );
-  }
-
-  if ( m_Process.answer != NULL ) {
-    std::fclose( m_Process.answer );
-    // Hopefully the external process will clean itself up after its
-    // stdin is closed for reading.
-  }
-  // If it doesn't clean itself up, we send a ctrl-c.
-  // KillProcess() is OS-independent way of doing that.
-  KillProcess( &(m_Process) );
 }
 
 
@@ -121,8 +104,7 @@ ExternalModel
   }
   argv[arguments.size()+1] = NULL; // NULL-terminated array
 
-  // CreateProcessPipe returns EXIT_FAILURE on error, EXIT_SUCCESS otherwise
-  int createError = CreateProcessPipe( &(m_Process), argv );
+  bool createStatus = m_Process.Start(argv);
 
   // Free up the argv arrays
   for ( size_t i = 0; i <= arguments.size(); ++i ) {
@@ -134,7 +116,7 @@ ExternalModel
   m_StateFlag = ERROR;
 
   // Now check for an error in the ProcessPipe creation
-  if ( EXIT_FAILURE == createError ) {
+  if ( ! createStatus ) {
     std::cerr << "CreateProcessPipe returned failure.\n";
     return OTHER_ERROR;
   }
@@ -352,6 +334,7 @@ ExternalModel
   // Send the STOP message
   std::fprintf( m_Process.question, "STOP\n" );
   std::fflush( m_Process.question );
+  m_Process.Stop();
 
   // Don't expect an answer
 

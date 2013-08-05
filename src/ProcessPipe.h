@@ -19,47 +19,43 @@
 #ifndef madai_ProcessPipe_h_included
 #define madai_ProcessPipe_h_included
 
-#ifdef __cplusplus
-#include <cstdio>
+#include <cstdio> // std::FILE
 namespace madai {
-  extern "C" {
-    typedef struct ProcessPipe {
-      std::FILE * question;
-      std::FILE * answer;
-      long int pid; /* in case other signals need to be sent. */
-    } ProcessPipe;
 
-#else /* NOT __cplusplus */
+/**
+   \todo document this.
+ */
+class ProcessPipe {
+public:
+  std::FILE * question;
+  std::FILE * answer;
+  ProcessPipe();
 
-#include <stdio.h>
-/** Container for process-related information */
-typedef struct ProcessPipe {
-  /** stdin for the process */
-  FILE * question;
+  /**
+     \return true on success, false otherwise.
+     If an error occurs, will print debugging info to stderr. */
+  bool Start(char const * const * argv);
+  // pointer to const pointer to const data.
 
-  /** stdout for the process */
-  FILE * answer;
+  /**
+     Will attempt to stop the running process. Will set question and
+     answer to NULL. */
+  void Stop();
 
-  /** Process id kept in case other signals need to be sent. */
-  long int pid;
+  ~ProcessPipe();
 
-} ProcessPipe;
+private:
+  /**
+     Explicitly disallowed */
+  ProcessPipe& operator=(const madai::ProcessPipe &);
+  /**
+     Explicitly disallowed */
+  ProcessPipe(const madai::ProcessPipe &);
 
-#endif /* __cplusplus */
-
-
-/** returns EXIT_FAILURE on error, EXIT_SUCCESS otherwise.  Note that
- argv[0] doesn't seem to respect your PATH evironment variable, so you
- may need to pass an absolute path. argv should be NULL terminated. */
- int CreateProcessPipe(ProcessPipe * pp, char * const * argv);
-
- /**
-    OS-dependent way of killing a process */
- void KillProcess(ProcessPipe * pp);
-
-#ifdef __cplusplus
-  }
+  struct ProcessPipePrivate;
+  /**
+     Opaque Pointer for OS-specific Private Implementation. */
+  ProcessPipePrivate * m_ProcessPipeImplementation;
+};
 }
-#endif /* __cplusplus */
-
 #endif  /* madai_ProcessPipe_h_included */

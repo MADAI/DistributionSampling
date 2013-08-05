@@ -19,19 +19,12 @@
 #ifndef madai_ExternalModel_h_included
 #define madai_ExternalModel_h_included
 
-#include "Model.h"
-
-#include "ProcessPipe.h"
-/* madai::ProcessPipe struct, madai::CreateProcessPipe fn.
- Note that ProcessPipe is full of POSIX-specific inter-process
- communication code.  We can and should fix that at some point.  Until we
- fix that, this class will only compile for a POSIX (Unix, Linux,
- BSD, MacOS X) target.  */
-
 #include <iostream>
 #include <string>
 #include <vector>
 
+#include "Model.h"
+#include "ProcessPipe.h"
 
 namespace madai {
 

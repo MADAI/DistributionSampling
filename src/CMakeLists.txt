@@ -12,7 +12,7 @@ set( SRC_FILES
   Model.cxx
   Sampler.cxx
   Paths.cxx
-  ProcessPipe.c
+  ProcessPipe.cxx
   RegularStepGradientAscentSampler.cxx
   RuntimeParameterFileReader.cxx
   Sample.cxx
