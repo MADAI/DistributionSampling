@@ -17,12 +17,15 @@
  *=========================================================================*/
 
 
+#include <iostream>  /* cerr */
+
+/*
+ ProcessPipePrivate, Start(), and Kill() are all OS-specific.
+*/
 #if defined(__unix__) || ( defined(__APPLE__) && defined(__MACH__))
 /* to do: test this out under MacOSX */
 
-#include <cstdio>  /* ANSI C standard calls (FILE*) */
 #include <cstdlib> /* exit() EXIT_FAILURE */
-#include <iostream>  /* cerr */
 
 #include <unistd.h> /* fork, pipe, dup2, close, execvp */
 #include <signal.h> // kill, SIGINT
@@ -31,17 +34,21 @@
 
 struct madai::ProcessPipe::ProcessPipePrivate {
   pid_t m_Pid;
+  ProcessPipePrivate() : m_Pid(0) { }
 };
 
 namespace madai {
 
-ProcessPipe::ProcessPipe() :
-  question(NULL), answer(NULL),
-  m_ProcessPipeImplementation(new ProcessPipePrivate)
-{
-  m_ProcessPipeImplementation->m_Pid = 0;
+void ProcessPipe::Kill() {
+  this->Stop();
+  // should we pause a second for cleanup?
+  if (m_ProcessPipeImplementation != NULL) {
+    if (m_ProcessPipeImplementation->m_Pid > 0) {
+      kill(m_ProcessPipeImplementation->m_Pid, SIGINT);
+      m_ProcessPipeImplementation->m_Pid = 0;
+    }
+  }
 }
-
 bool ProcessPipe::Start(char const * const * argv) {
   if (m_ProcessPipeImplementation == NULL) {
     std::cerr << __FILE__ << ':' << __LINE__ << " Error: bad init.\n";
@@ -151,6 +158,7 @@ bool ProcessPipe::Start(char const * const * argv) {
                 << " Error: close(answer_pipe[1]) failed.\n";
       return false;
     }
+    this->Stop(); // close any existing pipe.
     question = fdopen( question_pipe[1], "w" );
     answer = fdopen( answer_pipe[0], "r" );
     m_ProcessPipeImplementation->m_Pid = pid;
@@ -158,34 +166,12 @@ bool ProcessPipe::Start(char const * const * argv) {
   }
 }
 
-void ProcessPipe::Stop() {
-  if (question != NULL)
-    std::fclose(question);
-  question = NULL;
-  if (answer != NULL)
-    std::fclose(answer);
-  answer = NULL;
-  // should we pause a second for cleanup?
-  if (m_ProcessPipeImplementation != NULL) {
-    if (m_ProcessPipeImplementation->m_Pid > 0) {
-      kill(m_ProcessPipeImplementation->m_Pid, SIGINT);
-      m_ProcessPipeImplementation->m_Pid = 0;
-    }
-  }
-}
-
-ProcessPipe::~ProcessPipe() {
-  this->Stop();
-  delete m_ProcessPipeImplementation;
-}
 }
 /******************************************************************************/
 #elif defined _WIN32
 
-#include <cstdio>  /* ANSI C standard calls (FILE*) */
-#include <string> // internal function uses this for memory
-#include <sstream> // internal function uses this for memory
-#include <iostream> // internal function uses this for memory
+#include <string> // internal function uses this for memory allocation
+#include <sstream> // internal function uses this for memory allocation
 
 #include <io.h>
 #include <windows.h>
@@ -196,27 +182,11 @@ ProcessPipe::~ProcessPipe() {
 namespace madai {
 struct ProcessPipe::ProcessPipePrivate {
   HANDLE m_ProcessHandle;
+  ProcessPipePrivate(): m_ProcessHandle(0) { }
 };
 
-ProcessPipe::ProcessPipe() :
-  question(NULL), answer(NULL),
-  m_ProcessPipeImplementation(new ProcessPipePrivate)
-{
-  m_ProcessPipeImplementation->m_ProcessHandle = 0;
-}
-
-ProcessPipe::~ProcessPipe() {
+void ProcessPipe::Kill() {
   this->Stop();
-  delete m_ProcessPipeImplementation;
-}
-
-void ProcessPipe::Stop() {
-  if (question != NULL)
-    std::fclose(question);
-  question = NULL;
-  if (answer != NULL)
-    std::fclose(answer);
-  answer = NULL;
   // should we pause a second for cleanup?
   if (m_ProcessPipeImplementation != NULL) {
     if (m_ProcessPipeImplementation->m_ProcessHandle > 0) {
@@ -285,6 +255,7 @@ bool ProcessPipe::Start(char const * const * argv) {
      from <http://support.microsoft.com/kb/190351>. What I have added is
      moving that code into a cross-platform ANSI C framework. */
   /*
+    quote:
     On Windows, an args sequence is converted to a string that can be
     parsed using the following rules (which correspond to the rules
     used by the MS C runtime):
@@ -366,10 +337,10 @@ bool ProcessPipe::Start(char const * const * argv) {
     &processInformation)) { /* receives PROCESS_INFORMATION  */
     std::cerr << "Error starting command:\n  "
               << command_line << '\n';
-    // std::cerr << "Error in " __FILE__ ":" << __LINE__ << '\n';
     return false;
   }
 
+  this->Stop(); // close any existing pipe.
   this->question = _fdopen(_open_osfhandle(
     (intptr_t)(InWriteHandle), 0), "w");
   this->answer = _fdopen(_open_osfhandle(
@@ -384,3 +355,28 @@ bool ProcessPipe::Start(char const * const * argv) {
 #error "We only support WIN32 and POSIX.  Sorry."
 
 #endif
+
+namespace madai {
+
+ProcessPipe::ProcessPipe() :
+  question(NULL), answer(NULL),
+  m_ProcessPipeImplementation(new ProcessPipePrivate)
+{
+}
+
+ProcessPipe::~ProcessPipe() {
+  this->Stop();
+  // assume that calling Kill() is unnecessary
+  delete m_ProcessPipeImplementation;
+}
+
+void ProcessPipe::Stop() {
+  if (question != NULL)
+    std::fclose(question);
+  question = NULL;
+  if (answer != NULL)
+    std::fclose(answer);
+  answer = NULL;
+}
+
+} // end namespace madai

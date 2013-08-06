@@ -38,10 +38,18 @@ public:
   // pointer to const pointer to const data.
 
   /**
-     Will attempt to stop the running process. Will set question and
-     answer to NULL. */
+     Will attempt to stop the running process by closing stdin and stdout.
+     Will set question and answer to NULL. */
   void Stop();
 
+  /**
+     Will attempt to stop the running process by first calling Stop(),
+     and then sending a signal. */
+  void Kill();
+
+  /**
+     Will attempt to stop the running process by first calling Stop(),
+     unless Stop has already been called. */
   ~ProcessPipe();
 
 private:
