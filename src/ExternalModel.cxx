@@ -92,7 +92,8 @@ ExternalModel
                 const std::vector< std::string > & arguments )
 {
   // Create array of C strings from arguments array
-  char ** argv = new char*[arguments.size() + 1];
+  size_t argv_size = arguments.size() + 2;
+  char ** argv = new char*[argv_size];
 
   // First argument is expected to be the executable
   argv[0] = new char[processPath.size()+1];
@@ -102,12 +103,13 @@ ExternalModel
     argv[i+1] = new char[arguments[i].size()+1];
     strcpy( argv[i+1], arguments[i].c_str() );
   }
-  argv[arguments.size()+1] = NULL; // NULL-terminated array
+  argv[argv_size - 1] = NULL; // NULL-terminated array
 
   bool createStatus = m_Process.Start(argv);
 
   // Free up the argv arrays
-  for ( size_t i = 0; i <= arguments.size(); ++i ) {
+  for ( size_t i = 0; i < (argv_size - 1); ++i ) {
+    // argv[argv_size - 1] is already NULL, no delete necessary.
     delete[] argv[i];
   }
   delete[] argv;
