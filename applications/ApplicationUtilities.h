@@ -101,7 +101,7 @@ int FindIndex(const S & v, const T & s)
   typename S::const_iterator it = std::find(v.begin(), v.end(), s);
   if (it == v.end())
     return -1;
-  return std::distance(v.begin(), it);
+  return static_cast< int >( std::distance(v.begin(), it) );
 }
 
 /**

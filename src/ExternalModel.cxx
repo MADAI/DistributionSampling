@@ -28,6 +28,8 @@
 #include "GaussianDistribution.h"
 #include "UniformDistribution.h"
 
+#include "WindowsWarnings.h"
+
 #define str_equal(s1,s2) (std::strcmp ((s1), (s2)) == 0)
 
 namespace madai {

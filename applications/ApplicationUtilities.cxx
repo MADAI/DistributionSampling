@@ -26,6 +26,7 @@
 #include "RuntimeParameterFileReader.h"
 #include "Sampler.h"
 #include "System.h"
+#include "WindowsWarnings.h"
 
 #include <boost/algorithm/string.hpp>
 

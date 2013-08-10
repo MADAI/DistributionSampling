@@ -24,11 +24,13 @@
 #include "RuntimeParameterFileReader.h"
 #include "System.h"
 #include "UniformDistribution.h"
+#include "WindowsWarnings.h"
 
 #include <madaisys/Directory.hxx>
 #include <madaisys/SystemTools.hxx>
 
 #include <algorithm>  // std::find
+#include <cctype> // std::isspace
 #include <fstream>
 #include <iostream> // std::cerr
 #include <set>
@@ -384,7 +386,7 @@ GaussianProcessEmulatorDirectoryFormatIO
 
   input.close();
 
-  numberParameters = parameters.size();
+  numberParameters = static_cast< int >( parameters.size() );
 
   return ( numberParameters > 0 );
 }
@@ -443,7 +445,7 @@ bool GaussianProcessEmulatorDirectoryFormatIO::ParseOutputs(
 
   input.close();
 
-  numberOutputs = outputNames.size();
+  numberOutputs = static_cast< int >( outputNames.size() );
 
   return (numberOutputs > 0);
 }

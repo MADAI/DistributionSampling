@@ -445,7 +445,7 @@ Model
 ::GetConstantCovariance(std::vector< double > & x) const
 {
   x.clear();
-  unsigned int t = m_ScalarOutputNames.size();
+  unsigned int t = static_cast< unsigned int >( m_ScalarOutputNames.size() );
   if ( m_ObservedScalarCovariance.size() != (t*t) ) {
     std::cerr << "Observed scalar covariance is of invalid size "
               << m_ObservedScalarCovariance.size() << "\n";

@@ -162,7 +162,7 @@ GaussianProcessEmulatedModel
     return Model::NO_ERROR;
   }
 
-  int p = parameters.size();
+  int p = static_cast< int >( parameters.size() );
   size_t t = this->GetNumberOfScalarOutputs();
   assert( t > 0 );
   std::vector< double > scalarCovariance;
