@@ -96,18 +96,6 @@ void Random::Reseed()
   this->Reseed(time(NULL) ^ (systemInformation.GetProcessId() << 16));
 }
 
-int Random::Integer( int N )
-{
-  return m_RandomImplementation->m_UniformIntDistribution(
-      m_RandomImplementation->m_BaseGenerator, N );
-}
-
-int Random::operator()( int N )
-{
-  return m_RandomImplementation->m_UniformIntDistribution(
-      m_RandomImplementation->m_BaseGenerator, N );
-}
-
 long Random::Integer( long N )
 {
   return m_RandomImplementation->m_UniformLongDistribution(

@@ -49,12 +49,6 @@ public:
   /** Reseed with the current time and current process id. */
   virtual void Reseed();
 
-  /** Returns an integer < N and >= 0 */
-  virtual int Integer( int N );
-
-  /** Returns an integer < N and >= 0 */
-  virtual int operator()( int N );
-
   /** Returns a long < N and >= 0 */
   virtual long Integer( long N );
 
