@@ -64,7 +64,7 @@ const bool Defaults::MCMC_USE_MODEL_ERROR = false;
 
 const int Defaults::MCMC_NUMBER_OF_BURN_IN_SAMPLES = 0;
 
-const double Defaults::MCMC_STEP_SIZE = 0.1;
+const double Defaults::MCMC_STEP_SIZE = 0.025;
 
 const std::string Defaults::EXTERNAL_MODEL_EXECUTABLE = "";
 

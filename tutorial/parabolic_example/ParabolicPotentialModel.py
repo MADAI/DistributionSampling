@@ -33,6 +33,10 @@ class ParabolicPotentialModel(object):
 			return (xbar,x2bar,ebar)
 
 		def CalcObservablesAndError(X0, Kinv, T, uncertainty_scale):
+			if (Kinv <= 0) or (T <= 0) or (abs(X0) > 2):
+				badvalue = -1.23456789e30
+				return ([badvalue,badvalue,badvalue],
+				        [badvalue,badvalue,badvalue])
 			xbar, x2bar, ebar = CalcObservables(X0, Kinv, T)
 			sigmax = math.sqrt(Kinv * T);
 			xbar_error = uncertainty_scale * sigmax

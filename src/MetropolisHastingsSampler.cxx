@@ -96,8 +96,7 @@ MetropolisHastingsSampler
     if ( m_ActiveParameterIndices[i] ) {
       double step
         = (m_StepSize   // scale each step by this variable
-           //* m_Random.Gaussian() // random direction, length
-           * ( m_Random.Uniform() - 0.5 ) // random direction, length
+           * m_Random.Gaussian() // random direction, length
            * m_StepScales[i]); // scaled by parameter domain size
       xc[i] = m_CurrentParameters[i] + step;
     } else {
