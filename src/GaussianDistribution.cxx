@@ -18,7 +18,9 @@
 
 #include "GaussianDistribution.h"
 
+#define _USE_MATH_DEFINES // Needed for M_PI to be defined on Windows
 #include <cmath>
+#undef _USE_MATH_DEFINES
 
 #include "boost/math/distributions/normal.hpp"
 
