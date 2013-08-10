@@ -35,6 +35,10 @@
 
 #include "madaisys/SystemTools.hxx"
 
+#ifdef WIN32
+#define lrint(x) (floor(x+(x>0) ? 0.5 : -0.5))
+#endif
+
 
 int main(int argc, char ** argv) {
 
