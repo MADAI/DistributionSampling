@@ -25,41 +25,6 @@
 namespace madai {
 
 
-std::vector< double >
-LangevinSampler
-::GetGradient( const std::vector< double > Parameters, const Model * m) 
-{
-  std::vector< double > Gradient;
-  m->GetScalarAndGradientOutputs(
-    Parameters, m_ActiveParameterIndices,
-    m_CurrentOutputs, Gradient );
-  double gradient_size = 0;
-  for ( unsigned int i = 0; i < Gradient.size(); i++ ) {
-    Gradient[i] *= ( m_UpperLimit[i] - m_LowerLimit[i] ); // Scale gradient
-    gradient_size += Gradient[i] * Gradient[i]; // Determine size of gradient
-  }
-  gradient_size = std::sqrt( gradient_size );
-  if ( gradient_size > m_LargestGradient ) { // Check to see if updating largest gradient and step size is necessary
-    m_LargestGradient = gradient_size;
-    m_StepSize = 1.0 / ( 10.0 * m_LargestGradient );
-  }
-  if ( m_NumberOfElementsInAverage < (Parameters.size() * 2000) ) {
-    m_AverageGradient = ( double( m_NumberOfElementsInAverage ) * m_AverageGradient + gradient_size )
-                        / double( m_NumberOfElementsInAverage + 1 );
-    m_GaussianWidth = m_LargestGradient;
-    m_NumberOfElementsInAverage++;
-    // Reset gradient in order to sample space randomly ( no weighting )
-    for ( unsigned int i = 0; i < Gradient.size(); i++ ) {
-      Gradient[i] = 0;
-    }
-  } else if ( m_NumberOfElementsInAverage == (Parameters.size() * 2000) ) {
-    m_GaussianWidth = 2.0 * m_AverageGradient;
-  }
-  
-  return Gradient;
-}
-
-
 LangevinSampler
 ::LangevinSampler() :
   Sampler()
@@ -158,5 +123,41 @@ LangevinSampler
                  m_CurrentOutputs,
                  LogLikelihood );
 }
+
+
+std::vector< double >
+LangevinSampler
+::GetGradient( const std::vector< double > Parameters, const Model * m) 
+{
+  std::vector< double > Gradient;
+  m->GetScalarAndGradientOutputs(
+    Parameters, m_ActiveParameterIndices,
+    m_CurrentOutputs, Gradient );
+  double gradient_size = 0;
+  for ( unsigned int i = 0; i < Gradient.size(); i++ ) {
+    Gradient[i] *= ( m_UpperLimit[i] - m_LowerLimit[i] ); // Scale gradient
+    gradient_size += Gradient[i] * Gradient[i]; // Determine size of gradient
+  }
+  gradient_size = std::sqrt( gradient_size );
+  if ( gradient_size > m_LargestGradient ) { // Check to see if updating largest gradient and step size is necessary
+    m_LargestGradient = gradient_size;
+    m_StepSize = 1.0 / ( 10.0 * m_LargestGradient );
+  }
+  if ( m_NumberOfElementsInAverage < (Parameters.size() * 2000) ) {
+    m_AverageGradient = ( double( m_NumberOfElementsInAverage ) * m_AverageGradient + gradient_size )
+    / double( m_NumberOfElementsInAverage + 1 );
+    m_GaussianWidth = m_LargestGradient;
+    m_NumberOfElementsInAverage++;
+    // Reset gradient in order to sample space randomly ( no weighting )
+    for ( unsigned int i = 0; i < Gradient.size(); i++ ) {
+      Gradient[i] = 0;
+    }
+  } else if ( m_NumberOfElementsInAverage == (Parameters.size() * 2000) ) {
+    m_GaussianWidth = 2.0 * m_AverageGradient;
+  }
+  
+  return Gradient;
+}
+
 
 } // end namespace madai
