@@ -45,73 +45,34 @@ public:
    *
    * \return A new Sample. */
   virtual Sample NextSample();
-
-  /**
-   * Set/get the timestep. */
-  //@{
-  virtual void SetTimeStep( double TimeStep );
-  virtual double GetTimeStep() { return this->m_TimeStep; }
-  //@}
-
-  /**
-   * Set/get the kick strength. */
-  //@{
-  virtual void SetKickStrength( double Impulse );
-  virtual double GetKickStrength() { return this->m_KickStrength; }
-  //@}
-
-  /**
-   * Set/get the mean time between kicks. */
-  //@{
-  virtual void SetMeanTimeBetweenKicks( double MeanTime );
-  virtual double GetMeanTimeBetweenKicks() { return this->m_MeanTime; }
-  //@}
-
-  /**
-   * Set/get the drag coefficient. */
-  //@{
-  virtual void SetDragCoefficient( double DragCoefficient );
-  virtual double GetDragCoefficient() { return this->m_DragCoefficient; }
-  //@}
-
-  /**
-   * Set/get the mass scale. */
-  //@{
-  virtual void SetMassScale( double MassScale );
-  virtual double GetMassScale() { return this->m_MassScale; }
-  //@}
-
-  /**
-   * Set/get the velocity scale for the given parameter name. */
-  //@{
-  virtual ErrorType SetVelocity( const std::string & parameterName, double Velocity );
-  virtual std::vector< double > GetVelocities() { return m_CurrentVelocities; }
-  //@}
-
+  
 protected:
-  /** Timestep parameter. */
-  double m_TimeStep;
+  /** Record of the largest gradient size. */
+  double m_LargestGradient;
+  
+  /** Unweighted Average gradient with places chosen by using random gaussian steps. */
+  double m_AverageGradient;
+  
+  /** Width used when taking a random gaussian step. */
+  double m_GaussianWidth;
+  
+  /** Step size parameter. */
+  double m_StepSize;
+  
+  /** Parameter keeping track of number of points used in calculating the average gradient. */
+  unsigned int m_NumberOfElementsInAverage;
 
-  /** Mean time parameter. */
-  double m_MeanTime;
+  /** Records the upper limits on the parameterspace based on the priors. */
+  std::vector< double > m_UpperLimit;
 
-  /** Kick strength parameter. */
-  double m_KickStrength;
-
-  /** Time before next kick parameter. */
-  double m_TimeBeforeNextKick;
-
-  /** Drag coefficient parameter. */
-  double m_DragCoefficient;
-
-  /** Mass scale parameter. */
-  double m_MassScale;
-
-  /** Keeps track of the velocities. */
-  std::vector< double > m_CurrentVelocities;
+  /** Records the lower limits on the parameterspace based on the priors. */
+  std::vector< double > m_LowerLimit;
 
   /** Initialize this sampler with the given Model. */
   virtual void Initialize( const Model * model );
+  
+  /** Get the gradient of the LL at a point and update above parameters if necessary. */
+  std::vector< double > GetGradient( const std::vector< double > Parameters, const Model * m );
 
 private:
 

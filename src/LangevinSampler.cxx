@@ -25,14 +25,44 @@
 namespace madai {
 
 
+std::vector< double >
+LangevinSampler
+::GetGradient( const std::vector< double > Parameters, const Model * m) 
+{
+  std::vector< double > Gradient;
+  m->GetScalarAndGradientOutputs(
+    Parameters, m_ActiveParameterIndices,
+    m_CurrentOutputs, Gradient );
+  double gradient_size = 0;
+  for ( unsigned int i = 0; i < Gradient.size(); i++ ) {
+    Gradient[i] *= ( m_UpperLimit[i] - m_LowerLimit[i] ); // Scale gradient
+    gradient_size += Gradient[i] * Gradient[i]; // Determine size of gradient
+  }
+  gradient_size = std::sqrt( gradient_size );
+  if ( gradient_size > m_LargestGradient ) { // Check to see if updating largest gradient and step size is necessary
+    m_LargestGradient = gradient_size;
+    m_StepSize = 1.0 / ( 10.0 * m_LargestGradient );
+  }
+  if ( m_NumberOfElementsInAverage < (Parameters.size() * 2000) ) {
+    m_AverageGradient = ( double( m_NumberOfElementsInAverage ) * m_AverageGradient + gradient_size )
+                        / double( m_NumberOfElementsInAverage + 1 );
+    m_GaussianWidth = m_LargestGradient;
+    m_NumberOfElementsInAverage++;
+    // Reset gradient in order to sample space randomly ( no weighting )
+    for ( unsigned int i = 0; i < Gradient.size(); i++ ) {
+      Gradient[i] = 0;
+    }
+  } else if ( m_NumberOfElementsInAverage == (Parameters.size() * 2000) ) {
+    m_GaussianWidth = 2.0 * m_AverageGradient;
+  }
+  
+  return Gradient;
+}
+
+
 LangevinSampler
 ::LangevinSampler() :
-  Sampler(),
-  m_TimeStep( 1.0e-2 ),
-  m_MeanTime( 1 ),
-  m_KickStrength( 1 ),
-  m_DragCoefficient( 1.0e-2 ),
-  m_MassScale( 1 )
+  Sampler()
 {
 }
 
@@ -52,15 +82,24 @@ LangevinSampler
 
   Sampler::Initialize( model );
 
+  m_UpperLimit.clear();
+  m_LowerLimit.clear();
+  size_t t = m_Model->GetNumberOfParameters();
   // Random initial starting point
   const std::vector< Parameter > & params = m_Model->GetParameters();
-  for ( unsigned int i = 0; i < m_Model->GetNumberOfParameters(); i++ ) {
+  for ( unsigned int i = 0; i < t; i++ ) {
     const Distribution * priorDist = params[i].GetPriorDistribution();
     m_CurrentParameters[i] = priorDist->GetSample(m_Random);
-    m_CurrentVelocities.push_back(0.0);
+    double upper = priorDist->GetPercentile( 0.9 );
+    double lower = priorDist->GetPercentile( 0.1 );
+    m_LowerLimit.push_back( lower - ( upper - lower ) / 8.0 );
+    m_UpperLimit.push_back( upper + ( upper - lower ) / 8.0 );
   }
-
-  m_TimeBeforeNextKick = m_Random.Gaussian( m_MeanTime, m_MeanTime / 10.0 );
+  m_StepSize = 0.1;
+  m_LargestGradient = 1.0;
+  m_GaussianWidth = 1.0;
+  m_AverageGradient = 0;
+  m_NumberOfElementsInAverage = 0;
 }
 
 
@@ -69,117 +108,55 @@ LangevinSampler
 ::NextSample()
 {
   Model * m = const_cast< Model * >(m_Model);
-  double TimeLeft = m_TimeStep;
-
+  
   assert( static_cast<unsigned int> (
               std::count( m_ActiveParameterIndices.begin(),
                           m_ActiveParameterIndices.end(), true ))
           == this->GetNumberOfActiveParameters());
-
-  // Get the gradient of the Log Likelihood at the current point
-  std::vector< double > Gradient;
-  m->GetScalarAndGradientOutputs(
-    m_CurrentParameters, m_ActiveParameterIndices,
-    m_CurrentOutputs, Gradient );
-
-  // Get loglikelihood at the current parameters
+          
+  // Get the gradient of the log likelihood at the current point
+  std::vector< double > CurrentGradient = this->GetGradient( m_CurrentParameters, m );
+  
+  // Scale parameters by parameterspace
+  for ( unsigned int i = 0; i < m_CurrentParameters.size(); i++ ) {
+    m_CurrentParameters[i] = ( m_CurrentParameters[i] - m_LowerLimit[i] ) / ( m_UpperLimit[i] - m_LowerLimit[i] );
+  }
+  
+  // Take a half step
+  std::vector< double > NewParameters = m_CurrentParameters;
+  for ( unsigned int i = 0; i < NewParameters.size(); i++ ) {
+    NewParameters[i] += m_StepSize * ( CurrentGradient[i] + m_Random.Gaussian( 0., m_GaussianWidth ) ) / 2.0;
+    NewParameters[i] = NewParameters[i] * ( m_UpperLimit[i] - m_LowerLimit[i] ) + m_LowerLimit[i];
+  }
+  // Get Gradient of LL at the new point
+  std::vector< double > NewGradient = this->GetGradient( NewParameters, m );
+  
+  // Take final step and scale back to original units
+  for ( unsigned int i = 0; i < m_CurrentParameters.size(); i++ ) {
+    m_CurrentParameters[i] += m_StepSize * ( NewGradient[i] + m_Random.Gaussian( 0., m_GaussianWidth ) );
+    m_CurrentParameters[i] = m_CurrentParameters[i] * ( m_UpperLimit[i] - m_LowerLimit[i] ) + m_LowerLimit[i];
+  }
+  
+  // Reflect if past the upper and lower limits
+  for ( unsigned int i = 0; i < m_CurrentParameters.size(); i++ ) {
+    if ( m_CurrentParameters[i] < m_LowerLimit[i] ) {
+      m_CurrentParameters[i] = m_LowerLimit[i] + ( m_LowerLimit[i] - m_CurrentParameters[i] );
+    } else if ( m_CurrentParameters[i] > m_UpperLimit[i] ) {
+      m_CurrentParameters[i] = m_UpperLimit[i] - ( m_CurrentParameters[i] - m_UpperLimit[i] );
+    }
+  }
+  
+  // Get loglikelihood at the new parameters
   double LogLikelihood;
   m->GetScalarOutputsAndLogLikelihood(
     m_CurrentParameters, m_CurrentOutputs, LogLikelihood );
+    
   // Check for NaN
   assert( LogLikelihood == LogLikelihood );
-
-  std::vector< double > Accel = Gradient;
-  for ( unsigned int i = 0; i < Accel.size(); i++ ) {
-    Accel[i] -= m_DragCoefficient * m_CurrentVelocities[i];
-    Accel[i] /= m_MassScale;
-  }
-  if ( m_TimeBeforeNextKick < m_TimeStep ) { // Check if kick happens
-    // Take step up to m_TimeBeforeNextKick
-    for ( unsigned int i = 0; i < m_CurrentParameters.size(); i++ ) {
-      m_CurrentParameters[i] += m_CurrentVelocities[i] * m_TimeBeforeNextKick;
-      m_CurrentParameters[i] += 0.5 * Accel[i] * m_TimeBeforeNextKick * m_TimeBeforeNextKick;
-      m_CurrentVelocities[i] += Accel[i] * m_TimeBeforeNextKick;
-    }
-    // Get m_CurrentVelocities.size() number of random numbers
-    std::vector< double > r(m_CurrentVelocities.size());
-    double temp = 0;
-    for ( unsigned int i = 0; i < m_CurrentVelocities.size(); i++ ) {
-      r[i] = m_Random.Uniform( -1, 1 );
-      temp += r[i] * r[i];
-    }
-    temp = sqrt( temp );
-    temp /= m_KickStrength;
-    for ( unsigned int i = 0; i < m_CurrentVelocities.size(); i++ ) {
-     m_CurrentVelocities[i] += r[i] / temp;
-     Accel[i] -= m_DragCoefficient * r[i] / temp;
-    }
-    TimeLeft -= m_TimeBeforeNextKick;
-    m_TimeBeforeNextKick += m_Random.Gaussian( m_MeanTime, m_MeanTime / 10.0 );
-  }
-
-  for ( unsigned int i = 0; i < m_CurrentParameters.size(); i++ ) {
-    m_CurrentParameters[i] += m_CurrentVelocities[i] * TimeLeft;
-    m_CurrentParameters[i] += 0.5 * Accel[i] * TimeLeft * TimeLeft;
-    m_CurrentVelocities[i] += Accel[i] * TimeLeft;
-  }
-
-  m_TimeBeforeNextKick -= m_TimeStep;
-
+  
   return Sample( m_CurrentParameters,
                  m_CurrentOutputs,
                  LogLikelihood );
-
-}
-
-
-void LangevinSampler
-::SetTimeStep( double TimeStep )
-{
-  m_TimeStep = TimeStep;
-}
-
-
-void LangevinSampler
-::SetKickStrength( double KickStrength )
-{
-  m_KickStrength = KickStrength;
-}
-
-
-void LangevinSampler
-::SetMeanTimeBetweenKicks( double MeanTime )
-{
-  m_MeanTime = MeanTime;
-}
-
-
-void LangevinSampler
-::SetDragCoefficient( double DragCoefficient )
-{
-  m_DragCoefficient = DragCoefficient;
-}
-
-
-void LangevinSampler
-::SetMassScale( double MassScale )
-{
-  m_MassScale = MassScale;
-}
-
-Sampler::ErrorType
-LangevinSampler
-::SetVelocity( const std::string & parameterName, double Velocity )
-{
-  unsigned int parameterIndex = this->GetParameterIndex( parameterName );
-
-  if ( parameterIndex == static_cast< unsigned int >( -1 ) ) {
-    return INVALID_PARAMETER_INDEX_ERROR;
-  }
-
-  m_CurrentVelocities[parameterIndex] = Velocity;
-
-  return NO_ERROR;
 }
 
 } // end namespace madai
