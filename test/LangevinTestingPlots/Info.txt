@@ -1,0 +1,25 @@
+SDX = Standard Deviation for parameter X in Gaussian Model
+
+SDY = Standard Deviation for parameter Y in Gaussian Model
+
+P = Prior ( P10 => Prior used = Mean +- 10 * StandardDeviation )
+
+PolynomialModel1:
+f1 = 0.75 * ( x - 3 ) * ( x + 5 )
+f1_exp = -11
+f1_cov = 2.5 
+f2 = 1.5 * ( y - 4 )
+f2_exp = 1.75
+f2_cov = 0.15
+
+PolynomialModel2:
+f1 = same as above
+f2 = same as above
+f1_exp = 98
+f1_cov = 13
+f2_exp = 1.75
+f2_cov = 0.01
+
+NOTE: When plotting densities for the Gaussian Model, I always used
+the Mean +- 3 * SD for the prior even when it was +- 10 * SD in the 
+program since it only eliminated a bunch of "dead space". 
