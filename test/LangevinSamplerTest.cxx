@@ -30,16 +30,9 @@ int main( int, char *[] )
 
   madai::LangevinSampler sampler;
   sampler.SetModel( &model );
-  sampler.SetTimeStep( 0.1 );
-  sampler.SetKickStrength( 0.1 );
-  sampler.SetMeanTimeBetweenKicks( 50 );
-  sampler.SetDragCoefficient( 0.1 );
-  sampler.SetMassScale( 5 );
 
   sampler.SetParameterValue( "X", 13 );
   sampler.SetParameterValue( "Y", -2 );
-  sampler.SetVelocity( "X", 0.0 );
-  sampler.SetVelocity( "Y", 0.0 );
   madai::Sample BestSample;
   madai::Sample NewSample;
 
