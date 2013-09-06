@@ -30,6 +30,8 @@ namespace madai {
  * This is an implementation of a Langevin search algorithm.
  * It considers the gradient of the likelihood at a point, and
  * moves according to the Langevin equation.
+ *
+ * \warning This class is experimental.
  */
 
 class LangevinSampler : public Sampler {
