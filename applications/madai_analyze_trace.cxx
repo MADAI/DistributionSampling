@@ -53,6 +53,18 @@ int main(int argc, char ** argv) {
   }
   assert (numberOfParameters = parameters.size());
 
+  std::vector< std::string > outputNames;
+  int numberOfOutputs = 0;
+
+  if ( ! madai::GaussianProcessEmulatorDirectoryFormatIO::ParseOutputs(
+           outputNames, numberOfOutputs, statisticsDirectory, false )) {
+    std::cerr
+      << "Could not read outputs from prior file '"
+      << statisticsDirectory << madai::Paths::PARAMETER_PRIORS_FILE << "'\n";
+    return EXIT_FAILURE;
+  }
+  assert (numberOfOutputs = outputNames.size());
+
   std::string traceFile( statisticsDirectory );
   traceFile.append( argv[2] );
 
@@ -71,20 +83,20 @@ int main(int argc, char ** argv) {
   std::getline(trace,header);
   std::vector<std::string> headers = madai::SplitString(header, ',');
 
-  size_t numberOfFields = headers.size();
-  assert(static_cast<int>(numberOfFields) > numberOfParameters);
+  int numberOfFields = headers.size();
+  assert(numberOfFields == numberOfParameters + numberOfOutputs + 1);
 
   std::string line;
   size_t lineCount = 0, bestIndex = 0;
-  std::vector< double > sums(numberOfParameters, 0.0);
-  std::vector< std::vector< double > > values(numberOfParameters);
+  std::vector< double > sums(numberOfFields - 1, 0.0);
+  std::vector< std::vector< double > > values(numberOfFields - 1);
 
   double bestLogLikelihood = -std::numeric_limits< double >::infinity();
 
   while (std::getline(trace,line)) {
     std::vector<std::string> fields = madai::SplitString(line, ',');
-    assert(numberOfFields == fields.size());
-    for (int i = 0; i < numberOfParameters; ++i) {
+    assert(numberOfFields == (int) fields.size());
+    for (int i = 0; i < numberOfFields - 1; ++i) {
       double value = std::atof(fields[i].c_str());
       values[i].push_back(value);
       sums[i] += value;
@@ -98,9 +110,9 @@ int main(int argc, char ** argv) {
   }
 
   trace.close();
-  std::vector< double > means(numberOfParameters,0.0);
+  std::vector< double > means(numberOfFields - 1,0.0);
 
-  std::vector< double > priorStdDev(numberOfParameters,0.0);
+  std::vector< double > priorStdDev(numberOfFields - 1,0.0);
   for (int i = 0; i < numberOfParameters; ++i) {
     priorStdDev[i] =
       parameters[i].GetPriorDistribution()->GetStandardDeviation();
@@ -112,8 +124,10 @@ int main(int argc, char ** argv) {
   std::cout << std::setw(14) << "best value";
   std::cout << '\n';
 
-  for (int i = 0; i < numberOfParameters; ++i) {
+  for (int i = 0; i < numberOfFields - 1; ++i) {
     means[i] = sums[i] / lineCount;
+  }
+  for (int i = 0; i < numberOfParameters; ++i) {
     double variance = 0.0;
     for (size_t k = 0; k < lineCount; ++k) {
       variance += std::pow(values[i][k] - means[i], 2);
@@ -133,10 +147,10 @@ int main(int argc, char ** argv) {
   std::cout << std::setw(14) << bestLogLikelihood << "\n";
 
   std::vector< std::vector< double > > covariancematrix;
-  for (int i = 0; i < numberOfParameters; ++i)
-    covariancematrix.push_back(std::vector< double >(numberOfParameters, 0.0));
+  for (int i = 0; i < numberOfFields - 1; ++i)
+    covariancematrix.push_back(std::vector< double >(numberOfFields - 1, 0.0));
 
-  for (int i = 0; i < numberOfParameters; ++i) {
+  for (int i = 0; i < numberOfFields - 1; ++i) {
     for (int j = 0; j <= i; ++j) {
       double covariance = 0.0;
       for (size_t k = 0; k < lineCount; ++k) {
@@ -171,6 +185,21 @@ int main(int argc, char ** argv) {
     for (int j = 0; j < numberOfParameters; ++j) {
       std::cout << std::setw(14) << covariancematrix[i][j] / (
           priorStdDev[i] * priorStdDev[j]);
+    }
+    std::cout << "\n";
+  }
+
+  std::cout << "\nobservable-parameter correlation:\n";
+  std::cout << std::setw(14) << "";
+  for (int j = 0; j < numberOfParameters; ++j)
+    std::cout << std::setw(14) << parameters[j].m_Name;
+  std::cout << "\n";
+  for (int i = 0; i < numberOfOutputs; ++i) {
+    std::cout << std::setw(14) << outputNames[i];
+    for (int j = 0; j < numberOfParameters; ++j) {
+      std::cout << std::setw(14) << covariancematrix[numberOfParameters + i][j] / (
+          std::sqrt(covariancematrix[numberOfParameters + i][numberOfParameters + i]*
+          covariancematrix[j][j]));
     }
     std::cout << "\n";
   }
