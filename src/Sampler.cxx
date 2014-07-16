@@ -266,6 +266,14 @@ Sampler
 }
 
 
+const std::vector< double > &
+Sampler
+::GetCurrentLogLikelihoodGradient() const
+{
+  return m_CurrentLogLikelihoodGradient;
+}
+
+
 std::string
 Sampler
 ::GetErrorTypeAsString( ErrorType error )

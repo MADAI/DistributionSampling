@@ -225,6 +225,10 @@ public:
   double GetCurrentLogLikelihood() const;
 
   /**
+   * Return the Model's dLL/dsigma_y for Sampler::GetCurrentLogLikelihoodGradient().  */
+  const std::vector< double > & GetCurrentLogLikelihoodGradient()  const;
+
+  /**
    * Compute the next set of parameters, output scalar values, and
    * log likelihood
    *
@@ -259,6 +263,9 @@ protected:
 
   /** Stores the current log-likelihood. */
   double m_CurrentLogLikelihood;
+
+  /** Stores the current log-likelihood gradient dLL_dsigmay */
+  std::vector< double > m_CurrentLogLikelihoodGradient;
 
   /* Protected methods: */
 
