@@ -202,6 +202,12 @@ public:
     std::vector< double > & scalars,
     double & logLikelihood) const;
 
+   virtual ErrorType GetScalarOutputsAndLogLikelihoodAndLikelihoodErrorGradient(
+    const std::vector< double > & parameters,
+    std::vector< double > & scalars,
+    double & logLikelihood,
+    std::vector< double > & gradient) const;
+
   /** Some models don't know the output values precisely
    *
    * Instead they produce a distribution of possible output values,

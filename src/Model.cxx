@@ -406,6 +406,110 @@ Model
   return NO_ERROR;
 }
 
+  // FIXME remove code overlap with GetScalarOutputsAndLogLikelihood
+  // some major refactoring is required to make these less cumbersome
+Model::ErrorType
+Model
+::GetScalarOutputsAndLogLikelihoodAndLikelihoodErrorGradient(
+    const std::vector< double > & parameters,
+    std::vector< double > & scalars,
+    double & logLikelihood,
+    std::vector< double > & gradient) const
+{
+
+
+  logLikelihood = std::numeric_limits< double >::signaling_NaN();
+  double logPriorLikelihood
+    = this->GetLogPriorLikelihood(parameters);
+
+  size_t t = this->GetNumberOfScalarOutputs();
+  assert(t > 0);
+  std::vector< double > scalarCovariance;
+  // initially scalarCovariance is a empty vector
+  Model::ErrorType result;
+  if (m_UseModelCovarianceToCalulateLogLikelihood) {
+    result = this->GetScalarOutputsAndCovariance(
+        parameters, scalars, scalarCovariance);
+  } else {
+    // (! m_UseModelCovarianceToCalulateLogLikelihood)
+    result = this->GetScalarOutputs(parameters, scalars);
+  }
+  if (result != NO_ERROR)
+    return result;
+  if (scalars.size() != t)
+    return OTHER_ERROR;
+
+  std::vector< double > scalarDifferences(t);
+  std::vector<double> covariance(t * t);
+  double distSq = 0.0;
+  if (this->m_ObservedScalarValues.size() == 0) {
+    for (size_t i = 0; i < t; ++i) {
+      scalarDifferences[i] = scalars[i];
+      distSq += std::pow(scalarDifferences[i],2);
+    }
+  } else {
+    for (size_t i = 0; i < t; ++i) {
+      scalarDifferences[i] = scalars[i] - this->m_ObservedScalarValues[i];
+      distSq += std::pow(scalarDifferences[i],2);
+    }
+  }
+
+  std::vector< double > constantCovariance;
+  if ( !this->GetConstantCovariance(constantCovariance) ) {
+    std::cerr << "Error getting the constant covariance matrix from the model\n";
+    return OTHER_ERROR;
+  }
+
+  if ((scalarCovariance.size() == 0) &&
+      (constantCovariance.size() == 0)) {
+    // Infinite precision makes no sense, so assume variance of 1.0
+    // for each variable.
+    logLikelihood = ((-0.5) * distSq) + logPriorLikelihood;
+    return NO_ERROR;
+  } else if (scalarCovariance.size() == 0) {
+    assert(constantCovariance.size() == (t*t));
+    covariance = constantCovariance;
+  } else if (constantCovariance.size() == 0) {
+    assert(scalarCovariance.size() == (t*t));
+    covariance = scalarCovariance;
+  } else {
+    for (size_t i = 0; i < (t*t); ++i)
+      covariance[i]
+        = scalarCovariance[i] + constantCovariance[i];
+  }
+
+  Eigen::Map< Eigen::VectorXd > diff(&(scalarDifferences[0]),t);
+  Eigen::Map< Eigen::MatrixXd > cov(&(covariance[0]),t,t);
+  Eigen::ColPivHouseholderQR< Eigen::MatrixXd > qrDecomposition = cov.colPivHouseholderQr();
+
+  // FIXME check for singular matrix -> return negative infinity!
+  //assert( cov.determinant() >= 0.0 ); // is there a better way?
+
+  double innerProduct = qrDecomposition.solve(diff).dot(diff);
+  logLikelihood = ((-0.5) * innerProduct) + logPriorLikelihood;
+
+  gradient.clear();
+  if (this->m_ObservedScalarValues.size() > 0) {
+    Eigen::MatrixXd inverse  = qrDecomposition.inverse();
+    Eigen::MatrixXd covDelta(t,t);
+    for (size_t i = 0; i < t; ++i) {
+      covDelta.setZero();
+      for (size_t k = 0; k < t; k++) {
+        if(k == i) {
+          covDelta(i, k) = 2.0*cov(i, k);
+        }
+        else {
+          covDelta(i, k) = cov(i, k);
+          covDelta(k, i) = cov(k, i);
+        }
+      }
+      gradient.push_back(((inverse*covDelta*inverse)*diff).dot(diff));
+    }
+  }
+
+  return NO_ERROR;
+}
+
 
 /** return the sum of the LogPriorLikelihood for each x[i] */
 double
