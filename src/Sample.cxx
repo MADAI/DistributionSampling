@@ -25,6 +25,19 @@ namespace madai {
 
 
 Sample
+::Sample( const std::vector< double > & parameterValues,
+    const std::vector< double > & outputValues,
+    double LogLikelihood,
+    const std::vector< double > likelihoodErrorGradient) :
+  m_ParameterValues( parameterValues ),
+  m_OutputValues( outputValues ),
+  m_LikelihoodErrorGradient( likelihoodErrorGradient ),
+  m_LogLikelihood( LogLikelihood )
+{
+}
+
+
+Sample
 ::Sample( const std::vector< double > & parameter_values,
     const std::vector< double > & output_values,
     double LogLikelihood ) :

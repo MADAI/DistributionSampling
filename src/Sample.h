@@ -40,8 +40,14 @@ public:
    * If LogLikelihood is not set, it defaults to 0.0. If
    * outputValues is not specified, it defaults to an empty
    * vector. If parameterValues is not specified, it defaults to an
-   * empty vector.
+   * empty vector. If likelihoodErrorGradient is not specified, it
+   * defaults to an empty vector.
    */
+  Sample( const std::vector< double > & parameterValues,
+    const std::vector< double > & outputValues,
+    double LogLikelihood,
+    const std::vector< double > likelihoodErrorGradient);
+
   Sample( const std::vector< double > & parameterValues,
     const std::vector< double > & outputValues,
     double LogLikelihood );
@@ -67,6 +73,9 @@ public:
 
   /** The model output that correspond to m_ParameterValues in some model. */
   std::vector< double > m_OutputValues;
+
+  /** The gradient dL/dsigma_observable for each observable parameter. */
+  std::vector< double > m_LikelihoodErrorGradient;
 
   /**
    * Given some set of field observations, the log likelihood is the
