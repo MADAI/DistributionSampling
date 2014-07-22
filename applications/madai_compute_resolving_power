@@ -1,0 +1,202 @@
+#!/usr/bin/env python2
+
+###########################################################################
+#
+#  Copyright 2011-2013 The University of North Carolina at Chapel Hill
+#  and Michigan State University. All rights reserved.
+#
+#  Licensed under the MADAI Software License. You may obtain a copy of
+#  this license at
+#
+#      https://madai-public.cs.unc.edu/visualization/software-license/
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+###########################################################################
+
+import os
+import sys
+import copy
+import math
+
+class Correlations(object):
+    def __init__(self, number_of_parameters, number_of_observables):
+        self.number_of_parameters = number_of_parameters
+        self.number_of_observables = number_of_observables
+        self.samples = 0
+        self.D_samples = [0.0]*number_of_observables
+        self.po_squares = [ [0.0]*number_of_observables for i in range(number_of_parameters) ]
+        self.pp_squares = [ [0.0]*number_of_parameters for i in range(number_of_parameters) ]
+        self.parameter_sums = [0.0]*number_of_parameters
+        self.observable_sums = [0.0]*number_of_observables
+        self.D_parameter_sums = []
+        self.D_pp_squares = []
+        for i in range(number_of_observables):
+            self.D_parameter_sums.append(copy.deepcopy(self.parameter_sums))
+            self.D_pp_squares.append(copy.deepcopy(self.pp_squares))
+
+
+    def add_sample(self, parameters, observables, loglikelihood, gradient):
+        self.samples += 1
+        for i, parameter in enumerate(parameters):
+            self.parameter_sums[i] += parameter
+            for j in range(i+1):
+                self.pp_squares[i][j] += parameter*parameters[j]
+            for j, observable in enumerate(observables):
+                self.po_squares[i][j] += parameter*observable
+        for k, observable in enumerate(observables):
+            self.observable_sums[k] += observable
+            self.D_samples[k] += gradient[k]
+            for i, parameter in enumerate(parameters):
+                self.D_parameter_sums[k][i] += parameter*gradient[k]
+                for j in range(i+1):
+                    self.D_pp_squares[k][i][j] += parameter*parameters[j]*gradient[k]
+
+    def parameter_mean(self, i):
+        return self.parameter_sums[i]/float(self.samples)
+
+    def observable_mean(self, i):
+        return self.observable_sums[i]/float(self.samples)
+
+    def parameter_parameter_covariance(self, i, j):
+        if j > i:
+            i, j = j, i
+        N = float(self.samples)
+        return (self.pp_squares[i][j] - (self.parameter_sums[i]*self.parameter_sums[j]/N))/N
+
+    def parameter_variance(self, i):
+        return self.parameter_parameter_covariance(i, i)
+
+    def parameter_observable_covariance(self, i, j):
+        N = float(self.samples)
+        return (self.po_squares[i][j] - (self.parameter_sums[i]*self.observable_sums[j]/N))/N
+
+
+    def D_parameter_parameter_covariance(self, k, i, j):
+        N = float(self.samples)
+        D_covariance = self.D_pp_squares[k][i][j]/N
+        D_covariance -= self.pp_squares[i][j]*self.D_samples[k]/(N*N)
+
+        D_covariance -= self.parameter_mean(i)*self.D_parameter_sums[k][j]/N
+        D_covariance += self.parameter_mean(i)*self.parameter_mean(j)*self.D_samples[k]/N
+
+        D_covariance -= self.parameter_mean(j)*self.D_parameter_sums[k][i]/N
+        D_covariance += self.parameter_mean(j)*self.parameter_mean(i)*self.D_samples[k]/N
+
+        return D_covariance/self.parameter_parameter_covariance(i, j)
+    
+    def D_parameter_parameter_root_covariance(self, k, i, j):
+        return self.D_parameter_parameter_covariance(k, i, j)/2.0
+
+    def D_parameter_standard_deviation(self, k, i):
+        return self.D_parameter_parameter_root_covariance(k, i, i)
+
+    def resolving_power(self, k , i, j):
+        variance = (self.parameter_variance(i), self.parameter_variance(j))
+        standard_deviation = (math.sqrt(variance[0]), math.sqrt(variance[1]))
+        covariance = self.parameter_parameter_covariance(i, j)
+
+
+        # pick pi/4 if they're the same
+        major_theta = math.pi/4.0
+        if variance[0] != variance[1]:
+            major_theta = -0.5*math.atan(2.0*covariance/(variance[1]-variance[0]))
+        minor_theta = major_theta + math.pi/2.0
+        major_cos, major_sin = math.cos(major_theta), math.sin(major_theta)
+        minor_cos, minor_sin = math.cos(minor_theta), math.sin(minor_theta)
+        
+        major_variance = (major_cos**2)*variance[0]
+        major_variance += (major_sin**2)*variance[1]
+        major_variance += 2.0*major_cos*major_sin*covariance
+
+        minor_variance = (minor_cos**2)*variance[0]
+        minor_variance += (minor_sin**2)*variance[1]
+        minor_variance += 2.0*minor_cos*minor_sin*covariance
+
+        #It's arbitrary which is larger so swap them if necessary
+        if minor_variance > major_variance:
+            minor_variance, major_variance = major_variance, minor_variance
+            minor_theta, major_theta = major_theta, minor_theta
+            minor_cos, major_cos = major_cos, minor_cos
+            minor_sin, major_sin = major_sin, minor_sin
+        major_standard_deviation = math.sqrt(major_variance)
+        minor_standard_deviation = math.sqrt(minor_variance)
+
+
+        D_standard_deviation = (self.D_parameter_standard_deviation(k, i), self.D_parameter_standard_deviation(k, j))
+
+        D_major_variance = (major_cos**2)*2.0*variance[0]*D_standard_deviation[0]
+        D_major_variance += (major_sin**2)*2.0*variance[1]*D_standard_deviation[1]
+        D_major_variance += 2.0*major_cos*major_sin*covariance*self.D_parameter_parameter_covariance(k, i, j)
+
+        D_minor_variance = (minor_cos**2)*2.0*variance[0]*D_standard_deviation[0]
+        D_minor_variance += (minor_sin**2)*2.0*variance[1]*D_standard_deviation[1]
+        D_minor_variance += 2.0*minor_cos*minor_sin*covariance*self.D_parameter_parameter_covariance(k, i, j)
+
+        D_major_resolving_power = D_major_variance/(2.0*major_variance)
+        D_minor_resolving_power = D_minor_variance/(2.0*minor_variance)
+
+        if i < j:
+            return D_major_resolving_power
+        else:
+            return D_minor_resolving_power
+
+class TraceFileException(Exception):
+    pass
+
+def read_trace_file(filename):
+    if not os.path.isfile(filename):
+        raise TraceFileException('Trace file ' + filename + ' does not exist.')
+    with open(filename, 'r') as f:
+        header = [name[1:-1] for name in f.readline()[:-1].split(',')]
+        if header[-1] == 'LogLikelihood':
+            TraceFileException('There are no log likelihood gradients in the trace file.')
+        if 'LogLikelihood' not in header:
+            TraceFileException('There is no log likelihood in the trace file.')
+        loglikelihood_index = header.index('LogLikelihood')
+        number_of_observables = len(header) - loglikelihood_index - 1
+        number_of_parameters = loglikelihood_index - number_of_observables
+        parameter_names = header[:number_of_parameters]
+        observable_names = header[number_of_parameters:loglikelihood_index]
+        correlations = Correlations(number_of_parameters, number_of_observables)
+        for line in f:
+            line = map(float, line.split(','))
+            parameters = line[:number_of_parameters]
+            observables = line[number_of_parameters:loglikelihood_index]
+            loglikelihood = line[loglikelihood_index]
+            gradient = line[loglikelihood_index+1:]
+            correlations.add_sample(parameters, observables, loglikelihood, gradient)
+        for i in range(2):
+            for j in range(2):
+                print str(i) + "\t" + str(j)
+                print "\t" + str(correlations.D_parameter_standard_deviation(i, j))
+        print "Resolving powers:"
+        for i in range(2):
+            for j in range(2):
+                print str(i) + "\t" + str(j)
+                print "\t" + str(correlations.resolving_power(i, j, j))
+
+        row_format ="{:>20}" * (number_of_parameters + 1)
+        for k, observable in enumerate(observable_names):
+            print "Resolving power for the observable " + observable
+            print row_format.format("", *parameter_names)
+            for i, parameter in enumerate(parameter_names):
+                resolving_powers = []
+                for j in range(number_of_parameters):
+                    resolving_powers.append(correlations.resolving_power(k, i, j))
+                print row_format.format(parameter, *resolving_powers)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print 'Usage: ' + sys.argv[0] + ' trace_file.csv'
+        exit
+    try:
+        read_trace_file(sys.argv[1])
+    except TraceFileException as e:
+        print 'Fatal exception: ' + e
+
