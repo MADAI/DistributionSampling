@@ -496,14 +496,14 @@ Model
       covDelta.setZero();
       for (size_t k = 0; k < t; k++) {
         if(k == i) {
-          covDelta(i, k) = 2.0*cov(i, k);
+          covDelta(i, k) = 2.0*sqrt(cov(i, k));
         }
         else {
-          covDelta(i, k) = cov(i, k);
-          covDelta(k, i) = cov(k, i);
+          covDelta(i, k) = cov(i, k)/sqrt(cov(i, i));
+          covDelta(k, i) = covDelta(i, k);
         }
       }
-      gradient.push_back(((inverse*covDelta*inverse)*diff).dot(diff));
+      gradient.push_back(0.5*((inverse*covDelta*inverse)*diff).dot(diff)*sqrt(cov(i,i)));
     }
   }
 

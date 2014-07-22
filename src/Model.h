@@ -202,6 +202,18 @@ public:
     std::vector< double > & scalars,
     double & logLikelihood) const;
 
+  /** Performs the same tasks as ErrorType GetScalarOutputsAndLogLikelihood and
+      additionally fills a vector with the log likelihood error gradient.
+
+      For each observable y_i, the partial derivative is computed as:
+              sigma_(y_i)*dLL/dsigma_(y_i)
+
+      Note the additional weight of sigma_(y_i) which makes the gradient
+      correspond to the response of the log-likelihood to relative changes
+      in the experimental errors on observables rather than absolute changes.
+
+      The math behind this is described in the statistics handbook.
+  */
    virtual ErrorType GetScalarOutputsAndLogLikelihoodAndLikelihoodErrorGradient(
     const std::vector< double > & parameters,
     std::vector< double > & scalars,
