@@ -125,6 +125,10 @@ int main(int argc, char ** argv) {
 
   bool verbose = settings.GetOptionAsBool( "VERBOSE", madai::Defaults::VERBOSE );
 
+  bool writeLogLikelihoodGradients = settings.GetOptionAsBool(
+      "WRITE_LOGLIKELIHOOD_GRADIENTS", 
+      madai::Defaults::WRITE_LOGLIKELIHOOD_GRADIENTS );
+
   madai::ExternalModel externalModel;
   madai::GaussianProcessEmulatedModel gpem;
 
@@ -251,6 +255,7 @@ int main(int argc, char ** argv) {
       numberOfSamples,
       numberOfBurnInSamples,
       useModelError,
+      writeLogLikelihoodGradients,
       progressStream);
 
   if ( verbose ) {
