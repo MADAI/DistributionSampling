@@ -52,6 +52,7 @@ public:
     int NumberOfSamples,
     int NumberOfBurnInSamples=0,
     bool UseEmulatorCovariance=true,
+    bool WriteLogLikelihoodGradients=false,
     std::ostream * progress=NULL);
 
   /**
@@ -59,12 +60,14 @@ public:
    * names, the output names, and the log likelihood. */
   static void WriteHeader( std::ostream & o,
                            const std::vector< Parameter > & parameters,
-                           const std::vector< std::string > & outputs);
+                           const std::vector< std::string > & outputs,
+                           bool WriteLogLikelihoodGradients = false);
 
   /**
    * Writes one sample to the output stream.
    */
-  static void WriteSample( std::ostream & out, const Sample & sample );
+  static void WriteSample( std::ostream & out, const Sample & sample,
+                           bool WriteLogLikelihoodGradients = false);
 
 }; // end SamplerCSVWriter
 

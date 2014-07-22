@@ -35,6 +35,7 @@ int SamplerCSVWriter
     int NumberOfSamples,
     int NumberOfBurnInSamples,
     bool UseEmulatorCovariance,
+    bool WriteLogLikelihoodGradients,
     std::ostream * progress)
 {
   model.SetUseModelCovarianceToCalulateLogLikelihood(UseEmulatorCovariance);
@@ -57,7 +58,8 @@ int SamplerCSVWriter
     step = 1; // avoid div-by-zero error
   }
 
-  WriteHeader( outFile, model.GetParameters(), model.GetScalarOutputNames() );
+  WriteHeader( outFile, model.GetParameters(), model.GetScalarOutputNames(),
+               WriteLogLikelihoodGradients);
 
   for (int count = 0; count < NumberOfSamples; count ++) {
     if (progress != NULL) {
@@ -67,7 +69,7 @@ int SamplerCSVWriter
     }
     Sample sample = sampler.NextSample();
 
-    WriteSample( outFile, sample );
+    WriteSample( outFile, sample, WriteLogLikelihoodGradients );
   }
   if (progress != NULL) {
     (*progress) << "\r                            \r";
@@ -82,7 +84,8 @@ void
 SamplerCSVWriter
 ::WriteHeader( std::ostream & o,
                const std::vector< Parameter > & params,
-               const std::vector< std::string > & outputs)
+               const std::vector< std::string > & outputs,
+               bool WriteLogLikelihoodGradients)
 {
   if ( !params.empty() ) {
     std::vector< Parameter >::const_iterator itr = params.begin();
@@ -103,12 +106,13 @@ SamplerCSVWriter
     }
   }
   o << ",\"LogLikelihood\"";
-  if ( !outputs.empty() ) {
-    std::vector<std::string>::const_iterator itr = outputs.begin();
-    //std::cout << "Output name: " << *itr << std::endl;
-    o << ",\"dLL/dsigma_" << *itr << '"';
-    for ( itr++; itr < outputs.end(); itr++ ) {
-      o << ',' << "\"dLL/dsigma_" << *itr << '"';
+  if( WriteLogLikelihoodGradients ) {
+    if ( !outputs.empty() ) {
+      std::vector<std::string>::const_iterator itr = outputs.begin();
+      o << ",\"dLL/dsigma_" << *itr << '"';
+      for ( itr++; itr < outputs.end(); itr++ ) {
+        o << ',' << "\"" << *irt << "*dLL/dsigma_" << *itr << '"';
+      }
     }
   }
   o << "\n";
@@ -132,7 +136,8 @@ void write_vector( std::ostream& o, std::vector< T > const & v, char delim ) {
 
 void
 SamplerCSVWriter
-::WriteSample( std::ostream & out, const Sample & sample )
+::WriteSample( std::ostream & out, const Sample & sample,
+            bool WriteLogLikelihoodGradients)
 {
   write_vector( out, sample.m_ParameterValues, ',' );
   out << ',';
@@ -142,9 +147,11 @@ SamplerCSVWriter
     out << ',';
   }
   out << sample.m_LogLikelihood;
-  if ( sample.m_OutputValues.size() > 0 ) {
-    out << ',';
-    write_vector( out, sample.m_LikelihoodErrorGradient, ',' );
+  if( WriteLogLikelihoodGradients ) {
+    if ( sample.m_OutputValues.size() > 0 ) {
+      out << ',';
+      write_vector( out, sample.m_LikelihoodErrorGradient, ',' );
+    }
   }
   if ( sample.m_Comments.size() > 0 ) {
     out << ",\"";
