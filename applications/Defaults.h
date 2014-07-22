@@ -35,6 +35,8 @@ namespace Defaults {
 
   extern const bool READER_VERBOSE;
 
+  extern const bool WRITE_LOGLIKELIHOOD_GRADIENTS;
+
   /**
    Latin Hypercube Variables */
   extern const int GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS;
