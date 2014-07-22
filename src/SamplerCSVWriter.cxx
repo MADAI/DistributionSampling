@@ -108,10 +108,10 @@ SamplerCSVWriter
   o << ",\"LogLikelihood\"";
   if( WriteLogLikelihoodGradients ) {
     if ( !outputs.empty() ) {
-      std::vector<std::string>::const_iterator itr = outputs.begin();
-      o << ",\"dLL/dsigma_" << *itr << '"';
-      for ( itr++; itr < outputs.end(); itr++ ) {
-        o << ',' << "\"" << *irt << "*dLL/dsigma_" << *itr << '"';
+      for ( std::vector<std::string>::const_iterator itr = outputs.begin();
+            itr < outputs.end(); itr++ )
+      {
+        o << ',' << "\"" << *itr << "*dLL/dsigma_" << *itr << '"';
       }
     }
   }
