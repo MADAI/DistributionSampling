@@ -85,8 +85,8 @@ int main(int argc, char ** argv) {
 
   int numberOfFields = headers.size();
   bool gradientsPresent = false;
-  if( numberOfFields == numberOfParameters + 2*numberOfOutputs + 1 ) {
-    numberOfFields -= numberOfOutputs;
+  if( numberOfFields == numberOfParameters + 3*numberOfOutputs + 1 ) {
+    numberOfFields -= 2*numberOfOutputs;
     gradientsPresent = true;
   }
   assert(numberOfFields == numberOfParameters + numberOfOutputs + 1);
@@ -100,7 +100,7 @@ int main(int argc, char ** argv) {
 
   while (std::getline(trace,line)) {
     std::vector<std::string> fields = madai::SplitString(line, ',');
-    assert(numberOfFields == (int) fields.size() - (gradientsPresent?numberOfOutputs:0));
+    assert(numberOfFields == (int) fields.size() - (gradientsPresent?2*numberOfOutputs:0));
     for (int i = 0; i < numberOfFields - 1; ++i) {
       double value = std::atof(fields[i].c_str());
       values[i].push_back(value);
