@@ -46,7 +46,8 @@ public:
   Sample( const std::vector< double > & parameterValues,
     const std::vector< double > & outputValues,
     double LogLikelihood,
-    const std::vector< double > likelihoodErrorGradient);
+    const std::vector< double > logLikelihoodErrorGradient,
+    const std::vector< double > logLikelihoodValueGradient);
 
   Sample( const std::vector< double > & parameterValues,
     const std::vector< double > & outputValues,
@@ -74,8 +75,11 @@ public:
   /** The model output that correspond to m_ParameterValues in some model. */
   std::vector< double > m_OutputValues;
 
-  /** The gradient dL/dsigma_observable for each observable parameter. */
-  std::vector< double > m_LikelihoodErrorGradient;
+  /** The gradient sigma_observable*dLL/dsigma_observable for each observable parameter. */
+  std::vector< double > m_LogLikelihoodErrorGradient;
+
+  /** The gradient dLL/dobservable for each observable parameter. */
+  std::vector< double > m_LogLikelihoodValueGradient;
 
   /**
    * Given some set of field observations, the log likelihood is the

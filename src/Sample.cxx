@@ -31,7 +31,8 @@ Sample
     const std::vector< double > likelihoodErrorGradient) :
   m_ParameterValues( parameterValues ),
   m_OutputValues( outputValues ),
-  m_LikelihoodErrorGradient( likelihoodErrorGradient ),
+  m_LogLikelihoodErrorGradient( logLikelihoodErrorGradient ),
+  m_LogLikelihoodValueGradient( logLikelihoodValueGradient ),
   m_LogLikelihood( LogLikelihood )
 {
 }
