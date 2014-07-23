@@ -68,14 +68,13 @@ PercentileGridSampler
   m_StateVector[dim] ++;
 
   std::vector< double > y( m_Model->GetNumberOfScalarOutputs(), 0.0 );
-  double LogLikelihood; // ll is new_log_likelihood
   Model * m = const_cast< Model * >(m_Model);
   m->GetScalarOutputsAndLogLikelihoodAndLikelihoodErrorGradient(
-    m_CurrentParameters, m_CurrentOutputs, LogLikelihood, 
+    m_CurrentParameters, m_CurrentOutputs, m_CurrentLogLikelihood, 
     m_CurrentLogLikelihoodValueGradient, m_CurrentLogLikelihoodErrorGradient);
   return Sample( m_CurrentParameters,
                  m_CurrentOutputs,
-                 LogLikelihood,
+                 m_CurrentLogLikelihood,
                  m_CurrentLogLikelihoodValueGradient,
                  m_CurrentLogLikelihoodErrorGradient);
 }

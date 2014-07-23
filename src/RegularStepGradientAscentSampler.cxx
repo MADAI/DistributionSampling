@@ -62,9 +62,8 @@ RegularStepGradientAscentSampler
   }
 
   // Get the log likelihood
-  double logLikelihood = 0.0;
   error =
-    m_Model->GetScalarOutputsAndLogLikelihood( m_CurrentParameters, scalars, logLikelihood );
+    m_Model->GetScalarOutputsAndLogLikelihood( m_CurrentParameters, scalars, m_CurrentLogLikelihood );
 
   if (error != Model::NO_ERROR) {
     std::cerr << "In RegularStepGradientAscentSampler::NextSample()\n"
@@ -77,11 +76,11 @@ RegularStepGradientAscentSampler
   // such that calls can be made sequentially instead of these monolithic functions that
   // share code
   m_Model->GetScalarOutputsAndLogLikelihoodAndLikelihoodErrorGradient(
-    m_CurrentParameters, m_CurrentOutputs, logLikelihood, 
+    m_CurrentParameters, m_CurrentOutputs, m_CurrentLogLikelihood, 
     m_CurrentLogLikelihoodValueGradient, m_CurrentLogLikelihoodErrorGradient);
   Sample sample( m_CurrentParameters,
                  m_CurrentOutputs,
-                 logLikelihood,
+                 m_CurrentLogLikelihood,
                  m_CurrentLogLikelihoodValueGradient,
                  m_CurrentLogLikelihoodErrorGradient);
 
