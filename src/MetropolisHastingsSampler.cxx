@@ -86,7 +86,8 @@ MetropolisHastingsSampler
 
   std::vector< double > xc( m_Model->GetNumberOfParameters(), 0.0 );
   std::vector< double > yc( m_Model->GetNumberOfScalarOutputs(), 0.0 );
-  std::vector< double > dl_dsigmay( m_Model->GetNumberOfScalarOutputs(), 0.0 );
+  std::vector< double > dl_dy( m_Model->GetNumberOfScalarOutputs(), 0.0 );
+  std::vector< double > ydl_dsigmay( m_Model->GetNumberOfScalarOutputs(), 0.0 );
 
   assert( static_cast<unsigned int>(
               std::count( m_ActiveParameterIndices.begin(),
@@ -105,7 +106,7 @@ MetropolisHastingsSampler
     }
   }
   double ll; // ll is new_log_likelihood
-  m->GetScalarOutputsAndLogLikelihoodAndLikelihoodErrorGradient(xc,yc,ll,dl_dsigmay);
+  m->GetScalarOutputsAndLogLikelihoodAndLikelihoodErrorGradient(xc,yc,ll,dl_dy,ydl_dsigmay);
 
   // Check for NaN
   assert( ll == ll );
@@ -117,15 +118,17 @@ MetropolisHastingsSampler
     m_CurrentLogLikelihood = ll;
     m_CurrentParameters = xc;
     m_CurrentOutputs = yc;
-    m_CurrentLogLikelihoodGradient = dl_dsigmay;
-    return Sample( xc, yc, ll, dl_dsigmay);
+    m_CurrentLogLikelihoodValueGradient = dl_dy;
+    m_CurrentLogLikelihoodErrorGradient = ydl_dsigmay;
+    return Sample( xc, yc, ll, dl_dy, ydl_dsigmay);
   }
 
   // Stay at this point in parameter space
   return Sample( m_CurrentParameters,
                  m_CurrentOutputs,
                  m_CurrentLogLikelihood, 
-                 m_CurrentLogLikelihoodGradient);
+                 m_CurrentLogLikelihoodValueGradient,
+                 m_CurrentLogLikelihoodErrorGradient);
 
 }
 
