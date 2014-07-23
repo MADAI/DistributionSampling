@@ -46,8 +46,8 @@ public:
   Sample( const std::vector< double > & parameterValues,
     const std::vector< double > & outputValues,
     double LogLikelihood,
-    const std::vector< double > logLikelihoodErrorGradient,
-    const std::vector< double > logLikelihoodValueGradient);
+    const std::vector< double > logLikelihoodValueGradient,
+    const std::vector< double > logLikelihoodErrorGradient);
 
   Sample( const std::vector< double > & parameterValues,
     const std::vector< double > & outputValues,

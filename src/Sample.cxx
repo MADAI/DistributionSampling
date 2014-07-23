@@ -28,11 +28,12 @@ Sample
 ::Sample( const std::vector< double > & parameterValues,
     const std::vector< double > & outputValues,
     double LogLikelihood,
-    const std::vector< double > likelihoodErrorGradient) :
+    const std::vector< double > logLikelihoodValueGradient,
+    const std::vector< double > logLikelihoodErrorGradient) :
   m_ParameterValues( parameterValues ),
   m_OutputValues( outputValues ),
-  m_LogLikelihoodErrorGradient( logLikelihoodErrorGradient ),
   m_LogLikelihoodValueGradient( logLikelihoodValueGradient ),
+  m_LogLikelihoodErrorGradient( logLikelihoodErrorGradient ),
   m_LogLikelihood( LogLikelihood )
 {
 }
@@ -123,17 +124,17 @@ std::ostream & operator<<(std::ostream & os, const Sample & sample) {
   }
   os << "]\n";
 
-  os << "  sigma_observable*dLL/dsigma_observable: [";
-  for ( size_t i = 0; i < sample.m_LogLikelihoodErrorGradient.size(); ++i ) {
-    os << sample.m_LogLikelihoodErrorGradient[i];
-    if ( i < sample.m_LogLikelihoodErrorGradient.size()-1) os << ", ";
+  os << "  dLL/dobservable: [";
+  for ( size_t i = 0; i < sample.m_LogLikelihoodValueGradient.size(); ++i ) {
+    os << sample.m_LogLikelihoodValueGradient[i];
+    if ( i < sample.m_LogLikelihoodValueGradient.size()-1) os << ", ";
   }
   os << "]\n";
 
   os << "  sigma_observable*dLL/dsigma_observable: [";
-  for ( size_t i = 0; i < sample.m_LogLikelihoodValueGradient.size(); ++i ) {
-    os << sample.m_LogLikelihoodValueGradient[i];
-    if ( i < sample.m_LogLikelihoodValueGradient.size()-1) os << ", ";
+  for ( size_t i = 0; i < sample.m_LogLikelihoodErrorGradient.size(); ++i ) {
+    os << sample.m_LogLikelihoodErrorGradient[i];
+    if ( i < sample.m_LogLikelihoodErrorGradient.size()-1) os << ", ";
   }
   os << "]\n";
 

@@ -218,8 +218,8 @@ public:
     const std::vector< double > & parameters,
     std::vector< double > & scalars,
     double & logLikelihood,
-    std::vector< double > & error_gradient,
-    std::vector< double > & value_gradient) const;
+    std::vector< double > & value_gradient,
+    std::vector< double > & error_gradient) const;
 
   /** Some models don't know the output values precisely
    *
