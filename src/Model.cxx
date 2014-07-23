@@ -414,7 +414,8 @@ Model
     const std::vector< double > & parameters,
     std::vector< double > & scalars,
     double & logLikelihood,
-    std::vector< double > & gradient) const
+    std::vector< double > & error_gradient,
+    std::vector< double > & value_gradient) const
 {
 
 
@@ -488,9 +489,12 @@ Model
   double innerProduct = qrDecomposition.solve(diff).dot(diff);
   logLikelihood = ((-0.5) * innerProduct) + logPriorLikelihood;
 
-  gradient.clear();
+  value_gradient.clear();
+  error_gradient.clear();
   if (this->m_ObservedScalarValues.size() > 0) {
     Eigen::MatrixXd inverse  = qrDecomposition.inverse();
+    Eigen::VectorXd gradient = -1.0*inverse*diff;
+    value_gradient.assign(gradient.data(), gradient.data()+t);
     Eigen::MatrixXd covDelta(t,t);
     for (size_t i = 0; i < t; ++i) {
       covDelta.setZero();
@@ -503,7 +507,7 @@ Model
           covDelta(k, i) = covDelta(i, k);
         }
       }
-      gradient.push_back(0.5*((inverse*covDelta*inverse)*diff).dot(diff)*sqrt(cov(i,i)));
+      error_gradient.push_back(0.5*((inverse*covDelta*inverse)*diff).dot(diff)*sqrt(cov(i,i)));
     }
   }
 
