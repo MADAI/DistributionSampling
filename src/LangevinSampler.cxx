@@ -113,15 +113,18 @@ LangevinSampler
   
   // Get loglikelihood at the new parameters
   double LogLikelihood;
-  m->GetScalarOutputsAndLogLikelihood(
-    m_CurrentParameters, m_CurrentOutputs, LogLikelihood );
+  m->GetScalarOutputsAndLogLikelihoodAndLikelihoodErrorGradient(
+    m_CurrentParameters, m_CurrentOutputs, LogLikelihood, 
+    m_CurrentLogLikelihoodValueGradient, m_CurrentLogLikelihoodErrorGradient);
     
   // Check for NaN
   assert( LogLikelihood == LogLikelihood );
   
   return Sample( m_CurrentParameters,
                  m_CurrentOutputs,
-                 LogLikelihood );
+                 LogLikelihood,
+                 m_CurrentLogLikelihoodValueGradient,
+                 m_CurrentLogLikelihoodErrorGradient);
 }
 
 
