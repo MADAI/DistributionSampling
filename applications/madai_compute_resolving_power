@@ -96,6 +96,9 @@ class Correlations(object):
         return self.D_parameter_parameter_root_covariance(k, i, i)
 
     def resolving_power(self, k , i, j):
+        if i == j:
+            return self.D_parameter_standard_deviation(k, i)
+
         variance = (self.parameter_variance(i), self.parameter_variance(j))
         standard_deviation = (math.sqrt(variance[0]), math.sqrt(variance[1]))
         covariance = self.parameter_parameter_covariance(i, j)
