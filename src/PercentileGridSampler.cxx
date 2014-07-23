@@ -47,14 +47,13 @@ PercentileGridSampler
   unsigned int p = m_Model->GetNumberOfParameters();
 
   assert(m_CurrentParameters.size() == m_Model->GetNumberOfParameters());
-  std::vector< double > x(m_CurrentParameters); // copy constructor
 
   // do something
   double rangeOverN = 1.0 / static_cast< double >( m_NumberOfSamplesInEachDimension );
   double start = 0.5 * rangeOverN;
   for ( unsigned int dim = 0; dim < p; ++dim ) {
     if (this->IsParameterActive(dim)) {
-      x[dim] =
+      m_CurrentParameters[dim] =
         parameters[dim].GetPriorDistribution()->GetPercentile(
             start + (m_StateVector[dim] * rangeOverN));
     }
@@ -69,11 +68,16 @@ PercentileGridSampler
   m_StateVector[dim] ++;
 
   std::vector< double > y( m_Model->GetNumberOfScalarOutputs(), 0.0 );
-  double ll; // ll is new_log_likelihood
+  double LogLikelihood; // ll is new_log_likelihood
   Model * m = const_cast< Model * >(m_Model);
-  m->GetScalarOutputsAndLogLikelihood(x,y,ll);
-  return Sample( x, y, ll );
-
+  m->GetScalarOutputsAndLogLikelihoodAndLikelihoodErrorGradient(
+    m_CurrentParameters, m_CurrentOutputs, LogLikelihood, 
+    m_CurrentLogLikelihoodValueGradient, m_CurrentLogLikelihoodErrorGradient);
+  return Sample( m_CurrentParameters,
+                 m_CurrentOutputs,
+                 LogLikelihood,
+                 m_CurrentLogLikelihoodValueGradient,
+                 m_CurrentLogLikelihoodErrorGradient);
 }
 
 void PercentileGridSampler
