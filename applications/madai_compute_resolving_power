@@ -103,8 +103,14 @@ class Correlations(object):
         standard_deviation = (math.sqrt(variance[0]), math.sqrt(variance[1]))
         covariance = self.parameter_parameter_covariance(i, j)
 
+        # there's an arbitrary scale if the two parameters have different units
+        # here we scale each by their standard deviation
+        scale = (standard_deviation[0], standard_deviation[1])
+        standard_deviation = (standard_deviation[0]/scale[0], standard_deviation[1]/scale[1])
+        variance = (standard_deviation[0]**2, standard_deviation[1]**2)
+        covariance /= scale[0]*scale[1]
 
-        # pick pi/4 if they're the same
+        # pick pi/4 if they're the same, as is the case when scaled by the standard deviation
         major_theta = math.pi/4.0
         if variance[0] != variance[1]:
             major_theta = -0.5*math.atan(2.0*covariance/(variance[1]-variance[0]))
@@ -128,7 +134,6 @@ class Correlations(object):
             minor_sin, major_sin = major_sin, minor_sin
         major_standard_deviation = math.sqrt(major_variance)
         minor_standard_deviation = math.sqrt(minor_variance)
-
 
         D_standard_deviation = (self.D_parameter_standard_deviation(k, i), self.D_parameter_standard_deviation(k, j))
 
