@@ -123,6 +123,20 @@ std::ostream & operator<<(std::ostream & os, const Sample & sample) {
   }
   os << "]\n";
 
+  os << "  sigma_observable*dLL/dsigma_observable: [";
+  for ( size_t i = 0; i < sample.m_LogLikelihoodErrorGradient.size(); ++i ) {
+    os << sample.m_LogLikelihoodErrorGradient[i];
+    if ( i < sample.m_LogLikelihoodErrorGradient.size()-1) os << ", ";
+  }
+  os << "]\n";
+
+  os << "  sigma_observable*dLL/dsigma_observable: [";
+  for ( size_t i = 0; i < sample.m_LogLikelihoodValueGradient.size(); ++i ) {
+    os << sample.m_LogLikelihoodValueGradient[i];
+    if ( i < sample.m_LogLikelihoodValueGradient.size()-1) os << ", ";
+  }
+  os << "]\n";
+
   os << "  LogLikelihood: [" << sample.m_LogLikelihood << "]\n";
 
   if ( sample.m_Comments.size() > 0 ) {
