@@ -178,16 +178,6 @@ def read_trace_file(filename):
             loglikelihood = line[loglikelihood_index]
             gradient = line[loglikelihood_index+1:]
             correlations.add_sample(parameters, observables, loglikelihood, gradient)
-        for i in range(2):
-            for j in range(2):
-                print str(i) + "\t" + str(j)
-                print "\t" + str(correlations.D_parameter_standard_deviation(i, j))
-        print "Resolving powers:"
-        for i in range(2):
-            for j in range(2):
-                print str(i) + "\t" + str(j)
-                print "\t" + str(correlations.resolving_power(i, j, j))
-
         row_format ="{:>20}" * (number_of_parameters + 1)
         for k, observable in enumerate(observable_names):
             print "Resolving power for the observable " + observable
@@ -197,6 +187,8 @@ def read_trace_file(filename):
                 for j in range(number_of_parameters):
                     resolving_powers.append(correlations.resolving_power(k, i, j))
                 print row_format.format(parameter, *resolving_powers)
+        return correlations
+
 
 
 if __name__ == '__main__':
@@ -204,7 +196,7 @@ if __name__ == '__main__':
         print 'Usage: ' + sys.argv[0] + ' trace_file.csv'
         exit
     try:
-        read_trace_file(sys.argv[1])
+        correlations = read_trace_file(sys.argv[1])
     except TraceFileException as e:
         print 'Fatal exception: ' + e
 
