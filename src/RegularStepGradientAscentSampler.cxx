@@ -73,7 +73,17 @@ RegularStepGradientAscentSampler
     return Sample();
   }
 
-  Sample sample( m_CurrentParameters, scalars, logLikelihood );
+  // FIX ME - This is really innefficient calling this again but Model needs to be refactored
+  // such that calls can be made sequentially instead of these monolithic functions that
+  // share code
+  m_Model->GetScalarOutputsAndLogLikelihoodAndLikelihoodErrorGradient(
+    m_CurrentParameters, m_CurrentOutputs, logLikelihood, 
+    m_CurrentLogLikelihoodValueGradient, m_CurrentLogLikelihoodErrorGradient);
+  Sample sample( m_CurrentParameters,
+                 m_CurrentOutputs,
+                 logLikelihood,
+                 m_CurrentLogLikelihoodValueGradient,
+                 m_CurrentLogLikelihoodErrorGradient);
 
   // Update the current parameters to the new position
   double direction = 1.0;
