@@ -132,9 +132,13 @@ int main(int argc, char ** argv) {
       }
     }
   }
-
-  assert(static_cast<int>(headers.size())
-         == numberOfParameters + numberOfObservables + 1);
+  int numberOfFields = headers.size();
+  bool gradientsPresent = false;
+  if( numberOfFields == numberOfParameters + 3*numberOfObservables + 1 ) {
+    numberOfFields -= 2*numberOfObservables;
+    gradientsPresent = true;
+  }
+  assert(numberOfFields == numberOfParameters + numberOfObservables + 1);
 
   std::string line;
   size_t lineCount = 0;
