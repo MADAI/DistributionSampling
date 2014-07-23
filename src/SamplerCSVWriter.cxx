@@ -150,7 +150,7 @@ SamplerCSVWriter
   if( WriteLogLikelihoodGradients ) {
     if ( sample.m_OutputValues.size() > 0 ) {
       out << ',';
-      write_vector( out, sample.m_LikelihoodErrorGradient, ',' );
+      write_vector( out, sample.m_LogLikelihoodErrorGradient, ',' );
     }
   }
   if ( sample.m_Comments.size() > 0 ) {
