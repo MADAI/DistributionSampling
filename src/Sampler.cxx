@@ -268,9 +268,16 @@ Sampler
 
 const std::vector< double > &
 Sampler
-::GetCurrentLogLikelihoodGradient() const
+::GetCurrentLogLikelihoodValueGradient() const
 {
-  return m_CurrentLogLikelihoodGradient;
+  return m_CurrentLogLikelihoodValueGradient;
+}
+
+const std::vector< double > &
+Sampler
+::GetCurrentLogLikelihoodErrorGradient() const
+{
+  return m_CurrentLogLikelihoodErrorGradient;
 }
 
 
