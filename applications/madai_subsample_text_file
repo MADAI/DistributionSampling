@@ -11,7 +11,11 @@ INFILE="$2"
 OUTFILE="$3"
 if [ ${RATIO} != 1 ]
 then
-    exec awk "NR % ${RATIO} == 1" "$INFILE" > "$OUTFILE"
+    if file --mime-type "$INFILE" | grep -q gzip$; then
+      cat $INFILE | zcat -f | awk "NR % ${RATIO} == 1" | gzip > "$OUTFILE"
+    else
+      awk "NR % ${RATIO} == 1" $INFILE > "$OUTFILE"
+    fi
 else
     cp "$INFILE" "$OUTFILE"
 fi
