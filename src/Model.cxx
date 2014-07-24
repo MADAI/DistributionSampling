@@ -493,7 +493,8 @@ Model
   error_gradient.clear();
   if (this->m_ObservedScalarValues.size() > 0) {
     Eigen::MatrixXd inverse  = qrDecomposition.inverse();
-    Eigen::VectorXd gradient = -1.0*inverse*diff;
+    //this is positive because diff = scalars - observedScalars
+    Eigen::VectorXd gradient = inverse*diff;
     value_gradient.assign(gradient.data(), gradient.data()+t);
     Eigen::MatrixXd covDelta(t,t);
     for (size_t i = 0; i < t; ++i) {
