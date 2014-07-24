@@ -9,8 +9,10 @@ if [ -z "$1" ] ; then
   echo "" >&2;
   exit 1;
 fi
-zcat -f "$1"
+# The first cat forces the filename to be exact, zcat would otherwise add gz
+# The -f option on zcat makes it pass through uncompressed files
+cat "$1" | zcat -f
 shift
 for arg; do
-  zcat -f "$arg" | tail -n+2
+  cat "$arg" | zcat -f | tail -n+2
 done
