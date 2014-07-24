@@ -9,8 +9,8 @@ if [ -z "$1" ] ; then
   echo "" >&2;
   exit 1;
 fi
-cat "$1"
+zcat -f "$1"
 shift
 for arg; do
-  tail -n+2 < "$arg"
+  zcat -f "$arg" | tail -n+2
 done
