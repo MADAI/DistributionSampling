@@ -22,6 +22,7 @@ import os
 import sys
 import copy
 import math
+import gzip
 
 class Correlations(object):
     def __init__(self, number_of_parameters, number_of_observables):
@@ -159,41 +160,46 @@ class TraceFileException(Exception):
 def read_trace_file(filename):
     if not os.path.isfile(filename):
         raise TraceFileException('Trace file ' + filename + ' does not exist.')
-    with open(filename, 'r') as f:
-        header = [name[1:-1] for name in f.readline()[:-1].split(',')]
-        if header[-1] == 'LogLikelihood':
-            TraceFileException('There are no log likelihood gradients in the trace file.')
-        if 'LogLikelihood' not in header:
-            TraceFileException('There is no log likelihood in the trace file.')
-        loglikelihood_index = header.index('LogLikelihood')
-        number_of_observables = 0
-        for title in header[loglikelihood_index+1:]:
-            if '*dLL/dsigma_' in title:
-                break
-            number_of_observables += 1
-        print number_of_observables
-        number_of_parameters = loglikelihood_index - number_of_observables
-        parameter_names = header[:number_of_parameters]
-        observable_names = header[number_of_parameters:loglikelihood_index]
-        correlations = Correlations(number_of_parameters, number_of_observables)
-        for line in f:
-            line = map(float, line.split(','))
-            parameters = line[:number_of_parameters]
-            observables = line[number_of_parameters:loglikelihood_index]
-            loglikelihood = line[loglikelihood_index]
-            value_gradient = line[loglikelihood_index+1:loglikelihood_index+1+number_of_observables]
-            error_gradient = line[loglikelihood_index+1+number_of_observables:loglikelihood_index+1+2*number_of_observables]
-            correlations.add_sample(parameters, observables, loglikelihood, error_gradient)
-        row_format ="{:>20}" * (number_of_parameters + 1)
-        for k, observable in enumerate(observable_names):
-            print "Resolving power for the observable " + observable
-            print row_format.format("", *parameter_names)
-            for i, parameter in enumerate(parameter_names):
-                resolving_powers = []
-                for j in range(number_of_parameters):
-                    resolving_powers.append(correlations.resolving_power(k, i, j))
-                print row_format.format(parameter, *resolving_powers)
-        return correlations
+    f = open(filename, 'rb')
+    if f.read(1) == b'"':
+        f.close()
+        f = open(filename,'r')
+    else:
+        f.close()
+        f = gzip.open(filename,'r')
+    header = [name[1:-1] for name in f.readline()[:-1].split(',')]
+    if header[-1] == 'LogLikelihood':
+        TraceFileException('There are no log likelihood gradients in the trace file.')
+    if 'LogLikelihood' not in header:
+        TraceFileException('There is no log likelihood in the trace file.')
+    loglikelihood_index = header.index('LogLikelihood')
+    number_of_observables = 0
+    for title in header[loglikelihood_index+1:]:
+        if '*dLL/dsigma_' in title:
+            break
+        number_of_observables += 1
+    number_of_parameters = loglikelihood_index - number_of_observables
+    parameter_names = header[:number_of_parameters]
+    observable_names = header[number_of_parameters:loglikelihood_index]
+    correlations = Correlations(number_of_parameters, number_of_observables)
+    for line in f:
+        line = map(float, line.split(','))
+        parameters = line[:number_of_parameters]
+        observables = line[number_of_parameters:loglikelihood_index]
+        loglikelihood = line[loglikelihood_index]
+        value_gradient = line[loglikelihood_index+1:loglikelihood_index+1+number_of_observables]
+        error_gradient = line[loglikelihood_index+1+number_of_observables:loglikelihood_index+1+2*number_of_observables]
+        correlations.add_sample(parameters, observables, loglikelihood, error_gradient)
+    row_format ="{:>20}" * (number_of_parameters + 1)
+    for k, observable in enumerate(observable_names):
+        print "Resolving power for the observable " + observable
+        print row_format.format("", *parameter_names)
+        for i, parameter in enumerate(parameter_names):
+            resolving_powers = []
+            for j in range(number_of_parameters):
+                resolving_powers.append(correlations.resolving_power(k, i, j))
+            print row_format.format(parameter, *resolving_powers)
+    return correlations
 
 
 
