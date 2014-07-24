@@ -90,6 +90,7 @@ def madai_gnuplot_scatterplot_matrix(
 				f.close()
 				self.f = open(csvfile,'r')
 			else:
+				f.close()
 				self.f = gzip.open(csvfile,'r')
 			self.r = csv.reader(self.f)
 			self.header = self.r.next()
