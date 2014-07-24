@@ -112,6 +112,20 @@ std::string GetPosteriorAnalysisDirectory( const std::string & statisticsDirecto
     Defaults::POSTERIOR_ANALYSIS_DIRECTORY );
 }
 
+bool IsTraceCompressed( const std::string & traceFile )
+{
+    std::ifstream file(traceFile.c_str(), std::ios_base::in | std::ios_base::binary);
+    char firstByte;
+    file.read(&firstByte, 1);
+    file.seekg(0, file.beg);
+
+    // this indicates that it's not compressed
+    if(firstByte == '"') {
+      return false;
+    }
+    return true;
+}
+
 bool IsFile( const char * path )
 {
   return ( SystemTools::FileExists( path ) &&
