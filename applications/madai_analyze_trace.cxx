@@ -25,6 +25,9 @@
 #include <sstream> // std::stringstream
 #include <iomanip> // std::setw
 #include <limits> // inifity
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+
 
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulatorDirectoryFormatIO.h"
@@ -73,11 +76,17 @@ int main(int argc, char ** argv) {
     return EXIT_FAILURE;
   }
 
-  std::ifstream trace(traceFile.c_str());
-  if ( !trace.good() ) {
+  std::ifstream file(traceFile.c_str(), std::ios_base::in | std::ios_base::binary);
+  if ( !file.good() ) {
     std::cerr << "Error reading trace file '" << traceFile << "'.\n";
     return EXIT_FAILURE;
   }
+  boost::iostreams::filtering_streambuf<boost::iostreams::input> inbuf;
+  if( madai::IsTraceCompressed(traceFile) ) {
+      inbuf.push(boost::iostreams::gzip_decompressor());
+  }
+  inbuf.push(file);
+  std::istream trace(&inbuf);
 
   std::string header;
   std::getline(trace,header);
@@ -109,7 +118,7 @@ int main(int argc, char ** argv) {
     ++lineCount;
   }
 
-  trace.close();
+  file.close();
   std::vector< double > means(numberOfFields - 1,0.0);
 
   std::vector< double > priorStdDev(numberOfFields - 1,0.0);
