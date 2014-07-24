@@ -91,6 +91,26 @@ bool Sample
     return (m_LogLikelihood < rhs.m_LogLikelihood);
 }
 
+bool Sample
+::operator==(const Sample & rhs) const {
+  if ( m_LogLikelihood != rhs.m_LogLikelihood ) {
+    return false;
+  }
+
+  if ( m_ParameterValues != rhs.m_ParameterValues ) {
+    return false;
+  }
+
+  if ( m_OutputValues != rhs.m_OutputValues ) {
+    return false;
+  }
+
+  if ( m_Comments != rhs.m_Comments ) {
+    return false;
+  }
+
+  return true;
+}
 
 std::ostream & operator<<(std::ostream & os, const Sample & sample) {
 
