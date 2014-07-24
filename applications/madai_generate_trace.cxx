@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 
 #include "ApplicationUtilities.h"
 #include "Defaults.h"
@@ -128,6 +130,8 @@ int main(int argc, char ** argv) {
   bool writeLogLikelihoodGradients = settings.GetOptionAsBool(
       "WRITE_LOGLIKELIHOOD_GRADIENTS", 
       madai::Defaults::WRITE_LOGLIKELIHOOD_GRADIENTS );
+
+  bool compressed = settings.GetOptionAsBool( "COMPRESS_TRACE", madai::Defaults::COMPRESS_TRACE );
 
   madai::ExternalModel externalModel;
   madai::GaussianProcessEmulatedModel gpem;
@@ -241,17 +245,23 @@ int main(int argc, char ** argv) {
   }
 
   std::string outputFilePath( argv[2] );
-  std::ofstream outFile(outputFilePath.c_str());
+  std::ofstream outFile(outputFilePath.c_str(), std::ios_base::out | std::ios_base::binary);
   if ( !outFile.good() ) {
     std::cerr << "Could not open trace file '" << outputFilePath << "' for writing.\n";
     return EXIT_FAILURE;
   }
+  boost::iostreams::filtering_streambuf<boost::iostreams::output> outbuf;
+  if( compressed ) {
+      outbuf.push(boost::iostreams::gzip_compressor());
+  }
+  outbuf.push(outFile);
+  std::ostream outFileStream(&outbuf);
 
   std::ostream * progressStream = verbose ? (& std::cerr) : NULL;
   int returnCode = madai::SamplerCSVWriter::GenerateSamplesAndSaveToFile(
       *sampler,
       *model,
-      outFile,
+      outFileStream,
       numberOfSamples,
       numberOfBurnInSamples,
       useModelError,

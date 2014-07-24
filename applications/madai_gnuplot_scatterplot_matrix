@@ -20,7 +20,7 @@
 
 ## This has been tested to work with python 2.4.6.
 
-import sys,os,csv,tempfile,subprocess,stat
+import sys,os,csv,tempfile,subprocess,stat,gzip
 
 def madai_gnuplot_scatterplot_matrix(
 	parameter_list,
@@ -83,7 +83,14 @@ def madai_gnuplot_scatterplot_matrix(
 	# Using the generator pattern (an iterable)
 	class CSVRead(object):
 		def __init__(self, csvfile):
-			self.f = open(csvfile,'r')
+			f = open(csvfile, 'rb')
+			self.compressed = True
+			if f.read(1) == b'"':
+				self.compressed = False
+				f.close()
+				self.f = open(csvfile,'r')
+			else:
+				self.f = gzip.open(csvfile,'r')
 			self.r = csv.reader(self.f)
 			self.header = self.r.next()
 		def __iter__(self):

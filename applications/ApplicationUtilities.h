@@ -63,6 +63,12 @@ std::string GetPosteriorAnalysisDirectory( const std::string & statisticsDirecto
                                            const RuntimeParameterFileReader & settings );
 
 /**
+ * Opens the trace file and determines whether it has been gzipped or
+ * not. This is done by checking if the first character is '"' which
+ * indicates that it is not compressed. */
+bool IsTraceCompressed( const std::string & traceFile );
+
+/**
  * Returns a string where all the characters in the input parameter
  * are lowercase. */
 std::string LowerCase( const char * buffer );

@@ -104,6 +104,12 @@ public:
    */
   bool operator<(const Sample & rhs) const;
 
+  /**
+   * Equality operator so we can check if a sampler returned the same
+   * sample multiple times.
+   */
+  bool operator==(const Sample & rhs) const;
+
 }; // class Sample
 
 /**

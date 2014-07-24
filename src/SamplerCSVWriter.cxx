@@ -18,6 +18,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <iomanip>
 
 #include "SamplerCSVWriter.h"
 #include "Sample.h"
@@ -47,7 +48,7 @@ int SamplerCSVWriter
   for ( int count = 0; count < NumberOfBurnInSamples; count++ ) {
     if (progress != NULL) {
       if ( count % step == 0 ) {
-        (*progress) << '\r' << "Burn in percent done: " << percent++ << "%  ";
+        (*progress) << '\r' << "Burn in percent done: " << std::setfill('0') << std::setw(2) << percent++ << "%  ";
         progress->flush();
       }
     }
@@ -61,18 +62,32 @@ int SamplerCSVWriter
   WriteHeader( outFile, model.GetParameters(), model.GetScalarOutputNames(),
                WriteLogLikelihoodGradients);
 
+  Sample oldSample;
+  int successfulSteps = 0, failedSteps = 0;
   for (int count = 0; count < NumberOfSamples; count ++) {
     if (progress != NULL) {
-      if (count % step == 0)
-        (*progress) <<  '\r' << "Sampler percent done: " << percent++ << "%  ";
+      if (count % step == 0) {
+        if( successfulSteps > 0 || failedSteps > 0 ) {
+          (*progress) <<  '\r' << "Sampler percent done: " << std::setfill('0') << std::setw(2) << percent++ << "%";
+          (*progress) << "\tSuccess rate: " << std::setfill('0') << std::setw(2) << 100*successfulSteps / (successfulSteps + failedSteps) << "%";
+        }
+      }
       progress->flush();
     }
     Sample sample = sampler.NextSample();
+    if( sample == oldSample ) {
+      failedSteps++;
+    }
+    else {
+      successfulSteps++;
+    }
+    oldSample = sample;
 
     WriteSample( outFile, sample, WriteLogLikelihoodGradients );
   }
   if (progress != NULL) {
-    (*progress) << "\r                            \r";
+    // Leave the success rate percentage visible
+    (*progress) << "\n";
     progress->flush();
   }
 

@@ -37,6 +37,8 @@ namespace Defaults {
 
   extern const bool WRITE_LOGLIKELIHOOD_GRADIENTS;
 
+  extern const bool COMPRESS_TRACE;
+
   /**
    Latin Hypercube Variables */
   extern const int GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS;
