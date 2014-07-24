@@ -29,6 +29,8 @@ const bool Defaults::VERBOSE  = false;
 
 const bool Defaults::READER_VERBOSE = false;
 
+const bool Defaults::COMPRESS_TRACE = false;
+
 const int Defaults::GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS  = 100;
 
 const bool Defaults::GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE = true;
@@ -81,6 +83,7 @@ void Defaults::PrintAllDefaults(std::ostream & o) {
     << "#\n"
     << "VERBOSE "                                          << Defaults::VERBOSE << '\n'
     << "READER_VERBOSE "                                   << Defaults::READER_VERBOSE << '\n'
+    << "COMPRESS_TRACE "                                   << Defaults::COMPRESS_TRACE << '\n'
     << "#\n"
     << "GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS "        << Defaults::GENERATE_TRAINING_POINTS_NUMBER_OF_POINTS << '\n'
     << "GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE " << Defaults::GENERATE_TRAINING_POINTS_PARTITION_BY_PERCENTILE << '\n'
