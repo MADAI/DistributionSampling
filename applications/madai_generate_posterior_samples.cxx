@@ -141,10 +141,8 @@ int main(int argc, char ** argv) {
     }
   }
   int numberOfFields = headers.size();
-  bool gradientsPresent = false;
   if( numberOfFields == numberOfParameters + 3*numberOfObservables + 1 ) {
     numberOfFields -= 2*numberOfObservables;
-    gradientsPresent = true;
   }
   assert(numberOfFields == numberOfParameters + numberOfObservables + 1);
 
