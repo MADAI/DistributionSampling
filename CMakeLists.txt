@@ -36,7 +36,7 @@ find_package(Eigen3 REQUIRED)
 list(APPEND DistributionSampling_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} )
 
 ## BOOST
-find_package( Boost REQUIRED )
+find_package( Boost REQUIRED iostreams)
 list(APPEND DistributionSampling_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} )
 
 ## OpenMP

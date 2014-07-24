@@ -27,7 +27,9 @@ foreach( application ${APPLICATIONS} )
   target_link_libraries( ${application}
     DistributionSampling
     ApplicationUtilities
+    ${Boost_IOSTREAMS_LIBRARY}
     )
+   message(${application} ${Boost_LIBRARIES}) 
 endforeach()
 
 # Install binary executables
