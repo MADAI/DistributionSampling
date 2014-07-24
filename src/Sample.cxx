@@ -120,6 +120,14 @@ bool Sample
     return false;
   }
 
+  if ( m_LogLikelihoodValueGradient != rhs.m_LogLikelihoodValueGradient ) {
+    return false;
+  }
+
+  if ( m_LogLikelihoodErrorGradient != rhs.m_LogLikelihoodErrorGradient ) {
+    return false;
+  }
+
   if ( m_Comments != rhs.m_Comments ) {
     return false;
   }
