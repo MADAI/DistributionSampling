@@ -191,7 +191,8 @@ static double Score(
   int numberToLeaveOut = N / PARTITIONS;
   int numberToKeep = N - numberToLeaveOut;
   // assume Training Points are not sorted in any particular order
-  GaussianProcessEmulator dummy(m_UseModelError);
+  GaussianProcessEmulator dummy;
+  dummy.m_UseModelError = originalModel.m_Parent->m_UseModelError;
   dummy.m_NumberParameters = p;
   dummy.m_Parameters = originalModel.m_Parent->m_Parameters;
   dummy.m_NumberTrainingPoints = numberToKeep;
