@@ -128,7 +128,7 @@ public:
    * Default constructor which makes an uninitialized
    * GaussianProcessEmulator.
    */
-  GaussianProcessEmulator();
+  GaussianProcessEmulator(bool useModelUncertainty = true);
 
   /**
    * This takes a GaussianProcessEmulator with training data and
@@ -279,6 +279,11 @@ public:
    * faster.
    */
   bool MakeCache();
+
+  /**
+   * Whether to include the model uncertainty in the uncertainty scales.
+   */
+  bool m_UseModelUncertainty;
 
   /**
    * Current status of the GaussianProcessEmulator.
