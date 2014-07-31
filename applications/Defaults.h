@@ -51,6 +51,8 @@ namespace Defaults {
 
   /**
    Emulator Variables */
+  extern const bool PCA_USE_MODEL_ERROR;
+
   extern const double PCA_FRACTION_RESOLVING_POWER;
 
   extern const std::string EMULATOR_COVARIANCE_FUNCTION;
