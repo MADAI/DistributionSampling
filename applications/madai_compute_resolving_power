@@ -29,19 +29,29 @@ class Correlations(object):
         self.number_of_parameters = number_of_parameters
         self.number_of_observables = number_of_observables
         self.samples = 0
-        self.D_samples = [0.0]*number_of_observables
         self.po_squares = [ [0.0]*number_of_observables for i in range(number_of_parameters) ]
         self.pp_squares = [ [0.0]*number_of_parameters for i in range(number_of_parameters) ]
         self.parameter_sums = [0.0]*number_of_parameters
         self.observable_sums = [0.0]*number_of_observables
-        self.D_parameter_sums = []
-        self.D_pp_squares = []
+
+        # De represents the derivative with respect to the error on the observables
+        self.De_samples = [0.0]*number_of_observables
+        self.De_parameter_sums = []
+        self.De_pp_squares = []
         for i in range(number_of_observables):
-            self.D_parameter_sums.append(copy.deepcopy(self.parameter_sums))
-            self.D_pp_squares.append(copy.deepcopy(self.pp_squares))
+            self.De_parameter_sums.append(copy.deepcopy(self.parameter_sums))
+            self.De_pp_squares.append(copy.deepcopy(self.pp_squares))
+
+        # Dv represents the derivative with respect to the value of the observable
+        self.Dv_samples = [0.0]*number_of_observables
+        self.Dv_parameter_sums = []
+        self.Dv_pp_squares = []
+        for i in range(number_of_observables):
+            self.Dv_parameter_sums.append(copy.deepcopy(self.parameter_sums))
+            self.Dv_pp_squares.append(copy.deepcopy(self.pp_squares))
 
 
-    def add_sample(self, parameters, observables, loglikelihood, gradient):
+    def add_sample(self, parameters, observables, loglikelihood, value_gradient, error_gradient):
         self.samples += 1
         for i, parameter in enumerate(parameters):
             self.parameter_sums[i] += parameter
@@ -51,11 +61,14 @@ class Correlations(object):
                 self.po_squares[i][j] += parameter*observable
         for k, observable in enumerate(observables):
             self.observable_sums[k] += observable
-            self.D_samples[k] += gradient[k]
+            self.Dv_samples[k] += value_gradient[k]
+            self.De_samples[k] += error_gradient[k]
             for i, parameter in enumerate(parameters):
-                self.D_parameter_sums[k][i] += parameter*gradient[k]
+                self.Dv_parameter_sums[k][i] += parameter*value_gradient[k]
+                self.De_parameter_sums[k][i] += parameter*error_gradient[k]
                 for j in range(i+1):
-                    self.D_pp_squares[k][i][j] += parameter*parameters[j]*gradient[k]
+                    self.Dv_pp_squares[k][i][j] += parameter*parameters[j]*value_gradient[k]
+                    self.De_pp_squares[k][i][j] += parameter*parameters[j]*error_gradient[k]
 
     def parameter_mean(self, i):
         return self.parameter_sums[i]/float(self.samples)
@@ -77,28 +90,35 @@ class Correlations(object):
         return (self.po_squares[i][j] - (self.parameter_sums[i]*self.observable_sums[j]/N))/N
 
 
-    def D_parameter_parameter_covariance(self, k, i, j):
+    def De_parameter_parameter_covariance(self, k, i, j):
         N = float(self.samples)
-        D_covariance = self.D_pp_squares[k][i][j]/N
-        D_covariance -= self.pp_squares[i][j]*self.D_samples[k]/(N*N)
+        De_covariance = self.De_pp_squares[k][i][j]/N
+        De_covariance -= self.pp_squares[i][j]*self.De_samples[k]/(N*N)
 
-        D_covariance -= self.parameter_mean(i)*self.D_parameter_sums[k][j]/N
-        D_covariance += self.parameter_mean(i)*self.parameter_mean(j)*self.D_samples[k]/N
+        De_covariance -= self.parameter_mean(i)*self.De_parameter_sums[k][j]/N
+        De_covariance += self.parameter_mean(i)*self.parameter_mean(j)*self.De_samples[k]/N
 
-        D_covariance -= self.parameter_mean(j)*self.D_parameter_sums[k][i]/N
-        D_covariance += self.parameter_mean(j)*self.parameter_mean(i)*self.D_samples[k]/N
+        De_covariance -= self.parameter_mean(j)*self.De_parameter_sums[k][i]/N
+        De_covariance += self.parameter_mean(j)*self.parameter_mean(i)*self.De_samples[k]/N
 
-        return D_covariance/self.parameter_parameter_covariance(i, j)
+        return De_covariance/self.parameter_parameter_covariance(i, j)
     
-    def D_parameter_parameter_root_covariance(self, k, i, j):
-        return self.D_parameter_parameter_covariance(k, i, j)/2.0
+    def De_parameter_parameter_root_covariance(self, k, i, j):
+        return self.De_parameter_parameter_covariance(k, i, j)/2.0
 
-    def D_parameter_standard_deviation(self, k, i):
-        return self.D_parameter_parameter_root_covariance(k, i, i)
+    def De_parameter_standard_deviation(self, k, i):
+        return self.De_parameter_parameter_root_covariance(k, i, i)
+
+    def parameter_response(self, observable_index, parameter_index):
+        Dv_parameter_mean = self.Dv_parameter_sums[observable_index][parameter_index]/self.samples
+        parameter_mean = self.parameter_mean(parameter_index)
+        Dv_mean = self.Dv_samples[observable_index]/self.samples
+
+        return Dv_parameter_mean - parameter_mean*Dv_mean
 
     def resolving_power(self, k , i, j):
         if i == j:
-            return self.D_parameter_standard_deviation(k, i)
+            return self.De_parameter_standard_deviation(k, i)
 
         variance = (self.parameter_variance(i), self.parameter_variance(j))
         standard_deviation = (math.sqrt(variance[0]), math.sqrt(variance[1]))
@@ -136,23 +156,23 @@ class Correlations(object):
         major_standard_deviation = math.sqrt(major_variance)
         minor_standard_deviation = math.sqrt(minor_variance)
 
-        D_standard_deviation = (self.D_parameter_standard_deviation(k, i), self.D_parameter_standard_deviation(k, j))
+        De_standard_deviation = (self.De_parameter_standard_deviation(k, i), self.De_parameter_standard_deviation(k, j))
 
-        D_major_variance = (major_cos**2)*2.0*variance[0]*D_standard_deviation[0]
-        D_major_variance += (major_sin**2)*2.0*variance[1]*D_standard_deviation[1]
-        D_major_variance += 2.0*major_cos*major_sin*covariance*self.D_parameter_parameter_covariance(k, i, j)
+        De_major_variance = (major_cos**2)*2.0*variance[0]*De_standard_deviation[0]
+        De_major_variance += (major_sin**2)*2.0*variance[1]*De_standard_deviation[1]
+        De_major_variance += 2.0*major_cos*major_sin*covariance*self.De_parameter_parameter_covariance(k, i, j)
 
-        D_minor_variance = (minor_cos**2)*2.0*variance[0]*D_standard_deviation[0]
-        D_minor_variance += (minor_sin**2)*2.0*variance[1]*D_standard_deviation[1]
-        D_minor_variance += 2.0*minor_cos*minor_sin*covariance*self.D_parameter_parameter_covariance(k, i, j)
+        De_minor_variance = (minor_cos**2)*2.0*variance[0]*De_standard_deviation[0]
+        De_minor_variance += (minor_sin**2)*2.0*variance[1]*De_standard_deviation[1]
+        De_minor_variance += 2.0*minor_cos*minor_sin*covariance*self.De_parameter_parameter_covariance(k, i, j)
 
-        D_major_resolving_power = D_major_variance/(2.0*major_variance)
-        D_minor_resolving_power = D_minor_variance/(2.0*minor_variance)
+        De_major_resolving_power = De_major_variance/(2.0*major_variance)
+        De_minor_resolving_power = De_minor_variance/(2.0*minor_variance)
 
         if i < j:
-            return D_major_resolving_power
+            return De_major_resolving_power
         else:
-            return D_minor_resolving_power
+            return De_minor_resolving_power
 
 class TraceFileException(Exception):
     pass
@@ -189,7 +209,8 @@ def read_trace_file(filename):
         loglikelihood = line[loglikelihood_index]
         value_gradient = line[loglikelihood_index+1:loglikelihood_index+1+number_of_observables]
         error_gradient = line[loglikelihood_index+1+number_of_observables:loglikelihood_index+1+2*number_of_observables]
-        correlations.add_sample(parameters, observables, loglikelihood, error_gradient)
+        correlations.add_sample(parameters, observables, loglikelihood, value_gradient, error_gradient)
+
     row_format ="{:>20}" * (number_of_parameters + 1)
     for k, observable in enumerate(observable_names):
         print "Resolving power for the observable " + observable
@@ -199,6 +220,14 @@ def read_trace_file(filename):
             for j in range(number_of_parameters):
                 resolving_powers.append(correlations.resolving_power(k, i, j))
             print row_format.format(parameter, *resolving_powers)
+
+    print "Parameter response d<parameter>/dobservable:"
+    print row_format.format("", *parameter_names)
+    for k, observable in enumerate(observable_names):
+        parameter_responses = []
+        for i, parameter in enumerate(parameter_names):
+            parameter_responses.append(correlations.parameter_response(k, i))
+        print row_format.format(observable, *parameter_responses)
     return correlations
 
 
