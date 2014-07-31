@@ -191,7 +191,7 @@ static double Score(
   int numberToLeaveOut = N / PARTITIONS;
   int numberToKeep = N - numberToLeaveOut;
   // assume Training Points are not sorted in any particular order
-  GaussianProcessEmulator dummy(m_UseModelUncertainty);
+  GaussianProcessEmulator dummy(m_UseModelError);
   dummy.m_NumberParameters = p;
   dummy.m_Parameters = originalModel.m_Parent->m_Parameters;
   dummy.m_NumberTrainingPoints = numberToKeep;
@@ -595,7 +595,7 @@ bool GaussianProcessEmulator::BuildUncertaintyScales()
   // Compute uncertainty scales.
   m_UncertaintyScales = Eigen::VectorXd::Constant( m_NumberOutputs, 0.0 );
   for ( int i = 0; i < m_TrainingOutputVarianceMeans.size(); ++i ) {
-    if ( m_UseModelUncertainty ) {
+    if ( m_UseModelError ) {
       m_UncertaintyScales( i ) = std::sqrt(
         std::pow( m_TrainingOutputVarianceMeans( i ), 2 ) +
         std::pow( m_ObservedVariances(i), 2 ) );
@@ -706,8 +706,8 @@ bool GaussianProcessEmulator::SingleModel::MakeCache() {
   return true;
 }
 
-GaussianProcessEmulator::GaussianProcessEmulator(bool useModelUncertainty) :
-  m_UseModelUncertainty(useModelUncertainty),
+GaussianProcessEmulator::GaussianProcessEmulator(bool useModelError) :
+  m_UseModelError(useModelError),
   m_Status(UNINITIALIZED),
   m_NumberParameters(0),
   m_NumberOutputs(0),
