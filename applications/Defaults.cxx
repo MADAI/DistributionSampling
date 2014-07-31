@@ -77,7 +77,8 @@ const bool Defaults::EMULATE_WRITE_HEADER = true;
 const std::string Defaults::POSTERIOR_ANALYSIS_DIRECTORY = "posterior_model_output";
 
 void Defaults::PrintAllDefaults(std::ostream & o) {
-  o << "#\n"
+  o << std::boolalpha //output booleans as "true" or "false" rather than 0 or 1
+    << "#\n"
     << "MODEL_OUTPUT_DIRECTORY "                           << Defaults::MODEL_OUTPUT_DIRECTORY << '\n'
     << "EXPERIMENTAL_RESULTS_FILE "                        << Defaults::EXPERIMENTAL_RESULTS_FILE << '\n'
     << "#\n"
