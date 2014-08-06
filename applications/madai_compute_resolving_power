@@ -109,12 +109,19 @@ class Correlations(object):
     def De_parameter_standard_deviation(self, k, i):
         return self.De_parameter_parameter_root_covariance(k, i, i)
 
-    def parameter_response(self, observable_index, parameter_index):
+    def parameter_response_to_value(self, observable_index, parameter_index):
         Dv_parameter_mean = self.Dv_parameter_sums[observable_index][parameter_index]/self.samples
         parameter_mean = self.parameter_mean(parameter_index)
         Dv_mean = self.Dv_samples[observable_index]/self.samples
 
         return Dv_parameter_mean - parameter_mean*Dv_mean
+
+    def parameter_response_to_error(self, observable_index, parameter_index):
+        De_parameter_mean = self.De_parameter_sums[observable_index][parameter_index]/self.samples
+        parameter_mean = self.parameter_mean(parameter_index)
+        De_mean = self.De_samples[observable_index]/self.samples
+
+        return De_parameter_mean - parameter_mean*De_mean
 
     def resolving_power(self, k , i, j):
         if i == j:
@@ -211,7 +218,7 @@ def read_trace_file(filename):
         error_gradient = line[loglikelihood_index+1+number_of_observables:loglikelihood_index+1+2*number_of_observables]
         correlations.add_sample(parameters, observables, loglikelihood, value_gradient, error_gradient)
 
-    row_format ="{:>20}" * (number_of_parameters + 1)
+    row_format ="{:>30}" * (number_of_parameters + 1)
     for k, observable in enumerate(observable_names):
         print "Resolving power for the observable " + observable
         print row_format.format("", *parameter_names)
@@ -226,7 +233,16 @@ def read_trace_file(filename):
     for k, observable in enumerate(observable_names):
         parameter_responses = []
         for i, parameter in enumerate(parameter_names):
-            parameter_responses.append(correlations.parameter_response(k, i))
+            parameter_responses.append(correlations.parameter_response_to_value(k, i))
+        print row_format.format(observable, *parameter_responses)
+    return correlations
+
+    print "Parameter response d<parameter>/dsigma_observable:"
+    print row_format.format("", *parameter_names)
+    for k, observable in enumerate(observable_names):
+        parameter_responses = []
+        for i, parameter in enumerate(parameter_names):
+            parameter_responses.append(correlations.parameter_response_to_error(k, i))
         print row_format.format(observable, *parameter_responses)
     return correlations
 
