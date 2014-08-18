@@ -365,6 +365,12 @@ Model
   if (scalars.size() != t)
     return OTHER_ERROR;
 
+  // Use the model value for the log likelihood if it exists
+  if (m_LogLikelihoodObservable > -1) {
+    logLikelihood = scalars[m_LogLikelihoodObservable] + logPriorLikelihood;
+    return NO_ERROR;
+  }
+
   std::vector< double > scalarDifferences(t);
   std::vector<double> covariance(t * t);
   double distSq = 0.0;
