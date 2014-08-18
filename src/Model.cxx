@@ -39,6 +39,7 @@ namespace madai {
 
 Model
 ::Model() :
+  m_LogLikelihoodObservable( -1 ),
   m_GradientEstimateStepSize( 1.0e-4 ),
   m_StateFlag( UNINITIALIZED ),
   m_UseModelCovarianceToCalulateLogLikelihood( false )
@@ -265,6 +266,14 @@ void
 Model
 ::AddScalarOutputName( const std::string & name )
 {
+  //check to see if this is the log likelihood
+  std::string nameLower = name;
+  std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+  if (nameLower == "log_likelihood" || nameLower == "loglikelihood") {
+      m_LogLikelihoodObservable = m_ScalarOutputNames.size();
+  }
+
+  //actually add it to the list
   m_ScalarOutputNames.push_back( name );
 }
 

@@ -56,7 +56,13 @@ GaussianProcessEmulatedModel
   }
 
   m_Parameters = m_GPE->m_Parameters;
-  m_ScalarOutputNames = m_GPE->m_OutputNames;
+
+  // We add these one by one so that each is checked for being the log likelihood
+  m_ScalarOutputNames.clear();
+  for ( std::vector< std::string >::iterator it = m_GPE->m_OutputNames.begin(); it != m_GPE->m_OutputNames.end(); it++ ) {
+    AddScalarOutputName(*it);
+  }
+
   if ( !m_GPE->GetUncertaintyScalesAsCovariance( m_TrainingAndObservedCovariance ) ) {
     std::cerr << "Error setting the covariance containing experimental and model"
               << " output data.\n";
