@@ -131,7 +131,7 @@ SamplerCSVWriter
       for ( std::vector<std::string>::const_iterator itr = outputs.begin();
             itr < outputs.end(); itr++ )
       {
-        o << ',' << "\"" << *itr << "*dLL/dsigma_" << *itr << '"';
+        o << ',' << "\"sigma_" << *itr << "*dLL/dsigma_" << *itr << '"';
       }
     }
   }
