@@ -24,6 +24,7 @@ import copy
 import math
 import gzip
 import base64
+import copy
 import matplotlib as mpl
 import matplotlib.cm as cm
 
@@ -47,25 +48,16 @@ class Table(object):
         self.column_type = column_type
 
 class DataTable(Table):
-    def __init__(self, rows, columns, row_type, column_type, data, cmap = cm.seismic):
+    def __init__(self, rows, columns, row_type, column_type, data, cmap = cm.seismic, zero_center = True):
         Table.__init__(self, html_class = 'data_table', rows = rows, columns = columns, \
                        row_type = row_type, column_type = column_type)
 
-        vmax = max(map(max, data))
-        vmin = min(map(min, data))
-        vmax = max( [abs(vmin), abs(vmax)] )
-        vmin = - vmax
-        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
-        scalar_map = cm.ScalarMappable(norm=norm, cmap=cmap)
+        self.cmap = cmap
+        self.zero_center = zero_center
 
-        self.colors, self.data = [], []
-        for i in range(len(rows)):
-            c, d = [], []
-            for j in range(len(columns)):
-                c.append('rgb' + str(tuple(map(lambda x: int(256*x), scalar_map.to_rgba(data[i][j]))[:3])))
-                d.append(data[i][j])
-            self.colors.append(c)
-            self.data.append(d)
+        self.data = copy.deepcopy(data)
+        self.colors = copy.deepcopy(data)
+        self.colorize()
 
         self.csv = ''
         for i in range(-1,len(rows)):
@@ -81,6 +73,42 @@ class DataTable(Table):
                     self.csv += ',' + str(self.data[i][j])
             self.csv += '\n'
         self.csv = 'data:test/plain;base64,\n' + base64.b64encode(self.csv)
+
+    def produce_scalar_map(self, l):
+        vmax = max(l)
+        vmin = min(l)
+        if self.zero_center:
+            vmax = max( [abs(vmin), abs(vmax)] )
+            vmin = - vmax
+        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+        scalar_map = cm.ScalarMappable(norm=norm, cmap=self.cmap)
+        return scalar_map
+
+    def rgb(self, scalar_map, x):
+        return 'rgb' + str(tuple(map(lambda x: int(256*x), scalar_map.to_rgba(x))[:3]))
+
+    def colorize(self):
+        scalar_map = self.produce_scalar_map(sum(self.data, []))
+        for i in range(len(self.rows)):
+            for j in range(len(self.columns)):
+                self.colors[i][j] = self.rgb(scalar_map, self.data[i][j])
+
+    def colorize_by_row(self):
+        for i in range(len(self.rows)):
+            scalar_map = self.produce_scalar_map(data[i])
+            for j in range(len(self.columns)):
+                self.colors[i][j] = self.rgb(scalar_map, self.data[i][j])
+
+    def colorize_by_column(self):
+        for j in range(len(self.columns)):
+            scalar_map = self.produce_scalar_map([self.data[i][j] for i in range(len(self.rows))])
+            for i in range(len(self.rows)):
+                self.colors[i][j] = self.rgb(scalar_map, self.data[i][j])
+
+    def white_out(self):
+        for i in range(len(self.rows)):
+            for j in range(len(self.columns)):
+                self.colors[i][j] = 'rgb(255,255,255)'
 
 class ImageTable(Table):
     def __init__(self, rows, columns, row_type, column_type, data):
@@ -358,6 +386,8 @@ def build_data_tables(correlations, observable_names, parameter_names):
     tables['parameter_response'] = DataTable(rows = observable_names, columns = parameter_names, \
                                              row_type = 'observable', column_type = 'parameter', \
                                              data = parameter_response)
+    tables['parameter_response'].white_out()
+
     #scaled parameter response
     scaled_parameter_response = []
     for k, observable in enumerate(observable_names):
@@ -369,6 +399,7 @@ def build_data_tables(correlations, observable_names, parameter_names):
     tables['scaled_parameter_response'] = DataTable(rows = observable_names, columns = parameter_names, \
                                              row_type = 'observable', column_type = 'parameter', \
                                              data = scaled_parameter_response)
+    tables['scaled_parameter_response'].colorize_by_column()
 
     #parameter response to error
     parameter_response_to_error = []
@@ -380,6 +411,7 @@ def build_data_tables(correlations, observable_names, parameter_names):
     tables['parameter_response_to_error'] = DataTable(rows = observable_names, columns = parameter_names, \
                                                       row_type = 'observable', column_type = 'parameter', \
                                                       data = parameter_response_to_error)
+    tables['parameter_response_to_error'].colorize_by_column()
 
     #loglikelihood response
     loglikelihood_response = []
