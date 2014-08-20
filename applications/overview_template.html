@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style type="text/css">
+.outer-active-selection-box {
+    padding: 15px 25px;
+}
+.active-selection-box {
+    border: 2px solid #a1a1a1;
+    background: #dddddd;
+    border-radius: 25px;
+}
+.hidden {
+    display: none;
+    visibility: collapse;
+}
+.stroked {
+    color: white;
+    text-shadow: #000 0px 0px 1px,
+        #000 0px 0px 1px,
+        #000 0px 0px 1px;
+}
+.data_table {
+    padding:20px 0px;
+}
+.image_table {
+    width:100%;
+    padding:20px;
+}
+
+    </style>
+
+    <script type="text/javascript">
+        function remove_class(e,c) {e.className = e.className.replace( new RegExp('(?:^|\\s)'+c+'(?!\\S)') ,'');}
+        function add_class(e,c) {e.className = e.className + " " + c;}
+
+        function change_visibility(classes, visible) {
+            for(var class_index = 0; class_index < classes.length; class_index++) {
+                var elements = document.getElementsByClassName(classes[class_index]);
+                for(var element_index = 0; element_index < elements.length; element_index++) {
+                    if(visible) {
+                        remove_class(elements[element_index], "hidden");
+                    }
+                    else {
+                        add_class(elements[element_index], "hidden");
+                    }
+                }
+            }
+        }
+
+        function observable_checked(e) {
+            var prefix = "observable-" + e.value + "-";
+            var classes = [prefix + "row", prefix + "column"];
+            change_visibility(classes, e.checked);
+        }
+        function parameter_checked(e) {
+            var prefix = "parameter-" + e.value + "-";
+            var classes = [prefix + "row", prefix + "column"];
+            change_visibility(classes, e.checked);
+        }
+    </script>
+</head>
+<body>
+    <h2>Select Active Observables and Parameters</h2>
+    <div class ="outer-active-selection-box">Observables
+        <div class="active-selection-box">
+            {% for observable in observables %}
+            <input checked type="checkbox" id="checkbox-observable-{{observable}}" value="{{observable}}" onchange="observable_checked(this)">{{observable}}
+            {% endfor %}
+        </div>
+    </div>
+    <div class ="outer-active-selection-box">Parameters
+        <div class="active-selection-box">
+            {% for parameter in parameters %}
+            <input checked type="checkbox" id="checkbox-parameter-{{parameter}}" value="{{parameter}}" onchange="parameter_checked(this)">{{parameter}}
+            {% endfor %}
+        </div>
+    </div>
+
+    {% macro data_entry(table, i, j) %}
+        <td class="{{table.column_type}}-{{table.columns[j]}}-column stroked" 
+            style="background-color:{{table.colors[i][j]}}">{{table.data[i][j]}}</td>
+    {% endmacro %}
+
+    {% macro image_entry(table, i, j) %}
+        <td class="{{table.column_type}}-{{table.columns[j]}}-column stroked">
+            <img src="{{table.images[i][j]}}" style="width:100%"/></td>
+    {% endmacro %}
+
+    {% macro construct_table(table) %}
+        <table class="{{table.html_class}}">
+            <col />{% for column in table.columns %} <col class="{{table.column_type}}-{{column}}-column"/> {% endfor %}
+            <tr><th></th>{% for column in table.columns %} <th class="{{table.column_type}}-{{column}}-column">{{column}}</th> {% endfor %} </tr>
+            {% for row in table.rows %} {% set i = loop.index0 %}
+            <tr class="{{table.row_type}}-{{row}}-row">
+                <th>{{row}}</th>
+                {% for column in table.columns %} {% set j = loop.index0 %}
+                    {% if table.html_class == 'data_table' %}
+                        {{ data_entry(table, i, j) }}
+                    {% elif table.html_class == 'image_table' %}
+                        {{ image_entry(table, i, j) }}
+                    {% endif %}
+                {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% endmacro %}
+
+    {% macro sigma(subscript) %}&#x3c3;<sub>{{subscript}}</sub>{% endmacro %}
+    {% set partial = '&#x2202;' %}
+    {% set LL = '&#x2112;&#x2112;' %}
+
+    <h2>Parameter Response: {{partial}}parameter/{{partial}}observable</h2>
+        <a href="{{parameter_response.csv}}">Download as csv</a>
+        {{ construct_table(parameter_response) }}
+
+    <h2>Scaled Parameter Response: {{sigma('observable')}}{{partial}}parameter/{{partial}}observable</h2>
+        <a href="{{scaled_parameter_response.csv}}">Download as csv</a>
+        {{ construct_table(scaled_parameter_response) }}
+
+    <h2>Parameter Response to Error: {{partial}}parameter/{{partial}}{{sigma('observable')}}</h2>
+        <a href="{{parameter_response_to_error.csv}}">Download as csv</a>
+        {{ construct_table(parameter_response_to_error) }}
+
+    <h2>Log Likelihood Response: {{partial}}{{LL}}/{{partial}}observable</h2>
+        <a href="{{loglikelihood_response.csv}}">Download as csv</a>
+        {{ construct_table(loglikelihood_response) }}
+
+    <h2>Scaled Log Likelihood Response: {{sigma('observable')}}{{partial}}{{LL}}/{{partial}}observable</h2>
+        <a href="{{scaled_loglikelihood_response.csv}}">Download as csv</a>
+        {{ construct_table(scaled_loglikelihood_response) }}
+
+    <h2>Resolving Power: ({{sigma('observable')}}/{{sigma('parameter')}})({{partial}}parameter/{{partial}}observable)</h2>
+        <a href="{{resolving_power.csv}}">Download as csv</a>
+        {{ construct_table(resolving_power) }}
+
+    <h2>2D Resolving Power</h2>
+    {% for observable in observables %}
+        <div class="observable-{{observable}}-row">
+            <h3>2D Resolving Power With Respect to {{observable}}</h3>
+                <a href="{{resolving_power_2d[loop.index0].csv}}">Download as csv</a>
+                {{ construct_table(resolving_power_2d[loop.index0]) }}
+        </div>
+    {%endfor%}
+</body>
+</html>
