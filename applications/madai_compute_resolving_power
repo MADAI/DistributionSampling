@@ -33,9 +33,13 @@ class Correlations(object):
         self.pp_squares = [ [0.0]*number_of_parameters for i in range(number_of_parameters) ]
         self.parameter_sums = [0.0]*number_of_parameters
         self.observable_sums = [0.0]*number_of_observables
+        self.parameter_squares = [0.0]*number_of_parameters
+        self.observable_squares = [0.0]*number_of_observables
+        self.loglikelihood_sums = [0.0]*number_of_observables
 
         # De represents the derivative with respect to the error on the observables
         self.De_samples = [0.0]*number_of_observables
+        self.De_loglikelihood_sums = [0.0]*number_of_observables
         self.De_parameter_sums = []
         self.De_pp_squares = []
         for i in range(number_of_observables):
@@ -44,6 +48,7 @@ class Correlations(object):
 
         # Dv represents the derivative with respect to the value of the observable
         self.Dv_samples = [0.0]*number_of_observables
+        self.Dv_loglikelihood_sums = [0.0]*number_of_observables
         self.Dv_parameter_sums = []
         self.Dv_pp_squares = []
         for i in range(number_of_observables):
@@ -55,14 +60,19 @@ class Correlations(object):
         self.samples += 1
         for i, parameter in enumerate(parameters):
             self.parameter_sums[i] += parameter
+            self.parameter_squares[i] += parameter**2
             for j in range(i+1):
                 self.pp_squares[i][j] += parameter*parameters[j]
             for j, observable in enumerate(observables):
                 self.po_squares[i][j] += parameter*observable
         for k, observable in enumerate(observables):
             self.observable_sums[k] += observable
+            self.observable_squares[k] += observable**2
             self.Dv_samples[k] += value_gradient[k]
             self.De_samples[k] += error_gradient[k]
+            self.Dv_loglikelihood_sums[k] += value_gradient[k]*loglikelihood
+            self.De_loglikelihood_sums[k] += error_gradient[k]*loglikelihood
+            self.loglikelihood_sums[k] += loglikelihood
             for i, parameter in enumerate(parameters):
                 self.Dv_parameter_sums[k][i] += parameter*value_gradient[k]
                 self.De_parameter_sums[k][i] += parameter*error_gradient[k]
@@ -73,8 +83,18 @@ class Correlations(object):
     def parameter_mean(self, i):
         return self.parameter_sums[i]/float(self.samples)
 
+    def parameter_standard_deviation(self, i):
+        x2 = self.parameter_squares[i]/float(self.samples)
+        x = self.parameter_mean(i)
+        return x2 - x*x
+
     def observable_mean(self, i):
         return self.observable_sums[i]/float(self.samples)
+
+    def observable_standard_deviation(self, i):
+        y2 = self.observable_squares[i]/float(self.samples)
+        y = self.observable_mean(i)
+        return y2 - y*y
 
     def parameter_parameter_covariance(self, i, j):
         if j > i:
@@ -110,18 +130,25 @@ class Correlations(object):
         return self.De_parameter_parameter_root_covariance(k, i, i)
 
     def parameter_response_to_value(self, observable_index, parameter_index):
-        Dv_parameter_mean = self.Dv_parameter_sums[observable_index][parameter_index]/self.samples
+        Dv_parameter_mean = self.Dv_parameter_sums[observable_index][parameter_index]/float(self.samples)
         parameter_mean = self.parameter_mean(parameter_index)
-        Dv_mean = self.Dv_samples[observable_index]/self.samples
+        Dv_mean = self.Dv_samples[observable_index]/float(self.samples)
 
         return Dv_parameter_mean - parameter_mean*Dv_mean
 
     def parameter_response_to_error(self, observable_index, parameter_index):
-        De_parameter_mean = self.De_parameter_sums[observable_index][parameter_index]/self.samples
+        De_parameter_mean = self.De_parameter_sums[observable_index][parameter_index]/float(self.samples)
         parameter_mean = self.parameter_mean(parameter_index)
-        De_mean = self.De_samples[observable_index]/self.samples
+        De_mean = self.De_samples[observable_index]/float(self.samples)
 
         return De_parameter_mean - parameter_mean*De_mean
+
+    def loglikelihood_response_to_value(self, observable_index):
+        Dv_loglikelihood_mean = self.Dv_loglikelihood_sums[observable_index]/float(self.samples)
+        loglikelihood_mean = self.loglikelihood_sums[observable_index]/float(self.samples)
+        Dv_mean = self.Dv_samples[observable_index]/float(self.samples)
+
+        return Dv_loglikelihood_mean - loglikelihood_mean*Dv_mean
 
     def resolving_power(self, k , i, j):
         if i == j:
@@ -235,7 +262,6 @@ def read_trace_file(filename):
         for i, parameter in enumerate(parameter_names):
             parameter_responses.append(correlations.parameter_response_to_value(k, i))
         print row_format.format(observable, *parameter_responses)
-    return correlations
 
     print "Parameter response d<parameter>/dsigma_observable:"
     print row_format.format("", *parameter_names)
@@ -244,8 +270,22 @@ def read_trace_file(filename):
         for i, parameter in enumerate(parameter_names):
             parameter_responses.append(correlations.parameter_response_to_error(k, i))
         print row_format.format(observable, *parameter_responses)
-    return correlations
 
+    print "Log likelihood response d<LL>/dobservable:"
+    row_format ="{:>30}" * (number_of_observables + 1)
+    print row_format.format("", *observable_names)
+    loglikelihood_responses = []
+    for k, observable in enumerate(observable_names):
+        loglikelihood_responses.append(correlations.loglikelihood_response_to_value(k))
+    print row_format.format("d<LL>/dobservable", *loglikelihood_responses)
+
+    print "Log likelihood response sigma_observable*d<LL>/dobservable:"
+    print row_format.format("", *observable_names)
+    for i in range(len(loglikelihood_responses)):
+        loglikelihood_responses[i] *= correlations.observable_standard_deviation(i)
+    print row_format.format("sigma_observable*d<LL>/dobservable", *loglikelihood_responses)
+
+    return correlations
 
 
 if __name__ == '__main__':
@@ -255,5 +295,5 @@ if __name__ == '__main__':
     try:
         correlations = read_trace_file(sys.argv[1])
     except TraceFileException as e:
-        print 'Fatal exception: ' + e
+        print 'Fatal exception: ', e
 
