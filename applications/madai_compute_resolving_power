@@ -363,7 +363,7 @@ def read_trace_file(filename):
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print 'Usage: ' + sys.argv[0] + '/stats/directory/ trace_file.csv'
-        exit
+        exit()
     try:
         correlations = read_trace_file(sys.argv[2])
     except TraceFileException as e:
