@@ -118,7 +118,7 @@
         <a href="{{scaled_parameter_response.csv}}">Download as csv</a>
         {{ construct_table(scaled_parameter_response) }}
 
-    <h2>Parameter Response to Error: {{partial}}parameter/{{partial}}{{sigma('observable')}}</h2>
+    <h2>Parameter Response to Error: {{sigma('observable')}}{{partial}}parameter/{{partial}}{{sigma('observable')}}</h2>
         <a href="{{parameter_response_to_error.csv}}">Download as csv</a>
         {{ construct_table(parameter_response_to_error) }}
 
