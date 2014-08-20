@@ -75,11 +75,11 @@ public:
   /** The model output that correspond to m_ParameterValues in some model. */
   std::vector< double > m_OutputValues;
 
-  /** The gradient sigma_observable*dLL/dsigma_observable for each observable parameter. */
-  std::vector< double > m_LogLikelihoodErrorGradient;
-
   /** The gradient dLL/dobservable for each observable parameter. */
   std::vector< double > m_LogLikelihoodValueGradient;
+
+  /** The gradient sigma_observable*dLL/dsigma_observable for each observable parameter. */
+  std::vector< double > m_LogLikelihoodErrorGradient;
 
   /**
    * Given some set of field observations, the log likelihood is the
