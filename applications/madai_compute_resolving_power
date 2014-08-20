@@ -318,9 +318,9 @@ def read_trace_file(filename):
         error_gradient = line[loglikelihood_index+1+number_of_observables:loglikelihood_index+1+2*number_of_observables]
         correlations.add_sample(parameters, observables, loglikelihood, value_gradient, error_gradient)
 
-    return correlations
+    return (correlations, observable_names, parameter_names)
 
-def build_data_tables(correlations):
+def build_data_tables(correlations, observable_names, parameter_names):
     tables = {}
 
     #resolving power
@@ -340,7 +340,7 @@ def build_data_tables(correlations):
         resolving_power_2d = []
         for i, parameter in enumerate(parameter_names):
             row = []
-            for j in range(number_of_parameters):
+            for j in range(len(parameter_names)):
                 row.append(correlations.resolving_power(k, i, j))
             resolving_power_2d.append(row)
         table = DataTable(rows = parameter_names, columns = parameter_names, \
@@ -364,7 +364,7 @@ def build_data_tables(correlations):
         row = []
         for i, parameter in enumerate(parameter_names):
             row.append(parameter_response[k][i])
-            scaled_parameter_response[i] *= correlations.observable_standard_deviation(i)
+            row[i] *= correlations.observable_standard_deviation(i)
         scaled_parameter_response.append(row)
     tables['scaled_parameter_response'] = DataTable(rows = observable_names, columns = parameter_names, \
                                              row_type = 'observable', column_type = 'parameter', \
@@ -385,8 +385,8 @@ def build_data_tables(correlations):
     loglikelihood_response = []
     for k, observable in enumerate(observable_names):
         loglikelihood_response.append(correlations.loglikelihood_response_to_value(k))
-    tables['loglikelihood_response'] = DataTable(rows = ['dLL/d_observable'], columns = parameter_names, \
-                                                      row_type = 'other', column_type = 'parameter', \
+    tables['loglikelihood_response'] = DataTable(rows = ['dLL/d_observable'], columns = observable_names, \
+                                                      row_type = 'other', column_type = 'observable', \
                                                       data = [loglikelihood_response])
 
     #scaled loglikelihood response
@@ -394,10 +394,10 @@ def build_data_tables(correlations):
     for i in range(len(loglikelihood_response)):
         scaled_loglikelihood_response.append(loglikelihood_response[i])
         scaled_loglikelihood_response[i] *= correlations.observable_standard_deviation(i)
-    tables['scaled_loglikelihood_response'] = DataTable(rows = ['sigma_observable*dLL/d_observable'], columns = parameter_names, \
-                                                      row_type = 'other', column_type = 'parameter', \
+    tables['scaled_loglikelihood_response'] = DataTable(rows = ['sigma_observable*dLL/d_observable'], columns = observable_names, \
+                                                      row_type = 'other', column_type = 'observable', \
                                                       data = [scaled_loglikelihood_response])
-    return correlations
+    return tables
 
 def parse_parameters(stats_dir):
     parameters = {}
@@ -423,12 +423,22 @@ def parse_observables(stats_dir):
     return observables
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print 'Usage: ' + sys.argv[0] + '/stats/directory/ trace_file.csv'
+    if len(sys.argv) != 4:
+        print 'Usage: ' + sys.argv[0] + '/stats/directory/ trace_file.csv output.html'
         exit()
     try:
-        correlations = read_trace_file(sys.argv[2])
-        tables = build_data_tables(correlations)
+        correlations, observables, parameters = read_trace_file(sys.argv[2])
+        tables = build_data_tables(correlations, observables, parameters)
+        tables['observables'] = observables
+        tables['parameters'] = parameters
+
+        from jinja2 import Template
+        template_path = os.path.dirname(os.path.realpath(__file__)) + '/overview_template.html'
+        with open(template_path, 'r') as template_file:
+            with open(sys.argv[3], 'w') as output_file:
+                template = Template(template_file.read())
+                output_file.write(template.render(**tables))
+
     except TraceFileException as e:
         print 'Fatal exception: ', e
 
