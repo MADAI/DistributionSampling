@@ -33,7 +33,7 @@ N_BINS = 50
 
 class Table(object):
     def __init__(self, html_class, rows, columns, row_type, column_type):
-        valid_types = ['parameter', 'observable']
+        valid_types = ['parameter', 'observable', 'other']
         assert row_type in valid_types
         assert column_type in valid_types
 
@@ -295,9 +295,9 @@ def read_trace_file(filename):
         f = gzip.open(filename,'r')
     header = [name[1:-1] for name in f.readline()[:-1].split(',')]
     if header[-1] == 'LogLikelihood':
-        TraceFileException('There are no log likelihood gradients in the trace file.')
+        raise TraceFileException('There are no log likelihood gradients in the trace file.')
     if 'LogLikelihood' not in header:
-        TraceFileException('There is no log likelihood in the trace file.')
+        raise TraceFileException('There is no log likelihood in the trace file.')
     loglikelihood_index = header.index('LogLikelihood')
     number_of_observables = 0
     for title in header[loglikelihood_index+1:]:
@@ -308,6 +308,7 @@ def read_trace_file(filename):
     parameter_names = header[:number_of_parameters]
     observable_names = header[number_of_parameters:loglikelihood_index]
     correlations = Correlations(number_of_parameters, number_of_observables)
+
     for line in f:
         line = map(float, line.split(','))
         parameters = line[:number_of_parameters]
@@ -317,46 +318,85 @@ def read_trace_file(filename):
         error_gradient = line[loglikelihood_index+1+number_of_observables:loglikelihood_index+1+2*number_of_observables]
         correlations.add_sample(parameters, observables, loglikelihood, value_gradient, error_gradient)
 
-    row_format ="{:>30}" * (number_of_parameters + 1)
+    return correlations
+
+def build_data_tables(correlations):
+    tables = {}
+
+    #resolving power
+    resolving_power = []
+    for i, observable in enumerate(observable_names):
+        row = []
+        for j, parameter in enumerate(parameter_names):
+            row.append(correlations.resolving_power(i, j, j))
+        resolving_power.append(row)
+    tables['resolving_power'] = DataTable(rows = observable_names, columns = parameter_names, \
+                                          row_type = 'observable', column_type = 'parameter', \
+                                          data = resolving_power)
+
+    #2d resolving power
+    tables['resolving_power_2d'] = []
     for k, observable in enumerate(observable_names):
-        print "Resolving power for the observable " + observable
-        print row_format.format("", *parameter_names)
+        resolving_power_2d = []
         for i, parameter in enumerate(parameter_names):
-            resolving_powers = []
+            row = []
             for j in range(number_of_parameters):
-                resolving_powers.append(correlations.resolving_power(k, i, j))
-            print row_format.format(parameter, *resolving_powers)
+                row.append(correlations.resolving_power(k, i, j))
+            resolving_power_2d.append(row)
+        table = DataTable(rows = parameter_names, columns = parameter_names, \
+                          row_type = 'parameter', column_type = 'parameter', \
+                          data = resolving_power_2d)
+        tables['resolving_power_2d'].append(table)
 
-    print "Parameter response d<parameter>/dobservable:"
-    print row_format.format("", *parameter_names)
+    #parameter response
+    parameter_response = []
     for k, observable in enumerate(observable_names):
-        parameter_responses = []
+        row = []
         for i, parameter in enumerate(parameter_names):
-            parameter_responses.append(correlations.parameter_response_to_value(k, i))
-        print row_format.format(observable, *parameter_responses)
-
-    print "Parameter response d<parameter>/dsigma_observable:"
-    print row_format.format("", *parameter_names)
+            row.append(correlations.parameter_response_to_value(k, i))
+        parameter_response.append(row)
+    tables['parameter_response'] = DataTable(rows = observable_names, columns = parameter_names, \
+                                             row_type = 'observable', column_type = 'parameter', \
+                                             data = parameter_response)
+    #scaled parameter response
+    scaled_parameter_response = []
     for k, observable in enumerate(observable_names):
-        parameter_responses = []
+        row = []
         for i, parameter in enumerate(parameter_names):
-            parameter_responses.append(correlations.parameter_response_to_error(k, i))
-        print row_format.format(observable, *parameter_responses)
+            row.append(parameter_response[k][i])
+            scaled_parameter_response[i] *= correlations.observable_standard_deviation(i)
+        scaled_parameter_response.append(row)
+    tables['scaled_parameter_response'] = DataTable(rows = observable_names, columns = parameter_names, \
+                                             row_type = 'observable', column_type = 'parameter', \
+                                             data = scaled_parameter_response)
 
-    print "Log likelihood response d<LL>/dobservable:"
-    row_format ="{:>30}" * (number_of_observables + 1)
-    print row_format.format("", *observable_names)
-    loglikelihood_responses = []
+    #parameter response to error
+    parameter_response_to_error = []
     for k, observable in enumerate(observable_names):
-        loglikelihood_responses.append(correlations.loglikelihood_response_to_value(k))
-    print row_format.format("d<LL>/dobservable", *loglikelihood_responses)
+        row = []
+        for i, parameter in enumerate(parameter_names):
+            row.append(correlations.parameter_response_to_error(k, i))
+        parameter_response_to_error.append(row)
+    tables['parameter_response_to_error'] = DataTable(rows = observable_names, columns = parameter_names, \
+                                                      row_type = 'observable', column_type = 'parameter', \
+                                                      data = parameter_response_to_error)
 
-    print "Log likelihood response sigma_observable*d<LL>/dobservable:"
-    print row_format.format("", *observable_names)
-    for i in range(len(loglikelihood_responses)):
-        loglikelihood_responses[i] *= correlations.observable_standard_deviation(i)
-    print row_format.format("sigma_observable*d<LL>/dobservable", *loglikelihood_responses)
+    #loglikelihood response
+    loglikelihood_response = []
+    for k, observable in enumerate(observable_names):
+        loglikelihood_response.append(correlations.loglikelihood_response_to_value(k))
+    tables['loglikelihood_response'] = DataTable(rows = ['dLL/d_observable'], columns = parameter_names, \
+                                                      row_type = 'other', column_type = 'parameter', \
+                                                      data = [loglikelihood_response])
 
+    #scaled loglikelihood response
+    scaled_loglikelihood_response = []
+    for i in range(len(loglikelihood_response)):
+        scaled_loglikelihood_response.append(loglikelihood_response[i])
+        scaled_loglikelihood_response[i] *= correlations.observable_standard_deviation(i)
+    tables['scaled_loglikelihood_response'] = DataTable(rows = ['sigma_observable*dLL/d_observable'], columns = parameter_names, \
+                                                      row_type = 'other', column_type = 'parameter', \
+                                                      data = [scaled_loglikelihood_response])
     return correlations
 
 def parse_parameters(stats_dir):
@@ -388,6 +428,7 @@ if __name__ == '__main__':
         exit()
     try:
         correlations = read_trace_file(sys.argv[2])
+        tables = build_data_tables(correlations)
     except TraceFileException as e:
         print 'Fatal exception: ', e
 
