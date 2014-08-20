@@ -372,6 +372,16 @@ def parse_parameters(stats_dir):
             parameters[name] = {'min' : vmin, 'max' : vmax}
     return parameters
 
+def parse_observables(stats_dir):
+    observables = {}
+    with open(stats_dir + '/experimental_results.dat', 'r') as f:
+        for line in f:
+            name, mean, sigma = line.split()
+            mean, sigma = float(mean), float(sigma)
+            vmin, vmax = mean - sigma*N_SIGMA, mean + sigma*N_SIGMA
+            observables[name] = {'min' : vmin, 'max' : vmax, 'mean' : mean, 'sigma' : sigma}
+    return observables
+
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         print 'Usage: ' + sys.argv[0] + '/stats/directory/ trace_file.csv'
