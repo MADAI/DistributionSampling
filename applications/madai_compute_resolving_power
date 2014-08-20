@@ -27,6 +27,10 @@ import base64
 import matplotlib as mpl
 import matplotlib.cm as cm
 
+#Global settings for now:
+N_SIGMA = 4
+N_BINS = 50
+
 class Table(object):
     def __init__(self, html_class, rows, columns, row_type, column_type):
         valid_types = ['parameter', 'observable']
