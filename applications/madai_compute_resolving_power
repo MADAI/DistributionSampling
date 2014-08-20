@@ -23,6 +23,74 @@ import sys
 import copy
 import math
 import gzip
+import base64
+import matplotlib as mpl
+import matplotlib.cm as cm
+
+class Table(object):
+    def __init__(self, html_class, rows, columns, row_type, column_type):
+        valid_types = ['parameter', 'observable']
+        assert row_type in valid_types
+        assert column_type in valid_types
+
+        valid_types = ['data_table', 'image_table']
+        assert html_class in valid_types
+
+        self.html_class = html_class
+        self.rows = rows
+        self.columns = columns
+        self.row_type = row_type
+        self.column_type = column_type
+
+class DataTable(Table):
+    def __init__(self, rows, columns, row_type, column_type, data, cmap = cm.seismic):
+        Table.__init__(self, html_class = 'data_table', rows = rows, columns = columns, \
+                       row_type = row_type, column_type = column_type)
+
+        vmax = max(map(max, data))
+        vmin = min(map(min, data))
+        vmax = max( [abs(vmin), abs(vmax)] )
+        vmin = - vmax
+        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+        scalar_map = cm.ScalarMappable(norm=norm, cmap=cmap)
+
+        self.colors, self.data = [], []
+        for i in range(len(rows)):
+            c, d = [], []
+            for j in range(len(columns)):
+                c.append('rgb' + str(tuple(map(lambda x: int(256*x), scalar_map.to_rgba(data[i][j]))[:3])))
+                d.append(data[i][j])
+            self.colors.append(c)
+            self.data.append(d)
+
+        self.csv = ''
+        for i in range(-1,len(rows)):
+            self.csv += '"'
+            if i >= 0:
+                self.csv += rows[i]
+            self.csv += '"'
+
+            for j in range(len(columns)):
+                if i < 0:
+                    self.csv += ',"' + columns[j] + '"'
+                else:
+                    self.csv += ',' + str(self.data[i][j])
+            self.csv += '\n'
+        self.csv = 'data:test/plain;base64,\n' + base64.b64encode(self.csv)
+
+class ImageTable(Table):
+    def __init__(self, rows, columns, row_type, column_type, data):
+        Table.__init__(self, html_class = 'image_table', rows = rows, columns = columns, \
+                       row_type = row_type, column_type = column_type)
+
+        self.images = []
+        for i in range(len(rows)):
+            d = []
+            for j in range(len(columns)):
+                encoded_image = 'data:image/svg+xml;base64,\n'
+                encoded_image += base64.b64encode(data[i][j])
+                d.append(encoded_image)
+            self.images.append(d)
 
 class Correlations(object):
     def __init__(self, number_of_parameters, number_of_observables):
@@ -290,10 +358,10 @@ def read_trace_file(filename):
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print 'Usage: ' + sys.argv[0] + ' trace_file.csv'
+        print 'Usage: ' + sys.argv[0] + '/stats/directory/ trace_file.csv'
         exit
     try:
-        correlations = read_trace_file(sys.argv[1])
+        correlations = read_trace_file(sys.argv[2])
     except TraceFileException as e:
         print 'Fatal exception: ', e
 
