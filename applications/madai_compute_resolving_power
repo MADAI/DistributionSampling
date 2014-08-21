@@ -106,6 +106,7 @@ class Histogram2D(object):
         plt.ylim([self.binsy[0],self.binsy[-1]])
         svgdata = StringIO.StringIO()
         plt.savefig(svgdata, format='svg')
+        plt.clf()
         svgdata.seek(0)
 
         return svgdata.read()
