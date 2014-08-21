@@ -203,6 +203,79 @@ class ImageTable(Table):
                 d.append(encoded_image)
             self.images.append(d)
 
+class Histograms(object):
+    def __init__(self, parameters, observables, parameter_ranges, observable_ranges, N_bins = 25):
+        self.parameter_parameter = []
+        for parameter_y in parameters:
+            row = []
+            if parameter_y in parameter_ranges:
+                lowy = parameter_ranges[parameter_y]['min']
+                highy = parameter_ranges[parameter_y]['max']
+                for parameter_x in parameters:
+                    if parameter_x not in parameter_ranges:
+                        row.append(None)
+                        continue
+                    lowx = parameter_ranges[parameter_x]['min']
+                    highx = parameter_ranges[parameter_x]['max']
+                    if parameter_x == parameter_y:
+                        row.append(Histogram(N_bins, lowx, highx))
+                    else:
+                        row.append(Histogram2D(N_bins, lowx, highx, N_bins, lowy, highy))
+            else:
+                row = [None for p in parameters]
+            self.parameter_parameter.append(row)
+
+        self.observable_parameter = []
+        self.observable_observable = []
+        for observable_y in observables:
+            parameter_row = []
+            observable_row = []
+            if observable_y in observable_ranges:
+                lowy = observable_ranges[observable_y]['min']
+                highy = observable_ranges[observable_y]['max']
+                for parameter_x in parameters:
+                    if parameter_x not in parameter_ranges:
+                        parameter_row.append(None)
+                        continue
+                    lowx = parameter_ranges[parameter_x]['min']
+                    highx = parameter_ranges[parameter_x]['max']
+                    parameter_row.append(Histogram2D(N_bins, lowx, highx, N_bins, lowy, highy))
+                for observable_x in observables:
+                    if observable_x not in observable_ranges:
+                        observable_row.append(None)
+                        continue
+                    lowx = observable_ranges[observable_x]['min']
+                    highx = observable_ranges[observable_x]['max']
+                    if observable_x == observable_y:
+                        observable_row.append(Histogram(N_bins, lowx, highx))
+                    else:
+                        observable_row.append(Histogram2D(N_bins, lowx, highx, N_bins, lowy, highy))
+            else:
+                parameter_row = [None for p in parameters]
+                observable_row = [None for p in observable]
+            self.observable_parameter.append(parameter_row)
+            self.observable_observable.append(observable_row)
+
+        self.observables = observables
+        self.parameters = parameters
+        self.observable_ranges = observable_ranges
+
+    def add_sample(self, parameters, observables):
+        for i in range(len(observables)):
+            for j in range(len(observables)):
+                if i == j:
+                    self.observable_observable[i][j].fill(observables[i])
+                else:
+                    self.observable_observable[i][j].fill(observables[j], observables[i])
+            for j in range(len(parameters)):
+                self.observable_parameter[i][j].fill(observables[j], parameters[i])
+        for i in range(len(parameters)):
+            for j in range(len(parameters)):
+                if i == j:
+                    self.parameter_parameter[i][j].fill(parameters[i])
+                else:
+                    self.parameter_parameter[i][j].fill(parameters[j], parameters[i])
+
 class Correlations(object):
     def __init__(self, number_of_parameters, number_of_observables):
         self.number_of_parameters = number_of_parameters
