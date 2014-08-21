@@ -110,6 +110,15 @@
     {% set partial = '&#x2202;' %}
     {% set LL = '&#x2112;&#x2112;' %}
 
+    <h2>Parameter-Parameter Posterior Distributions</h2>
+    {{ construct_table(parameter_parameter_plots) }}
+
+    <h2>Observable-Observable Posterior Distributions</h2>
+    {{ construct_table(observable_observable_plots) }}
+
+    <h2>Observable-Parameter Posterior Distributions</h2>
+    {{ construct_table(observable_parameter_plots) }}
+
     <h2>Parameter Response: {{partial}}parameter/{{partial}}observable</h2>
         <a href="{{parameter_response.csv}}">Download as csv</a>
         {{ construct_table(parameter_response) }}
