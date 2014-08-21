@@ -169,7 +169,7 @@
         <a href="{{scaled_loglikelihood_response.csv}}">Download as csv</a>
         {{ construct_table(scaled_loglikelihood_response) }}
 
-    <h2>Resolving Power: ({{sigma('observable')}}/{{sigma('parameter')}})({{partial}}parameter/{{partial}}observable)</h2>
+        <h2>Resolving Power: ({{sigma('observable')}}/{{sigma('parameter')}})({{partial}}{{sigma('parameter')}}/{{partial}}{{sigma('observable')}})</h2>
         <a href="{{resolving_power.csv}}">Download as csv</a>
         {{ construct_table(resolving_power) }}
 
