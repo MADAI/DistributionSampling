@@ -62,9 +62,14 @@ class Histogram(object):
         plt.xlim([self.bins[0],self.bins[-1]])
         x0, x1, y0, y1 = plt.axis()
         if mu and sigma:
-            plt.plot([mu-sigma]*2,[y0,y1],ls='dashed',lw=3,color=(0.5,0.5,0,0.7))
-            plt.plot([mu+sigma]*2,[y0,y1],ls='dashed',lw=3,color=(0.5,0.5,0,0.7))
-            plt.plot([mu]*2,[y0,y1],ls='solid',lw=5,color=(0.5,0.5,0,1))
+            plt.plot([mu-sigma]*2,[y0,y1],ls='dashed',lw=3,label=r'experimental 1 $\sigma$', color=(0.5,0,0.5,0.5))
+            plt.plot([mu+sigma]*2,[y0,y1],ls='dashed',lw=3,color=(0.5,0,0.5,0.5))
+            plt.plot([mu]*2,[y0,y1],ls='solid',lw=5,color=(0.5,0,0.5,0.8))
+            posterior_mu, posterior_sigma = self.mu(), self.sigma()
+            plt.plot([posterior_mu-posterior_sigma]*2,[y0,y1],ls='dashed',lw=3,label=r'posterior 1 $\sigma$', color=(0.5,0.5,0,0.7))
+            plt.plot([posterior_mu+posterior_sigma]*2,[y0,y1],ls='dashed',lw=3,color=(0.5,0.5,0,0.7))
+            plt.plot([posterior_mu]*2,[y0,y1],ls='solid',lw=5,color=(0.5,0.5,0,1))
+            plt.legend()
         svgdata = StringIO.StringIO()
         plt.savefig(svgdata, format='svg')
         plt.clf()
@@ -598,6 +603,11 @@ def build_image_tables(histograms):
             xlabel, ylabel = histograms.observables[j], histograms.observables[i]
             if i == j:
                 ylabel = 'counts'
+                mu = histograms.observable_ranges[histograms.observables[i]]['mu']
+                sigma = histograms.observable_ranges[histograms.observables[i]]['sigma']
+                observable_row.append(histograms.observable_observable[i][j].svg(xlabel = xlabel, ylabel = ylabel, \
+                                                                                 mu = mu, sigma = sigma))
+                continue
             observable_row.append(histograms.observable_observable[i][j].svg(xlabel = xlabel, ylabel = ylabel))
         for j in range(len(parameters)):
             xlabel, ylabel = histograms.parameters[j], histograms.observables[i]
@@ -636,8 +646,8 @@ def parse_parameters(stats_dir):
             vmin, vmax = float(vmin), float(vmax)
             distribution = distribution.lower()
             if distribution != 'uniform':
-                mean, sigma = vmin, vmax
-                vmin, vmax = mean - sigma*N_SIGMA, mean + sigma*N_SIGMA
+                mu, sigma = vmin, vmax
+                vmin, vmax = mu - sigma*N_SIGMA, mu + sigma*N_SIGMA
             parameters[name] = {'min' : vmin, 'max' : vmax}
     return parameters
 
@@ -645,10 +655,10 @@ def parse_observables(stats_dir):
     observables = {}
     with open(stats_dir + '/experimental_results.dat', 'r') as f:
         for line in f:
-            name, mean, sigma = line.split()
-            mean, sigma = float(mean), float(sigma)
-            vmin, vmax = mean - sigma*N_SIGMA, mean + sigma*N_SIGMA
-            observables[name] = {'min' : vmin, 'max' : vmax, 'mean' : mean, 'sigma' : sigma}
+            name, mu, sigma = line.split()
+            mu, sigma = float(mu), float(sigma)
+            vmin, vmax = mu - sigma*N_SIGMA, mu + sigma*N_SIGMA
+            observables[name] = {'min' : vmin, 'max' : vmax, 'mu' : mu, 'sigma' : sigma}
     return observables
 
 if __name__ == '__main__':
