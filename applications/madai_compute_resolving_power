@@ -273,7 +273,7 @@ class Histograms(object):
                 else:
                     self.observable_observable[i][j].fill(observables[j], observables[i])
             for j in range(len(parameters)):
-                self.observable_parameter[i][j].fill(observables[j], parameters[i])
+                self.observable_parameter[i][j].fill(parameters[j], observables[i])
         for i in range(len(parameters)):
             for j in range(len(parameters)):
                 if i == j:
