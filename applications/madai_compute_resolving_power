@@ -99,7 +99,7 @@ class Histogram2D(object):
         return np.sqrt( (self.sum2x/self.count - mu[0]**2, self.sum2y/self.count - mu[1]**2) )
 
     def svg(self, xlabel = '', ylabel = ''):
-        plt.pcolor(self.binsx, self.binsy, self.content[1:-1,1:-1])
+        plt.pcolor(self.binsx, self.binsy, self.content[1:-1,1:-1], edgecolor=(1,1,1,0.3))
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.xlim([self.binsx[0],self.binsx[-1]])
