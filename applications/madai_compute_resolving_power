@@ -33,11 +33,10 @@ import numpy as np
 
 #Global settings for now:
 N_SIGMA = 4
-N_BINS = 50
 
 class Histogram(object):
     def __init__(self, N_bins, low, high):
-        self.bins = np.array([ float(i)*(high - low)/float(N_bins) for i in range(N_bins + 1) ])
+        self.bins = np.array([ low + float(i)*(high - low)/float(N_bins) for i in range(N_bins + 1) ])
         self.content = np.array([0.0]*(N_bins+2)) # +2 for overflow
         self.sum, self.sum2, self.count = 0, 0, 0
 
@@ -67,14 +66,15 @@ class Histogram(object):
             plt.plot([mu]*2,[y0,y1],ls='solid',lw=5,color=(0.5,0.5,0,1))
         svgdata = StringIO.StringIO()
         plt.savefig(svgdata, format='svg')
+        plt.clf()
         svgdata.seek(0)
 
         return svgdata.read()
 
 class Histogram2D(object):
     def __init__(self, N_binsx, lowx, highx, N_binsy, lowy, highy):
-        self.binsx = np.array([ float(i)*(highx - lowx)/float(N_binsx) for i in range(N_binsx + 1) ])
-        self.binsy = np.array([ float(i)*(highy - lowy)/float(N_binsy) for i in range(N_binsy + 1) ])
+        self.binsx = np.array([ lowx + float(i)*(highx - lowx)/float(N_binsx) for i in range(N_binsx + 1) ])
+        self.binsy = np.array([ lowy + float(i)*(highy - lowy)/float(N_binsy) for i in range(N_binsy + 1) ])
         self.content = np.zeros((N_binsy+2,N_binsx+2)) # +2 for overflow
         self.sumx, self.sum2x, self.sumy, self.sum2y, self.count = 0, 0, 0, 0, 0
 
