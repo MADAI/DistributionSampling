@@ -463,7 +463,7 @@ class Correlations(object):
 class TraceFileException(Exception):
     pass
 
-def read_trace_file(filename):
+def read_trace_file(filename, stats_dir = '.'):
     if not os.path.isfile(filename):
         raise TraceFileException('Trace file ' + filename + ' does not exist.')
     f = open(filename, 'rb')
@@ -487,7 +487,10 @@ def read_trace_file(filename):
     number_of_parameters = loglikelihood_index - number_of_observables
     parameter_names = header[:number_of_parameters]
     observable_names = header[number_of_parameters:loglikelihood_index]
+    parameter_ranges = parse_parameters(stats_dir)
+    observable_ranges = parse_observables(stats_dir)
     correlations = Correlations(number_of_parameters, number_of_observables)
+    histograms = Histograms(parameter_names, observable_names, parameter_ranges, observable_ranges)
 
     for line in f:
         line = map(float, line.split(','))
@@ -497,8 +500,9 @@ def read_trace_file(filename):
         value_gradient = line[loglikelihood_index+1:loglikelihood_index+1+number_of_observables]
         error_gradient = line[loglikelihood_index+1+number_of_observables:loglikelihood_index+1+2*number_of_observables]
         correlations.add_sample(parameters, observables, loglikelihood, value_gradient, error_gradient)
+        histograms.add_sample(parameters, observables)
 
-    return (correlations, observable_names, parameter_names)
+    return (correlations, histograms, observable_names, parameter_names)
 
 def build_data_tables(correlations, observable_names, parameter_names):
     tables = {}
@@ -583,6 +587,47 @@ def build_data_tables(correlations, observable_names, parameter_names):
                                                       data = [scaled_loglikelihood_response])
     return tables
 
+def build_image_tables(histograms):
+    tables = {}
+
+    observable_observable_plots = []
+    observable_parameter_plots = []
+    for i in range(len(histograms.observables)):
+        observable_row, parameter_row = [], []
+        for j in range(len(histograms.observables)):
+            xlabel, ylabel = histograms.observables[j], histograms.observables[i]
+            if i == j:
+                ylabel = 'counts'
+            observable_row.append(histograms.observable_observable[i][j].svg(xlabel = xlabel, ylabel = ylabel))
+        for j in range(len(parameters)):
+            xlabel, ylabel = histograms.parameters[j], histograms.observables[i]
+            if i == j:
+                ylabel = 'counts'
+            parameter_row.append(histograms.observable_parameter[i][j].svg(xlabel = xlabel, ylabel = ylabel))
+        observable_observable_plots.append(observable_row)
+        observable_parameter_plots.append(parameter_row)
+    tables['observable_observable_plots'] = ImageTable(rows = histograms.observables, columns = histograms.observables, \
+                                                       row_type = 'observable', column_type = 'observable', \
+                                                       data = observable_observable_plots)
+    tables['observable_parameter_plots'] = ImageTable(rows = histograms.observables, columns = histograms.parameters, \
+                                                      row_type = 'observable', column_type = 'parameter', \
+                                                      data = observable_parameter_plots)
+
+    parameter_parameter_plots = []
+    for i in range(len(histograms.parameters)):
+        parameter_row = []
+        for j in range(len(histograms.parameters)):
+            xlabel, ylabel = histograms.parameters[j], histograms.parameters[i]
+            if i == j:
+                ylabel = 'counts'
+            parameter_row.append(histograms.parameter_parameter[i][j].svg(xlabel = xlabel, ylabel = ylabel))
+        parameter_parameter_plots.append(parameter_row)
+    tables['parameter_parameter_plots'] = ImageTable(rows = histograms.parameters, columns = histograms.parameters, \
+                                                     row_type = 'parameter', column_type = 'parameter', \
+                                                     data = parameter_parameter_plots)
+
+    return tables
+
 def parse_parameters(stats_dir):
     parameters = {}
     with open(stats_dir + '/parameter_priors.dat', 'r') as f:
@@ -611,10 +656,12 @@ if __name__ == '__main__':
         print 'Usage: ' + sys.argv[0] + '/stats/directory/ trace_file.csv output.html'
         exit()
     try:
-        correlations, observables, parameters = read_trace_file(sys.argv[2])
+        correlations, histograms, observables, parameters = read_trace_file(sys.argv[2], sys.argv[1])
         tables = build_data_tables(correlations, observables, parameters)
         tables['observables'] = observables
         tables['parameters'] = parameters
+        for key, val in build_image_tables(histograms).iteritems():
+            tables[key] = val
 
         from jinja2 import Template
         template_path = os.path.dirname(os.path.realpath(__file__)) + '/overview_template.html'
