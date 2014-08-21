@@ -71,6 +71,42 @@ class Histogram(object):
 
         return svgdata.read()
 
+class Histogram2D(object):
+    def __init__(self, N_binsx, lowx, highx, N_binsy, lowy, highy):
+        self.binsx = np.array([ float(i)*(highx - lowx)/float(N_binsx) for i in range(N_binsx + 1) ])
+        self.binsy = np.array([ float(i)*(highy - lowy)/float(N_binsy) for i in range(N_binsy + 1) ])
+        self.content = np.zeros((N_binsy+2,N_binsx+2)) # +2 for overflow
+        self.sumx, self.sum2x, self.sumy, self.sum2y, self.count = 0, 0, 0, 0, 0
+
+    def fill(self, x, y, w = 1.0):
+        #not supporting arrays for now
+        assert(not hasattr(x, '__iter__'))
+        assert(not hasattr(y, '__iter__'))
+
+        self.content[np.digitize([y], self.binsy)[0]][np.digitize([x], self.binsx)[0]] += w
+        self.sumx += x*w
+        self.sum2x += x*x*w
+        self.sumy += y*w
+        self.sum2y += y*y*w
+        self.count += w
+
+    def mu(self):
+        return (self.sumx/self.count, self.sumy/self.count)
+
+    def sigma(self):
+        mu = self.mu()
+        return np.sqrt( (self.sum2x/self.count - mu[0]**2, self.sum2y/self.count - mu[1]**2) )
+
+    def svg(self, xlabel = '', ylabel = ''):
+        plt.pcolor(self.binsx, self.binsy, self.content[1:-1,1:-1])
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        svgdata = StringIO.StringIO()
+        plt.savefig(svgdata, format='svg')
+        svgdata.seek(0)
+
+        return svgdata.read()
+
 class Table(object):
     def __init__(self, html_class, rows, columns, row_type, column_type):
         valid_types = ['parameter', 'observable', 'other']
