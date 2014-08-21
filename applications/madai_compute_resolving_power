@@ -25,12 +25,51 @@ import math
 import gzip
 import base64
 import copy
+import StringIO
 import matplotlib as mpl
 import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import numpy as np
 
 #Global settings for now:
 N_SIGMA = 4
 N_BINS = 50
+
+class Histogram(object):
+    def __init__(self, N_bins, low, high):
+        self.bins = np.array([ float(i)*(high - low)/float(N_bins) for i in range(N_bins + 1) ])
+        self.content = np.array([0.0]*(N_bins+2)) # +2 for overflow
+        self.sum, self.sum2, self.count = 0, 0, 0
+
+    def fill(self, x, w = 1.0):
+        if not hasattr(x, '__iter__'):
+            x = [x]
+        self.content[np.digitize(x, self.bins)] += w
+        for value in x:
+            self.sum += value*w
+            self.sum2 += value*value*w
+            self.count += w
+
+    def mu(self):
+        return self.sum/self.count
+
+    def sigma(self):
+        return np.sqrt(self.sum2/self.count - self.mu()**2)
+
+    def svg(self, xlabel = '', ylabel = '', mu = None, sigma = None):
+        plt.bar(self.bins[:-1], self.content[1:-1], self.bins[1]-self.bins[0], color=(0.9,0.2,0.4,0.5), edgecolor=(0.9,0.2,0.4,0.9))
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        x0, x1, y0, y1 = plt.axis()
+        if mu and sigma:
+            plt.plot([mu-sigma]*2,[y0,y1],ls='dashed',lw=3,color=(0.5,0.5,0,0.7))
+            plt.plot([mu+sigma]*2,[y0,y1],ls='dashed',lw=3,color=(0.5,0.5,0,0.7))
+            plt.plot([mu]*2,[y0,y1],ls='solid',lw=5,color=(0.5,0.5,0,1))
+        svgdata = StringIO.StringIO()
+        plt.savefig(svgdata, format='svg')
+        svgdata.seek(0)
+
+        return svgdata.read()
 
 class Table(object):
     def __init__(self, html_class, rows, columns, row_type, column_type):
