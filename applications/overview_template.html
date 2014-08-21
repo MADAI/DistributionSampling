@@ -48,15 +48,39 @@
             }
         }
 
-        function observable_checked(e) {
-            var prefix = "observable-" + e.value + "-";
+        function item_checked(e) {
+            var prefix = "observable-";
+            if((' ' + e.className + ' ').indexOf(' checkbox-parameter ') > -1) {
+                prefix = "parameter-";
+            }
+            prefix += e.value + "-";
             var classes = [prefix + "row", prefix + "column"];
             change_visibility(classes, e.checked);
         }
-        function parameter_checked(e) {
-            var prefix = "parameter-" + e.value + "-";
-            var classes = [prefix + "row", prefix + "column"];
-            change_visibility(classes, e.checked);
+
+        function toggle_checkboxes(class_name) {
+            var elements = document.getElementsByClassName(class_name);
+            for(var element_index = 0; element_index < elements.length; element_index++) {
+                if(elements[element_index].checked == true) {
+                    elements[element_index].checked = false;
+                } else {
+                    elements[element_index].checked = true;
+                }
+                item_checked(elements[element_index]);
+            }
+        }
+
+        function check_all(class_name, checked) {
+            var elements = document.getElementsByClassName(class_name);
+            for(var element_index = 0; element_index < elements.length; element_index++) {
+                if(elements[element_index].checked == true && checked == false) {
+                    elements[element_index].checked = false;
+                    item_checked(elements[element_index]);
+                } else if(elements[element_index].checked == false && checked == true) {
+                    elements[element_index].checked = true;
+                    item_checked(elements[element_index]);
+                }
+            }
         }
     </script>
 </head>
@@ -65,15 +89,21 @@
     <div class ="outer-active-selection-box">Observables
         <div class="active-selection-box">
             {% for observable in observables %}
-            <input checked type="checkbox" id="checkbox-observable-{{observable}}" value="{{observable}}" onchange="observable_checked(this)">{{observable}}
+            <input checked class="checkbox-observable" type="checkbox" id="checkbox-observable-{{observable}}" value="{{observable}}" onchange="item_checked(this)">{{observable}}
             {% endfor %}
+            <button onclick="toggle_checkboxes('checkbox-observable')">Toggle</button>
+            <button onclick="check_all('checkbox-observable', true)">Check All</button>
+            <button onclick="check_all('checkbox-observable', false)">Uncheck All</button>
         </div>
     </div>
     <div class ="outer-active-selection-box">Parameters
         <div class="active-selection-box">
             {% for parameter in parameters %}
-            <input checked type="checkbox" id="checkbox-parameter-{{parameter}}" value="{{parameter}}" onchange="parameter_checked(this)">{{parameter}}
+            <input checked class="checkbox-parameter" type="checkbox" id="checkbox-parameter-{{parameter}}" value="{{parameter}}" onchange="item_checked(this)">{{parameter}}
             {% endfor %}
+            <button onclick="toggle_checkboxes('checkbox-parameter')">Toggle</button>
+            <button onclick="check_all('checkbox-parameter', true)">Check All</button>
+            <button onclick="check_all('checkbox-parameter', false)">Uncheck All</button>
         </div>
     </div>
 
