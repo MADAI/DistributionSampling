@@ -611,8 +611,6 @@ def build_image_tables(histograms):
             observable_row.append(histograms.observable_observable[i][j].svg(xlabel = xlabel, ylabel = ylabel))
         for j in range(len(parameters)):
             xlabel, ylabel = histograms.parameters[j], histograms.observables[i]
-            if i == j:
-                ylabel = 'counts'
             parameter_row.append(histograms.observable_parameter[i][j].svg(xlabel = xlabel, ylabel = ylabel))
         observable_observable_plots.append(observable_row)
         observable_parameter_plots.append(parameter_row)
@@ -627,9 +625,9 @@ def build_image_tables(histograms):
     for i in range(len(histograms.parameters)):
         parameter_row = []
         for j in range(len(histograms.parameters)):
-            xlabel, ylabel = histograms.parameters[j], histograms.parameters[i]
             if i == j:
                 ylabel = 'counts'
+            xlabel, ylabel = histograms.parameters[j], histograms.parameters[i]
             parameter_row.append(histograms.parameter_parameter[i][j].svg(xlabel = xlabel, ylabel = ylabel))
         parameter_parameter_plots.append(parameter_row)
     tables['parameter_parameter_plots'] = ImageTable(rows = histograms.parameters, columns = histograms.parameters, \
