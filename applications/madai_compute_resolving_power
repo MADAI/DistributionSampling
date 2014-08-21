@@ -59,6 +59,7 @@ class Histogram(object):
         plt.bar(self.bins[:-1], self.content[1:-1], self.bins[1]-self.bins[0], color=(0.9,0.2,0.4,0.5), edgecolor=(0.9,0.2,0.4,0.9))
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
+        plt.xlim([self.bins[0],self.bins[-1]])
         x0, x1, y0, y1 = plt.axis()
         if mu and sigma:
             plt.plot([mu-sigma]*2,[y0,y1],ls='dashed',lw=3,color=(0.5,0.5,0,0.7))
@@ -101,6 +102,8 @@ class Histogram2D(object):
         plt.pcolor(self.binsx, self.binsy, self.content[1:-1,1:-1])
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
+        plt.xlim([self.binsx[0],self.binsx[-1]])
+        plt.ylim([self.binsy[0],self.binsy[-1]])
         svgdata = StringIO.StringIO()
         plt.savefig(svgdata, format='svg')
         svgdata.seek(0)
