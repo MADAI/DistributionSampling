@@ -268,14 +268,20 @@ class Histograms(object):
     def add_sample(self, parameters, observables):
         for i in range(len(observables)):
             for j in range(len(observables)):
+                if not self.observable_observable[i][j]:
+                    continue
                 if i == j:
                     self.observable_observable[i][j].fill(observables[i])
                 else:
                     self.observable_observable[i][j].fill(observables[j], observables[i])
             for j in range(len(parameters)):
+                if not self.observable_parameter[i][j]:
+                    continue
                 self.observable_parameter[i][j].fill(parameters[j], observables[i])
         for i in range(len(parameters)):
             for j in range(len(parameters)):
+                if not self.parameter_parameter[i][j]:
+                    continue
                 if i == j:
                     self.parameter_parameter[i][j].fill(parameters[i])
                 else:
@@ -600,6 +606,9 @@ def build_image_tables(histograms):
     for i in range(len(histograms.observables)):
         observable_row, parameter_row = [], []
         for j in range(len(histograms.observables)):
+            if not histograms.observable_observable[i][j]:
+                observable_row.append('')
+                continue
             xlabel, ylabel = histograms.observables[j], histograms.observables[i]
             if i == j:
                 ylabel = 'counts'
@@ -610,6 +619,9 @@ def build_image_tables(histograms):
                 continue
             observable_row.append(histograms.observable_observable[i][j].svg(xlabel = xlabel, ylabel = ylabel))
         for j in range(len(parameters)):
+            if not histograms.observable_parameter[i][j]:
+                parameter_row.append('')
+                continue
             xlabel, ylabel = histograms.parameters[j], histograms.observables[i]
             parameter_row.append(histograms.observable_parameter[i][j].svg(xlabel = xlabel, ylabel = ylabel))
         observable_observable_plots.append(observable_row)
@@ -625,6 +637,9 @@ def build_image_tables(histograms):
     for i in range(len(histograms.parameters)):
         parameter_row = []
         for j in range(len(histograms.parameters)):
+            if not histograms.parameter_parameter[i][j]:
+                parameter_row.append('')
+                continue
             if i == j:
                 ylabel = 'counts'
             xlabel, ylabel = histograms.parameters[j], histograms.parameters[i]
