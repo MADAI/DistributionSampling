@@ -40,53 +40,51 @@ int SamplerCSVWriter
 {
   model.SetUseModelCovarianceToCalulateLogLikelihood(UseEmulatorCovariance);
   sampler.SetModel( &model );
-  int step = NumberOfBurnInSamples / 100, percent = 0;
-  if ( step < 1 ) {
-    step = 1; // avoid div-by-zero error
-  }
-  for ( int count = 0; count < NumberOfBurnInSamples; count++ ) {
-    if (progress != NULL) {
-      if ( count % step == 0 ) {
-        (*progress) << '\r' << "Burn in percent done: " << std::setfill('0') << std::setw(2) << percent++ << "%  ";
+
+  enum phase { burnIn = 0, traceGeneration = 1 };
+  int currentNumberOfSamples[2] = { NumberOfBurnInSamples, NumberOfSamples };
+  const char * currentName[2] = {"Burn in", "Sampler"};
+  double bestLogLikelihood = 0;
+  Sample oldSample = sampler.NextSample();
+  for ( int currentPhase = burnIn; currentPhase <= traceGeneration; currentPhase++ ) {
+    int step = currentNumberOfSamples[currentPhase] / 100, percent = 1;
+    if ( step < 1 ) {
+      step = 1; // avoid div-by-zero error
+    }
+    int successfulSteps = 0, failedSteps = 0;
+    for ( int count = 0; count < currentNumberOfSamples[currentPhase]; count++ ) {
+      Sample sample = sampler.NextSample();
+      if ( sample == oldSample ) {
+        failedSteps++;
+      }
+      else {
+        successfulSteps++;
+      }
+      oldSample = sample;
+
+      WriteSample( outFile, sample );
+
+      if ( sample.m_LogLikelihood > bestLogLikelihood || ( currentPhase == burnIn && count == 0 ) ) {
+        bestLogLikelihood = sample.m_LogLikelihood;
+      }
+
+      if ( progress != NULL ) {
+        if ( ( count + 1 ) % step == 0 ) {
+          (*progress) <<  '\r' << currentName[currentPhase] << " percent done: " << std::setfill('0') << std::setw(2) << percent++ << "%";
+          (*progress) << "  Success rate: " << std::setfill('0') << std::setw(2) << 100*successfulSteps / (successfulSteps + failedSteps) << "%";
+          (*progress) << "  Best log likelihood: " << bestLogLikelihood;
+        }
         progress->flush();
       }
     }
-    sampler.NextSample(); // Discard samples in the burn-in phase
-  }
-  step = NumberOfSamples / 100, percent = 0;
-  if ( step < 1 ) {
-    step = 1; // avoid div-by-zero error
-  }
-
-  WriteHeader( outFile, model.GetParameters(), model.GetScalarOutputNames() );
-
-  Sample oldSample;
-  int successfulSteps = 0, failedSteps = 0;
-  for (int count = 0; count < NumberOfSamples; count ++) {
-    if (progress != NULL) {
-      if (count % step == 0) {
-        if( successfulSteps > 0 || failedSteps > 0 ) {
-          (*progress) <<  '\r' << "Sampler percent done: " << std::setfill('0') << std::setw(2) << percent++ << "%";
-          (*progress) << "\tSuccess rate: " << std::setfill('0') << std::setw(2) << 100*successfulSteps / (successfulSteps + failedSteps) << "%";
-        }
-      }
+    if ( currentPhase == burnIn ) {
+      WriteHeader( outFile, model.GetParameters(), model.GetScalarOutputNames() );
+    }
+    if ( progress != NULL ) {
+      // Leave the success rate percentage visible
+      (*progress) << "\n";
       progress->flush();
     }
-    Sample sample = sampler.NextSample();
-    if( sample == oldSample ) {
-      failedSteps++;
-    }
-    else {
-      successfulSteps++;
-    }
-    oldSample = sample;
-
-    WriteSample( outFile, sample );
-  }
-  if (progress != NULL) {
-    // Leave the success rate percentage visible
-    (*progress) << "\n";
-    progress->flush();
   }
 
   return EXIT_SUCCESS;
