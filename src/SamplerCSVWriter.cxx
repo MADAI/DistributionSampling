@@ -63,7 +63,9 @@ int SamplerCSVWriter
       }
       oldSample = sample;
 
-      WriteSample( outFile, sample );
+      if ( currentPhase == traceGeneration ) {
+        WriteSample( outFile, sample, WriteLogLikelihoodGradients );
+      }
 
       if ( sample.m_LogLikelihood > bestLogLikelihood || ( currentPhase == burnIn && count == 0 ) ) {
         bestLogLikelihood = sample.m_LogLikelihood;
@@ -79,7 +81,7 @@ int SamplerCSVWriter
       }
     }
     if ( currentPhase == burnIn ) {
-      WriteHeader( outFile, model.GetParameters(), model.GetScalarOutputNames() );
+      WriteHeader( outFile, model.GetParameters(), model.GetScalarOutputNames(), WriteLogLikelihoodGradients );
     }
     if ( progress != NULL ) {
       // Leave the success rate percentage visible
