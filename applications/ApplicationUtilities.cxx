@@ -279,8 +279,13 @@ Model::ErrorType LoadObservations(Model * model, std::istream & i)
   // Report any observed scalars with unread values
   for ( std::set< std::string >::iterator iter = scalarNamesRemaining.begin();
         iter != scalarNamesRemaining.end(); ++iter ) {
-    std::cout << "Value for observed scalar '" << *iter << "' was not "
-              << "specified. Assuming its value is zero.\n";
+    // Suppress the warning for the special case of it being the log likelihood
+    std::string nameLower = *iter;
+    std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+    if (nameLower != "log_likelihood" && nameLower != "loglikelihood") {
+      std::cout << "Value for observed scalar '" << *iter << "' was not "
+                << "specified. Assuming its value is zero.\n";
+    }
   }
 
   Model::ErrorType e;

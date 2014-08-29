@@ -131,7 +131,9 @@ int main(int argc, char ** argv) {
   bool readerVerbose = settings.GetOptionAsBool(
       "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
 
-  madai::GaussianProcessEmulator gpe;
+  bool useModelError = settings.GetOptionAsBool(
+      "PCA_USE_MODEL_ERROR", madai::Defaults::PCA_USE_MODEL_ERROR );
+  madai::GaussianProcessEmulator gpe(useModelError);
   madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
   directoryReader.SetVerbose( readerVerbose );
 

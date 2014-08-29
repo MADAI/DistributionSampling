@@ -288,6 +288,10 @@ protected:
    * scalar outputs. */
   std::vector< std::string > m_ScalarOutputNames;
 
+  /**
+  */
+  int m_LogLikelihoodObservable;
+
   /** Step size used for numerical estimation of gradient.
    *
    * This is usually denoted 'h' in math texts about finite differences. */

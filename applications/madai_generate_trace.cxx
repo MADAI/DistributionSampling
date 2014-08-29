@@ -138,7 +138,9 @@ int main(int argc, char ** argv) {
 
   madai::Model * model;
   if ( executable == "" ) { // Use emulator
-    madai::GaussianProcessEmulator gpe;
+    bool useModelError = settings.GetOptionAsBool(
+        "PCA_USE_MODEL_ERROR", madai::Defaults::PCA_USE_MODEL_ERROR );
+    madai::GaussianProcessEmulator gpe(useModelError);
     madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
     if ( !directoryReader.LoadTrainingData( &gpe,
                                             modelOutputDirectory,

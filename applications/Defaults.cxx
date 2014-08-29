@@ -43,6 +43,8 @@ const bool Defaults::GENERATE_TRAINING_POINTS_USE_MAXIMIN = false;
 
 const int Defaults::GENERATE_TRAINING_POINTS_MAXIMIN_TRIES = 20;
 
+const bool Defaults::PCA_USE_MODEL_ERROR = false;
+
 const double Defaults::PCA_FRACTION_RESOLVING_POWER = 0.95;
 
 const std::string Defaults::EMULATOR_COVARIANCE_FUNCTION =
@@ -79,7 +81,8 @@ const bool Defaults::EMULATE_WRITE_HEADER = true;
 const std::string Defaults::POSTERIOR_ANALYSIS_DIRECTORY = "posterior_model_output";
 
 void Defaults::PrintAllDefaults(std::ostream & o) {
-  o << "#\n"
+  o << std::boolalpha //output booleans as "true" or "false" rather than 0 or 1
+    << "#\n"
     << "MODEL_OUTPUT_DIRECTORY "                           << Defaults::MODEL_OUTPUT_DIRECTORY << '\n'
     << "EXPERIMENTAL_RESULTS_FILE "                        << Defaults::EXPERIMENTAL_RESULTS_FILE << '\n'
     << "#\n"
@@ -93,6 +96,7 @@ void Defaults::PrintAllDefaults(std::ostream & o) {
     << "GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS "     << Defaults::GENERATE_TRAINING_POINTS_STANDARD_DEVIATIONS << '\n'
     << "GENERATE_TRAINING_POINTS_USE_MAXIMIN "             << Defaults::GENERATE_TRAINING_POINTS_USE_MAXIMIN << '\n'
     << "GENERATE_TRAINING_POINTS_MAXIMIN_TRIES "           << Defaults::GENERATE_TRAINING_POINTS_MAXIMIN_TRIES << '\n'
+    << "PCA_USE_MODEL_ERROR "                              << Defaults::PCA_USE_MODEL_ERROR << '\n'
     << "PCA_FRACTION_RESOLVING_POWER "                     << Defaults::PCA_FRACTION_RESOLVING_POWER << '\n'
     << "EMULATOR_COVARIANCE_FUNCTION "                     << Defaults::EMULATOR_COVARIANCE_FUNCTION << '\n'
     << "EMULATOR_REGRESSION_ORDER "                        << Defaults::EMULATOR_REGRESSION_ORDER << '\n'
