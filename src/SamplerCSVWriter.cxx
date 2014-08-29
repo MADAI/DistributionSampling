@@ -62,7 +62,9 @@ int SamplerCSVWriter
       }
       oldSample = sample;
 
-      WriteSample( outFile, sample );
+      if ( currentPhase == traceGeneration ) {
+        WriteSample( outFile, sample );
+      }
 
       if ( sample.m_LogLikelihood > bestLogLikelihood || ( currentPhase == burnIn && count == 0 ) ) {
         bestLogLikelihood = sample.m_LogLikelihood;
