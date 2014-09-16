@@ -26,6 +26,8 @@ ACKNOWLEDGMENTS:
 
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
+#include <stdio.h>
 
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
@@ -178,6 +180,12 @@ int main(int argc, char ** argv) {
   madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
   bool verbose = settings.GetOptionAsBool(
       "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
+  //if we're not connected to a terminal then don't be verbose,
+  //doing so will break interaction with the other applications
+  //because the header is invalid
+  if ( !isatty(fileno(stdin)) ) {
+    verbose = false;
+  }
   directoryReader.SetVerbose( verbose );
 
   if ( !directoryReader.LoadTrainingData( &gpe,
