@@ -80,17 +80,17 @@ bool Interact(
   if ( writeHeader ) {
     output
       << "VERSION 1\n"
-      << "PARAMETERS\n"
+      << "PARAMETERS "
       << p << '\n';
     for(unsigned int i = 0; i < p; i++) {
       output << gpme.m_Parameters[i] << '\n';
     }
-    output <<"OUTPUTS\n" << t << '\n';
+    output <<"OUTPUTS " << t << '\n';
 
     for(unsigned int i = 0; i < t; i++) {
       output << gpme.m_OutputNames[i] << '\n';
     }
-    output << "COVARIANCE\n" << "TRIANGULAR_MATRIX\n"
+    output << "COVARIANCE " << "TRIANGULAR_MATRIX "
            << ((t * (t + 1)) / 2) << '\n';
     /*
       For example, a 5x5 symmetric matrix can be represented with
