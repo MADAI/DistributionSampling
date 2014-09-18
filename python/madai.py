@@ -380,3 +380,47 @@ class ExperimentalResultsFile(object):
                 result, value, error = line.split()
                 self.results[result] = float(value)
                 self.errors[result] = float(error)
+
+class ParametersFile(object):
+    def __init__(self, parameters_file):
+        self.parameters_file = parameters_file
+        if os.path.isdir(parameters_file):
+            if parameters_file[-1] != '/':
+                parameters_file += '/'
+            parameters_file += 'parameter_priors.dat'
+        self.parameters = {}
+        with open(parameters_file, 'r') as f:
+            for line in f:
+                type, parameter, x1, x2 = line.split()
+                x1, x2 = float(x1), float(x2)
+                mean = x1
+                sigma = x2
+                low, high = x1 - x2, x1 + x2
+                if type.lower() == 'uniform':
+                    mean = (x1 + x2)/2.0
+                    sigma = (x2 - x1)/2.0
+                    low, high = x1, x2
+                self.parameters[parameter] = {}
+                self.parameters[parameter]['type'] = type
+                self.parameters[parameter]['mean'] = mean
+                self.parameters[parameter]['sigma'] = sigma
+                self.parameters[parameter]['low'] = low
+                self.parameters[parameter]['high'] = high
+
+    def __repr__(self):
+        return str(self.parameters)
+
+    def average(self):
+        parameters = {}
+        for parameter, values in self.parameters.iteritems():
+            parameters[parameter] = values['mean']
+        return parameters
+
+    def random(self):
+        parameters = {}
+        for parameter, values in self.parameters.iteritems():
+            if values['type'].lower() == 'uniform':
+                parameters[parameter] = random.uniform(values['low'], values['high'])
+            elif values['type'].lower() == 'gaussian':
+                parameters[parameter] = random.gauss(values['mean'], values['sigma'])
+        return parameters
