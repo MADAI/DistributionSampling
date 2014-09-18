@@ -452,3 +452,54 @@ class ModelRun(object):
             chi_squared += ( (value - self.outputs[output]) / self.errors[output] )**2
             NDF += 1.0
         return chi_squared/NDF
+
+class ExternalModel(object):
+    def __init__(self, command):
+        self.process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        self.parameters = []
+        self.outputs = []
+
+        #get to the parameters section
+        self.version = float(self.readline().split()[1])
+
+        #read in the parameters
+        self.N_parameters = int(self.readline().split()[1])
+        for i in range(self.N_parameters):
+            last_line = self.readline()
+            self.parameters.append(last_line.split()[0])
+        #read in the outputs
+        self.N_outputs = int(self.readline().split()[1])
+        for i in range(self.N_outputs):
+            last_line = self.readline()
+            self.outputs.append(last_line[:-1])
+        #read the header
+        self.error_name = self.readline().lower()[:-1]
+        self.error_size = int(self.error_name.split()[-1])
+        self.readline()
+
+    def __del__(self):
+        if self.process.poll() != None:
+            os.kill(self.process.pid, signal.SIGINT)
+
+    def readline(self):
+        return self.process.stdout.readline().decode('UTF-8')
+
+    def run(self, **parameter_values):
+        for parameter in self.parameters:
+            #for python3:
+            #self.process.stdin.write(bytes(str(parameter_values[parameter]) + '\n', 'UTF-8'))
+            self.process.stdin.write(str(parameter_values[parameter]) + '\n')
+        self.process.stdin.flush()
+
+        output_values = []
+        while len(output_values) < self.N_outputs:
+            output_values += list(map(float, self.readline().split()))
+        output_dictionary = {}
+        for i, output in enumerate(self.outputs):
+            output_dictionary[output] = output_values[i]
+
+        error_values = []
+        while len(error_values) < self.error_size:
+            error_values += list(map(float, self.readline().split()))
+
+        return output_dictionary, error_values
