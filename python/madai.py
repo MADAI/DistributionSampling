@@ -333,3 +333,35 @@ def Interactive(Function, Parameters, OutputNames,
             return
         except (KeyboardInterrupt,):
             return
+
+class SettingsFile(object):
+    def __init__(self, settings_file):
+        if os.path.isdir(settings_file):
+            if settings_file[-1] != '/':
+                settings_file += '/'
+            settings_file += 'settings.dat'
+        self.settings_file = settings_file
+        with open(settings_file, 'r') as f:
+            self.settings = f.read()
+
+    def __repr__(self):
+        return self.settings
+
+    def write(self, settings_file = None):
+        if settings_file == None:
+            settings_file = self.settings_file
+        with open(settings_file, 'w') as f:
+            f.write(self.settings)
+
+    def set_setting(self, setting, value):
+        first_occurance = self.settings.lower().find(setting.lower())
+        end_of_line = self.settings.find('\n', first_occurance)
+        self.settings = self.settings[:first_occurance + len(setting)] + \
+                       ' ' + str(value) + \
+                       self.settings[end_of_line:]
+
+    def set_scale(self, scale):
+        return self.set_setting('EMULATOR_SCALE', scale)
+
+    def set_nugget(self, scale):
+        return self.set_setting('EMULATOR_NUGGET', scale)
