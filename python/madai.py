@@ -365,3 +365,18 @@ class SettingsFile(object):
 
     def set_nugget(self, scale):
         return self.set_setting('EMULATOR_NUGGET', scale)
+
+class ExperimentalResultsFile(object):
+    def __init__(self, results_file):
+        self.results_file = results_file
+        if os.path.isdir(results_file):
+            if results_file[-1] != '/':
+                results_file += '/'
+            results_file += 'experimental_results.dat'
+        self.results = {}
+        self.errors = {}
+        with open(results_file, 'r') as f:
+            for line in f:
+                result, value, error = line.split()
+                self.results[result] = float(value)
+                self.errors[result] = float(error)
