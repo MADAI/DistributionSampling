@@ -503,3 +503,10 @@ class ExternalModel(object):
             error_values += list(map(float, self.readline().split()))
 
         return output_dictionary, error_values
+
+class EmulatorModel(ExternalModel):
+    def __init__(self, stats_dir, retrain = False):
+        if retrain:
+            subprocess.call( ['madai_pca_decompose', stats_dir] )
+            subprocess.call( ['madai_train_emulator', stats_dir] )
+        ExternalModel.__init__(self, 'madai_emulate ' + stats_dir)
