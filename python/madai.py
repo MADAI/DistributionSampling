@@ -424,3 +424,31 @@ class ParametersFile(object):
             elif values['type'].lower() == 'gaussian':
                 parameters[parameter] = random.gauss(values['mean'], values['sigma'])
         return parameters
+
+class ModelRun(object):
+    def __init__(self, directory):
+        if directory[-1] != '/':
+            directory += '/'
+        self.parameters = {}
+        with open(directory + 'parameters.dat', 'r') as f:
+            for line in f:
+                parameter, value = line.split()
+                self.parameters[parameter] = float(value)
+        self.outputs = {}
+        self.errors = {}
+        with open(directory + 'results.dat', 'r') as f:
+            for line in f:
+                output, value, error = line.split()
+                self.outputs[output] = float(value)
+                self.errors[output] = float(error)
+
+    def __repr__(self):
+        return str({'parameters' : self.parameters, 'outputs' : self.outputs, 'errors' : self.errors})
+
+    def chi_squared(self, **outputs):
+        chi_squared = 0.0
+        NDF = 0.0
+        for output, value in outputs.iteritems():
+            chi_squared += ( (value - self.outputs[output]) / self.errors[output] )**2
+            NDF += 1.0
+        return chi_squared/NDF
