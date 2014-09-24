@@ -1074,7 +1074,7 @@ bool GaussianProcessEmulator::SingleModel
     double & mean,
     double & variance) const {
   assert(m_RegressionOrder >= 0);
-  Eigen::Map<const Eigen::VectorXd> point(&(x[0]),x.size());
+  Eigen::VectorXd point = Eigen::Map<const Eigen::VectorXd>(&(x[0]),x.size());
   int N = m_Parent->m_NumberTrainingPoints;
   int p = m_Parent->m_NumberParameters;
   assert(p > 0);
@@ -1090,13 +1090,7 @@ bool GaussianProcessEmulator::SingleModel
     kplus(j) = cov;
   }
   Eigen::VectorXd h_vector(F);
-  h_vector(0) = 1.0;
-  if (m_RegressionOrder > 0)
-    h_vector.segment(1,p) = point;
-  for (int i = 2; i < m_RegressionOrder; ++i) {
-    h_vector.segment(1+(i*p),p)
-      = h_vector.segment(1+((i-1)*p),p).cwiseProduct(point);
-  }
+  MakeHVector(point,h_vector,m_RegressionOrder);
   // m_CInverse = CMatrix.ldlt().solve(Eigen::MatrixXd::Identity(N,N));
   // m_RegressionMatrix
   //    = (HMatrix.transpose() * m_CInverse
