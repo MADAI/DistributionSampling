@@ -92,7 +92,7 @@ inline void MakeHMatrix(
     int regressionOrder)
 {
   int p = X.cols(), N = X.rows();
-  int numberRegressionFunctions = 1 + (regressionOrder * p);
+  int numberRegressionFunctions = NumberRegressionFunctions(regressionOrder, p);
   Eigen::MatrixBase< TDerived > & H
     = const_cast< Eigen::MatrixBase< TDerived > & >(H_);
   H.derived().resize(N, numberRegressionFunctions);
@@ -114,7 +114,7 @@ inline void MakeHVector(
     int regressionOrder)
 {
   int p = point.size();
-  int numberRegressionFunctions = 1 + (regressionOrder * p);
+  int numberRegressionFunctions = NumberRegressionFunctions(regressionOrder, p);
   Eigen::MatrixBase< TDerived > & hvec
     = const_cast< Eigen::MatrixBase< TDerived > & >(hvec_);
   hvec.derived().resize(numberRegressionFunctions,1);
@@ -136,7 +136,7 @@ inline void GetGradientOfHVector(
   int regressionOrder)
 {
   int p = point.size();
-  int numberRegressionFunctions = 1 + (regressionOrder * p);
+  int numberRegressionFunctions = NumberRegressionFunctions(regressionOrder, p);
   GradMatrix.resize(p, numberRegressionFunctions);
   GradMatrix = Eigen::MatrixXd::Zero(p, numberRegressionFunctions);
   if ( regressionOrder > 0 ) {
