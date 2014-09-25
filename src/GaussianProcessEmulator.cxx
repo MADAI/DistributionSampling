@@ -27,6 +27,7 @@
 #include <cmath>        // std::exp std::amp
 #include <limits>       // std::numeric_limits
 #include <fstream>      // std::ofstream std::ifstream
+#include <algorithm>    // std::swap
 
 #include "Configuration.h"
 #include "GaussianProcessEmulator.h"
@@ -40,6 +41,26 @@ namespace madai {
 
 // Anonymous namespace to hide these functions
 namespace {
+
+/**
+ * Binomial function used for combinatorics of higher order polynomials.
+ */
+inline int Binomial(
+    int N, int k) {
+  unsigned int min = N - k, max = k;
+  if(min > max) { std::swap(min, max); }
+  unsigned int total = N;
+
+  unsigned int numerator = 1;
+  for(unsigned int i = max + 1; i <= total; ++i) {
+    numerator *= i;
+  }
+  unsigned int denominator = 1;
+  for(unsigned int i = 1; i <= min; ++i) {
+    denominator *= i;
+  }
+  return int(numerator/denominator);
+}
 
 /**
  * Get the number of regression functions.
