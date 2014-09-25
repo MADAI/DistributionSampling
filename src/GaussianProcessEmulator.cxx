@@ -64,11 +64,12 @@ inline int Binomial(
 
 /**
  * Get the number of regression functions.
+ * # = (numberParameters + regressionOrder) choose (numberParameters)
  */
 inline int NumberRegressionFunctions(
     int regressionOrder,
     int numberParameters) {
-  return 1 + (regressionOrder * numberParameters);
+  return Binomial(regressionOrder + numberParameters, numberParameters);
 }
 
 /**
@@ -120,8 +121,19 @@ inline void MakeHMatrix(
   H.block(0,0,N,1) = Eigen::MatrixXd::Constant(N,1, 1.0);
   if (regressionOrder > 0)
     H.block(0,1,N,p) = X;
+
+  int currentPosition = 1 + p, lastStart = 1, nextStart = 1;
   for (int i = 1; i < regressionOrder; ++i) {
-    H.block(0,1+(i*p),N,p) = H.block(0,1+((i-1)*p),N,p).cwiseProduct(X);
+    lastStart = nextStart;
+    nextStart = currentPosition;
+    for(int pComponent = 0; pComponent < p; ++pComponent) {
+      int steps = Binomial(i + pComponent, pComponent);
+      for(int j = 0; j < steps; ++j) {
+        H.block(0,currentPosition,N,1)
+          = H.block(0,lastStart+j,N,1).cwiseProduct(H.block(0,1+pComponent,N,1));
+        currentPosition++;
+      }
+    }
   }
 }
 
@@ -142,9 +154,17 @@ inline void MakeHVector(
   hvec(0) = 1.0;
   if (regressionOrder > 0)
     hvec.segment(1,p) = point;
+
+  int currentPosition = 1 + p, lastStart = 1, nextStart = 1;
   for (int i = 1; i < regressionOrder; ++i) {
-    hvec.segment(1+(i*p),p)
-      = hvec.segment(1+((i-1)*p),p).cwiseProduct(point);
+    lastStart = nextStart;
+    nextStart = currentPosition;
+    for(int pComponent = 0; pComponent < p; ++pComponent) {
+      int steps = Binomial(i + pComponent, pComponent);
+      hvec.segment(currentPosition, steps)
+        = hvec.segment(lastStart, steps)*point(pComponent);
+      currentPosition += steps;
+    }
   }
 }
 
