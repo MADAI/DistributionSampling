@@ -26,6 +26,8 @@ ACKNOWLEDGMENTS:
 
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
+#include <stdio.h>
 
 #include "ApplicationUtilities.h"
 #include "GaussianProcessEmulator.h"
@@ -78,17 +80,17 @@ bool Interact(
   if ( writeHeader ) {
     output
       << "VERSION 1\n"
-      << "PARAMETERS\n"
+      << "PARAMETERS "
       << p << '\n';
     for(unsigned int i = 0; i < p; i++) {
       output << gpme.m_Parameters[i] << '\n';
     }
-    output <<"OUTPUTS\n" << t << '\n';
+    output <<"OUTPUTS " << t << '\n';
 
     for(unsigned int i = 0; i < t; i++) {
       output << gpme.m_OutputNames[i] << '\n';
     }
-    output << "COVARIANCE\n" << "TRIANGULAR_MATRIX\n"
+    output << "COVARIANCE " << "TRIANGULAR_MATRIX "
            << ((t * (t + 1)) / 2) << '\n';
     /*
       For example, a 5x5 symmetric matrix can be represented with
@@ -178,6 +180,12 @@ int main(int argc, char ** argv) {
   madai::GaussianProcessEmulatorDirectoryFormatIO directoryReader;
   bool verbose = settings.GetOptionAsBool(
       "READER_VERBOSE", madai::Defaults::READER_VERBOSE );
+  //if we're not connected to a terminal then don't be verbose,
+  //doing so will break interaction with the other applications
+  //because the header is invalid
+  if ( !isatty(fileno(stdin)) ) {
+    verbose = false;
+  }
   directoryReader.SetVerbose( verbose );
 
   if ( !directoryReader.LoadTrainingData( &gpe,

@@ -27,6 +27,7 @@
 #include <cmath>        // std::exp std::amp
 #include <limits>       // std::numeric_limits
 #include <fstream>      // std::ofstream std::ifstream
+#include <algorithm>    // std::swap
 
 #include "Configuration.h"
 #include "GaussianProcessEmulator.h"
@@ -42,12 +43,33 @@ namespace madai {
 namespace {
 
 /**
+ * Binomial function used for combinatorics of higher order polynomials.
+ */
+inline int Binomial(
+    int N, int k) {
+  unsigned int min = N - k, max = k;
+  if(min > max) { std::swap(min, max); }
+  unsigned int total = N;
+
+  unsigned int numerator = 1;
+  for(unsigned int i = max + 1; i <= total; ++i) {
+    numerator *= i;
+  }
+  unsigned int denominator = 1;
+  for(unsigned int i = 1; i <= min; ++i) {
+    denominator *= i;
+  }
+  return int(numerator/denominator);
+}
+
+/**
  * Get the number of regression functions.
+ * # = (numberParameters + regressionOrder) choose (numberParameters)
  */
 inline int NumberRegressionFunctions(
     int regressionOrder,
     int numberParameters) {
-  return 1 + (regressionOrder * numberParameters);
+  return Binomial(regressionOrder + numberParameters, numberParameters);
 }
 
 /**
@@ -92,15 +114,26 @@ inline void MakeHMatrix(
     int regressionOrder)
 {
   int p = X.cols(), N = X.rows();
-  int numberRegressionFunctions = 1 + (regressionOrder * p);
+  int numberRegressionFunctions = NumberRegressionFunctions(regressionOrder, p);
   Eigen::MatrixBase< TDerived > & H
     = const_cast< Eigen::MatrixBase< TDerived > & >(H_);
   H.derived().resize(N, numberRegressionFunctions);
   H.block(0,0,N,1) = Eigen::MatrixXd::Constant(N,1, 1.0);
   if (regressionOrder > 0)
     H.block(0,1,N,p) = X;
+
+  int currentPosition = 1 + p, lastStart = 1, nextStart = 1;
   for (int i = 1; i < regressionOrder; ++i) {
-    H.block(0,1+(i*p),N,p) = H.block(0,1+((i-1)*p),N,p).cwiseProduct(X);
+    lastStart = nextStart;
+    nextStart = currentPosition;
+    for(int pComponent = 0; pComponent < p; ++pComponent) {
+      int steps = Binomial(i + pComponent, pComponent);
+      for(int j = 0; j < steps; ++j) {
+        H.block(0,currentPosition,N,1)
+          = H.block(0,lastStart+j,N,1).cwiseProduct(H.block(0,1+pComponent,N,1));
+        currentPosition++;
+      }
+    }
   }
 }
 
@@ -114,16 +147,24 @@ inline void MakeHVector(
     int regressionOrder)
 {
   int p = point.size();
-  int numberRegressionFunctions = 1 + (regressionOrder * p);
+  int numberRegressionFunctions = NumberRegressionFunctions(regressionOrder, p);
   Eigen::MatrixBase< TDerived > & hvec
     = const_cast< Eigen::MatrixBase< TDerived > & >(hvec_);
   hvec.derived().resize(numberRegressionFunctions,1);
   hvec(0) = 1.0;
   if (regressionOrder > 0)
     hvec.segment(1,p) = point;
+
+  int currentPosition = 1 + p, lastStart = 1, nextStart = 1;
   for (int i = 1; i < regressionOrder; ++i) {
-    hvec.segment(1+(i*p),p)
-      = hvec.segment(1+((i-1)*p),p).cwiseProduct(point);
+    lastStart = nextStart;
+    nextStart = currentPosition;
+    for(int pComponent = 0; pComponent < p; ++pComponent) {
+      int steps = Binomial(i + pComponent, pComponent);
+      hvec.segment(currentPosition, steps)
+        = hvec.segment(lastStart, steps)*point(pComponent);
+      currentPosition += steps;
+    }
   }
 }
 
@@ -136,7 +177,7 @@ inline void GetGradientOfHVector(
   int regressionOrder)
 {
   int p = point.size();
-  int numberRegressionFunctions = 1 + (regressionOrder * p);
+  int numberRegressionFunctions = NumberRegressionFunctions(regressionOrder, p);
   GradMatrix.resize(p, numberRegressionFunctions);
   GradMatrix = Eigen::MatrixXd::Zero(p, numberRegressionFunctions);
   if ( regressionOrder > 0 ) {
@@ -1074,7 +1115,7 @@ bool GaussianProcessEmulator::SingleModel
     double & mean,
     double & variance) const {
   assert(m_RegressionOrder >= 0);
-  Eigen::Map<const Eigen::VectorXd> point(&(x[0]),x.size());
+  Eigen::VectorXd point = Eigen::Map<const Eigen::VectorXd>(&(x[0]),x.size());
   int N = m_Parent->m_NumberTrainingPoints;
   int p = m_Parent->m_NumberParameters;
   assert(p > 0);
@@ -1090,13 +1131,7 @@ bool GaussianProcessEmulator::SingleModel
     kplus(j) = cov;
   }
   Eigen::VectorXd h_vector(F);
-  h_vector(0) = 1.0;
-  if (m_RegressionOrder > 0)
-    h_vector.segment(1,p) = point;
-  for (int i = 2; i < m_RegressionOrder; ++i) {
-    h_vector.segment(1+(i*p),p)
-      = h_vector.segment(1+((i-1)*p),p).cwiseProduct(point);
-  }
+  MakeHVector(point,h_vector,m_RegressionOrder);
   // m_CInverse = CMatrix.ldlt().solve(Eigen::MatrixXd::Identity(N,N));
   // m_RegressionMatrix
   //    = (HMatrix.transpose() * m_CInverse

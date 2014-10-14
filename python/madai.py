@@ -333,3 +333,180 @@ def Interactive(Function, Parameters, OutputNames,
             return
         except (KeyboardInterrupt,):
             return
+
+class SettingsFile(object):
+    def __init__(self, settings_file):
+        if os.path.isdir(settings_file):
+            if settings_file[-1] != '/':
+                settings_file += '/'
+            settings_file += 'settings.dat'
+        self.settings_file = settings_file
+        with open(settings_file, 'r') as f:
+            self.settings = f.read()
+
+    def __repr__(self):
+        return self.settings
+
+    def write(self, settings_file = None):
+        if settings_file == None:
+            settings_file = self.settings_file
+        with open(settings_file, 'w') as f:
+            f.write(self.settings)
+
+    def set_setting(self, setting, value):
+        first_occurance = self.settings.lower().find(setting.lower())
+        end_of_line = self.settings.find('\n', first_occurance)
+        self.settings = self.settings[:first_occurance + len(setting)] + \
+                       ' ' + str(value) + \
+                       self.settings[end_of_line:]
+
+    def set_scale(self, scale):
+        return self.set_setting('EMULATOR_SCALE', scale)
+
+    def set_nugget(self, scale):
+        return self.set_setting('EMULATOR_NUGGET', scale)
+
+class ExperimentalResultsFile(object):
+    def __init__(self, results_file):
+        self.results_file = results_file
+        if os.path.isdir(results_file):
+            if results_file[-1] != '/':
+                results_file += '/'
+            results_file += 'experimental_results.dat'
+        self.results = {}
+        self.errors = {}
+        with open(results_file, 'r') as f:
+            for line in f:
+                result, value, error = line.split()
+                self.results[result] = float(value)
+                self.errors[result] = float(error)
+
+class ParametersFile(object):
+    def __init__(self, parameters_file):
+        self.parameters_file = parameters_file
+        if os.path.isdir(parameters_file):
+            if parameters_file[-1] != '/':
+                parameters_file += '/'
+            parameters_file += 'parameter_priors.dat'
+        self.parameters = {}
+        with open(parameters_file, 'r') as f:
+            for line in f:
+                type, parameter, x1, x2 = line.split()
+                x1, x2 = float(x1), float(x2)
+                mean = x1
+                sigma = x2
+                low, high = x1 - x2, x1 + x2
+                if type.lower() == 'uniform':
+                    mean = (x1 + x2)/2.0
+                    sigma = (x2 - x1)/2.0
+                    low, high = x1, x2
+                self.parameters[parameter] = {}
+                self.parameters[parameter]['type'] = type
+                self.parameters[parameter]['mean'] = mean
+                self.parameters[parameter]['sigma'] = sigma
+                self.parameters[parameter]['low'] = low
+                self.parameters[parameter]['high'] = high
+
+    def __repr__(self):
+        return str(self.parameters)
+
+    def average(self):
+        parameters = {}
+        for parameter, values in self.parameters.iteritems():
+            parameters[parameter] = values['mean']
+        return parameters
+
+    def random(self):
+        parameters = {}
+        for parameter, values in self.parameters.iteritems():
+            if values['type'].lower() == 'uniform':
+                parameters[parameter] = random.uniform(values['low'], values['high'])
+            elif values['type'].lower() == 'gaussian':
+                parameters[parameter] = random.gauss(values['mean'], values['sigma'])
+        return parameters
+
+class ModelRun(object):
+    def __init__(self, directory):
+        if directory[-1] != '/':
+            directory += '/'
+        self.parameters = {}
+        with open(directory + 'parameters.dat', 'r') as f:
+            for line in f:
+                parameter, value = line.split()
+                self.parameters[parameter] = float(value)
+        self.outputs = {}
+        self.errors = {}
+        with open(directory + 'results.dat', 'r') as f:
+            for line in f:
+                output, value, error = line.split()
+                self.outputs[output] = float(value)
+                self.errors[output] = float(error)
+
+    def __repr__(self):
+        return str({'parameters' : self.parameters, 'outputs' : self.outputs, 'errors' : self.errors})
+
+    def chi_squared(self, **outputs):
+        chi_squared = 0.0
+        NDF = 0.0
+        for output, value in outputs.iteritems():
+            chi_squared += ( (value - self.outputs[output]) / self.errors[output] )**2
+            NDF += 1.0
+        return chi_squared/NDF
+
+class ExternalModel(object):
+    def __init__(self, command):
+        self.process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        self.parameters = []
+        self.outputs = []
+
+        #get to the parameters section
+        self.version = float(self.readline().split()[1])
+
+        #read in the parameters
+        self.N_parameters = int(self.readline().split()[1])
+        for i in range(self.N_parameters):
+            last_line = self.readline()
+            self.parameters.append(last_line.split()[0])
+        #read in the outputs
+        self.N_outputs = int(self.readline().split()[1])
+        for i in range(self.N_outputs):
+            last_line = self.readline()
+            self.outputs.append(last_line[:-1])
+        #read the header
+        self.error_name = self.readline().lower()[:-1]
+        self.error_size = int(self.error_name.split()[-1])
+        self.readline()
+
+    def __del__(self):
+        if self.process.poll() != None:
+            os.kill(self.process.pid, signal.SIGINT)
+
+    def readline(self):
+        return self.process.stdout.readline().decode('UTF-8')
+
+    def run(self, **parameter_values):
+        for parameter in self.parameters:
+            #for python3:
+            #self.process.stdin.write(bytes(str(parameter_values[parameter]) + '\n', 'UTF-8'))
+            self.process.stdin.write(str(parameter_values[parameter]) + '\n')
+        self.process.stdin.flush()
+
+        output_values = []
+        while len(output_values) < self.N_outputs:
+            output_values += list(map(float, self.readline().split()))
+        output_dictionary = {}
+        for i, output in enumerate(self.outputs):
+            output_dictionary[output] = output_values[i]
+
+        error_values = []
+        while len(error_values) < self.error_size:
+            error_values += list(map(float, self.readline().split()))
+
+        return output_dictionary, error_values
+
+class EmulatorModel(ExternalModel):
+    def __init__(self, stats_dir, retrain = False):
+        if retrain:
+            subprocess.call( ['madai_pca_decompose', stats_dir] )
+            subprocess.call( ['madai_train_emulator', stats_dir] )
+        ExternalModel.__init__(self, 'madai_emulate ' + stats_dir)
