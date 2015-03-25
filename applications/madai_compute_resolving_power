@@ -29,10 +29,14 @@ import StringIO
 import matplotlib as mpl
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+from matplotlib import colorbar
+import matplotlib.patheffects as PathEffects
+from scipy import ndimage
 import numpy as np
 
 #Global settings for now:
 N_SIGMA = 4
+PIXEL_WIDTH = 2000
 
 class Histogram(object):
     def __init__(self, N_bins, low, high):
@@ -55,7 +59,7 @@ class Histogram(object):
     def sigma(self):
         return np.sqrt(self.sum2/self.count - self.mu()**2)
 
-    def svg(self, xlabel = '', ylabel = '', mu = None, sigma = None):
+    def img(self, xlabel = '', ylabel = '', mu = None, sigma = None, format = 'png', width = 100, filename = None):
         plt.bar(self.bins[:-1], self.content[1:-1], self.bins[1]-self.bins[0], color=(0.9,0.2,0.4,0.5), edgecolor=(0.9,0.2,0.4,0.9))
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
@@ -70,12 +74,26 @@ class Histogram(object):
             plt.plot([posterior_mu+posterior_sigma]*2,[y0,y1],ls='dashed',lw=3,color=(0.5,0.5,0,0.7))
             plt.plot([posterior_mu]*2,[y0,y1],ls='solid',lw=5,color=(0.5,0.5,0,1))
             plt.legend()
-        svgdata = StringIO.StringIO()
-        plt.savefig(svgdata, format='svg')
+        #plt.set_inches_size(3,2)
+        if filename != None:
+            plt.savefig(filename)
+        imgdata = StringIO.StringIO()
+        plt.savefig(imgdata, format=format, dpi=float(width)/3.0)
         plt.clf()
-        svgdata.seek(0)
+        imgdata.seek(0)
 
-        return svgdata.read()
+        return imgdata.read()
+
+#finds the z-magnitudes that correspond to the one and two sigma confidence levels
+def find_sigmas(content):
+    x = np.sort(content.flatten())[::-1]
+    x_int = np.cumsum(x)
+    total = x_int[-1]
+    one = total*0.6826895
+    two = total*0.9544997
+    one_arg = np.argmin(abs(x_int-one))
+    two_arg = np.argmin(abs(x_int-two))
+    return x[one_arg], x[two_arg]
 
 class Histogram2D(object):
     def __init__(self, N_binsx, lowx, highx, N_binsy, lowy, highy):
@@ -103,18 +121,34 @@ class Histogram2D(object):
         mu = self.mu()
         return np.sqrt( (self.sum2x/self.count - mu[0]**2, self.sum2y/self.count - mu[1]**2) )
 
-    def svg(self, xlabel = '', ylabel = ''):
+    def img(self, xlabel = '', ylabel = '', format = 'png', width = 100, filename = None):
         plt.pcolor(self.binsx, self.binsy, self.content[1:-1,1:-1], edgecolor=(1,1,1,0.3))
+        #smoothed_content = ndimage.filters.gaussian_filter(self.content[1:-1,1:-1],1.,mode='constant',cval=0)
+        #don't smooth it for now:
+        smoothed_content = self.content[1:-1,1:-1]
+        edged_content = 0.5*(np.hstack((smoothed_content, np.transpose(np.array([smoothed_content[:,-1]])))) \
+                           + np.hstack((np.transpose(np.array([smoothed_content[:,0]])), smoothed_content)))
+        edged_content = 0.5*(np.vstack((edged_content, np.array([edged_content[-1,:]]))) \
+                           + np.vstack((np.array([edged_content[0,:]]), edged_content)))
+        sigmas = find_sigmas(edged_content)
+        con = plt.contour(self.binsx, self.binsy, edged_content, sigmas, colors='k', linewidths=2, linestyles='solid')
+        cl = plt.clabel(con, fmt={ sigmas[0] : r'$1 \sigma$', sigmas[1] : r'$2 \sigma$'}, fontsize=20)
+        plt.setp(cl, path_effects=[PathEffects.withStroke(linewidth=2, foreground="w")])
+        plt.setp(con.collections, path_effects=[PathEffects.withStroke(linewidth=5, foreground="w")])
+
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.xlim([self.binsx[0],self.binsx[-1]])
         plt.ylim([self.binsy[0],self.binsy[-1]])
-        svgdata = StringIO.StringIO()
-        plt.savefig(svgdata, format='svg')
+        #plt.set_inches_size(3, 2)
+        if filename != None:
+            plt.savefig(filename)
+        imgdata = StringIO.StringIO()
+        plt.savefig(imgdata, format=format, dpi=float(width)/3.0)
         plt.clf()
-        svgdata.seek(0)
+        imgdata.seek(0)
 
-        return svgdata.read()
+        return imgdata.read()
 
 class Table(object):
     def __init__(self, html_class, rows, columns, row_type, column_type):
@@ -156,7 +190,7 @@ class DataTable(Table):
                 else:
                     self.csv += ',' + str(self.data[i][j])
             self.csv += '\n'
-        self.csv = 'data:test/plain;base64,\n' + base64.b64encode(self.csv)
+        self.csv = 'data:text/plain;base64,\n' + base64.b64encode(self.csv)
 
     def produce_scalar_map(self, l):
         vmax = max(l)
@@ -200,13 +234,17 @@ class ImageTable(Table):
                        row_type = row_type, column_type = column_type)
 
         self.images = []
+        self.urls = []
         for i in range(len(rows)):
             d = []
+            u = []
             for j in range(len(columns)):
-                encoded_image = 'data:image/svg+xml;base64,\n'
-                encoded_image += base64.b64encode(data[i][j])
+                encoded_image = 'data:image/png;base64,\n'
+                encoded_image += base64.b64encode(data[i][j][1])
                 d.append(encoded_image)
+                u.append(data[i][j][0])
             self.images.append(d)
+            self.urls.append(u)
 
 class Histograms(object):
     def __init__(self, parameters, observables, parameter_ranges, observable_ranges, N_bins = 25):
@@ -598,8 +636,12 @@ def build_data_tables(correlations, observable_names, parameter_names):
                                                       data = [scaled_loglikelihood_response])
     return tables
 
-def build_image_tables(histograms):
+def build_image_tables(histograms, outdir=None):
     tables = {}
+
+    #try to make the png files small enough...
+    observable_width = float(PIXEL_WIDTH/float(len(histograms.observables)))
+    parameter_width = float(PIXEL_WIDTH/float(len(histograms.parameters)))
 
     observable_observable_plots = []
     observable_parameter_plots = []
@@ -614,16 +656,25 @@ def build_image_tables(histograms):
                 ylabel = 'counts'
                 mu = histograms.observable_ranges[histograms.observables[i]]['mu']
                 sigma = histograms.observable_ranges[histograms.observables[i]]['sigma']
-                observable_row.append(histograms.observable_observable[i][j].svg(xlabel = xlabel, ylabel = ylabel, \
-                                                                                 mu = mu, sigma = sigma))
+                filename = None
+                if outdir != None:
+                    filename = histograms.observables[j] + '.svg'
+                observable_row.append((filename, histograms.observable_observable[i][j].img(xlabel = xlabel, ylabel = ylabel, \
+                                                                                 mu = mu, sigma = sigma, filename=outdir+filename, width=observable_width)))
                 continue
-            observable_row.append(histograms.observable_observable[i][j].svg(xlabel = xlabel, ylabel = ylabel))
+            filename = None
+            if outdir != None:
+                filename = histograms.observables[i] + '_vs_' + histograms.observables[j] + '.svg'
+            observable_row.append((filename, histograms.observable_observable[i][j].img(xlabel = xlabel, ylabel = ylabel, filename=outdir+filename, width=observable_width)))
         for j in range(len(parameters)):
             if not histograms.observable_parameter[i][j]:
                 parameter_row.append('')
                 continue
             xlabel, ylabel = histograms.parameters[j], histograms.observables[i]
-            parameter_row.append(histograms.observable_parameter[i][j].svg(xlabel = xlabel, ylabel = ylabel))
+            filename = None
+            if outdir != None:
+                filename = histograms.observables[i] + '_vs_' + histograms.parameters[j] + '.svg'
+            parameter_row.append((filename, histograms.observable_parameter[i][j].img(xlabel = xlabel, ylabel = ylabel, filename=outdir+filename, width=parameter_width)))
         observable_observable_plots.append(observable_row)
         observable_parameter_plots.append(parameter_row)
     tables['observable_observable_plots'] = ImageTable(rows = histograms.observables, columns = histograms.observables, \
@@ -643,7 +694,12 @@ def build_image_tables(histograms):
             if i == j:
                 ylabel = 'counts'
             xlabel, ylabel = histograms.parameters[j], histograms.parameters[i]
-            parameter_row.append(histograms.parameter_parameter[i][j].svg(xlabel = xlabel, ylabel = ylabel))
+            filename = None
+            if outdir != None:
+                filename = histograms.parameters[i] + '_vs_' + histograms.parameters[j] + '.svg'
+                if i == j:
+                    filename = histograms.parameters[i] + '.svg'
+            parameter_row.append((filename, histograms.parameter_parameter[i][j].img(xlabel = xlabel, ylabel = ylabel, filename=outdir+filename, width=parameter_width)))
         parameter_parameter_plots.append(parameter_row)
     tables['parameter_parameter_plots'] = ImageTable(rows = histograms.parameters, columns = histograms.parameters, \
                                                      row_type = 'parameter', column_type = 'parameter', \
@@ -676,23 +732,28 @@ def parse_observables(stats_dir):
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:
-        print 'Usage: ' + sys.argv[0] + '/stats/directory/ trace_file.csv output.html'
+        print 'Usage: ' + sys.argv[0] + '/stats/directory/ trace_file.csv web_directory'
         exit()
     try:
+        outdir = sys.argv[3]
+        if outdir[-1] != '/':
+            outdir += '/'
+        if not os.path.exists(outdir):
+            os.makedirs(outdir)
+
         correlations, histograms, observables, parameters = read_trace_file(sys.argv[2], sys.argv[1])
         tables = build_data_tables(correlations, observables, parameters)
         tables['observables'] = observables
         tables['parameters'] = parameters
-        for key, val in build_image_tables(histograms).iteritems():
+        for key, val in build_image_tables(histograms, outdir).iteritems():
             tables[key] = val
 
         from jinja2 import Template
         template_path = os.path.dirname(os.path.realpath(__file__)) + '/overview_template.html'
         with open(template_path, 'r') as template_file:
-            with open(sys.argv[3], 'w') as output_file:
+            with open(outdir + 'index.html', 'w') as output_file:
                 template = Template(template_file.read())
                 output_file.write(template.render(**tables))
 
     except TraceFileException as e:
         print 'Fatal exception: ', e
-

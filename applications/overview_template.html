@@ -114,7 +114,7 @@
 
     {% macro image_entry(table, i, j) %}
         <td class="{{table.column_type}}-{{table.columns[j]}}-column stroked">
-            <img src="{{table.images[i][j]}}" style="width:100%"/></td>
+            <a href="{{table.urls[i][j]}}"><img src="{{table.images[i][j]}}" style="width:100%"/></a></td>
     {% endmacro %}
 
     {% macro construct_table(table) %}
