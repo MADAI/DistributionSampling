@@ -599,7 +599,7 @@ def build_data_tables(correlations, observable_names, parameter_names):
         row = []
         for i, parameter in enumerate(parameter_names):
             row.append(parameter_response[k][i])
-            row[i] *= correlations.observable_standard_deviation(i)
+            row[i] *= correlations.observable_standard_deviation(k)
         scaled_parameter_response.append(row)
     tables['scaled_parameter_response'] = DataTable(rows = observable_names, columns = parameter_names, \
                                              row_type = 'observable', column_type = 'parameter', \
