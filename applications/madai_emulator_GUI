@@ -35,6 +35,7 @@ class EmulatorGUI:
         # read the header
         self.read_in_header()
 
+        # initialize observables
         observables_file = open(
             path.join(stat_directory, 'experimental_results.dat'), 'r')
         for observable_line in observables_file:
@@ -47,7 +48,7 @@ class EmulatorGUI:
                 observables_value, observables_value_error)
             self.result_list.append(StringVar())
 
-        """Build the GUI"""
+        # Build the GUI
         self.master = parent  # store the parent
         title_frame = Frame(parent)   # frame for all class widgets
         title_frame.pack(side='top')  # pack frame in parent's window
@@ -59,21 +60,22 @@ class EmulatorGUI:
         # create label in the frame:
         font = 'times 48 bold'
         title_text = 'A GUI for the MADAI emulator'
-        header_text = Label(header_frame, text=title_text, fg='blue', font=font)
+        header_text = Label(header_frame, text=title_text, 
+                            fg='blue', font=font)
         header_text.pack(side='top', pady=20)
 
         middle_frame = Frame(title_frame)
         middle_frame.pack(side='top', padx=2, pady=2)
 
-        # place the textentry widgets and the buttons in a frame
-        # to the right of slider_frame:
+        # place text entry and slider widgets on the left
         widget_frame = Frame(middle_frame)
         widget_frame.pack(side='left', anchor='n', padx=2, pady=2)
 
+        # title
         parameter_title_frame = Frame(widget_frame)
         parameter_title_frame.pack(side='top', anchor='n', padx=1, pady=1)
         parameter_title_text = Label(
-            parameter_title_frame, text='parameters', fg='black',
+            parameter_title_frame, text='Parameters', fg='black',
             font='times 30 bold')
         parameter_title_text.pack(side='top', pady=5)
 
@@ -105,7 +107,7 @@ class EmulatorGUI:
         results_title_frame = Frame(results_frame)
         results_title_frame.pack(side='top', anchor='n', padx=1, pady=1)
         results_title_text = Label(
-            results_title_frame, text='results', fg='black',
+            results_title_frame, text='Observables', fg='black',
             font='times 30 bold')
         results_title_text.pack(side='top', pady=5)
 
@@ -143,7 +145,7 @@ class EmulatorGUI:
         results_exp_frame = Frame(results_show_frame)
         results_exp_frame.pack(side='left', anchor='n', padx=2, pady=2)
         font_format = 'times 20'
-        observable_name = Label(results_exp_frame, text='exp.', fg='black',
+        observable_name = Label(results_exp_frame, text='experiment', fg='black',
                                 font=(font_format + ' bold'))
         observable_name.pack(side='top', pady=1)
         for observable_name in self.observable_name_list:
