@@ -38,7 +38,7 @@ class EmulatorGUI:
         observables_file = open(
             path.join(stat_directory, 'experimental_results.dat'), 'r')
         for observable_line in observables_file:
-            temp_line = observable_line.split(' ')
+            temp_line = observable_line.split()
             observable_name = temp_line[0]
             self.observable_name_list.append(observable_name)
             observables_value = temp_line[1]
