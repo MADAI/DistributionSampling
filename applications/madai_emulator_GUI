@@ -7,6 +7,8 @@
     results and the experimental data.
     It calls the built in program madai_emulate to get results from the
     emulator.
+
+    written by Chun Shen (Aug. 2015)
 """
 
 import subprocess
@@ -15,9 +17,8 @@ import sys
 from os import path
 
 
-class HelloWorld:
+class EmulatorGUI:
     def __init__(self, parent, stat_directory):
-
         # initialize the emulator
         self.emulator = subprocess.Popen(
             ["madai_emulate", stat_directory], stdin=subprocess.PIPE,
@@ -34,6 +35,18 @@ class HelloWorld:
         # read the header
         self.read_in_header()
 
+        observables_file = open(
+            path.join(stat_directory, 'experimental_results.dat'), 'r')
+        for observable_line in observables_file:
+            temp_line = observable_line.split(' ')
+            observable_name = temp_line[0]
+            self.observable_name_list.append(observable_name)
+            observables_value = temp_line[1]
+            observables_value_error = temp_line[2]
+            self.observables_list[observable_name] = (
+                observables_value, observables_value_error)
+            self.result_list.append(StringVar())
+
         """Build the GUI"""
         self.master = parent  # store the parent
         title_frame = Frame(parent)   # frame for all class widgets
@@ -45,57 +58,46 @@ class HelloWorld:
         header_frame.pack(side='top')
         # create label in the frame:
         font = 'times 48 bold'
-        title_text = 'GUI for MADAI emulator'
+        title_text = 'A GUI for the MADAI emulator'
         header_text = Label(header_frame, text=title_text, fg='blue', font=font)
         header_text.pack(side='top', pady=20)
 
         middle_frame = Frame(title_frame)
         middle_frame.pack(side='top', padx=2, pady=2)
 
-        # place all the sliders in a left frame:
-        slider_frame = Frame(middle_frame)
-        slider_frame.pack(side='left', padx=2, pady=2)
+        # place the textentry widgets and the buttons in a frame
+        # to the right of slider_frame:
+        widget_frame = Frame(middle_frame)
+        widget_frame.pack(side='left', anchor='n', padx=2, pady=2)
 
-        self.slider_widget_list = {}
+        parameter_title_frame = Frame(widget_frame)
+        parameter_title_frame.pack(side='top', anchor='n', padx=1, pady=1)
+        parameter_title_text = Label(
+            parameter_title_frame, text='parameters', fg='black',
+            font='times 30 bold')
+        parameter_title_text.pack(side='top', pady=5)
+
+        # use a separate frame and the grid geometry manager to
+        # pack the labels and entries in a table fashion (enables
+        # nice alignment):
+        entry_frame = Frame(widget_frame)
+        entry_frame.pack(side='top', pady=20, padx=10)
+        self.row_counter = 0
+
+        self.widget_list = {}
         for parameter_name in self.parameter_name_list:
             parameter_min = self.parameter_range[parameter_name][0]
             parameter_max = self.parameter_range[parameter_name][1]
             parameter_default = (parameter_min + parameter_max)/2.
             self.parameters[parameter_name] = DoubleVar()
             self.parameters[parameter_name].set(parameter_default)
-            self.slider_widget_list[parameter_name] = self.slider(
-                slider_frame, self.parameters[parameter_name], parameter_min,
-                parameter_max, parameter_name)
-
-        # place the textentry widgets and the buttons in a frame
-        # to the right of slider_frame:
-        text_entry_frame = Frame(middle_frame)
-        text_entry_frame.pack(side='left', anchor='n', padx=2, pady=2)
-
-        # use a separate frame and the grid geometry manager to
-        # pack the labels and entries in a table fashion (enables
-        # nice alignment):
-        entry_frame = Frame(text_entry_frame)
-        entry_frame.pack(side='top', pady=22, padx=12)
-        self.row_counter = 0
-
-        self.text_entry_widget_list = {}
         for parameter_name in self.parameter_name_list:
-            text_entry_widget = self.textentry(
-                entry_frame, self.parameters[parameter_name], parameter_name)
-            text_entry_widget.bind('<Return>',
-                lambda event: self.slider_widget_list[parameter_name].configure(
-                    to=self.parameters[parameter_name].get())
-            )
-            self.text_entry_widget_list[parameter_name] = text_entry_widget
-
-        # add some space (empty label):
-        Label(text_entry_frame, text='').pack(side='top', pady=5)
-
-        # add compute button:
-        self.sim = Button(text_entry_frame, text='Compute',
-                          width=8, command=self.compute)
-        self.sim.pack(side='top', pady=5)
+            parameter_min = self.parameter_range[parameter_name][0]
+            parameter_max = self.parameter_range[parameter_name][1]
+            widget = self.text_entry_and_slider_widget(
+                entry_frame, self.parameters[parameter_name], parameter_min,
+                parameter_max, parameter_name)
+            self.widget_list[parameter_name] = widget
 
         # put the results to the right of text entry widgets
         results_frame = Frame(middle_frame)
@@ -108,21 +110,8 @@ class HelloWorld:
         results_title_text.pack(side='top', pady=5)
 
         # read in experimental observables
-        observables_file = open(
-            path.join(stat_directory, 'experimental_results.dat'), 'r')
-        for observable_line in observables_file:
-            temp_line = observable_line.split(' ')
-            observable_name = temp_line[0]
-            self.observable_name_list.append(observable_name)
-            observables_value = temp_line[1]
-            observables_value_error = temp_line[2]
-            self.observables_list[observable_name] = (
-                observables_value, observables_value_error)
-            self.result_list.append(StringVar())
-        self.compute()
-
         results_show_frame = Frame(results_frame)
-        results_show_frame.pack(side='top', anchor='n', padx=2, pady=2)
+        results_show_frame.pack(side='top', anchor='n', padx=100, pady=20)
 
         # print observables names
         results_name_frame = Frame(results_show_frame)
@@ -147,7 +136,7 @@ class HelloWorld:
             observable_text = Label(
                 results_theory_frame, textvariable=self.result_list[i],
                 fg='black', font=font_format)
-            observable_text.bind('<Return>', self.compute())
+            observable_text.bind('<Return>', self.compute_update(1.0))
             observable_text.pack(side='top', pady=1)
 
         # print experimental results
@@ -168,7 +157,7 @@ class HelloWorld:
                 fg='black', font=font_format)
             observable_text.pack(side='top', pady=1)
 
-    def read_in_header(self, ):
+    def read_in_header(self,):
         """
             read in header information for the emulator and initialize the
             parameter and observables dictionaries
@@ -198,7 +187,7 @@ class HelloWorld:
 
         self.emulator.stdout.readline()  # skip the line "END_OF_HEADER"
 
-    def compute(self,):
+    def compute_update(self, input):
         """
             This function call the MADAI emulator and return the results
         """
@@ -221,35 +210,27 @@ class HelloWorld:
         for i in range(self.number_of_lines_for_covariance_matrix):
             self.emulator.stdout.readline()
 
-    def textentry(self, parent, variable, label):
+    def text_entry_and_slider_widget(self, parent, variable, low, high, label):
         """Make a textentry field tied to variable."""
         # pack a label and entry horizontally in a frame:
-        l = Label(parent, text=label)
-        l.grid(column=0, row=self.row_counter, sticky='w')
+        l = Label(parent, text=label, fg='red', font='times 20 bold')
+        l.grid(column=0, row=2*self.row_counter, sticky='w')
         widget = Entry(parent, textvariable=variable, width=8)
-        widget.grid(column=1, row=self.row_counter)
-        #widget.grid(column=1, sticky='w')
+        widget.grid(column=1, row=2*self.row_counter)
+        widget_slider = Scale(
+            parent, orient='horizontal', from_=low, to=high,
+            tickinterval=high-low, resolution=(high-low)/10000.0,
+            length=350, variable=variable,
+            command=self.compute_update)  # slider value is tied to variable
+        widget_slider.grid(column=0, row=2*self.row_counter+1, columnspan=2)
         self.row_counter += 1
-        return widget
-
-    def slider(self, parent, variable, low, high, label):
-        """Make a slider [low,high] tied to variable."""
-        widget = Scale(parent, orient='horizontal',
-                       from_=low, to=high,  # range of slider
-                       #  tickmarks on the slider "axis":
-                       tickinterval=(high-low),
-                       # the steps of the counter above the slider:
-                       resolution=(high-low)/5000.0,
-                       label=label,    # label printed above the slider
-                       length=300,     # length of slider in pixels
-                       variable=variable)  # slider value is tied to variable
-        widget.pack(side='top')
-        return widget
+        return widget_slider
 
 
 def create_GUI_for_emulator(directory_path):
     root = Tk() # root (main) window
-    hello = HelloWorld(root, directory_path)
+    root.title("A GUI for the MADAI emulator (made by Chun Shen)")
+    my_gui = EmulatorGUI(root, directory_path)
     root.mainloop()
 
 if __name__ == '__main__':
